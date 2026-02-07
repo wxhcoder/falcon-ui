@@ -1,2 +1,2 @@
 # falcon-ui
-基于Element plus二次封装的组件库
+Monorepo 项目二次封装Element plus
