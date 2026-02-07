@@ -2,3 +2,11 @@
 *.css.map
 *.sass.map
 *.scss.map
+node_modules/
+dist/
+coverage/
+.vite/
+.cache/
+.pnpm-store/
+*.log
+.DS_Store

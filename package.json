@@ -1,0 +1,43 @@
+{
+  "name": "falcon-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@falcon-ui/components": "workspace:*",
+    "@falcon-ui/falcon-ui": "workspace:*",
+    "@falcon-ui/hooks": "workspace:*",
+    "@falcon-ui/icons": "workspace:*",
+    "@falcon-ui/theme": "workspace:*",
+    "@falcon-ui/utils": "workspace:*"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "oxlint .",
+    "format": "oxfmt -w .",
+    "format:check": "oxfmt -c .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "play": "pnpm --filter @falcon-ui/play dev",
+    "play:build": "pnpm --filter @falcon-ui/play build",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "latest",
+    "@vitejs/plugin-vue": "latest",
+    "@vitest/coverage-v8": "latest",
+    "@vue/test-utils": "latest",
+    "oxfmt": "latest",
+    "oxlint": "latest",
+    "sass": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vitest": "latest",
+    "vue": "latest",
+    "vue-tsc": "latest"
+  }
+}
