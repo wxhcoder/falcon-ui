@@ -14,9 +14,10 @@
   "scripts": {
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
-    "lint": "oxlint .",
-    "format": "oxfmt -w .",
-    "format:check": "oxfmt -c .",
+    "lint": "eslint . --ext .js,.ts,.tsx,.vue --max-warnings=0",
+    "lint:fix": "eslint . --ext .js,.ts,.tsx,.vue --fix --max-warnings=0",
+    "format": "prettier --write \"**/*.{js,ts,tsx,vue}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,tsx,vue}\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -27,17 +28,22 @@
     "release": "changeset publish"
   },
   "devDependencies": {
+    "@eslint/js": "latest",
     "@changesets/cli": "latest",
     "@vitejs/plugin-vue": "latest",
     "@vitest/coverage-v8": "latest",
     "@vue/test-utils": "latest",
-    "oxfmt": "latest",
-    "oxlint": "latest",
+    "eslint": "latest",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-vue": "latest",
+    "globals": "latest",
+    "prettier": "latest",
     "sass": "latest",
     "typescript": "latest",
+    "typescript-eslint": "latest",
     "vite": "latest",
     "vitest": "latest",
     "vue": "latest",
-    "vue-tsc": "latest"
+    "vue-eslint-parser": "latest"
   }
 }
