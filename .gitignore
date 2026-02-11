@@ -10,3 +10,6 @@ coverage/
 .pnpm-store/
 *.log
 .DS_Store
+.agents/
+.changeset /
+.idea /
