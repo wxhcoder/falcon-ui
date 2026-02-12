@@ -1,0 +1,25 @@
+$namespace: 'f';
+
+@mixin b($block) {
+  .#{$namespace}-#{$block} {
+    @content;
+  }
+}
+
+@mixin e($element) {
+  &__#{$element} {
+    @content;
+  }
+}
+
+@mixin m($modifier) {
+  &--#{$modifier} {
+    @content;
+  }
+}
+
+@mixin when($state) {
+  &.is-#{$state} {
+    @content;
+  }
+}

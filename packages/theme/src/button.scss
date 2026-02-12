@@ -1,0 +1,85 @@
+@use './mixins/bem.scss' as bem;
+
+@include bem.b(button) {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid var(--f-color-border);
+  border-radius: var(--f-radius-md);
+  background: var(--f-color-default);
+  color: var(--f-color-text-primary);
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+
+  @include bem.m(small) {
+    height: var(--f-button-height-sm);
+    font-size: var(--f-font-size-sm);
+  }
+
+  @include bem.m(medium) {
+    height: var(--f-button-height-md);
+    font-size: var(--f-font-size-md);
+  }
+
+  @include bem.m(large) {
+    height: var(--f-button-height-lg);
+    font-size: var(--f-font-size-lg);
+  }
+
+  @include bem.m(primary) {
+    border-color: var(--f-color-primary);
+    background: var(--f-color-primary);
+    color: var(--f-color-text-inverse);
+  }
+
+  @include bem.m(success) {
+    border-color: var(--f-color-success);
+    background: var(--f-color-success);
+    color: var(--f-color-text-inverse);
+  }
+
+  @include bem.m(warning) {
+    border-color: var(--f-color-warning);
+    background: var(--f-color-warning);
+    color: var(--f-color-text-inverse);
+  }
+
+  @include bem.m(danger) {
+    border-color: var(--f-color-danger);
+    background: var(--f-color-danger);
+    color: var(--f-color-text-inverse);
+  }
+
+  @include bem.when(disabled) {
+    cursor: not-allowed;
+    opacity: 0.64;
+  }
+
+  @include bem.when(loading) {
+    cursor: not-allowed;
+    opacity: 0.64;
+  }
+
+  @include bem.e(loader) {
+    width: 12px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 999px;
+    animation: f-button-spin 0.7s linear infinite;
+  }
+
+  @include bem.e(content) {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+@keyframes f-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

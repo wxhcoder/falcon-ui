@@ -1,0 +1,24 @@
+{
+  "name": "@falcon-ui/play",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@falcon-ui/falcon-ui": "workspace:*",
+    "@falcon-ui/theme": "workspace:*",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vue-tsc": "latest"
+  }
+}

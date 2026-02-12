@@ -1,0 +1,123 @@
+:root {
+  --play-bg: #f6f7fb;
+  --play-surface: #ffffff;
+  --play-border: #dde1ea;
+  --play-text: #1f2430;
+  --play-text-secondary: #5a657b;
+  --play-accent: #1565d8;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  color: var(--play-text);
+  font-family:
+    "Segoe UI",
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    sans-serif;
+  background: var(--play-bg);
+}
+
+.play-layout {
+  min-height: 100vh;
+}
+
+.play-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--play-border);
+  background: var(--play-surface);
+}
+
+.play-title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.play-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.play-link {
+  padding: 6px 10px;
+  border: 1px solid var(--play-border);
+  border-radius: 8px;
+  color: var(--play-text);
+  text-decoration: none;
+}
+
+.play-link.router-link-active {
+  border-color: var(--play-accent);
+  color: var(--play-accent);
+}
+
+.play-main {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 22px;
+}
+
+.page-desc {
+  margin: 10px 0 18px;
+  color: var(--play-text-secondary);
+}
+
+.card-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card {
+  padding: 14px;
+  border: 1px solid var(--play-border);
+  border-radius: 10px;
+  background: var(--play-surface);
+}
+
+.card h3 {
+  margin: 0 0 8px;
+}
+
+.card p {
+  margin: 0;
+  color: var(--play-text-secondary);
+}
+
+.todo-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--play-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .play-header {
+    padding: 14px;
+  }
+
+  .play-main {
+    padding: 14px;
+  }
+}

@@ -12,6 +12,7 @@
     "@falcon-ui/utils": "workspace:*"
   },
   "scripts": {
+    "dev": "pnpm --filter @falcon-ui/play dev",
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "eslint . --ext .js,.ts,.tsx,.vue --max-warnings=0",
@@ -37,6 +38,7 @@
     "eslint-config-prettier": "latest",
     "eslint-plugin-vue": "latest",
     "globals": "latest",
+    "jsdom": "latest",
     "prettier": "latest",
     "sass": "latest",
     "typescript": "latest",
