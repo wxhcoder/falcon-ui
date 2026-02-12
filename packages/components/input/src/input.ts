@@ -1,30 +1,35 @@
-import type { ExtractPropTypes } from 'vue'
+import type { ExtractPublicPropTypes } from 'vue'
 
-export const inputProps = {
-  modelValue: {
+export const fInputProps = {
+  debugLabel: {
     type: String,
     default: ''
   },
-  placeholder: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  clearable: {
+  debugMode: {
     type: Boolean,
     default: false
   }
 } as const
 
-export type InputProps = ExtractPropTypes<typeof inputProps>
-
-export const inputEmits = {
-  'update:modelValue': (_value: string) => true,
-  input: (_value: string) => true,
-  change: (_value: string) => true
+export interface FInputCustomPayload {
+  length: number
+  value: string
 }
 
-export type InputEmits = typeof inputEmits
+export interface FInputDebugPayload {
+  label: string
+  value: string
+}
+
+export const fInputEmits = {
+  'custom-input': (payload: FInputCustomPayload) =>
+    typeof payload.value === 'string' && typeof payload.length === 'number',
+  'debug-event': (payload: FInputDebugPayload) =>
+    typeof payload.label === 'string' && typeof payload.value === 'string'
+} as const
+
+export type FInputProps = ExtractPublicPropTypes<typeof fInputProps>
+export type FInputEmits = typeof fInputEmits
+
+export type InputProps = FInputProps
+export type InputEmits = FInputEmits

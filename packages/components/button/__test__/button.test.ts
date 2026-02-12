@@ -1,38 +1,41 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import FButton from '../src/button.vue'
 
 describe('FButton', () => {
-  it('emits click when active', async () => {
+  it('renders Element Plus button by default and forwards listeners', async () => {
+    const clicked = vi.fn()
+
     const wrapper = mount(FButton, {
-      props: {
+      attrs: {
+        onClick: clicked,
         type: 'primary'
+      },
+      props: {
+        debugLabel: 'button-probe',
+        debugMode: true
       },
       slots: {
         default: 'Submit'
       }
     })
 
-    await wrapper.get('button').trigger('click')
+    expect(wrapper.get('button').classes()).toContain('el-button')
 
-    expect(wrapper.emitted('click')).toHaveLength(1)
+    await wrapper.get('button').trigger('click')
+    expect(clicked).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('debug-click')?.[0]).toEqual([{ label: 'button-probe' }])
   })
 
-  it('does not emit click when disabled or loading', async () => {
-    const disabledWrapper = mount(FButton, {
-      props: {
-        disabled: true
+  it('forwards icon slot to ElButton', () => {
+    const wrapper = mount(FButton, {
+      slots: {
+        default: 'Action',
+        icon: () => 'I'
       }
     })
-    await disabledWrapper.get('button').trigger('click')
-    expect(disabledWrapper.emitted('click')).toBeUndefined()
 
-    const loadingWrapper = mount(FButton, {
-      props: {
-        loading: true
-      }
-    })
-    await loadingWrapper.get('button').trigger('click')
-    expect(loadingWrapper.emitted('click')).toBeUndefined()
+    expect(wrapper.text()).toContain('I')
+    expect(wrapper.text()).toContain('Action')
   })
 })

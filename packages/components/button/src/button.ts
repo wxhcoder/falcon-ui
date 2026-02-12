@@ -1,34 +1,26 @@
-import type { ExtractPropTypes, PropType } from 'vue'
+import type { ExtractPublicPropTypes } from 'vue'
 
-export const buttonTypes = ['default', 'primary', 'success', 'warning', 'danger'] as const
-export type ButtonType = (typeof buttonTypes)[number]
-
-export const buttonSizes = ['small', 'medium', 'large'] as const
-export type ButtonSize = (typeof buttonSizes)[number]
-
-export const buttonProps = {
-  type: {
-    type: String as PropType<ButtonType>,
-    default: 'default'
+export const fButtonProps = {
+  debugLabel: {
+    type: String,
+    default: ''
   },
-  size: {
-    type: String as PropType<ButtonSize>,
-    default: 'medium'
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  loading: {
+  debugMode: {
     type: Boolean,
     default: false
   }
 } as const
 
-export type ButtonProps = ExtractPropTypes<typeof buttonProps>
-
-export const buttonEmits = {
-  click: (_event: MouseEvent) => true
+export interface FButtonDebugPayload {
+  label: string
 }
 
-export type ButtonEmits = typeof buttonEmits
+export const fButtonEmits = {
+  'debug-click': (payload: FButtonDebugPayload) => typeof payload.label === 'string'
+} as const
+
+export type FButtonProps = ExtractPublicPropTypes<typeof fButtonProps>
+export type FButtonEmits = typeof fButtonEmits
+
+export type ButtonProps = FButtonProps
+export type ButtonEmits = FButtonEmits
