@@ -11,5 +11,5 @@ coverage/
 *.log
 .DS_Store
 .agents/
-.changeset /
-.idea /
+.changeset/
+.idea/

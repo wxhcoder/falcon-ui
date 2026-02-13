@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.ts",
   "dependencies": {
+    "element-plus": "latest",
     "@falcon-ui/utils": "workspace:*"
   },
   "scripts": {
