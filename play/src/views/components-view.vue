@@ -59,7 +59,6 @@
 import { ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
-import { FButton, FInput } from '@falcon-ui/falcon-ui'
 
 const buttonClicks = ref(0)
 const inputValue = ref('')

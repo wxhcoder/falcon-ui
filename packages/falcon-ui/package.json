@@ -2,7 +2,19 @@
   "name": "@falcon-ui/falcon-ui",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./global": "./global.d.ts"
+  },
+  "dependencies": {
+    "@falcon-ui/components": "workspace:*",
+    "@falcon-ui/hooks": "workspace:*",
+    "@falcon-ui/icons": "workspace:*",
+    "@falcon-ui/utils": "workspace:*"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

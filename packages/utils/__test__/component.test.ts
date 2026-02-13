@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { invokeListener, mergeComponentExpose } from './component'
+import { invokeListener, mergeComponentExpose } from '../src/component'
 
 describe('component helpers', () => {
   it('invokes function and array listeners', () => {

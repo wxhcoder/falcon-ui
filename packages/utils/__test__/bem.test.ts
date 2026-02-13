@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { useNamespace } from './bem'
+import { useNamespace } from '../src/bem'
 
 describe('useNamespace', () => {
   it('creates block and element class names', () => {
