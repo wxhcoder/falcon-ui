@@ -10,8 +10,6 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@falcon-ui/falcon-ui": "workspace:*",
-    "@falcon-ui/theme": "workspace:*",
     "vue": "latest",
     "vue-router": "latest"
   },

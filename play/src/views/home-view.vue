@@ -12,7 +12,7 @@
       <article class="card">
         <h3>Workspace Integration</h3>
         <p>
-          `@falcon-ui/falcon-ui` imports are available.
+          `falcon-ui` imports are available.
           <br />
           Export count: {{ exportCount }}
         </p>
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import * as FalconUI from '@falcon-ui/falcon-ui'
+import * as FalconUI from 'falcon-ui'
 
 const exportCount = Object.keys(FalconUI).length
 </script>

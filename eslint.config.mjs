@@ -1,9 +1,9 @@
-import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import globals from 'globals';
-import vuePlugin from 'eslint-plugin-vue';
-import vueParser from 'vue-eslint-parser';
+import js from '@eslint/js'
+import tseslint from 'typescript-eslint'
+import eslintConfigPrettier from 'eslint-config-prettier'
+import globals from 'globals'
+import vuePlugin from 'eslint-plugin-vue'
+import vueParser from 'vue-eslint-parser'
 
 export default [
   {
@@ -13,8 +13,8 @@ export default [
       '**/coverage/**',
       '**/.vite/**',
       '**/.cache/**',
-      '**/.pnpm-store/**',
-    ],
+      '**/.pnpm-store/**'
+    ]
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,tsx,vue}'],
@@ -23,9 +23,9 @@ export default [
       sourceType: 'module',
       globals: {
         ...globals.browser,
-        ...globals.node,
-      },
-    },
+        ...globals.node
+      }
+    }
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -38,10 +38,10 @@ export default [
         'error',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        },
-      ],
-    },
+          varsIgnorePattern: '^_'
+        }
+      ]
+    }
   },
   {
     files: ['**/*.vue'],
@@ -51,8 +51,8 @@ export default [
         parser: tseslint.parser,
         ecmaVersion: 'latest',
         sourceType: 'module',
-        extraFileExtensions: ['.vue'],
-      },
+        extraFileExtensions: ['.vue']
+      }
     },
     rules: {
       'vue/multi-word-component-names': 'off',
@@ -62,10 +62,10 @@ export default [
         'error',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        },
-      ],
-    },
+          varsIgnorePattern: '^_'
+        }
+      ]
+    }
   },
   {
     files: ['**/*.{js,mjs,cjs}'],
@@ -74,12 +74,12 @@ export default [
         'error',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        },
+          varsIgnorePattern: '^_'
+        }
       ],
       'no-console': 'warn',
-      camelcase: 'off',
-    },
+      camelcase: 'off'
+    }
   },
-  eslintConfigPrettier,
-];
+  eslintConfigPrettier
+]

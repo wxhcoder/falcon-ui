@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": "./dist/falcon-ui/types",
+    "rootDir": "./packages",
+    "stripInternal": true
+  },
+  "include": ["packages/**/*.ts", "packages/**/*.d.ts", "packages/**/*.vue"],
+  "exclude": [
+    "packages/**/__test__/**",
+    "packages/**/*.test.ts",
+    "packages/**/node_modules/**",
+    "play/**",
+    "dist/**"
+  ]
+}

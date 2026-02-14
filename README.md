@@ -42,12 +42,38 @@ Current component demos in `Components` page:
 - `FButton`
 - `FInput`
 
+## Library Build
+
+Build the distributable package:
+
+- `pnpm build:lib` run full build pipeline (Gulp orchestrated)
+- `pnpm build:lib:clean` clean `dist/falcon-ui`
+- `pnpm build:lib:js` build `esm/cjs/umd`
+- `pnpm build:lib:types` build declaration files
+- `pnpm build:lib:style` build theme css
+
+Output structure:
+
+```txt
+dist/falcon-ui/
+  package.json
+  global.d.ts
+  esm/
+  cjs/
+  umd/
+  types/
+  theme/
+    index.css
+    index.scss
+    src/
+```
+
 ## Third-Party Usage
 
 Install and import in your app:
 
 ```bash
-pnpm add @falcon-ui/falcon-ui @falcon-ui/theme
+pnpm add falcon-ui
 ```
 
 Use one of these patterns:
@@ -55,7 +81,7 @@ Use one of these patterns:
 1. Local import (usually no extra global typing config needed)
 
 ```ts
-import { FInput } from '@falcon-ui/falcon-ui'
+import { FInput } from 'falcon-ui'
 ```
 
 2. Global install (register all components)
@@ -63,8 +89,8 @@ import { FInput } from '@falcon-ui/falcon-ui'
 ```ts
 import { createApp } from 'vue'
 import App from './App.vue'
-import FalconUI from '@falcon-ui/falcon-ui'
-import '@falcon-ui/theme/index.scss'
+import FalconUI from 'falcon-ui'
+import 'falcon-ui/theme/index.css'
 
 createApp(App).use(FalconUI).mount('#app')
 ```
@@ -74,7 +100,7 @@ createApp(App).use(FalconUI).mount('#app')
 If you use global install (`app.use(FalconUI)`), you must add the global
 component type entry:
 
-- `@falcon-ui/falcon-ui/global`
+- `falcon-ui/global`
 
 Choose one setup method.
 
@@ -83,7 +109,7 @@ Choose one setup method.
 ```json
 {
   "compilerOptions": {
-    "types": ["vite/client", "@falcon-ui/falcon-ui/global"]
+    "types": ["vite/client", "falcon-ui/global"]
   }
 }
 ```
@@ -92,7 +118,7 @@ Choose one setup method.
 
 ```ts
 /// <reference types="vite/client" />
-/// <reference types="@falcon-ui/falcon-ui/global" />
+/// <reference types="falcon-ui/global" />
 ```
 
 ## Type Hints Checklist
@@ -105,9 +131,24 @@ Choose one setup method.
 
 When publishing, ensure these type artifacts and exports exist:
 
-- `dist/index.d.ts`
-- `dist/global.d.ts`
+- `dist/falcon-ui/types/falcon-ui/index.d.ts`
+- `dist/falcon-ui/global.d.ts`
 - `package.json` contains:
   - `types`
   - `exports["."]`
   - `exports["./global"]`
+  - `exports["./theme/index.css"]`
+
+Style override source files are published under `dist/falcon-ui/theme/src`.
+
+## Play Dist Link Mode
+
+Play uses the built package output and `pnpm link`:
+
+1. `pnpm build:lib`
+2. `pnpm link:play:falcon`
+3. `pnpm --dir play dev`
+
+Or run one command:
+
+- `pnpm play:dist`

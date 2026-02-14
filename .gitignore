@@ -8,6 +8,7 @@ coverage/
 .vite/
 .cache/
 .pnpm-store/
+logs/
 *.log
 .DS_Store
 .agents/

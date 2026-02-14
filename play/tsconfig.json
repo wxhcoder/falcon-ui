@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["vite/client", "@falcon-ui/falcon-ui/global"],
+    "types": ["vite/client", "falcon-ui/global"],
     "baseUrl": "."
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"]
