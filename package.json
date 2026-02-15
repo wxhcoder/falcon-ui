@@ -3,7 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "browserslist": ["> 0.2%", "not dead", "not op_mini all"],
+  "browserslist": [
+    "> 0.2%",
+    "not dead",
+    "not op_mini all"
+  ],
   "dependencies": {
     "@falcon-ui/components": "workspace:*",
     "@falcon-ui/falcon-ui": "workspace:*",
@@ -14,6 +18,7 @@
   },
   "scripts": {
     "dev": "pnpm play",
+    "prepare": "husky",
     "build": "pnpm build:lib",
     "build:lib": "gulp --gulpfile scripts/gulpfile.mjs build",
     "build:lib:clean": "gulp --gulpfile scripts/gulpfile.mjs clean",
@@ -23,8 +28,10 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "eslint . --ext .js,.mjs,.ts,.tsx,.vue --max-warnings=0",
     "lint:fix": "eslint . --ext .js,.mjs,.ts,.tsx,.vue --fix --max-warnings=0",
-    "format": "prettier --write \"**/*.{js,mjs,ts,tsx,vue}\"",
-    "format:check": "prettier --check \"**/*.{js,mjs,ts,tsx,vue}\"",
+    "format": "prettier --write \"**/*.{js,mjs,ts,tsx,vue,scss,css,md,json,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{js,mjs,ts,tsx,vue,scss,css,md,json,yml,yaml}\"",
+    "precommit:format": "lint-staged",
+    "precommit:quality": "pnpm lint && pnpm test",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -44,15 +51,17 @@
     "@vitest/coverage-v8": "latest",
     "@vue/test-utils": "latest",
     "autoprefixer": "latest",
-    "cssnano": "latest",
     "consola": "latest",
+    "cssnano": "latest",
     "eslint": "latest",
     "eslint-config-prettier": "latest",
     "eslint-plugin-vue": "latest",
     "globals": "latest",
     "gulp": "^5.0.1",
     "gulp-cli": "^3.1.0",
+    "husky": "^9.1.7",
     "jsdom": "latest",
+    "lint-staged": "^16.2.7",
     "postcss": "latest",
     "prettier": "latest",
     "rolldown": "1.0.0-rc.4",
@@ -65,5 +74,8 @@
     "vue": "latest",
     "vue-eslint-parser": "latest",
     "vue-tsc": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{js,mjs,ts,tsx,vue,scss,css,md,json,yml,yaml}": "prettier --write"
   }
 }

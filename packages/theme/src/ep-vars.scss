@@ -1,0 +1,11 @@
+// Bridge file for Element Plus theme variables.
+// Keep empty maps by default; override keys here when you need custom EP theme tokens.
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (),
+  $button: (),
+  $input: (),
+  $input-disabled: (),
+  $border-radius: (),
+  $font-size: (),
+  $common-component-size: ()
+);

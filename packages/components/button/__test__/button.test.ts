@@ -21,6 +21,7 @@ describe('FButton', () => {
     })
 
     expect(wrapper.get('button').classes()).toContain('el-button')
+    expect(wrapper.get('button').classes()).toContain('f-button')
 
     await wrapper.get('button').trigger('click')
     expect(clicked).toHaveBeenCalledTimes(1)

@@ -36,6 +36,7 @@ function changeRef(exposed: unknown) {
 const mergedAttrs = computed(() => {
   const next = { ...(attrs as Record<string, unknown>) }
   const attrInputListener = next.onInput
+  next.class = ['f-input', next.class]
 
   next.onInput = (...args: unknown[]) => {
     const value = args[0]

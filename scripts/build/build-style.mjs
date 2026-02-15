@@ -22,7 +22,8 @@ const buildStyle = async () => {
   await logInfo(`compile scss: ${sourceFile}`, { stage: 'style' })
   await logInfo(`browserslist=${JSON.stringify(browserslist)}`, { stage: 'style' })
   const sassResult = sass.compile(sourceFile, {
-    style: 'expanded'
+    style: 'expanded',
+    loadPaths: [resolve(rootDir, 'node_modules')]
   })
 
   const inputBytes = Buffer.byteLength(sassResult.css, 'utf8')

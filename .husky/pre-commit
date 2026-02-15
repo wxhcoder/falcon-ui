@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+pnpm precommit:format || exit 1
+pnpm precommit:quality

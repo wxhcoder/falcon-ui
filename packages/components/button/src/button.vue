@@ -31,6 +31,7 @@ const changeRef = (exposed: unknown) => {
 const mergedAttrs = computed(() => {
   const next = { ...(attrs as Record<string, unknown>) }
   const attrClickListener = next.onClick
+  next.class = ['f-button', next.class]
 
   next.onClick = (...args: unknown[]) => {
     if (props.debugMode) {

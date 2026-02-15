@@ -23,6 +23,13 @@ Commands:
 - `pnpm format` format files in place
 - `pnpm format:check` check formatting without writing
 
+Commit quality gate:
+
+- `pre-commit` runs format, lint, and unit tests
+- run `pnpm prepare` once if hooks are not installed yet
+- `pnpm precommit:format` format staged files with `lint-staged`
+- `pnpm precommit:quality` run `pnpm lint && pnpm test`
+
 ## Play Shell
 
 Use the play shell app for local preview:

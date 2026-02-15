@@ -24,6 +24,7 @@ describe('FInput', () => {
     })
 
     expect(wrapper.find('.el-input').exists()).toBe(true)
+    expect(wrapper.find('.el-input').classes()).toContain('f-input')
     expect(wrapper.text()).toContain('prefix')
 
     await wrapper.get('input').setValue('hello')
