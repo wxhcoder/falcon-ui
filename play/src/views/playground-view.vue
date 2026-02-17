@@ -26,17 +26,17 @@
         </div>
 
         <div class="action-row">
-          <FButton plain @click="resetTheme">Reset</FButton>
+          <FlButton plain @click="resetTheme">Reset</FlButton>
         </div>
       </article>
 
       <article class="card demo-card">
         <h3>Live Preview</h3>
         <div class="demo-row">
-          <FButton>Default</FButton>
-          <FButton type="primary">Primary</FButton>
-          <FButton type="success" plain>Success Plain</FButton>
-          <FButton type="warning" round>Warning Round</FButton>
+          <FlButton>Default</FlButton>
+          <FlButton type="primary">Primary</FlButton>
+          <FlButton type="success" plain>Success Plain</FlButton>
+          <FlButton type="warning" round>Warning Round</FlButton>
         </div>
 
         <div class="demo-row">
@@ -46,7 +46,7 @@
         </div>
 
         <div class="demo-row">
-          <FInput v-model="inputValue" clearable placeholder="Type to preview input radius..." />
+          <FlInput v-model="inputValue" clearable placeholder="Type to preview input radius..." />
         </div>
       </article>
     </div>

@@ -1,14 +1,14 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { h } from 'vue'
-import FInput from '../src/input.vue'
+import FlInput from '../src/input.vue'
 
-describe('FInput', () => {
+describe('FlInput', () => {
   it('passes attrs listeners through and emits custom-input', async () => {
     const onInput = vi.fn()
     const onUpdateModelValue = vi.fn()
 
-    const wrapper = mount(FInput, {
+    const wrapper = mount(FlInput, {
       attrs: {
         onInput,
         'onUpdate:modelValue': onUpdateModelValue
@@ -24,7 +24,7 @@ describe('FInput', () => {
     })
 
     expect(wrapper.find('.el-input').exists()).toBe(true)
-    expect(wrapper.find('.el-input').classes()).toContain('f-input')
+    expect(wrapper.find('.el-input').classes()).toContain('fl-input')
     expect(wrapper.text()).toContain('prefix')
 
     await wrapper.get('input').setValue('hello')
@@ -36,7 +36,7 @@ describe('FInput', () => {
   })
 
   it('forwards ElInput exposed instance methods', () => {
-    const wrapper = mount(FInput, {
+    const wrapper = mount(FlInput, {
       props: {
         modelValue: 'value'
       }

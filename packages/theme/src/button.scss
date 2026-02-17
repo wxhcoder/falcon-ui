@@ -8,7 +8,7 @@
   @include ep-var-mixin.set-component-css-var('button', ep-var.$button);
 
   &.el-button {
-    border-radius: var(--f-radius-md);
+    border-radius: var(--fl-radius-md);
     font-weight: 500;
   }
 }

@@ -1,12 +1,12 @@
 import type { App, Plugin } from 'vue'
-import { FButton, FInput } from '@falcon-ui/components'
+import { FlButton, FlInput } from '@falcon-ui/components'
 
 export * from '@falcon-ui/components'
 export * from '@falcon-ui/hooks'
 export * from '@falcon-ui/icons'
 export * from '@falcon-ui/utils'
 
-const components = [FButton, FInput] as const
+const components = [FlButton, FlInput] as const
 
 export const install = (app: App) => {
   for (const component of components) {

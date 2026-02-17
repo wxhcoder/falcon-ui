@@ -1,6 +1,6 @@
 import type { ExtractPublicPropTypes } from 'vue'
 
-export const fButtonProps = {
+export const flButtonProps = {
   debugLabel: {
     type: String,
     default: ''
@@ -11,16 +11,16 @@ export const fButtonProps = {
   }
 } as const
 
-export interface FButtonDebugPayload {
+export interface FlButtonDebugPayload {
   label: string
 }
 
-export const fButtonEmits = {
-  'debug-click': (payload: FButtonDebugPayload) => typeof payload.label === 'string'
+export const flButtonEmits = {
+  'debug-click': (payload: FlButtonDebugPayload) => typeof payload.label === 'string'
 } as const
 
-export type FButtonProps = ExtractPublicPropTypes<typeof fButtonProps>
-export type FButtonEmits = typeof fButtonEmits
+export type FlButtonProps = ExtractPublicPropTypes<typeof flButtonProps>
+export type FlButtonEmits = typeof flButtonEmits
 
-export type ButtonProps = FButtonProps
-export type ButtonEmits = FButtonEmits
+export type ButtonProps = FlButtonProps
+export type ButtonEmits = FlButtonEmits

@@ -1,9 +1,9 @@
-import type { FButton, FInput } from '@falcon-ui/components'
+import type { FlButton, FlInput } from '@falcon-ui/components'
 
 declare module 'vue' {
   interface GlobalComponents {
-    FButton: typeof FButton
-    FInput: typeof FInput
+    FlButton: typeof FlButton
+    FlInput: typeof FlInput
   }
 }
 

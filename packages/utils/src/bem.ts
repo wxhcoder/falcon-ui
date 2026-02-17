@@ -1,4 +1,4 @@
-const defaultNamespace = 'f'
+const defaultNamespace = 'fl'
 const statePrefix = 'is-'
 
 const buildBemName = (

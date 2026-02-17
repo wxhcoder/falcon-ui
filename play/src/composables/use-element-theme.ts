@@ -103,8 +103,8 @@ const applyTheme = (primaryColor: string, borderRadius: number) => {
   setCssVar('--el-border-radius-round', `${Math.max(4, radius * 5)}px`)
 
   // Keep Falcon extension tokens aligned for the wrapper demos.
-  setCssVar('--f-radius-md', `${radius}px`)
-  setCssVar('--f-radius-sm', `${Math.max(2, radius - 2)}px`)
+  setCssVar('--fl-radius-md', `${radius}px`)
+  setCssVar('--fl-radius-sm', `${Math.max(2, radius - 2)}px`)
 
   // Sync play shell accent with current primary color.
   setCssVar('--play-accent', toHex(primary))

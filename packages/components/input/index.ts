@@ -1,8 +1,8 @@
 import Input from './src/input.vue'
 import { withInstall } from '@falcon-ui/utils'
 
-export const FInput = withInstall(Input)
+export const FlInput = withInstall(Input)
 
-export default FInput
+export default FlInput
 
-export type { FInputEmits, FInputProps, InputEmits, InputProps } from './src/input'
+export type { FlInputEmits, FlInputProps, InputEmits, InputProps } from './src/input'

@@ -1,8 +1,8 @@
 import Button from './src/button.vue'
 import { withInstall } from '@falcon-ui/utils'
 
-export const FButton = withInstall(Button)
+export const FlButton = withInstall(Button)
 
-export default FButton
+export default FlButton
 
-export type { ButtonEmits, ButtonProps, FButtonEmits, FButtonProps } from './src/button'
+export type { ButtonEmits, ButtonProps, FlButtonEmits, FlButtonProps } from './src/button'

@@ -1,6 +1,6 @@
 import type { ExtractPublicPropTypes } from 'vue'
 
-export const fInputProps = {
+export const flInputProps = {
   debugLabel: {
     type: String,
     default: ''
@@ -11,25 +11,25 @@ export const fInputProps = {
   }
 } as const
 
-export interface FInputCustomPayload {
+export interface FlInputCustomPayload {
   length: number
   value: string
 }
 
-export interface FInputDebugPayload {
+export interface FlInputDebugPayload {
   label: string
   value: string
 }
 
-export const fInputEmits = {
-  'custom-input': (payload: FInputCustomPayload) =>
+export const flInputEmits = {
+  'custom-input': (payload: FlInputCustomPayload) =>
     typeof payload.value === 'string' && typeof payload.length === 'number',
-  'debug-event': (payload: FInputDebugPayload) =>
+  'debug-event': (payload: FlInputDebugPayload) =>
     typeof payload.label === 'string' && typeof payload.value === 'string'
 } as const
 
-export type FInputProps = ExtractPublicPropTypes<typeof fInputProps>
-export type FInputEmits = typeof fInputEmits
+export type FlInputProps = ExtractPublicPropTypes<typeof flInputProps>
+export type FlInputEmits = typeof flInputEmits
 
-export type InputProps = FInputProps
-export type InputEmits = FInputEmits
+export type InputProps = FlInputProps
+export type InputEmits = FlInputEmits

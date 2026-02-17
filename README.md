@@ -46,8 +46,8 @@ Play app structure:
 
 Current component demos in `Components` page:
 
-- `FButton`
-- `FInput`
+- `FlButton`
+- `FlInput`
 
 ## Library Build
 
@@ -88,7 +88,7 @@ Use one of these patterns:
 1. Local import (usually no extra global typing config needed)
 
 ```ts
-import { FInput } from 'falcon-ui'
+import { FlInput } from 'falcon-ui'
 ```
 
 2. Global install (register all components)
@@ -132,7 +132,7 @@ Choose one setup method.
 
 - Use Volar (`Vue - Official`) in VSCode.
 - After changing types config, run `TypeScript: Restart TS Server`.
-- Confirm template completion works on `<FInput>` and `<FButton>`.
+- Confirm template completion works on `<FlInput>` and `<FlButton>`.
 
 ## For Library Maintainers
 

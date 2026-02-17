@@ -7,15 +7,15 @@ import { ElInput } from 'element-plus'
 import type { ComponentInstance } from 'vue'
 import { computed, getCurrentInstance, h, useAttrs, useSlots } from 'vue'
 import { invokeListener, mergeComponentExpose } from '@falcon-ui/utils'
-import { fInputEmits, fInputProps } from './input'
+import { flInputEmits, flInputProps } from './input'
 
 defineOptions({
-  name: 'FInput',
+  name: 'FlInput',
   inheritAttrs: false
 })
 
-const props = defineProps(fInputProps)
-const emit = defineEmits(fInputEmits)
+const props = defineProps(flInputProps)
+const emit = defineEmits(flInputEmits)
 const attrs = useAttrs()
 const slots = useSlots()
 
@@ -36,7 +36,7 @@ function changeRef(exposed: unknown) {
 const mergedAttrs = computed(() => {
   const next = { ...(attrs as Record<string, unknown>) }
   const attrInputListener = next.onInput
-  next.class = ['f-input', next.class]
+  next.class = ['fl-input', next.class]
 
   next.onInput = (...args: unknown[]) => {
     const value = args[0]

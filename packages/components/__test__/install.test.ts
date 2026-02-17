@@ -1,6 +1,6 @@
 import type { App, Plugin } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import { FButton, FInput } from '..'
+import { FlButton, FlInput } from '..'
 
 type AppMock = App & {
   _registered: Record<string, unknown>
@@ -33,18 +33,18 @@ describe('@falcon-ui/components exports', () => {
   it('supports single component install via app.use', () => {
     const app = createAppMock()
 
-    app.use(FInput)
+    app.use(FlInput)
 
-    expect(app.component).toHaveBeenCalledWith('FInput', FInput)
+    expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
   })
 
   it('exports installable components', () => {
     const app = createAppMock()
 
-    app.use(FButton)
-    app.use(FInput)
+    app.use(FlButton)
+    app.use(FlInput)
 
-    expect(app.component).toHaveBeenCalledWith('FButton', FButton)
-    expect(app.component).toHaveBeenCalledWith('FInput', FInput)
+    expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
+    expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
   })
 })

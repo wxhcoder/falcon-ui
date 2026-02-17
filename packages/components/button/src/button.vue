@@ -7,15 +7,15 @@ import { ElButton } from 'element-plus'
 import type { ComponentInstance } from 'vue'
 import { computed, getCurrentInstance, h, useAttrs, useSlots } from 'vue'
 import { invokeListener, mergeComponentExpose } from '@falcon-ui/utils'
-import { fButtonEmits, fButtonProps } from './button'
+import { flButtonEmits, flButtonProps } from './button'
 
 defineOptions({
-  name: 'FButton',
+  name: 'FlButton',
   inheritAttrs: false
 })
 
-const props = defineProps(fButtonProps)
-const emit = defineEmits(fButtonEmits)
+const props = defineProps(flButtonProps)
+const emit = defineEmits(flButtonEmits)
 const attrs = useAttrs()
 const slots = useSlots()
 const vm = getCurrentInstance()
@@ -31,7 +31,7 @@ const changeRef = (exposed: unknown) => {
 const mergedAttrs = computed(() => {
   const next = { ...(attrs as Record<string, unknown>) }
   const attrClickListener = next.onClick
-  next.class = ['f-button', next.class]
+  next.class = ['fl-button', next.class]
 
   next.onClick = (...args: unknown[]) => {
     if (props.debugMode) {

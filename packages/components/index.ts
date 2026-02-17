@@ -1,4 +1,4 @@
-export { FButton } from './button'
-export type { ButtonEmits, ButtonProps, FButtonEmits, FButtonProps } from './button'
-export { FInput } from './input'
-export type { FInputEmits, FInputProps, InputEmits, InputProps } from './input'
+export { FlButton } from './button'
+export type { ButtonEmits, ButtonProps, FlButtonEmits, FlButtonProps } from './button'
+export { FlInput } from './input'
+export type { FlInputEmits, FlInputProps, InputEmits, InputProps } from './input'

@@ -1,12 +1,12 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
-import FButton from '../src/button.vue'
+import FlButton from '../src/button.vue'
 
-describe('FButton', () => {
+describe('FlButton', () => {
   it('renders Element Plus button by default and forwards listeners', async () => {
     const clicked = vi.fn()
 
-    const wrapper = mount(FButton, {
+    const wrapper = mount(FlButton, {
       attrs: {
         onClick: clicked,
         type: 'primary'
@@ -21,7 +21,7 @@ describe('FButton', () => {
     })
 
     expect(wrapper.get('button').classes()).toContain('el-button')
-    expect(wrapper.get('button').classes()).toContain('f-button')
+    expect(wrapper.get('button').classes()).toContain('fl-button')
 
     await wrapper.get('button').trigger('click')
     expect(clicked).toHaveBeenCalledTimes(1)
@@ -29,7 +29,7 @@ describe('FButton', () => {
   })
 
   it('forwards icon slot to ElButton', () => {
-    const wrapper = mount(FButton, {
+    const wrapper = mount(FlButton, {
       slots: {
         default: 'Action',
         icon: () => 'I'

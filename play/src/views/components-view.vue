@@ -1,28 +1,28 @@
 <template>
   <section class="page">
     <h2 class="page-title">Components</h2>
-    <p class="page-desc">Element Plus passthrough wrappers: FButton and FInput.</p>
+    <p class="page-desc">Element Plus passthrough wrappers: FlButton and FlInput.</p>
 
     <article class="card demo-card">
-      <h3>FButton</h3>
+      <h3>FlButton</h3>
       <div class="demo-row">
-        <FButton class="dddd">Default</FButton>
-        <FButton type="primary">Primary</FButton>
-        <FButton type="success" plain>Success Plain</FButton>
-        <FButton type="warning" round>Warning Round</FButton>
+        <FlButton class="dddd">Default</FlButton>
+        <FlButton type="primary">Primary</FlButton>
+        <FlButton type="success" plain>Success Plain</FlButton>
+        <FlButton type="warning" round>Warning Round</FlButton>
       </div>
       <div class="demo-row">
-        <FButton :disabled="true">Disabled</FButton>
-        <FButton :loading="true" type="primary">Loading</FButton>
-        <FButton type="primary" @click="buttonClicks += 1">Click +1</FButton>
+        <FlButton :disabled="true">Disabled</FlButton>
+        <FlButton :loading="true" type="primary">Loading</FlButton>
+        <FlButton type="primary" @click="buttonClicks += 1">Click +1</FlButton>
       </div>
       <p class="demo-result">Click count: {{ buttonClicks }}</p>
     </article>
 
     <article class="card demo-card">
-      <h3>FInput</h3>
+      <h3>FlInput</h3>
       <div class="demo-row">
-        <FInput
+        <FlInput
           v-model="inputValue"
           placeholder="Type something..."
           clearable
@@ -31,19 +31,19 @@
           <template #prefix>
             <span>@</span>
           </template>
-        </FInput>
+        </FlInput>
       </div>
       <div class="demo-row">
-        <FInput v-model="iconInputValue" placeholder="Input with icon slot">
+        <FlInput v-model="iconInputValue" placeholder="Input with icon slot">
           <template #prefix>
             <ElIcon>
               <Search />
             </ElIcon>
           </template>
-        </FInput>
+        </FlInput>
       </div>
       <div class="demo-row">
-        <FInput v-model="disabledValue" placeholder="Disabled input" disabled />
+        <FlInput v-model="disabledValue" placeholder="Disabled input" disabled />
       </div>
       <p class="demo-result">Current value: {{ inputValue || '(empty)' }}</p>
       <p class="demo-result">Icon slot value: {{ iconInputValue || '(empty)' }}</p>
