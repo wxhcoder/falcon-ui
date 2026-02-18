@@ -1,0 +1,8 @@
+.VPDoc h2 {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 20px;
+}
+
+.VPDoc .custom-block {
+  border-radius: 10px;
+}

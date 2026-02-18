@@ -1,0 +1,409 @@
+{
+  "component": "fl-input",
+  "description": "",
+  "events": [
+    {
+      "description": "",
+      "name": "blur",
+      "signature": "(event: \"blur\", evt: FocusEvent): void",
+      "type": "[evt: FocusEvent]"
+    },
+    {
+      "description": "",
+      "name": "change",
+      "signature": "(event: \"change\", value: string, evt?: Event | undefined): void",
+      "type": "[value: string, evt?: Event | undefined]"
+    },
+    {
+      "description": "",
+      "name": "clear",
+      "signature": "(event: \"clear\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "compositionend",
+      "signature": "(event: \"compositionend\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "",
+      "name": "compositionstart",
+      "signature": "(event: \"compositionstart\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "",
+      "name": "compositionupdate",
+      "signature": "(event: \"compositionupdate\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "",
+      "name": "custom-input",
+      "signature": "(event: \"custom-input\", payload: FlInputCustomPayload): void",
+      "type": "[payload: FlInputCustomPayload]"
+    },
+    {
+      "description": "",
+      "name": "debug-event",
+      "signature": "(event: \"debug-event\", payload: FlInputDebugPayload): void",
+      "type": "[payload: FlInputDebugPayload]"
+    },
+    {
+      "description": "",
+      "name": "focus",
+      "signature": "(event: \"focus\", evt: FocusEvent): void",
+      "type": "[evt: FocusEvent]"
+    },
+    {
+      "description": "",
+      "name": "input",
+      "signature": "(event: \"input\", value: string): void",
+      "type": "[value: string]"
+    },
+    {
+      "description": "",
+      "name": "keydown",
+      "signature": "(event: \"keydown\", evt: Event | KeyboardEvent): void",
+      "type": "[evt: Event | KeyboardEvent]"
+    },
+    {
+      "description": "",
+      "name": "mouseenter",
+      "signature": "(event: \"mouseenter\", evt: MouseEvent): void",
+      "type": "[evt: MouseEvent]"
+    },
+    {
+      "description": "",
+      "name": "mouseleave",
+      "signature": "(event: \"mouseleave\", evt: MouseEvent): void",
+      "type": "[evt: MouseEvent]"
+    },
+    {
+      "description": "",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", value: string): void",
+      "type": "[value: string]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "",
+      "name": "blur",
+      "type": "() => void | undefined"
+    },
+    {
+      "description": "",
+      "name": "clear",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "focus",
+      "type": "() => void | undefined"
+    },
+    {
+      "description": "",
+      "name": "input",
+      "type": "HTMLInputElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "isComposing",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "myMethod",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "myValue",
+      "type": "number"
+    },
+    {
+      "description": "",
+      "name": "resizeTextarea",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "select",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "textarea",
+      "type": "HTMLTextAreaElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "textareaStyle",
+      "type": "StyleValue"
+    }
+  ],
+  "props": [
+    {
+      "default": "-",
+      "description": "",
+      "name": "ariaLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "autocomplete",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "autofocus",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "autosize",
+      "required": false,
+      "type": "InputAutoSize | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "clearable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "clearIcon",
+      "required": false,
+      "type": "string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "containerRole",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "''",
+      "description": "",
+      "name": "debugLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "debugMode",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "form",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "formatter",
+      "required": false,
+      "type": "((value: string) => string) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "id",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "inputmode",
+      "required": false,
+      "type": "\"text\" | \"search\" | \"email\" | \"tel\" | \"url\" | \"none\" | \"numeric\" | \"decimal\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "inputStyle",
+      "required": false,
+      "type": "string | false | CSSProperties | StyleValue[] | null | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "maxlength",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "minlength",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "modelModifiers",
+      "required": false,
+      "type": "InputModelModifiers | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "modelValue",
+      "required": false,
+      "type": "string | number | null | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "name",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "parser",
+      "required": false,
+      "type": "((value: string) => string) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "placeholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "prefixIcon",
+      "required": false,
+      "type": "string | Component | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "readonly",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "resize",
+      "required": false,
+      "type": "\"none\" | \"both\" | \"horizontal\" | \"vertical\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "rows",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showPassword",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showWordLimit",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "size",
+      "required": false,
+      "type": "\"\" | \"default\" | \"small\" | \"large\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "suffixIcon",
+      "required": false,
+      "type": "string | Component | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tabindex",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "type",
+      "required": false,
+      "type": "InputType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "validateEvent",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "wordLimitPosition",
+      "required": false,
+      "type": "\"inside\" | \"outside\" | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "",
+      "name": "append",
+      "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "prefix",
+      "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "prepend",
+      "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "suffix",
+      "type": "{}"
+    }
+  ]
+}
