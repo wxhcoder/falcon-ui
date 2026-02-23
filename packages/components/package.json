@@ -12,6 +12,7 @@
     "./input": "./input/index.ts"
   },
   "dependencies": {
+    "@falcon-ui/hooks": "workspace:*",
     "@falcon-ui/utils": "workspace:*",
     "element-plus": "latest"
   },

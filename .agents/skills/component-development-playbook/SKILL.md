@@ -104,3 +104,15 @@ description: 用于将 Element Plus 组件二次封装为 Falcon UI 组件的标
 2. 封装完成定义检查清单：`references/component-checklist.md`
 3. 测试矩阵：`references/test-matrix.md`
 4. PR 输出模板：`references/pr-template.md`
+
+## Shared Hook Refactor Rule (Mandatory)
+When two or more Element Plus wrapper components contain the same Composition API logic,
+extract that logic into a shared hook under `packages/hooks/src/`.
+
+Requirements:
+1. Prefer one semantic hook file for one cohesive concern (for example `use-component.ts`).
+2. Do not hardcode BEM class strings in component files; generate class names via `useNamespace`.
+3. Keep component-specific payload logic in component files; only move reusable structure.
+4. Export new hooks from `packages/hooks/index.ts` and ensure dependent packages declare
+   `@falcon-ui/hooks` / `@falcon-ui/utils` dependencies correctly.
+5. After refactor, run and pass at least: `pnpm lint`, `pnpm test`.

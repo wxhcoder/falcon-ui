@@ -5,8 +5,8 @@
 <script lang="ts" setup>
 import { ElInput } from 'element-plus'
 import type { ComponentInstance } from 'vue'
-import { computed, getCurrentInstance, h, useAttrs, useSlots } from 'vue'
-import { invokeListener, mergeComponentExpose } from '@falcon-ui/utils'
+import { h, useAttrs, useSlots } from 'vue'
+import { useMergedAttrs, useMergedExpose } from '@falcon-ui/hooks'
 import { flInputEmits, flInputProps } from './input'
 
 defineOptions({
@@ -27,18 +27,12 @@ const _myExpose = {
   myValue: 123
 }
 
-const vm = getCurrentInstance()
-
-function changeRef(exposed: unknown) {
-  mergeComponentExpose(vm, exposed, _myExpose)
-}
-
-const mergedAttrs = computed(() => {
-  const next = { ...(attrs as Record<string, unknown>) }
-  const attrInputListener = next.onInput
-  next.class = ['fl-input', next.class]
-
-  next.onInput = (...args: unknown[]) => {
+const { changeRef } = useMergedExpose(_myExpose)
+const { mergedAttrs } = useMergedAttrs({
+  attrs: attrs as Record<string, unknown>,
+  block: 'input',
+  listenerName: 'onInput',
+  onListener: (...args: unknown[]) => {
     const value = args[0]
     if (typeof value === 'string') {
       emit('custom-input', {
@@ -53,11 +47,7 @@ const mergedAttrs = computed(() => {
         })
       }
     }
-
-    invokeListener(attrInputListener, ...args)
   }
-
-  return next
 })
 
 defineExpose({} as ComponentInstance<typeof ElInput> & typeof _myExpose)
