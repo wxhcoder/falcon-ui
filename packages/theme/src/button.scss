@@ -1,14 +1,9 @@
 @use './mixins/bem.scss' as bem;
-@use './ep-vars.scss' as ep-var;
-@use 'element-plus/theme-chalk/src/mixins/_var.scss' as ep-var-mixin;
 @use 'element-plus/theme-chalk/src/button.scss';
 
 // Keep EP button style as baseline, then place Falcon extension in this block.
 @include bem.b(button) {
-  @include ep-var-mixin.set-component-css-var('button', ep-var.$button);
-
   &.el-button {
     border-radius: var(--fl-radius-md);
-    font-weight: 500;
   }
 }
