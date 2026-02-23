@@ -7,6 +7,21 @@
 ::: demo input/basic
 :::
 
+## 使用图标
+
+::: demo input/icon
+:::
+
+## 清空按钮
+
+::: demo input/clearable
+:::
+
+## 输入框尺寸
+
+::: demo input/size
+:::
+
 ## API
 
 ### Props

@@ -10,6 +10,7 @@
         <FlButton type="primary">Primary</FlButton>
         <FlButton type="success" plain>Success Plain</FlButton>
         <FlButton type="warning" round>Warning Round</FlButton>
+        <FlButton type="danger" circle>1</FlButton>
       </div>
       <div class="demo-row">
         <FlButton :disabled="true">Disabled</FlButton>

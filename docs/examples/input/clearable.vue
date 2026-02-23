@@ -1,6 +1,6 @@
 <template>
   <div class="demo-col">
-    <FlInput v-model="value" placeholder="请输入内容" />
+    <FlInput v-model="value" clearable placeholder="输入后可点击右侧清空按钮" />
     <div class="demo-result">当前值：{{ value || '(空)' }}</div>
   </div>
 </template>

@@ -4,6 +4,7 @@
 // Keep EP button style as baseline, then place Falcon extension in this block.
 @include bem.b(button) {
   &.el-button {
-    border-radius: var(--fl-radius-md);
+    // border-radius: var(--fl-radius-md);
+    column-count: 0;
   }
 }
