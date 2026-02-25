@@ -1,0 +1,106 @@
+@use './mixins/bem.scss' as bem;
+@use 'element-plus/theme-chalk/src/dialog.scss';
+
+@include bem.b(dialog) {
+  &.el-dialog {
+    border: 1px solid var(--fl-color-border);
+    padding: 0;
+  }
+
+  @include bem.e(header) {
+    border-bottom: 1px solid var(--fl-color-border);
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0;
+  }
+
+  @include bem.e(body) {
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  @include bem.e(footer) {
+    border-top: 1px solid var(--fl-color-border);
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0;
+  }
+
+  @include bem.e(header-content) {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    gap: 12px;
+    height: 100%;
+    justify-content: space-between;
+    padding: 0 12px;
+  }
+
+  @include bem.e(header-title) {
+    color: var(--fl-color-text-primary);
+    font-size: var(--fl-font-size-md);
+    font-weight: 600;
+    line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @include bem.e(header-actions) {
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  @include bem.e(body-inner) {
+    box-sizing: border-box;
+    padding: 12px;
+  }
+
+  @include bem.e(footer-actions) {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    gap: 8px;
+    height: 100%;
+    justify-content: flex-end;
+    padding: 0 12px;
+  }
+}
+
+@include bem.b(dialog-bounce-enter-active) {
+  animation: fl-dialog-bounce-in 0.24s ease-out;
+}
+
+@include bem.b(dialog-bounce-leave-active) {
+  animation: fl-dialog-bounce-out 0.18s ease-in forwards;
+}
+
+@keyframes fl-dialog-bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(-6px);
+  }
+
+  65% {
+    opacity: 1;
+    transform: scale(1.01) translateY(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fl-dialog-bounce-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}

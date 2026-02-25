@@ -1,6 +1,6 @@
 import type { App, Plugin } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import { FlButton, FlInput } from '..'
+import { FlButton, FlDialog, FlInput } from '..'
 
 type AppMock = App & {
   _registered: Record<string, unknown>
@@ -42,9 +42,11 @@ describe('@falcon-ui/components exports', () => {
     const app = createAppMock()
 
     app.use(FlButton)
+    app.use(FlDialog)
     app.use(FlInput)
 
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
+    expect(app.component).toHaveBeenCalledWith('FlDialog', FlDialog)
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
   })
 })

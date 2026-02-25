@@ -1,0 +1,375 @@
+{
+  "component": "fl-dialog",
+  "description": "",
+  "events": [
+    {
+      "description": "",
+      "name": "cancel",
+      "signature": "(event: \"cancel\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "close",
+      "signature": "(event: \"close\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "closeAutoFocus",
+      "signature": "(event: \"closeAutoFocus\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "closed",
+      "signature": "(event: \"closed\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "confirm",
+      "signature": "(event: \"confirm\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "open",
+      "signature": "(event: \"open\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "openAutoFocus",
+      "signature": "(event: \"openAutoFocus\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "opened",
+      "signature": "(event: \"opened\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", value: boolean): void",
+      "type": "[value: boolean]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "",
+      "name": "closeDialog",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "dialogContentRef",
+      "type": "any"
+    },
+    {
+      "description": "",
+      "name": "handleClose",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "resetPosition",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "toggleFullscreen",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "visible",
+      "type": "boolean"
+    }
+  ],
+  "props": [
+    {
+      "default": "-",
+      "description": "",
+      "name": "alignCenter",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "appendTo",
+      "required": false,
+      "type": "string | HTMLElement | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "appendToBody",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "ariaLevel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "beforeClose",
+      "required": false,
+      "type": "DialogBeforeCloseFn | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "bodyClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "bodyHeight",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "cancelDisabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'取消'",
+      "description": "",
+      "name": "cancelText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "center",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "closeDelay",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "closeIcon",
+      "required": false,
+      "type": "string | Component | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "closeOnClickModal",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "closeOnPressEscape",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "confirmDisabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'确认'",
+      "description": "",
+      "name": "confirmText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "destroyOnClose",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "draggable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "footerClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "fullscreen",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "headerAriaLevel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "headerClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "lockScroll",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "modal",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "modalClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "modalPenetrable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "modelValue",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "openDelay",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "overflow",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showClose",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "true",
+      "description": "",
+      "name": "showFooter",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "title",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "top",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "transition",
+      "required": false,
+      "type": "DialogTransition | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "trapFocus",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "width",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "zIndex",
+      "required": false,
+      "type": "number | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "",
+      "name": "default",
+      "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "footer",
+      "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "header",
+      "type": "{ close: () => void; titleId: string; titleClass: string; }"
+    },
+    {
+      "description": "",
+      "name": "title",
+      "type": "{}"
+    }
+  ]
+}

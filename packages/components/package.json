@@ -9,6 +9,7 @@
   "exports": {
     ".": "./index.ts",
     "./button": "./button/index.ts",
+    "./dialog": "./dialog/index.ts",
     "./input": "./input/index.ts"
   },
   "dependencies": {

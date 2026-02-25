@@ -16,6 +16,10 @@ const targets = [
   {
     id: 'fl-input',
     filePath: path.resolve(rootDir, 'packages/components/input/src/input.vue')
+  },
+  {
+    id: 'fl-dialog',
+    filePath: path.resolve(rootDir, 'packages/components/dialog/src/dialog.vue')
   }
 ]
 
