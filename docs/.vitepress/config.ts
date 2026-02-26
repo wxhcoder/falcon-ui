@@ -1,4 +1,4 @@
-﻿import { fileURLToPath } from 'node:url'
+import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { defineConfig } from 'vitepress'
 import { useDemoContainer } from './plugins/demo-container'

@@ -251,6 +251,20 @@
       "type": "string | false | CSSProperties | StyleValue[] | null | undefined"
     },
     {
+      "default": "false",
+      "description": "是否进入错误态。开启后会触发错误样式并清空输入值。",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否用于表格单元格内输入场景。开启后会使用表格样式。",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
       "default": "-",
       "description": "",
       "name": "maxlength",

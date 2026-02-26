@@ -2,6 +2,20 @@ import type { ExtractPublicPropTypes } from 'vue'
 
 export const flInputProps = {
   /**
+   * 是否用于表格单元格内输入场景。开启后会使用表格样式。
+   */
+  isTable: {
+    type: Boolean,
+    default: false
+  },
+  /**
+   * 是否进入错误态。开启后会触发错误样式并清空输入值。
+   */
+  isError: {
+    type: Boolean,
+    default: false
+  },
+  /**
    * 调试事件标签，在开启调试模式后会随 `debug-event` 一起抛出。
    */
   debugLabel: {

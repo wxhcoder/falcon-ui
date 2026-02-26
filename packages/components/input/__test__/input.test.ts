@@ -52,4 +52,72 @@ describe('FlInput', () => {
     expect(typeof exposed.blur).toBe('function')
     expect(typeof exposed.clear).toBe('function')
   })
+
+  it('clears model value immediately when isError is true', () => {
+    const onUpdateModelValue = vi.fn()
+
+    mount(FlInput, {
+      attrs: {
+        'onUpdate:modelValue': onUpdateModelValue
+      },
+      props: {
+        isError: true,
+        modelValue: 'hello'
+      }
+    })
+
+    expect(onUpdateModelValue).toHaveBeenCalledTimes(1)
+    expect(onUpdateModelValue).toHaveBeenCalledWith('')
+  })
+
+  it('clears model value and adds error class when isError switches to true', async () => {
+    const onUpdateModelValue = vi.fn()
+    const wrapper = mount(FlInput, {
+      attrs: {
+        'onUpdate:modelValue': onUpdateModelValue
+      },
+      props: {
+        isError: false,
+        modelValue: 'hello'
+      }
+    })
+
+    expect(onUpdateModelValue).not.toHaveBeenCalled()
+
+    await wrapper.setProps({ isError: true })
+
+    expect(wrapper.find('.el-input').classes()).toContain('is-error')
+    expect(onUpdateModelValue).toHaveBeenCalledTimes(1)
+    expect(onUpdateModelValue).toHaveBeenCalledWith('')
+  })
+
+  it('adds table class when isTable is true', () => {
+    const wrapper = mount(FlInput, {
+      props: {
+        isTable: true,
+        modelValue: 'cell'
+      }
+    })
+
+    expect(wrapper.find('.el-input').classes()).toContain('is-table')
+  })
+
+  it('keeps clear behavior for table input when isError is true', () => {
+    const onUpdateModelValue = vi.fn()
+    const wrapper = mount(FlInput, {
+      attrs: {
+        'onUpdate:modelValue': onUpdateModelValue
+      },
+      props: {
+        isTable: true,
+        isError: true,
+        modelValue: 'hello'
+      }
+    })
+
+    expect(wrapper.find('.el-input').classes()).toContain('is-table')
+    expect(wrapper.find('.el-input').classes()).toContain('is-error')
+    expect(onUpdateModelValue).toHaveBeenCalledTimes(1)
+    expect(onUpdateModelValue).toHaveBeenCalledWith('')
+  })
 })

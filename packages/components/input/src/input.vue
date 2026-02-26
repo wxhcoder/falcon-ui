@@ -1,12 +1,13 @@
 <template>
-  <component :is="h(ElInput, { ...mergedAttrs, ref: changeRef }, slots)" />
+  <component :is="h(ElInput, { ...mergedInputAttrs, ref: changeRef }, slots)" />
 </template>
 
 <script lang="ts" setup>
 import { ElInput } from 'element-plus'
 import type { ComponentInstance } from 'vue'
-import { h, useAttrs, useSlots } from 'vue'
+import { computed, h, useAttrs, useSlots, watch } from 'vue'
 import { useMergedAttrs, useMergedExpose } from '@falcon-ui/hooks'
+import { invokeListener } from '@falcon-ui/utils'
 import { flInputEmits, flInputProps } from './input'
 
 defineOptions({
@@ -18,6 +19,7 @@ const props = defineProps(flInputProps)
 const emit = defineEmits(flInputEmits)
 const attrs = useAttrs()
 const slots = useSlots()
+const rawAttrs = attrs as Record<string, unknown>
 
 // Keep user-defined exposed capabilities and merge with ElInput expose.
 const _myExpose = {
@@ -35,7 +37,7 @@ const _myExpose = {
 
 const { changeRef } = useMergedExpose(_myExpose)
 const { mergedAttrs } = useMergedAttrs({
-  attrs: attrs as Record<string, unknown>,
+  attrs: rawAttrs,
   block: 'input',
   listenerName: 'onInput',
   onListener: (...args: unknown[]) => {
@@ -55,6 +57,25 @@ const { mergedAttrs } = useMergedAttrs({
     }
   }
 })
+
+const mergedInputAttrs = computed(() => ({
+  ...mergedAttrs.value,
+  class: [mergedAttrs.value.class, { 'is-error': props.isError, 'is-table': props.isTable }]
+}))
+
+const clearModelValue = () => {
+  invokeListener(rawAttrs['onUpdate:modelValue'], '')
+}
+
+watch(
+  () => props.isError,
+  (isError, previousIsError) => {
+    if (isError && previousIsError !== true) {
+      clearModelValue()
+    }
+  },
+  { immediate: true }
+)
 
 defineExpose({} as ComponentInstance<typeof ElInput> & typeof _myExpose)
 </script>

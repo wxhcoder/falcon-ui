@@ -1,8 +1,10 @@
 <template>
   <section class="vp-demo">
     <div class="vp-demo__preview">
-      <component :is="demoComponent" v-if="demoComponent" />
-      <slot v-else />
+      <div class="vp-demo__raw vp-raw">
+        <component :is="demoComponent" v-if="demoComponent" />
+        <slot v-else />
+      </div>
     </div>
 
     <div class="vp-demo__toolbar">
@@ -140,6 +142,10 @@ const copyCode = async () => {
   background: var(--vp-c-bg);
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
+}
+
+.vp-demo__raw {
+  width: 100%;
 }
 
 .vp-demo__toolbar {
