@@ -151,10 +151,16 @@ const resolveBooleanAttr = (value: unknown, fallback: boolean): boolean => {
   return Boolean(value)
 }
 
+/**
+ * 通过同步 `modelValue=false` 关闭当前对话框。
+ */
 const closeDialog = () => {
   emit('update:modelValue', false)
 }
 
+/**
+ * 切换当前对话框的全屏状态。
+ */
 const toggleFullscreen = () => {
   isFullscreen.value = !isFullscreen.value
 }
@@ -257,7 +263,13 @@ const bodyInnerClass = ns.e('body-inner')
 const footerActionsClass = ns.e('footer-actions')
 
 const _myExpose = {
+  /**
+   * 以编程方式关闭当前对话框。
+   */
   closeDialog,
+  /**
+   * 以编程方式切换对话框全屏模式。
+   */
   toggleFullscreen
 }
 

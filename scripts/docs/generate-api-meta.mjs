@@ -25,12 +25,47 @@ const targets = [
 
 const normalizeText = (value) => (value ? String(value).trim() : '')
 
+const customDescriptionOverrides = {
+  'fl-button': {
+    events: {
+      'debug-click': '开启 debugMode 后，按钮点击时触发。'
+    }
+  },
+  'fl-dialog': {
+    events: {
+      cancel: '点击内置取消动作时触发。',
+      confirm: '点击内置确认动作时触发。',
+      'update:modelValue': '对话框显示状态发生变化时触发。'
+    }
+  },
+  'fl-input': {
+    events: {
+      'custom-input': '输入值变化时触发，携带当前值与字符长度。',
+      'debug-event': '开启 debugMode 后在 custom-input 之后触发。'
+    }
+  }
+}
+
+const resolveDescription = (componentId, section, name, description) => {
+  const normalizedDescription = normalizeText(description)
+  if (normalizedDescription) {
+    return normalizedDescription
+  }
+
+  const sectionOverrides = customDescriptionOverrides[componentId]?.[section]
+  if (!sectionOverrides) {
+    return ''
+  }
+
+  return normalizeText(sectionOverrides[name] ?? '')
+}
+
 const toApiMeta = (componentId, meta) => ({
   component: meta.name || componentId,
-  description: normalizeText(meta.description),
+  description: resolveDescription(componentId, 'component', '', meta.description),
   events: meta.events
     .map((item) => ({
-      description: normalizeText(item.description),
+      description: resolveDescription(componentId, 'events', item.name, item.description),
       name: item.name,
       signature: item.signature,
       type: item.type
@@ -38,7 +73,7 @@ const toApiMeta = (componentId, meta) => ({
     .sort((a, b) => a.name.localeCompare(b.name)),
   exposes: meta.exposed
     .map((item) => ({
-      description: normalizeText(item.description),
+      description: resolveDescription(componentId, 'exposes', item.name, item.description),
       name: item.name,
       type: item.type
     }))
@@ -47,7 +82,7 @@ const toApiMeta = (componentId, meta) => ({
     .filter((item) => !item.global)
     .map((item) => ({
       default: item.default ?? '-',
-      description: normalizeText(item.description),
+      description: resolveDescription(componentId, 'props', item.name, item.description),
       name: item.name,
       required: item.required,
       type: item.type
@@ -55,7 +90,7 @@ const toApiMeta = (componentId, meta) => ({
     .sort((a, b) => a.name.localeCompare(b.name)),
   slots: meta.slots
     .map((item) => ({
-      description: normalizeText(item.description),
+      description: resolveDescription(componentId, 'slots', item.name, item.description),
       name: item.name,
       type: item.type
     }))

@@ -9,7 +9,7 @@
       "type": "[evt: MouseEvent]"
     },
     {
-      "description": "",
+      "description": "开启 debugMode 后，按钮点击时触发。",
       "name": "debug-click",
       "signature": "(event: \"debug-click\", payload: FlButtonDebugPayload): void",
       "type": "[payload: FlButtonDebugPayload]"
@@ -17,7 +17,7 @@
   ],
   "exposes": [
     {
-      "description": "",
+      "description": "标记该暴露值来源于 FlButton，便于调试识别。",
       "name": "debugKind",
       "type": "string"
     },
@@ -72,14 +72,14 @@
     },
     {
       "default": "''",
-      "description": "",
+      "description": "调试事件标签，在开启调试模式后会随 `debug-click` 一起抛出。",
       "name": "debugLabel",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "false",
-      "description": "",
+      "description": "是否开启调试点击事件，开启后每次点击都会触发 `debug-click`。",
       "name": "debugMode",
       "required": false,
       "type": "boolean | undefined"

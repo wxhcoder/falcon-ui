@@ -3,7 +3,7 @@
   "description": "",
   "events": [
     {
-      "description": "",
+      "description": "点击内置取消动作时触发。",
       "name": "cancel",
       "signature": "(event: \"cancel\"): void",
       "type": "[]"
@@ -27,7 +27,7 @@
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "点击内置确认动作时触发。",
       "name": "confirm",
       "signature": "(event: \"confirm\"): void",
       "type": "[]"
@@ -51,7 +51,7 @@
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "对话框显示状态发生变化时触发。",
       "name": "update:modelValue",
       "signature": "(event: \"update:modelValue\", value: boolean): void",
       "type": "[value: boolean]"
@@ -59,7 +59,7 @@
   ],
   "exposes": [
     {
-      "description": "",
+      "description": "以编程方式关闭当前对话框。",
       "name": "closeDialog",
       "type": "() => void"
     },
@@ -79,7 +79,7 @@
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "以编程方式切换对话框全屏模式。",
       "name": "toggleFullscreen",
       "type": "() => void"
     },
@@ -134,21 +134,21 @@
     },
     {
       "default": "undefined",
-      "description": "",
+      "description": "对话框主体区域固定高度，传入数字时按像素处理。",
       "name": "bodyHeight",
       "required": false,
       "type": "string | number | undefined"
     },
     {
       "default": "false",
-      "description": "",
+      "description": "是否禁用默认页脚中的取消按钮。",
       "name": "cancelDisabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "'取消'",
-      "description": "",
+      "description": "默认页脚取消按钮文案。",
       "name": "cancelText",
       "required": false,
       "type": "string | undefined"
@@ -190,14 +190,14 @@
     },
     {
       "default": "false",
-      "description": "",
+      "description": "是否禁用默认页脚中的确认按钮。",
       "name": "confirmDisabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "'确认'",
-      "description": "",
+      "description": "默认页脚确认按钮文案。",
       "name": "confirmText",
       "required": false,
       "type": "string | undefined"
@@ -274,7 +274,7 @@
     },
     {
       "default": "false",
-      "description": "",
+      "description": "通过 v-model 控制对话框显示状态。",
       "name": "modelValue",
       "required": false,
       "type": "boolean | undefined"
@@ -302,7 +302,7 @@
     },
     {
       "default": "true",
-      "description": "",
+      "description": "是否渲染默认页脚操作区。",
       "name": "showFooter",
       "required": false,
       "type": "boolean | undefined"

@@ -20,6 +20,9 @@ const attrs = useAttrs()
 const slots = useSlots()
 
 const _myExpose = {
+  /**
+   * 标记该暴露值来源于 FlButton，便于调试识别。
+   */
   debugKind: 'button'
 }
 

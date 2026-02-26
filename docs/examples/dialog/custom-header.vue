@@ -39,9 +39,9 @@ const open = ref(false)
 }
 
 .header-tag {
-  background: #eef4ff;
+  background: #f4d9a3;
   border-radius: 999px;
-  color: #1d4ed8;
+  color: #df4e04;
   font-size: 12px;
   line-height: 1;
   padding: 4px 8px;

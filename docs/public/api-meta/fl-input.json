@@ -39,13 +39,13 @@
       "type": "[evt: CompositionEvent]"
     },
     {
-      "description": "",
+      "description": "输入值变化时触发，携带当前值与字符长度。",
       "name": "custom-input",
       "signature": "(event: \"custom-input\", payload: FlInputCustomPayload): void",
       "type": "[payload: FlInputCustomPayload]"
     },
     {
-      "description": "",
+      "description": "开启 debugMode 后在 custom-input 之后触发。",
       "name": "debug-event",
       "signature": "(event: \"debug-event\", payload: FlInputDebugPayload): void",
       "type": "[payload: FlInputDebugPayload]"
@@ -114,12 +114,12 @@
       "type": "boolean"
     },
     {
-      "description": "",
+      "description": "FlInput 额外暴露的示例方法，可用于联调验证。",
       "name": "myMethod",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "FlInput 额外暴露的示例数值，用于文档演示与调试。",
       "name": "myValue",
       "type": "number"
     },
@@ -196,14 +196,14 @@
     },
     {
       "default": "''",
-      "description": "",
+      "description": "调试事件标签，在开启调试模式后会随 `debug-event` 一起抛出。",
       "name": "debugLabel",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "false",
-      "description": "",
+      "description": "是否开启调试事件派发，开启后每次输入都会触发调试事件。",
       "name": "debugMode",
       "required": false,
       "type": "boolean | undefined"

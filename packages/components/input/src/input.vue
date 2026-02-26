@@ -21,9 +21,15 @@ const slots = useSlots()
 
 // Keep user-defined exposed capabilities and merge with ElInput expose.
 const _myExpose = {
+  /**
+   * FlInput 额外暴露的示例方法，可用于联调验证。
+   */
   myMethod() {
     console.log('my method!')
   },
+  /**
+   * FlInput 额外暴露的示例数值，用于文档演示与调试。
+   */
   myValue: 123
 }
 

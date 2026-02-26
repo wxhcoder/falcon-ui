@@ -191,11 +191,19 @@ const copyCode = async () => {
 
 .vp-demo__source {
   padding: 0 20px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
 .vp-demo__source :deep(pre) {
   margin: 0;
   border-radius: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
 }
 
 .vp-demo__footer {
