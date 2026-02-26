@@ -8,8 +8,27 @@
           <template v-else>{{ resolvedTitle }}</template>
         </div>
         <div :class="headerActionsClass">
-          <ElButton link type="primary" @click="toggleFullscreen">全屏</ElButton>
-          <ElButton link type="primary" @click="closeDialog">关闭</ElButton>
+          <span
+            :class="headerActionIconClass"
+            aria-label="FullScreen"
+            role="button"
+            tabindex="0"
+            title="FullScreen"
+            @click="toggleFullscreen"
+            @keydown.enter.prevent="toggleFullscreen"
+            @keydown.space.prevent="toggleFullscreen">
+            <ElIcon>
+              <FullScreen />
+            </ElIcon>
+          </span>
+          <FlButton
+            :icon="Close"
+            :class="headerActionIconClass"
+            aria-label="Close"
+            link
+            title="Close"
+            type="primary"
+            @click="closeDialog" />
         </div>
       </div>
     </template>
@@ -21,23 +40,25 @@
     <template v-if="slots.footer || props.showFooter" #footer>
       <slot v-if="slots.footer" name="footer" />
       <div v-else :class="footerActionsClass">
-        <ElButton :disabled="props.cancelDisabled" @click="handleCancel">
+        <fl-button :disabled="props.cancelDisabled" @click="handleCancel">
           {{ props.cancelText }}
-        </ElButton>
-        <ElButton :disabled="props.confirmDisabled" type="primary" @click="handleConfirm">
+        </fl-button>
+        <fl-button :disabled="props.confirmDisabled" type="primary" @click="handleConfirm">
           {{ props.confirmText }}
-        </ElButton>
+        </fl-button>
       </div>
     </template>
   </component>
 </template>
 
 <script setup lang="ts">
-import { ElButton, ElDialog } from 'element-plus'
+import { Close, FullScreen } from '@element-plus/icons-vue'
+import { ElDialog, ElIcon } from 'element-plus'
 import type { ComponentInstance, CSSProperties } from 'vue'
 import { computed, ref, useAttrs, useSlots } from 'vue'
 import { useMergedExpose } from '@falcon-ui/hooks'
 import { invokeListener, useNamespace } from '@falcon-ui/utils'
+import { FlButton } from '../../button'
 import { flDialogEmits, flDialogProps } from './dialog'
 
 defineOptions({
@@ -165,6 +186,10 @@ const mergedFooterClass = computed(() =>
 )
 
 const bodyStyle = computed<CSSProperties | undefined>(() => {
+  if (isFullscreen.value) {
+    return undefined
+  }
+
   if (props.bodyHeight === undefined || props.bodyHeight === null || props.bodyHeight === '') {
     return undefined
   }
@@ -227,6 +252,7 @@ const mergedAttrs = computed(() => ({
 const headerContentClass = ns.e('header-content')
 const headerTitleClass = ns.e('header-title')
 const headerActionsClass = ns.e('header-actions')
+const headerActionIconClass = ns.e('header-action-icon')
 const bodyInnerClass = ns.e('body-inner')
 const footerActionsClass = ns.e('footer-actions')
 

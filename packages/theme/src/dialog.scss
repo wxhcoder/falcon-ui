@@ -3,27 +3,40 @@
 
 @include bem.b(dialog) {
   &.el-dialog {
-    border: 1px solid var(--fl-color-border);
+    border: 1px solid var(--el-color-primary-light-5);
     padding: 0;
+
+    &.is-fullscreen {
+      display: flex;
+      flex-direction: column;
+    }
   }
 
   @include bem.e(header) {
-    border-bottom: 1px solid var(--fl-color-border);
+    background-color: var(--el-color-primary-light-9);
+    border-bottom: 1px solid var(--el-color-primary-light-5);
     box-sizing: border-box;
-    height: 40px;
-    padding: 0;
+    padding: var(--fl-gap-sm);
+    flex-shrink: 0;
   }
 
   @include bem.e(body) {
     box-sizing: border-box;
-    padding: 0;
+    padding: var(--fl-gap-sm);
+
+    .el-dialog.is-fullscreen & {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
   }
 
   @include bem.e(footer) {
-    border-top: 1px solid var(--fl-color-border);
+    border-top: 1px solid var(--el-border-color);
+    box-shadow: 0 -6px 6px -5px var(--el-border-color);
     box-sizing: border-box;
-    height: 40px;
-    padding: 0;
+    padding: var(--fl-gap-sm);
+    flex-shrink: 0;
   }
 
   @include bem.e(header-content) {
@@ -31,13 +44,11 @@
     box-sizing: border-box;
     display: flex;
     gap: 12px;
-    height: 100%;
     justify-content: space-between;
-    padding: 0 12px;
   }
 
   @include bem.e(header-title) {
-    color: var(--fl-color-text-primary);
+    color: var(--el-color-primary);
     font-size: var(--fl-font-size-md);
     font-weight: 600;
     line-height: 1;
@@ -49,22 +60,51 @@
   @include bem.e(header-actions) {
     align-items: center;
     display: inline-flex;
-    gap: 8px;
+    gap: var(--fl-gap-sm);
+  }
+
+  @include bem.e(header-action-icon) {
+    align-items: center;
+    border-radius: var(--el-border-radius-base);
+    color: var(--el-color-primary);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 16px;
+    justify-content: center;
+    line-height: 1;
+    padding: 2px;
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--el-color-primary-light-9);
+      color: var(--el-color-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--el-color-primary-light-5);
+      outline-offset: 2px;
+    }
   }
 
   @include bem.e(body-inner) {
     box-sizing: border-box;
-    padding: 12px;
+    padding: 0;
+
+    .el-dialog.is-fullscreen & {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
   }
 
   @include bem.e(footer-actions) {
     align-items: center;
     box-sizing: border-box;
     display: flex;
-    gap: 8px;
-    height: 100%;
+    gap: var(--fl-gap-sm);
     justify-content: flex-end;
-    padding: 0 12px;
   }
 }
 

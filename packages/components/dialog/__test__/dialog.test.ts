@@ -129,6 +129,28 @@ describe('FlDialog', () => {
     expect(wrapper.get('.fl-dialog__body-inner').attributes('style')).toContain('height: 60vh')
   })
 
+  it('ignores bodyHeight when switched to fullscreen', async () => {
+    const wrapper = mount(FlDialog, {
+      attrs: {
+        teleported: false
+      },
+      props: {
+        bodyHeight: 300,
+        modelValue: false
+      }
+    })
+    await openDialog(wrapper)
+
+    expect(wrapper.get('.fl-dialog__body-inner').attributes('style')).toContain('height: 300px')
+
+    const headerButtons = wrapper.findAll('.fl-dialog__header-action-icon')
+    await headerButtons[0].trigger('click')
+    await nextTick()
+
+    const bodyStyle = wrapper.get('.fl-dialog__body-inner').attributes('style') ?? ''
+    expect(bodyStyle).not.toContain('height: 300px')
+  })
+
   it('toggles fullscreen internally and close button emits update:modelValue', async () => {
     const wrapper = mount(FlDialog, {
       attrs: {
@@ -143,7 +165,7 @@ describe('FlDialog', () => {
     const dialog = wrapper.getComponent(ElDialog)
     expect(dialog.props('fullscreen')).toBe(false)
 
-    const headerButtons = wrapper.findAll('.fl-dialog__header-actions .el-button')
+    const headerButtons = wrapper.findAll('.fl-dialog__header-action-icon')
     await headerButtons[0].trigger('click')
     await nextTick()
     expect(dialog.props('fullscreen')).toBe(true)

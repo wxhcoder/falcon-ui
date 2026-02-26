@@ -16,7 +16,7 @@
 - 支持 Body 高度控制
 - 使用 `header-class/body-class/footer-class` 定义三段主体样式
 
-## 3. 功能需求
+## 3. 功能需求（按当前实现修订）
 
 ### FR-01 默认可拖拽
 
@@ -29,23 +29,25 @@
 
 ### FR-03 Header 内置全屏与关闭
 
-- Header 固定包含“全屏”和“关闭”按钮。
-- 全屏仅内部切换 `fullscreen`。
-- 关闭触发 `update:modelValue = false`。
+- Header 固定包含“全屏”和“关闭”操作。
+- 全屏：使用 `ElIcon + FullScreen` 触发内部 `fullscreen` 状态切换。
+- 关闭：使用 `FlButton`（icon 模式，`Close` 图标）触发 `update:modelValue = false`。
 
 ### FR-04 Footer 内置取消与确认
 
 - 默认渲染取消/确认按钮。
+- 取消、确认均使用 `FlButton`。
 - 事件顺序：
   - 取消：`cancel` -> `update:modelValue(false)`
   - 确认：`confirm` -> `update:modelValue(false)`
 - 支持：`showFooter`、`cancelText`、`confirmText`、`cancelDisabled`、`confirmDisabled`。
 - 若存在 `#footer` 插槽，则覆盖内置 Footer。
 
-### FR-05 Body 高度可控
+### FR-05 Body 高度可控（含全屏规则）
 
 - `bodyHeight: number | string`
-- `number` 按 `px`，`string` 原样应用。
+- 非全屏：`number` 按 `px`，`string` 原样应用。
+- 全屏：忽略外部传入 `bodyHeight`，Body 充满除 Header/Footer 外剩余高度。
 
 ### FR-06 使用 2.9.3 分区 class 属性
 
@@ -64,10 +66,9 @@
 要求：
 
 - 默认类与业务类合并。
-- 覆盖 ElDialog 原生 padding 为 0。
-- 弹窗整体边框。
-- Header/Footer 高度均为 `40px`。
-- Header 带下边框，Footer 带上边框。
+- Dialog 保持外层边框。
+- Header 下边框，Footer 上边框。
+- Footer 带上阴影。
 
 ### FR-07 默认 Bounce 动画
 
@@ -80,6 +81,12 @@
 ### FR-09 样式文件约束
 
 - Dialog 相关样式统一在 `packages/theme/src/dialog.scss`。
+
+### FR-10 间距 Token 统一
+
+- 新增并使用 `--fl-gap-sm` 作为通用小间距变量。
+- Header/Body/Footer 的 padding 统一使用 `var(--fl-gap-sm)`。
+- Header actions / Footer actions 的 gap 统一使用 `var(--fl-gap-sm)`。
 
 ## 4. API 约定
 
@@ -106,7 +113,15 @@
 - `title`
 - `footer`
 
-## 5. 开发完成标记
+## 5. 视觉变量约定（当前实现）
+
+- Dialog 边框：`--el-color-primary-light-5`
+- Header 背景：`--el-color-primary-light-9`
+- Header 标题色：`--el-color-primary`
+- Footer 边框与阴影色：`--el-border-color`
+- 间距 Token：`--fl-gap-sm`（定义于 `packages/theme/src/tokens.scss`）
+
+## 6. 开发完成标记
 
 ### 功能目标
 
@@ -114,11 +129,12 @@
 - [x] FR-02 自动销毁
 - [x] FR-03 Header 内置全屏与关闭
 - [x] FR-04 Footer 内置取消与确认
-- [x] FR-05 Body 高度可控
+- [x] FR-05 Body 高度可控（含全屏填充规则）
 - [x] FR-06 使用 `header-class/body-class/footer-class` 定义主体样式
 - [x] FR-07 默认 Bounce 动画
 - [x] FR-08 弹窗居中
 - [x] FR-09 样式全部落在 `dialog.scss`
+- [x] FR-10 间距 Token 统一（`--fl-gap-sm`）
 
 ### 工程接入目标
 
@@ -130,6 +146,7 @@
 - [x] 新增主题样式：`packages/theme/src/dialog.scss`
 - [x] 接入主题入口：`packages/theme/index.scss`
 - [x] 新增组件单测：`packages/components/dialog/__test__/dialog.test.ts`
+- [x] 增加全屏忽略 bodyHeight 的回归测试
 - [x] 更新 install 回归测试（components/falcon-ui）
 - [x] 新增 docs 示例与组件文档（dialog）
 - [x] 更新 docs 侧边栏与组件索引
@@ -140,7 +157,5 @@
 
 - [x] `pnpm lint` 通过
 - [x] `pnpm test` 通过
-- [x] `pnpm play:build` 通过
-- [x] `pnpm docs:api` 通过
-- [x] `pnpm docs:build` 通过
-- [ ] `pnpm format:check` 未通过（仓库存在大量既有历史文件格式问题，非本次改动单独引入）
+- [x] `pnpm build:lib:style` 通过
+- [ ] `pnpm format:check` 未通过（仓库存在历史文件格式问题）
