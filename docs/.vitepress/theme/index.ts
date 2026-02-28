@@ -6,6 +6,7 @@ import type { Component } from 'vue'
 import Layout from './layout.vue'
 import VpDemo from '../components/vp-demo.vue'
 import VpApiTable from '../components/vp-api-table.vue'
+import OverviewGrid from '../components/overview-grid.vue'
 import '../styles/vars.css'
 import '../styles/custom.css'
 import 'element-plus/dist/index.css'
@@ -31,6 +32,7 @@ const theme: Theme = {
     app.use(FalconUI)
     app.component('VpDemo', VpDemo)
     app.component('VpApiTable', VpApiTable)
+    app.component('OverviewGrid', OverviewGrid)
 
     const demoModules = import.meta.glob('../../examples/**/*.vue', {
       eager: true

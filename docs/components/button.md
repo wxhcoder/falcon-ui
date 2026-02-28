@@ -1,6 +1,6 @@
 # FlButton 按钮
 
-基于 Element Plus `ElButton` 的二次封装组件，保留原生交互语义并扩展调试事件。
+基于 Element Plus `ElButton` 的二次封装组件，取消按钮本身外边距。
 
 ## 基础用法
 

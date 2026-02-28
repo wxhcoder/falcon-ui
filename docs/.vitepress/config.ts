@@ -1,6 +1,6 @@
 ﻿import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import { defineConfig } from 'vitepress'
+import { defineConfig, postcssIsolateStyles } from 'vitepress'
 import { useDemoContainer } from './plugins/demo-container'
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url))
@@ -54,6 +54,11 @@ export default defineConfig({
     }
   },
   vite: {
+    css: {
+      postcss: {
+        plugins: [postcssIsolateStyles()]
+      }
+    },
     resolve: {
       alias: {
         '@docs': docsRoot
