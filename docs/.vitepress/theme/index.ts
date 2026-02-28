@@ -10,6 +10,7 @@ import OverviewGrid from '../components/overview-grid.vue'
 import '../styles/vars.css'
 import '../styles/custom.css'
 import 'element-plus/dist/index.css'
+import 'element-plus/theme-chalk/dark/css-vars.css'
 import '@falcon-ui/theme/index.scss'
 
 const toDemoComponentName = (demoPath: string) => {
