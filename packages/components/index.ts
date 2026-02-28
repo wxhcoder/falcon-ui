@@ -7,7 +7,6 @@ export type { FlInputEmits, FlInputProps, InputEmits, InputProps } from './input
 export { FlInputNumber } from './input-number'
 export type {
   FlInputNumberCustomPayload,
-  FlInputNumberDebugPayload,
   FlInputNumberEmits,
   FlInputNumberPrecisionMode,
   FlInputNumberProps,

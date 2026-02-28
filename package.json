@@ -51,6 +51,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "latest",
+    "@element-plus/icons-vue": "latest",
     "@eslint/js": "latest",
     "@vitejs/plugin-vue": "latest",
     "@vitest/coverage-v8": "latest",
@@ -58,6 +59,7 @@
     "autoprefixer": "latest",
     "consola": "latest",
     "cssnano": "latest",
+    "element-plus": "latest",
     "eslint": "latest",
     "eslint-config-prettier": "latest",
     "eslint-plugin-vue": "latest",

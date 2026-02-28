@@ -13,11 +13,6 @@
     "./input": "./input/index.ts",
     "./input-number": "./input-number/index.ts"
   },
-  "dependencies": {
-    "@falcon-ui/hooks": "workspace:*",
-    "@falcon-ui/utils": "workspace:*",
-    "element-plus": "latest"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
