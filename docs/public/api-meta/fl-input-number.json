@@ -1,0 +1,469 @@
+{
+  "component": "fl-input-number",
+  "description": "",
+  "events": [
+    {
+      "description": "",
+      "name": "blur",
+      "signature": "(event: \"blur\", evt: FocusEvent): void",
+      "type": "[evt: FocusEvent]"
+    },
+    {
+      "description": "",
+      "name": "change",
+      "signature": "(event: \"change\", value: string, evt?: Event | undefined): void",
+      "type": "[value: string, evt?: Event | undefined]"
+    },
+    {
+      "description": "",
+      "name": "clear",
+      "signature": "(event: \"clear\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "compositionend",
+      "signature": "(event: \"compositionend\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "",
+      "name": "compositionstart",
+      "signature": "(event: \"compositionstart\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "",
+      "name": "compositionupdate",
+      "signature": "(event: \"compositionupdate\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "输入值变化时触发，携带当前原始值与归一化数值。",
+      "name": "custom-input",
+      "signature": "(event: \"custom-input\", payload: FlInputNumberCustomPayload): void",
+      "type": "[payload: FlInputNumberCustomPayload]"
+    },
+    {
+      "description": "开启 debugMode 后在 custom-input 之后触发。",
+      "name": "debug-event",
+      "signature": "(event: \"debug-event\", payload: FlInputNumberDebugPayload): void",
+      "type": "[payload: FlInputNumberDebugPayload]"
+    },
+    {
+      "description": "",
+      "name": "focus",
+      "signature": "(event: \"focus\", evt: FocusEvent): void",
+      "type": "[evt: FocusEvent]"
+    },
+    {
+      "description": "",
+      "name": "input",
+      "signature": "(event: \"input\", value: string): void",
+      "type": "[value: string]"
+    },
+    {
+      "description": "",
+      "name": "keydown",
+      "signature": "(event: \"keydown\", evt: Event | KeyboardEvent): void",
+      "type": "[evt: Event | KeyboardEvent]"
+    },
+    {
+      "description": "",
+      "name": "mouseenter",
+      "signature": "(event: \"mouseenter\", evt: MouseEvent): void",
+      "type": "[evt: MouseEvent]"
+    },
+    {
+      "description": "",
+      "name": "mouseleave",
+      "signature": "(event: \"mouseleave\", evt: MouseEvent): void",
+      "type": "[evt: MouseEvent]"
+    },
+    {
+      "description": "STRICT 模式下当输入精度超限时触发。",
+      "name": "strict-error",
+      "signature": "(event: \"strict-error\", payload: FlInputNumberStrictErrorPayload): void",
+      "type": "[payload: FlInputNumberStrictErrorPayload]"
+    },
+    {
+      "description": "内部严格模式错误态变化时触发。",
+      "name": "update:isError",
+      "signature": "(event: \"update:isError\", value: boolean): void",
+      "type": "[value: boolean]"
+    },
+    {
+      "description": "",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", value: number | null): void",
+      "type": "[value: number | null]"
+    },
+    {
+      "description": "",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", value: string): void",
+      "type": "[value: string]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "",
+      "name": "blur",
+      "type": "() => void | undefined"
+    },
+    {
+      "description": "",
+      "name": "clear",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "focus",
+      "type": "() => void | undefined"
+    },
+    {
+      "description": "",
+      "name": "input",
+      "type": "HTMLInputElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "isComposing",
+      "type": "boolean"
+    },
+    {
+      "description": "FlInputNumber 额外暴露的方法，用于联调验证。",
+      "name": "myMethod",
+      "type": "() => void"
+    },
+    {
+      "description": "FlInputNumber 额外暴露的示例数值。",
+      "name": "myValue",
+      "type": "number"
+    },
+    {
+      "description": "",
+      "name": "resizeTextarea",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "select",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "textarea",
+      "type": "HTMLTextAreaElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "textareaStyle",
+      "type": "StyleValue"
+    }
+  ],
+  "props": [
+    {
+      "default": "-",
+      "description": "",
+      "name": "ariaLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "autocomplete",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "autofocus",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "autosize",
+      "required": false,
+      "type": "InputAutoSize | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "clearable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "clearIcon",
+      "required": false,
+      "type": "string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "containerRole",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "''",
+      "description": "调试事件标签，在开启调试模式后会随 debug-event 一起抛出。",
+      "name": "debugLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否开启调试事件派发。",
+      "name": "debugMode",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "form",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "formatter",
+      "required": false,
+      "type": "((value: string) => string) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "id",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "inputmode",
+      "required": false,
+      "type": "\"text\" | \"search\" | \"email\" | \"tel\" | \"url\" | \"none\" | \"numeric\" | \"decimal\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "inputStyle",
+      "required": false,
+      "type": "string | false | CSSProperties | StyleValue[] | null | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否进入错误态。开启后会触发错误样式并清空输入值。",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否开启格式化显示。",
+      "name": "isFormat",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否用于表格单元格内输入场景。",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "maxlength",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "minlength",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "modelModifiers",
+      "required": false,
+      "type": "InputModelModifiers | undefined"
+    },
+    {
+      "default": "null",
+      "description": "绑定值，仅输出 number 或 null。",
+      "name": "modelValue",
+      "required": false,
+      "type": "string | number | null | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "name",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "parser",
+      "required": false,
+      "type": "((value: string) => string) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "placeholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "2",
+      "description": "小数精度位数。",
+      "name": "precision",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'ROUND'",
+      "description": "精度处理模式：ROUND(四舍五入) / FIXED(截断) / STRICT(严格)。",
+      "name": "precisionMode",
+      "required": false,
+      "type": "\"ROUND\" | \"FIXED\" | \"STRICT\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "prefixIcon",
+      "required": false,
+      "type": "string | Component | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "readonly",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "resize",
+      "required": false,
+      "type": "\"none\" | \"both\" | \"horizontal\" | \"vertical\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "rows",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showPassword",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showWordLimit",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "size",
+      "required": false,
+      "type": "\"\" | \"default\" | \"small\" | \"large\" | undefined"
+    },
+    {
+      "default": "'精度不对'",
+      "description": "严格模式下精度不匹配时的 placeholder 提示。",
+      "name": "strictErrorPlaceholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "suffixIcon",
+      "required": false,
+      "type": "string | Component | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tabindex",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "type",
+      "required": false,
+      "type": "InputType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "validateEvent",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "wordLimitPosition",
+      "required": false,
+      "type": "\"inside\" | \"outside\" | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "",
+      "name": "append",
+      "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "prefix",
+      "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "prepend",
+      "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "suffix",
+      "type": "{}"
+    }
+  ]
+}

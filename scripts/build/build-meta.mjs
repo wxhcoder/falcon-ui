@@ -37,6 +37,11 @@ const buildMeta = async () => {
         import: './esm/components/input/index.mjs',
         require: './cjs/components/input/index.cjs'
       },
+      './components/input-number': {
+        types: './types/components/input-number/index.d.ts',
+        import: './esm/components/input-number/index.mjs',
+        require: './cjs/components/input-number/index.cjs'
+      },
       './utils': {
         types: './types/utils/index.d.ts',
         import: './esm/utils/index.mjs',
@@ -67,13 +72,12 @@ const buildMeta = async () => {
 
   await logInfo(`publish package name=${publishPackageJson.name}`, { stage: 'meta' })
   await logInfo(`publish package version=${publishPackageJson.version}`, { stage: 'meta' })
-  await logInfo(`exports count=${Object.keys(publishPackageJson.exports).length}`, { stage: 'meta' })
+  await logInfo(`exports count=${Object.keys(publishPackageJson.exports).length}`, {
+    stage: 'meta'
+  })
   await logInfo(`write package metadata -> ${targetPackageFile}`, { stage: 'meta' })
 
-  await writeFile(
-    targetPackageFile,
-    `${JSON.stringify(publishPackageJson, null, 2)}\n`
-  )
+  await writeFile(targetPackageFile, `${JSON.stringify(publishPackageJson, null, 2)}\n`)
 }
 
 export { buildMeta }

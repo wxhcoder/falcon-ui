@@ -10,7 +10,8 @@
     ".": "./index.ts",
     "./button": "./button/index.ts",
     "./dialog": "./dialog/index.ts",
-    "./input": "./input/index.ts"
+    "./input": "./input/index.ts",
+    "./input-number": "./input-number/index.ts"
   },
   "dependencies": {
     "@falcon-ui/hooks": "workspace:*",

@@ -1,7 +1,9 @@
 ﻿<template>
   <section class="page">
     <h2 class="page-title">Components</h2>
-    <p class="page-desc">Element Plus passthrough wrappers: FlButton, FlInput and FlDialog.</p>
+    <p class="page-desc">
+      Element Plus passthrough wrappers: FlButton, FlInput, FlInputNumber and FlDialog.
+    </p>
     <article class="card demo-card">
       <h3>FlButton</h3>
       <div class="demo-row">
@@ -53,6 +55,57 @@
     </article>
 
     <article class="card demo-card">
+      <h3>FlInputNumber</h3>
+      <div class="demo-row">
+        <FlInputNumber v-model="numberValue" placeholder="Only number value" />
+      </div>
+      <div class="demo-row">
+        <FlInputNumber
+          v-model="roundValue"
+          :precision="2"
+          precision-mode="ROUND"
+          placeholder="ROUND: 1.236 => 1.24" />
+        <FlInputNumber
+          v-model="fixedValue"
+          :precision="2"
+          precision-mode="FIXED"
+          placeholder="FIXED: 1.236 => 1.23" />
+        <FlInputNumber
+          :is-error="strictIsError"
+          :model-value="strictValue"
+          :precision="2"
+          precision-mode="STRICT"
+          strict-error-placeholder="精度不对"
+          placeholder="STRICT: precision check"
+          @strict-error="strictErrors += 1"
+          @update:is-error="strictIsError = $event"
+          @update:model-value="strictValue = $event" />
+      </div>
+      <div class="demo-row">
+        <FlInputNumber
+          v-model="formattedValue"
+          :is-format="true"
+          placeholder="Default thousand format" />
+        <FlInputNumber
+          v-model="customFormattedValue"
+          :is-format="true"
+          :formatter="currencyFormatter"
+          :parser="currencyParser"
+          placeholder="Custom formatter" />
+      </div>
+      <p class="demo-result">numberValue: {{ numberValue ?? '(null)' }}</p>
+      <p class="demo-result">
+        round/fixed/strict: {{ roundValue }} / {{ fixedValue }} / {{ strictValue }}
+      </p>
+      <p class="demo-result">
+        strict error: {{ strictIsError ? 'on' : 'off' }}, count: {{ strictErrors }}
+      </p>
+      <p class="demo-result">
+        formatted values: {{ formattedValue ?? '(null)' }} / {{ customFormattedValue ?? '(null)' }}
+      </p>
+    </article>
+
+    <article class="card demo-card">
       <h3>FlDialog</h3>
       <div class="demo-row">
         <FlButton type="primary" @click="dialogVisible = true">Open Dialog</FlButton>
@@ -84,6 +137,14 @@ const disabledValue = ref('disabled text')
 const inputEvents = ref(0)
 const customInputEvents = ref(0)
 const customInputPayload = ref('')
+const numberValue = ref<number | null>(null)
+const roundValue = ref<number | null>(null)
+const fixedValue = ref<number | null>(null)
+const strictValue = ref<number | string | null>(null)
+const strictIsError = ref(false)
+const strictErrors = ref(0)
+const formattedValue = ref<number | null>(12345.67)
+const customFormattedValue = ref<number | null>(1200)
 
 const dialogVisible = ref(false)
 const confirmCount = ref(0)
@@ -93,6 +154,9 @@ const handleCustomInput = (payload: { length: number; value: string }) => {
   customInputEvents.value += 1
   customInputPayload.value = `value="${payload.value}" length=${payload.length}`
 }
+
+const currencyFormatter = (value: string) => `USD ${value}`
+const currencyParser = (value: string) => value.replace(/^USD\s*/, '')
 </script>
 
 <style scoped>

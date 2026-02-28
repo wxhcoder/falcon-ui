@@ -5,3 +5,4 @@
 - [FlButton](./button.md)
 - [FlDialog](./dialog.md)
 - [FlInput](./input.md)
+- [FlInputNumber](./input-number.md)

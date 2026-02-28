@@ -1,4 +1,4 @@
-import { fileURLToPath } from 'node:url'
+﻿import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { defineConfig } from 'vitepress'
 import { useDemoContainer } from './plugins/demo-container'
@@ -38,7 +38,8 @@ export default defineConfig({
             { text: '总览', link: '/components/index' },
             { text: 'FlButton', link: '/components/button' },
             { text: 'FlDialog', link: '/components/dialog' },
-            { text: 'FlInput', link: '/components/input' }
+            { text: 'FlInput', link: '/components/input' },
+            { text: 'FlInputNumber', link: '/components/input-number' }
           ]
         }
       ]

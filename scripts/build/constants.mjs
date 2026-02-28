@@ -20,6 +20,15 @@ const entryPoints = {
   'components/input/index': resolve(packagesDir, 'components/input/index.ts'),
   'components/input/src/input': resolve(packagesDir, 'components/input/src/input.ts'),
   'components/input/src/input.vue': resolve(packagesDir, 'components/input/src/input.vue'),
+  'components/input-number/index': resolve(packagesDir, 'components/input-number/index.ts'),
+  'components/input-number/src/input-number': resolve(
+    packagesDir,
+    'components/input-number/src/input-number.ts'
+  ),
+  'components/input-number/src/input-number.vue': resolve(
+    packagesDir,
+    'components/input-number/src/input-number.vue'
+  ),
   'utils/index': resolve(packagesDir, 'utils/index.ts'),
   'hooks/index': resolve(packagesDir, 'hooks/index.ts'),
   'icons/index': resolve(packagesDir, 'icons/index.ts')

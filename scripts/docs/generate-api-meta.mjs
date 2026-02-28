@@ -1,4 +1,4 @@
-import fs from 'node:fs'
+﻿import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createChecker } from 'vue-component-meta'
@@ -16,6 +16,10 @@ const targets = [
   {
     id: 'fl-input',
     filePath: path.resolve(rootDir, 'packages/components/input/src/input.vue')
+  },
+  {
+    id: 'fl-input-number',
+    filePath: path.resolve(rootDir, 'packages/components/input-number/src/input-number.vue')
   },
   {
     id: 'fl-dialog',
@@ -42,6 +46,14 @@ const customDescriptionOverrides = {
     events: {
       'custom-input': '输入值变化时触发，携带当前值与字符长度。',
       'debug-event': '开启 debugMode 后在 custom-input 之后触发。'
+    }
+  },
+  'fl-input-number': {
+    events: {
+      'custom-input': '输入值变化时触发，携带当前原始值与归一化数值。',
+      'debug-event': '开启 debugMode 后在 custom-input 之后触发。',
+      'strict-error': 'STRICT 模式下当输入精度超限时触发。',
+      'update:isError': '内部严格模式错误态变化时触发。'
     }
   }
 }

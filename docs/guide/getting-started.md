@@ -1,12 +1,12 @@
-# 安装与使用
+﻿# 瀹夎涓庝娇鐢?
 
-## 安装
+## 瀹夎
 
 ```bash
 pnpm add falcon-ui
 ```
 
-## 全量注册
+## 鍏ㄩ噺娉ㄥ唽
 
 ```ts
 import { createApp } from 'vue'
@@ -17,15 +17,15 @@ import 'falcon-ui/theme/index.css'
 createApp(App).use(FalconUI).mount('#app')
 ```
 
-## 按需引入
+## 鎸夐渶寮曞叆
 
 ```ts
-import { FlButton, FlInput } from 'falcon-ui'
+import { FlButton, FlInput, FlInputNumber } from 'falcon-ui'
 ```
 
-## 类型提示
+## 绫诲瀷鎻愮ず
 
-如果使用 `app.use(FalconUI)` 全局注册，建议增加：
+濡傛灉浣跨敤 `app.use(FalconUI)` 鍏ㄥ眬娉ㄥ唽锛屽缓璁鍔狅細
 
 ```json
 {
