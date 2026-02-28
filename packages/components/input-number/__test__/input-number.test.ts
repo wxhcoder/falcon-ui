@@ -13,8 +13,6 @@ describe('FlInputNumber', () => {
         'onUpdate:modelValue': onUpdateModelValue
       },
       props: {
-        debugLabel: 'probe',
-        debugMode: true,
         modelValue: null
       }
     })
@@ -27,9 +25,6 @@ describe('FlInputNumber', () => {
     expect(onInput).toHaveBeenCalledWith('123.45')
     expect(onUpdateModelValue).toHaveBeenCalledWith(123.45)
     expect(wrapper.emitted('custom-input')?.[0]).toEqual([{ rawValue: '123.45', value: 123.45 }])
-    expect(wrapper.emitted('debug-event')?.[0]).toEqual([
-      { label: 'probe', rawValue: '123.45', value: 123.45 }
-    ])
   })
 
   it('clears model value for invalid external value', async () => {

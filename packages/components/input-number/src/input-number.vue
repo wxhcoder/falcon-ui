@@ -196,14 +196,6 @@ const syncDisplayFromModel = (value: number | null) => {
 
 const handleCustomPayload = (rawValue: string, value: number | null) => {
   emit('custom-input', { rawValue, value })
-
-  if (props.debugMode) {
-    emit('debug-event', {
-      label: props.debugLabel,
-      rawValue,
-      value
-    })
-  }
 }
 
 const handleInput = (value: unknown) => {

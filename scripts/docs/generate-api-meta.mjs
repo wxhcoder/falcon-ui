@@ -51,7 +51,6 @@ const customDescriptionOverrides = {
   'fl-input-number': {
     events: {
       'custom-input': '输入值变化时触发，携带当前原始值与归一化数值。',
-      'debug-event': '开启 debugMode 后在 custom-input 之后触发。',
       'strict-error': 'STRICT 模式下当输入精度超限时触发。',
       'update:isError': '内部严格模式错误态变化时触发。'
     }

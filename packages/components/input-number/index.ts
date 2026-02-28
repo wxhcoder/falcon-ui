@@ -7,7 +7,6 @@ export default FlInputNumber
 
 export type {
   FlInputNumberCustomPayload,
-  FlInputNumberDebugPayload,
   FlInputNumberEmits,
   FlInputNumberPrecisionMode,
   FlInputNumberProps,

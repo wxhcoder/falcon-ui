@@ -45,12 +45,6 @@
       "type": "[payload: FlInputNumberCustomPayload]"
     },
     {
-      "description": "开启 debugMode 后在 custom-input 之后触发。",
-      "name": "debug-event",
-      "signature": "(event: \"debug-event\", payload: FlInputNumberDebugPayload): void",
-      "type": "[payload: FlInputNumberDebugPayload]"
-    },
-    {
       "description": "",
       "name": "focus",
       "signature": "(event: \"focus\", evt: FocusEvent): void",
@@ -211,20 +205,6 @@
       "name": "containerRole",
       "required": false,
       "type": "string | undefined"
-    },
-    {
-      "default": "''",
-      "description": "调试事件标签，在开启调试模式后会随 debug-event 一起抛出。",
-      "name": "debugLabel",
-      "required": false,
-      "type": "string | undefined"
-    },
-    {
-      "default": "false",
-      "description": "是否开启调试事件派发。",
-      "name": "debugMode",
-      "required": false,
-      "type": "boolean | undefined"
     },
     {
       "default": "-",

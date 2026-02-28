@@ -27,20 +27,6 @@ export const flInputNumberProps = {
     default: false
   },
   /**
-   * 调试事件标签，在开启调试模式后会随 debug-event 一起抛出。
-   */
-  debugLabel: {
-    type: String,
-    default: ''
-  },
-  /**
-   * 是否开启调试事件派发。
-   */
-  debugMode: {
-    type: Boolean,
-    default: false
-  },
-  /**
    * 小数精度位数。
    */
   precision: {
@@ -83,13 +69,6 @@ export interface FlInputNumberCustomPayload {
   value: number | null
 }
 
-export interface FlInputNumberDebugPayload extends FlInputNumberCustomPayload {
-  /**
-   * 调试标识标签。
-   */
-  label: string
-}
-
 export interface FlInputNumberStrictErrorPayload {
   /**
    * 严格模式校验失败时的原始输入值。
@@ -118,13 +97,6 @@ export const flInputNumberEmits = {
    * 每次输入后触发，携带归一化结果。
    */
   'custom-input': (payload: FlInputNumberCustomPayload) =>
-    typeof payload.rawValue === 'string' &&
-    (payload.value === null || typeof payload.value === 'number'),
-  /**
-   * 开启 debugMode 后在 custom-input 之后触发。
-   */
-  'debug-event': (payload: FlInputNumberDebugPayload) =>
-    typeof payload.label === 'string' &&
     typeof payload.rawValue === 'string' &&
     (payload.value === null || typeof payload.value === 'number'),
   /**
