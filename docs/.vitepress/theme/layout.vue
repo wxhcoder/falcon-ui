@@ -30,6 +30,23 @@ const { Layout } = DefaultTheme
   display: none;
 }
 
+.falcon-docs-layout :deep(header.VPNav) {
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.falcon-docs-layout :deep(.VPNavBar .divider),
+.falcon-docs-layout :deep(.VPNavBar .divider-line) {
+  display: none;
+}
+
+.falcon-docs-layout :deep(.VPNavBarTitle.has-sidebar .title) {
+  border-bottom: 0;
+}
+
+.falcon-docs-layout :deep(.VPNavBar.screen-open) {
+  border-bottom: 0;
+}
+
 .falcon-docs-layout__search-wrap {
   display: flex;
   align-items: center;
