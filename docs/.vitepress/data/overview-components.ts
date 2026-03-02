@@ -39,6 +39,14 @@ export const overviewComponents: readonly OverviewItem[] = [
     icon: '/overview/fl-input.svg'
   },
   {
+    name: 'FlInputSearch',
+    title: 'Input Search',
+    group: 'form',
+    link: '/components/input-search',
+    description: '业务搜索输入组件，支持回车检索与弹窗占位事件。',
+    icon: '/overview/fl-input-search.svg'
+  },
+  {
     name: 'FlInputNumber',
     title: 'Input Number',
     group: 'form',

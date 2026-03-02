@@ -1,6 +1,6 @@
 import type { App, Plugin } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import FalconUI, { FlButton, FlDialog, FlInput, FlInputNumber, install } from '..'
+import FalconUI, { FlButton, FlDialog, FlInput, FlInputNumber, FlInputSearch, install } from '..'
 
 const createAppMock = (): App => {
   const app = {
@@ -28,6 +28,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
     expect(app.component).toHaveBeenCalledWith('FlDialog', FlDialog)
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
+    expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
   })
 
@@ -39,6 +40,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
     expect(app.component).toHaveBeenCalledWith('FlDialog', FlDialog)
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
+    expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
   })
 })

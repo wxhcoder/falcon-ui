@@ -39,6 +39,7 @@ export default defineConfig({
             { text: 'FlButton', link: '/components/button' },
             { text: 'FlDialog', link: '/components/dialog' },
             { text: 'FlInput', link: '/components/input' },
+            { text: 'FlInputSearch', link: '/components/input-search' },
             { text: 'FlInputNumber', link: '/components/input-number' }
           ]
         }

@@ -4,12 +4,24 @@
 @use 'element-plus/theme-chalk/src/input.scss';
 
 // Keep EP input style as baseline, then place Falcon extension in this block.
-@include bem.b(input) {
+@include bem.b(input-search) {
   @include ep-var-mixin.set-component-css-var('input', ep-var.$input);
   @include ep-var-mixin.set-component-css-var('input-disabled', ep-var.$input-disabled);
 
   &.el-input .el-input__wrapper {
     border-radius: var(--fl-radius-sm);
+  }
+
+  @include bem.e(trigger) {
+    display: inline-flex;
+    align-items: center;
+    color: var(--el-text-color-placeholder);
+    cursor: pointer;
+    line-height: 1;
+
+    &:hover {
+      color: var(--el-color-primary);
+    }
   }
 
   &.is-error {

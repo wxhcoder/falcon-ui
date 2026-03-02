@@ -8,10 +8,6 @@
   @include ep-var-mixin.set-component-css-var('input', ep-var.$input);
   @include ep-var-mixin.set-component-css-var('input-disabled', ep-var.$input-disabled);
 
-  &.el-input {
-    width: 240px;
-  }
-
   &.el-input .el-input__wrapper {
     border-radius: var(--fl-radius-sm);
   }

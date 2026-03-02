@@ -18,6 +18,10 @@ const targets = [
     filePath: path.resolve(rootDir, 'packages/components/input/src/input.vue')
   },
   {
+    id: 'fl-input-search',
+    filePath: path.resolve(rootDir, 'packages/components/input-search/src/input-search.vue')
+  },
+  {
     id: 'fl-input-number',
     filePath: path.resolve(rootDir, 'packages/components/input-number/src/input-number.vue')
   },
@@ -46,6 +50,16 @@ const customDescriptionOverrides = {
     events: {
       'custom-input': '输入值变化时触发，携带当前值与字符长度。',
       'debug-event': '开启 debugMode 后在 custom-input 之后触发。'
+    }
+  },
+  'fl-input-search': {
+    events: {
+      clear: '清空值时触发，携带清空原因。',
+      openDialog: '需要外部接管弹窗时触发。',
+      'search-error': '回车检索失败时触发。',
+      'selection-commit': '回车检索唯一结果并完成回填时触发。',
+      'update:label': '显示标签值变化时触发。',
+      'update:modelValue': '绑定值变化时触发。'
     }
   },
   'fl-input-number': {

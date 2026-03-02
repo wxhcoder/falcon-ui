@@ -11,6 +11,7 @@
     "./button": "./button/index.ts",
     "./dialog": "./dialog/index.ts",
     "./input": "./input/index.ts",
+    "./input-search": "./input-search/index.ts",
     "./input-number": "./input-number/index.ts"
   },
   "scripts": {

@@ -2,7 +2,8 @@
   <section class="page">
     <h2 class="page-title">Components</h2>
     <p class="page-desc">
-      Element Plus passthrough wrappers: FlButton, FlInput, FlInputNumber and FlDialog.
+      Element Plus passthrough wrappers: FlButton, FlInput, FlInputSearch, FlInputNumber and
+      FlDialog.
     </p>
     <article class="card demo-card">
       <h3>FlButton</h3>
@@ -52,6 +53,27 @@
       <p class="demo-result">Input events: {{ inputEvents }}</p>
       <p class="demo-result">Custom input events: {{ customInputEvents }}</p>
       <p class="demo-result">Custom payload: {{ customInputPayload || '(none)' }}</p>
+    </article>
+
+    <article class="card demo-card">
+      <h3>FlInputSearch</h3>
+      <div class="demo-row">
+        <FlInputSearch
+          v-model="searchValue"
+          v-model:label="searchLabel"
+          clearable
+          placeholder="Type acme and press Enter"
+          :fetch-api="searchByKeyword"
+          :map-result="mapSearchResult"
+          @open-dialog="handleOpenDialog" />
+      </div>
+      <p class="demo-result">search value / label: {{ searchValue ?? '(null)' }} / {{ searchLabel }}</p>
+      <p class="demo-result">
+        panel placeholder count: {{ panelTriggerCount }}, reason: {{ panelReason || '(none)' }}
+      </p>
+      <p class="demo-result">
+        panel keyword/result size: {{ panelKeyword || '(empty)' }} / {{ panelResultSize }}
+      </p>
     </article>
 
     <article class="card demo-card">
@@ -137,6 +159,12 @@ const disabledValue = ref('disabled text')
 const inputEvents = ref(0)
 const customInputEvents = ref(0)
 const customInputPayload = ref('')
+const searchValue = ref<string | number | null>(null)
+const searchLabel = ref('')
+const panelTriggerCount = ref(0)
+const panelReason = ref('')
+const panelKeyword = ref('')
+const panelResultSize = ref(0)
 const numberValue = ref<number | null>(null)
 const roundValue = ref<number | null>(null)
 const fixedValue = ref<number | null>(null)
@@ -157,6 +185,46 @@ const handleCustomInput = (payload: { length: number; value: string }) => {
 
 const currencyFormatter = (value: string) => `USD ${value}`
 const currencyParser = (value: string) => value.replace(/^USD\s*/, '')
+
+type SearchItem = {
+  id: string
+  name: string
+}
+
+const searchData: SearchItem[] = [
+  { id: 'c-1001', name: 'Acme Corporation' },
+  { id: 'c-1002', name: 'Acme Retail' },
+  { id: 'c-1003', name: 'Acme Logistics' },
+  { id: 'c-2001', name: 'Globex Inc.' }
+]
+
+const searchByKeyword = async (keyword: string) => {
+  const normalized = keyword.trim().toLowerCase()
+  if (!normalized) {
+    return []
+  }
+
+  return searchData.filter((item) => item.name.toLowerCase().includes(normalized))
+}
+
+const mapSearchResult = (item: unknown) => {
+  const record = item as SearchItem
+  return {
+    value: record?.id ?? null,
+    label: record?.name ?? ''
+  }
+}
+
+const handleOpenDialog = (payload: {
+  keyword: string
+  reason: 'manual' | 'multi-match'
+  results?: unknown[]
+}) => {
+  panelTriggerCount.value += 1
+  panelReason.value = payload.reason
+  panelKeyword.value = payload.keyword
+  panelResultSize.value = payload.results?.length ?? 0
+}
 </script>
 
 <style scoped>

@@ -1,0 +1,132 @@
+{
+  "component": "fl-input-search",
+  "description": "",
+  "events": [
+    {
+      "description": "清空值时触发，携带清空原因。",
+      "name": "clear",
+      "signature": "(event: \"clear\", payload: FlInputSearchClearPayload): void",
+      "type": "[payload: FlInputSearchClearPayload]"
+    },
+    {
+      "description": "需要外部接管弹窗时触发。",
+      "name": "openDialog",
+      "signature": "(event: \"openDialog\", payload: FlInputSearchOpenDialogPayload): void",
+      "type": "[payload: FlInputSearchOpenDialogPayload]"
+    },
+    {
+      "description": "回车检索失败时触发。",
+      "name": "search-error",
+      "signature": "(event: \"search-error\", payload: FlInputSearchSearchErrorPayload): void",
+      "type": "[payload: FlInputSearchSearchErrorPayload]"
+    },
+    {
+      "description": "回车检索唯一结果并完成回填时触发。",
+      "name": "selection-commit",
+      "signature": "(event: \"selection-commit\", payload: FlInputSearchSelectionCommitPayload): void",
+      "type": "[payload: FlInputSearchSelectionCommitPayload]"
+    },
+    {
+      "description": "显示标签值变化时触发。",
+      "name": "update:label",
+      "signature": "(event: \"update:label\", value: string): void",
+      "type": "[value: string]"
+    },
+    {
+      "description": "绑定值变化时触发。",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", value: FlInputSearchValue): void",
+      "type": "[value: FlInputSearchValue]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "",
+      "name": "blur",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "clear",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "focus",
+      "type": "() => void"
+    }
+  ],
+  "props": [
+    {
+      "default": "false",
+      "description": "是否显示清空按钮。",
+      "name": "clearable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Blur 时未确认输入是否强制清空。",
+      "name": "clearOnBlurUnconfirmed",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否禁用输入。",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "回车检索方法。",
+      "name": "fetchApi",
+      "required": false,
+      "type": "FlInputSearchFetchApi | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否进入错误态。",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否用于表格单元格输入。",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "''",
+      "description": "输入框显示值（业务标签）。",
+      "name": "label",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "外部结果映射方法，统一映射到 value/label。",
+      "name": "mapResult",
+      "required": true,
+      "type": "FlInputSearchMapResult"
+    },
+    {
+      "default": "null",
+      "description": "绑定值，通常为业务实体 ID。",
+      "name": "modelValue",
+      "required": false,
+      "type": "string | number | null | undefined"
+    },
+    {
+      "default": "''",
+      "description": "占位提示文案。",
+      "name": "placeholder",
+      "required": false,
+      "type": "string | undefined"
+    }
+  ],
+  "slots": []
+}
