@@ -1,9 +1,25 @@
+@use 'sass:map';
+@use './ep-vars.scss' as ep-var;
 @use './mixins/bem.scss' as bem;
+@use './mixins/color.scss' as color-mixin;
 @use 'element-plus/theme-chalk/src/button.scss';
+
+$fl-button-primary-base-color: map.get(ep-var.$colors, 'primary', 'base');
+$fl-button-primary-gradient-end-color: color-mixin.get-nearby-color($fl-button-primary-base-color);
 
 // Keep EP button style as baseline, then place Falcon extension in this block.
 @include bem.b(button) {
   &.el-button {
     margin: 0;
+  }
+
+  &.el-button--primary:not(.is-disabled):not(.is-plain):not(.is-link):not(.is-text) {
+    --fl-button-primary-gradient-end-color: #{$fl-button-primary-gradient-end-color};
+    background-color: var(--el-color-primary);
+    background-image: linear-gradient(
+      135deg,
+      var(--el-color-primary) 0%,
+      var(--fl-button-primary-gradient-end-color) 100%
+    );
   }
 }

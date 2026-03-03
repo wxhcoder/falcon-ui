@@ -57,7 +57,11 @@ export default defineConfig({
   vite: {
     css: {
       postcss: {
-        plugins: [postcssIsolateStyles()]
+        plugins: [
+          postcssIsolateStyles({
+            includeFiles: [/base\.css$/, /vp-doc\.css$/]
+          })
+        ]
       }
     },
     resolve: {

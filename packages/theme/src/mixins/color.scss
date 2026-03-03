@@ -1,0 +1,8 @@
+@use 'sass:color';
+
+@function get-nearby-color($base-color, $hue-offset: 30deg, $depth-ratio: 30%, $mix-ratio: 55%) {
+  $hue-shifted-color: color.adjust($base-color, $hue: $hue-offset);
+  $mixed-color: color.mix($base-color, $hue-shifted-color, $mix-ratio);
+
+  @return color.mix(#000000, $mixed-color, $depth-ratio);
+}
