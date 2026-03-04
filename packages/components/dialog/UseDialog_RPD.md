@@ -102,7 +102,49 @@ dialog
   })
 ```
 
-## 7. 实现约束
+## 7. open 到 then 数据回传执行流程图
+
+```mermaid
+flowchart TD
+  A[业务调用 open] --> B[open 先关闭旧实例]
+  B --> C[解析挂载目标并创建容器和实例编号]
+  C --> D[创建 Promise 并初始化关闭和清理流程]
+  D --> E[动态加载 FlDialog 组件]
+  E --> F[render Wrapper]
+  F --> G[Wrapper 解析 message 内容]
+  G --> H{message 是否为组件 VNode}
+  H -- 是 --> I[注入 payloadTargetRef 并合并 ref]
+  H -- 否 --> J[直接使用 messageContent]
+  I --> K[渲染 FlDialog 并打开]
+  J --> K
+  K --> L[用户点击确认 进入 requestClose confirm]
+  L --> M{beforeClose 是否通过}
+  M -- 否 --> N[阻止关闭并保持弹窗打开]
+  M -- 是 --> O[进入 settle confirm]
+  O --> P[resolveConfirmPayload]
+  P --> Q{是否存在 payloadResolver}
+  Q -- 是 --> R[执行 payloadResolver]
+  Q -- 否 --> S{是否存在 payloadMethod}
+  S -- 是 --> T[从 payloadTargetRef 读取方法并调用]
+  S -- 否 --> U[payload = undefined]
+  R --> V[执行 onAction confirm]
+  T --> V
+  U --> V
+  V --> W[resolve confirm 和 data]
+  W --> X[执行 cleanup 卸载并移除容器]
+  X --> Y[业务侧 then 拿到 data]
+  T --> Z{方法是否可调用}
+  Z -- 否 --> E1[抛出错误]
+  E1 --> E2[reject error 并进入 catch]
+```
+
+补充说明：
+
+1. 数据回传优先级固定：`payloadResolver > payloadMethod > undefined`。
+2. 只有 `confirm` 分支会进入 `resolveConfirmPayload`，取消/关闭不会触发数据解析。
+3. 若 `payloadMethod` 缺失目标实例或方法非函数，将直接 `reject(error)`。
+
+## 8. 实现约束
 
 1. `useDialog` 负责实例生命周期、Promise 结算、并发覆盖、资源清理。
 2. `FlDialog` 负责 UI 呈现与交互事件。
@@ -110,9 +152,9 @@ dialog
 4. `appendTo` 非法时回退到 `document.body`。
 5. `closeAll` 在无活动实例时无副作用。
 
-## 8. 测试验收标准
+## 9. 测试验收标准
 
-### 8.1 单测必测项
+### 9.1 单测必测项
 
 1. `open` 动态挂载与销毁正常。
 2. confirm 进入 resolve；非 confirm 进入 reject。
@@ -123,13 +165,13 @@ dialog
 7. 渲染 `ElTable` 时可通过 `payloadMethod: 'getSelectionRows'`
    在 `then` 中拿到勾选行。
 
-### 8.2 文档验收
+### 9.2 文档验收
 
 1. `FlDialog` 文档新增 `useDialog` 章节与 API 表。
 2. 新增 `useDialog` + `ElTable` 勾选回传示例。
 3. 示例不依赖外部 `tableRef` 进行取值。
 
-## 9. 迁移建议
+## 10. 迁移建议
 
 1. 新代码优先使用 `useDialog.open`。
 2. 旧路径可兼容一版后逐步迁移。
