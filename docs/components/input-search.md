@@ -9,10 +9,11 @@
 ::: demo input-search/basic
 :::
 
-## 回车检索与弹窗占位
+## 回车检索与 useDialog 占位
 
 当回车结果唯一时，自动回填 `modelValue` 与 `label`。  
-当结果不唯一，或点击后缀搜索图标时，触发 `openDialog` 事件，由业务侧接管弹窗逻辑。
+当结果不唯一，或点击后缀搜索图标时，触发 `openDialog` 事件。  
+推荐在业务侧通过 `useDialog.open` 渲染表格，确认后返回勾选行并回填输入框值。
 
 ::: demo input-search/enter-multi-placeholder
 :::
