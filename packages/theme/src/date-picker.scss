@@ -8,6 +8,15 @@
   @include ep-var-mixin.set-component-css-var('input', ep-var.$input);
   @include ep-var-mixin.set-component-css-var('input-disabled', ep-var.$input-disabled);
 
+  &.el-date-editor.el-input,
+  &.el-date-editor.el-input__wrapper {
+    width: 100%;
+  }
+
+  &.el-date-editor.el-input__wrapper {
+    box-sizing: border-box;
+  }
+
   &.el-date-editor .el-input__wrapper,
   &.el-date-editor.el-input__wrapper,
   &.el-date-editor--daterange,
