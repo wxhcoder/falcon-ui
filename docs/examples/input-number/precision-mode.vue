@@ -41,11 +41,6 @@ const strictErrorCount = ref(0)
 </script>
 
 <style scoped>
-.demo-col {
-  width: 100%;
-  display: grid;
-  gap: 10px;
-}
 
 .demo-result {
   color: var(--vp-c-text-2);

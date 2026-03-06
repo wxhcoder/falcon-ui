@@ -23,11 +23,6 @@ const open = ref(false)
 </script>
 
 <style scoped>
-.demo-col {
-  width: 100%;
-  display: grid;
-  gap: 10px;
-}
 
 .header-slot {
   align-items: center;

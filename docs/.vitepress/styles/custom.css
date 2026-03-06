@@ -6,3 +6,9 @@
 .VPDoc .custom-block {
   border-radius: 10px;
 }
+
+.demo-col {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+}

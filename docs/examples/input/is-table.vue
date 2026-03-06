@@ -27,9 +27,3 @@ const tableData = ref<RowData[]>([
   { id: 3, name: '王五', remark: '' }
 ])
 </script>
-
-<style scoped>
-.demo-col {
-  width: 100%;
-}
-</style>

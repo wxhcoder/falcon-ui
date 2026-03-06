@@ -12,11 +12,3 @@ import { ref } from 'vue'
 const keyword = ref('')
 const schedule = ref('')
 </script>
-
-<style scoped>
-.demo-col {
-  width: 100%;
-  display: grid;
-  gap: 10px;
-}
-</style>

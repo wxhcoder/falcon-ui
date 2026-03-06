@@ -50,11 +50,6 @@ const statusOptions = [
 </script>
 
 <style scoped>
-.demo-col {
-  width: 100%;
-  display: grid;
-  gap: 10px;
-}
 
 .demo-actions {
   align-items: center;

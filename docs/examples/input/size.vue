@@ -13,11 +13,3 @@ const smallValue = ref('')
 const defaultValue = ref('')
 const largeValue = ref('')
 </script>
-
-<style scoped>
-.demo-col {
-  width: 100%;
-  display: grid;
-  gap: 10px;
-}
-</style>
