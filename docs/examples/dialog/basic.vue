@@ -26,6 +26,7 @@ const confirmCount = ref(0)
 
 <style scoped>
 .demo-col {
+  width: 100%;
   display: grid;
   gap: 10px;
 }

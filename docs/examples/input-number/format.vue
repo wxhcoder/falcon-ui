@@ -29,6 +29,7 @@ const currencyParser = (value: string) => value.replace(/^USD\s*/, '')
 
 <style scoped>
 .demo-col {
+  width: 100%;
   display: grid;
   gap: 10px;
   max-width: 420px;

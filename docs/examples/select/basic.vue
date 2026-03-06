@@ -20,6 +20,7 @@ const options = [
 
 <style scoped>
 .demo-col {
+  width: 100%;
   display: grid;
   gap: 10px;
   max-width: 360px;
