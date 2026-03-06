@@ -1,6 +1,14 @@
 import type { App, Plugin } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import { FlButton, FlDialog, FlInput, FlInputNumber, FlInputSearch } from '..'
+import {
+  FlButton,
+  FlDatePicker,
+  FlDialog,
+  FlInput,
+  FlInputNumber,
+  FlInputSearch,
+  FlSelect
+} from '..'
 
 type AppMock = App & {
   _registered: Record<string, unknown>
@@ -43,14 +51,18 @@ describe('@falcon-ui/components exports', () => {
 
     app.use(FlButton)
     app.use(FlDialog)
+    app.use(FlDatePicker)
     app.use(FlInput)
     app.use(FlInputSearch)
     app.use(FlInputNumber)
+    app.use(FlSelect)
 
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
     expect(app.component).toHaveBeenCalledWith('FlDialog', FlDialog)
+    expect(app.component).toHaveBeenCalledWith('FlDatePicker', FlDatePicker)
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
+    expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
   })
 })

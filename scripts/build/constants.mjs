@@ -38,6 +38,18 @@ const entryPoints = {
     packagesDir,
     'components/input-number/src/input-number.vue'
   ),
+  'components/date-picker/index': resolve(packagesDir, 'components/date-picker/index.ts'),
+  'components/date-picker/src/date-picker': resolve(
+    packagesDir,
+    'components/date-picker/src/date-picker.ts'
+  ),
+  'components/date-picker/src/date-picker.vue': resolve(
+    packagesDir,
+    'components/date-picker/src/date-picker.vue'
+  ),
+  'components/select/index': resolve(packagesDir, 'components/select/index.ts'),
+  'components/select/src/select': resolve(packagesDir, 'components/select/src/select.ts'),
+  'components/select/src/select.vue': resolve(packagesDir, 'components/select/src/select.vue'),
   'utils/index': resolve(packagesDir, 'utils/index.ts'),
   'hooks/index': resolve(packagesDir, 'hooks/index.ts'),
   'icons/index': resolve(packagesDir, 'icons/index.ts')

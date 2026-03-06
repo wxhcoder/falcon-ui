@@ -18,12 +18,20 @@ const targets = [
     filePath: path.resolve(rootDir, 'packages/components/input/src/input.vue')
   },
   {
+    id: 'fl-select',
+    filePath: path.resolve(rootDir, 'packages/components/select/src/select.vue')
+  },
+  {
     id: 'fl-input-search',
     filePath: path.resolve(rootDir, 'packages/components/input-search/src/input-search.vue')
   },
   {
     id: 'fl-input-number',
     filePath: path.resolve(rootDir, 'packages/components/input-number/src/input-number.vue')
+  },
+  {
+    id: 'fl-date-picker',
+    filePath: path.resolve(rootDir, 'packages/components/date-picker/src/date-picker.vue')
   },
   {
     id: 'fl-dialog',

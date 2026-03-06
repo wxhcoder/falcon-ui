@@ -2,8 +2,8 @@
   <section class="page">
     <h2 class="page-title">Components</h2>
     <p class="page-desc">
-      Element Plus passthrough wrappers: FlButton, FlInput, FlInputSearch, FlInputNumber and
-      FlDialog.
+      Element Plus passthrough wrappers: FlButton, FlInput, FlDatePicker, FlSelect, FlInputSearch,
+      FlInputNumber and FlDialog.
     </p>
     <article class="card demo-card">
       <h3>FlButton</h3>
@@ -56,6 +56,48 @@
     </article>
 
     <article class="card demo-card">
+      <h3>FlDatePicker</h3>
+      <div class="demo-row">
+        <FlDatePicker
+          v-model="dateValue"
+          type="date"
+          value-format="YYYY-MM-DD"
+          placeholder="Pick a date" />
+        <FlDatePicker
+          v-model="rangeDateValue"
+          type="daterange"
+          unlink-panels
+          value-format="YYYY-MM-DD"
+          start-placeholder="Start"
+          end-placeholder="End" />
+      </div>
+      <div class="demo-row">
+        <FlDatePicker
+          v-model="errorDateValue"
+          :is-error="dateError"
+          :is-table="dateTable"
+          type="date"
+          value-format="YYYY-MM-DD"
+          placeholder="Toggle state below" />
+        <FlButton @click="dateError = !dateError">
+          Toggle isError: {{ dateError ? 'on' : 'off' }}
+        </FlButton>
+        <FlButton @click="dateTable = !dateTable">
+          Toggle isTable: {{ dateTable ? 'on' : 'off' }}
+        </FlButton>
+      </div>
+      <p class="demo-result">date value: {{ dateValue ?? '(null)' }}</p>
+      <p class="demo-result">
+        range value: {{ rangeDateValue ? rangeDateValue.join(' ~ ') : '(null)' }}
+      </p>
+      <p class="demo-result">
+        state: error={{ dateError }}, table={{ dateTable }}, errorDate={{
+          errorDateValue ?? '(null)'
+        }}
+      </p>
+    </article>
+
+    <article class="card demo-card">
       <h3>FlInputSearch</h3>
       <div class="demo-row">
         <FlInputSearch
@@ -67,13 +109,45 @@
           :map-result="mapSearchResult"
           @open-dialog="handleOpenDialog" />
       </div>
-      <p class="demo-result">search value / label: {{ searchValue ?? '(null)' }} / {{ searchLabel }}</p>
+      <p class="demo-result">
+        search value / label: {{ searchValue ?? '(null)' }} / {{ searchLabel }}
+      </p>
       <p class="demo-result">
         panel placeholder count: {{ panelTriggerCount }}, reason: {{ panelReason || '(none)' }}
       </p>
       <p class="demo-result">
         panel keyword/result size: {{ panelKeyword || '(empty)' }} / {{ panelResultSize }}
       </p>
+    </article>
+
+    <article class="card demo-card">
+      <h3>FlSelect</h3>
+      <div class="demo-row">
+        <FlSelect v-model="selectValue" placeholder="Choose a city">
+          <ElOption
+            v-for="item in selectOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value" />
+        </FlSelect>
+      </div>
+      <div class="demo-row">
+        <FlSelect v-model="selectValue" :is-error="selectError" :is-table="selectTable">
+          <ElOption
+            v-for="item in selectOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value" />
+        </FlSelect>
+        <FlButton @click="selectError = !selectError">
+          Toggle isError: {{ selectError ? 'on' : 'off' }}
+        </FlButton>
+        <FlButton @click="selectTable = !selectTable">
+          Toggle isTable: {{ selectTable ? 'on' : 'off' }}
+        </FlButton>
+      </div>
+      <p class="demo-result">Selected value: {{ selectValue || '(empty)' }}</p>
+      <p class="demo-result">State: error={{ selectError }}, table={{ selectTable }}</p>
     </article>
 
     <article class="card demo-card">
@@ -150,7 +224,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
-import { ElIcon } from 'element-plus'
+import { ElIcon, ElOption } from 'element-plus'
 
 const buttonClicks = ref(0)
 const inputValue = ref('')
@@ -159,12 +233,20 @@ const disabledValue = ref('disabled text')
 const inputEvents = ref(0)
 const customInputEvents = ref(0)
 const customInputPayload = ref('')
+const dateValue = ref<string | null>(null)
+const rangeDateValue = ref<[string, string] | null>(null)
+const errorDateValue = ref<string | null>('2026-03-05')
+const dateError = ref(false)
+const dateTable = ref(false)
 const searchValue = ref<string | number | null>(null)
 const searchLabel = ref('')
 const panelTriggerCount = ref(0)
 const panelReason = ref('')
 const panelKeyword = ref('')
 const panelResultSize = ref(0)
+const selectValue = ref('')
+const selectError = ref(false)
+const selectTable = ref(false)
 const numberValue = ref<number | null>(null)
 const roundValue = ref<number | null>(null)
 const fixedValue = ref<number | null>(null)
@@ -225,6 +307,12 @@ const handleOpenDialog = (payload: {
   panelKeyword.value = payload.keyword
   panelResultSize.value = payload.results?.length ?? 0
 }
+
+const selectOptions = [
+  { label: 'Shanghai', value: 'shanghai' },
+  { label: 'Beijing', value: 'beijing' },
+  { label: 'Shenzhen', value: 'shenzhen' }
+]
 </script>
 
 <style scoped>

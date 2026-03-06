@@ -30,3 +30,12 @@ export type {
   InputNumberEmits,
   InputNumberProps
 } from './input-number'
+export { FlDatePicker } from './date-picker'
+export type {
+  DatePickerEmits,
+  DatePickerProps,
+  FlDatePickerEmits,
+  FlDatePickerProps
+} from './date-picker'
+export { FlSelect } from './select'
+export type { FlSelectEmits, FlSelectProps, SelectEmits, SelectProps } from './select'

@@ -1,6 +1,15 @@
 import type { App, Plugin } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import FalconUI, { FlButton, FlDialog, FlInput, FlInputNumber, FlInputSearch, install } from '..'
+import FalconUI, {
+  FlButton,
+  FlDatePicker,
+  FlDialog,
+  FlInput,
+  FlInputNumber,
+  FlInputSearch,
+  FlSelect,
+  install
+} from '..'
 
 const createAppMock = (): App => {
   const app = {
@@ -27,9 +36,11 @@ describe('@falcon-ui/falcon-ui install', () => {
 
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
     expect(app.component).toHaveBeenCalledWith('FlDialog', FlDialog)
+    expect(app.component).toHaveBeenCalledWith('FlDatePicker', FlDatePicker)
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
+    expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
   })
 
   it('registers all components via default plugin', () => {
@@ -39,8 +50,10 @@ describe('@falcon-ui/falcon-ui install', () => {
 
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
     expect(app.component).toHaveBeenCalledWith('FlDialog', FlDialog)
+    expect(app.component).toHaveBeenCalledWith('FlDatePicker', FlDatePicker)
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
+    expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
   })
 })

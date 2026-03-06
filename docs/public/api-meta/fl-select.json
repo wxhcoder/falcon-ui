@@ -1,0 +1,837 @@
+{
+  "component": "fl-select",
+  "description": "",
+  "events": [],
+  "exposes": [
+    {
+      "description": "",
+      "name": "blur",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "calculatorRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "collapseItemRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "collapseTagList",
+      "type": "{ index: number; value: EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>; currentLabel: string | number | boolean; isDisabled?: boolean | undefined; }[]"
+    },
+    {
+      "description": "",
+      "name": "collapseTagSize",
+      "type": "\"default\" | \"small\""
+    },
+    {
+      "description": "",
+      "name": "collapseTagStyle",
+      "type": "{ maxWidth: string; }"
+    },
+    {
+      "description": "",
+      "name": "contentId",
+      "type": "string"
+    },
+    {
+      "description": "",
+      "name": "currentPlaceholder",
+      "type": "string"
+    },
+    {
+      "description": "",
+      "name": "debouncedOnInputChange",
+      "type": "PromisifyFn<() => void>"
+    },
+    {
+      "description": "",
+      "name": "deletePrevTag",
+      "type": "(e: KeyboardEvent) => void"
+    },
+    {
+      "description": "",
+      "name": "deleteSelected",
+      "type": "(event: Event) => void"
+    },
+    {
+      "description": "",
+      "name": "deleteTag",
+      "type": "(event: MouseEvent, tag: OptionBasic) => void"
+    },
+    {
+      "description": "",
+      "name": "dropdownMenuVisible",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "emptyText",
+      "type": "string | null"
+    },
+    {
+      "description": "",
+      "name": "expanded",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "filteredOptionsCount",
+      "type": "number"
+    },
+    {
+      "description": "",
+      "name": "focus",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "getDisabled",
+      "type": "(option: Option) => any"
+    },
+    {
+      "description": "",
+      "name": "getLabel",
+      "type": "(option: Option) => any"
+    },
+    {
+      "description": "",
+      "name": "getOption",
+      "type": "(value: EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>) => { index: number; value: EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>; currentLabel: any; } | { index: number; value: EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>; currentLabel: string | number | boolean; readonly isDisabled: boolean; }"
+    },
+    {
+      "description": "",
+      "name": "getOptionProps",
+      "type": "(option: Record<string, any>) => { label: any; value: any; disabled: any; }"
+    },
+    {
+      "description": "",
+      "name": "getOptions",
+      "type": "(option: Option) => any"
+    },
+    {
+      "description": "",
+      "name": "getValue",
+      "type": "(option: Option) => any"
+    },
+    {
+      "description": "",
+      "name": "getValueKey",
+      "type": "(item: OptionPublicInstance | OptionBasic) => any"
+    },
+    {
+      "description": "",
+      "name": "handleClearClick",
+      "type": "(event: Event) => void"
+    },
+    {
+      "description": "",
+      "name": "handleClickOutside",
+      "type": "(event: Event) => void"
+    },
+    {
+      "description": "",
+      "name": "handleCompositionEnd",
+      "type": "(event: CompositionEvent) => void"
+    },
+    {
+      "description": "",
+      "name": "handleCompositionStart",
+      "type": "(event: CompositionEvent) => void"
+    },
+    {
+      "description": "",
+      "name": "handleCompositionUpdate",
+      "type": "(event: CompositionEvent) => void"
+    },
+    {
+      "description": "",
+      "name": "handleEsc",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "handleKeydown",
+      "type": "(e: KeyboardEvent) => void"
+    },
+    {
+      "description": "",
+      "name": "handleMenuEnter",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "handleOptionSelect",
+      "type": "(option: OptionPublicInstance) => void"
+    },
+    {
+      "description": "",
+      "name": "hasModelValue",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "hoverOption",
+      "type": "any"
+    },
+    {
+      "description": "",
+      "name": "iconComponent",
+      "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>))[], unknown, unknown> | undefined"
+    },
+    {
+      "description": "",
+      "name": "iconReverse",
+      "type": "string"
+    },
+    {
+      "description": "",
+      "name": "inputId",
+      "type": "string | undefined"
+    },
+    {
+      "description": "",
+      "name": "inputRef",
+      "type": "HTMLInputElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "inputStyle",
+      "type": "{ minWidth: string; }"
+    },
+    {
+      "description": "",
+      "name": "isFocused",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "menuRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "mouseEnterEventName",
+      "type": "\"mouseenter\" | null"
+    },
+    {
+      "description": "",
+      "name": "navigateOptions",
+      "type": "(direction: \"prev\" | \"next\") => void"
+    },
+    {
+      "description": "",
+      "name": "needStatusIcon",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "nsInput",
+      "type": "{ namespace: ComputedRef<string>; b: (blockSuffix?: string | undefined) => string; e: (element?: string | undefined) => string; m: (modifier?: string | undefined) => string; be: (blockSuffix?: string | undefined, element?: string | undefined) => string; em: (element?: string | undefined, modifier?: string | undefined) => string; bm: (blockSuffix?: string | undefined, modifier?: string | undefined) => string; bem: (blockSuffix?: string | undefined, element?: string | undefined, modifier?: string | undefined) => string; is: { (name: string, state: boolean | undefined): string; (name: string): string; }; cssVar: (object: Record<string, string>) => Record<string, string>; cssVarName: (name: string) => string; cssVarBlock: (object: Record<string, string>) => Record<string, string>; cssVarBlockName: (name: string) => string; }"
+    },
+    {
+      "description": "",
+      "name": "nsSelect",
+      "type": "{ namespace: ComputedRef<string>; b: (blockSuffix?: string | undefined) => string; e: (element?: string | undefined) => string; m: (modifier?: string | undefined) => string; be: (blockSuffix?: string | undefined, element?: string | undefined) => string; em: (element?: string | undefined, modifier?: string | undefined) => string; bm: (blockSuffix?: string | undefined, modifier?: string | undefined) => string; bem: (blockSuffix?: string | undefined, element?: string | undefined, modifier?: string | undefined) => string; is: { (name: string, state: boolean | undefined): string; (name: string): string; }; cssVar: (object: Record<string, string>) => Record<string, string>; cssVarName: (name: string) => string; cssVarBlock: (object: Record<string, string>) => Record<string, string>; cssVarBlockName: (name: string) => string; }"
+    },
+    {
+      "description": "",
+      "name": "onInput",
+      "type": "(event: Event) => void"
+    },
+    {
+      "description": "",
+      "name": "onOptionCreate",
+      "type": "(vm: OptionPublicInstance) => void"
+    },
+    {
+      "description": "",
+      "name": "onOptionDestroy",
+      "type": "(key: EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>, vm: OptionPublicInstance) => void"
+    },
+    {
+      "description": "",
+      "name": "optionsArray",
+      "type": "OptionPublicInstance[]"
+    },
+    {
+      "description": "",
+      "name": "popperRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "popupScroll",
+      "type": "(data: { scrollTop: number; scrollLeft: number; }) => void"
+    },
+    {
+      "description": "",
+      "name": "prefixRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "scrollbarRef",
+      "type": "ScrollbarInstance | undefined"
+    },
+    {
+      "description": "",
+      "name": "scrollToOption",
+      "type": "(option: OptionPublicInstance | OptionPublicInstance[] | OptionBasic[]) => void"
+    },
+    {
+      "description": "",
+      "name": "selectDisabled",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "selectedLabel",
+      "type": "string | string[]"
+    },
+    {
+      "description": "",
+      "name": "selectionRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "selectOption",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "selectRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "selectSize",
+      "type": "\"\" | \"default\" | \"small\" | \"large\""
+    },
+    {
+      "description": "",
+      "name": "setSelected",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "shouldShowPlaceholder",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "showClearBtn",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "showNewOption",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "showTagList",
+      "type": "{ index: number; value: EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>; currentLabel: string | number | boolean; isDisabled?: boolean | undefined; }[]"
+    },
+    {
+      "description": "",
+      "name": "states",
+      "type": "{ inputValue: string; options: Map<EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>, OptionPublicInstance> & Omit<Map<EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>, OptionPublicInstance>, keyof Map<any, any>>; cachedOptions: Map<EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>, OptionPublicInstance> & Omit<Map<EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>, OptionPublicInstance>, keyof Map<any, any>>; optionValues: EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>[]; selected: { index: number; value: EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>; currentLabel: string | number | boolean; isDisabled?: boolean | undefined; }[]; hoveringIndex: number; inputHovering: boolean; selectionWidth: number; collapseItemWidth: number; previousQuery: string | null; selectedLabel: string; menuVisibleOnFocus: boolean; isBeforeHide: boolean; }"
+    },
+    {
+      "description": "",
+      "name": "suffixRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "tagMenuRef",
+      "type": "HTMLElement | undefined"
+    },
+    {
+      "description": "",
+      "name": "tagStyle",
+      "type": "{ maxWidth: string; }"
+    },
+    {
+      "description": "",
+      "name": "tagTooltipRef",
+      "type": "TooltipInstance | undefined"
+    },
+    {
+      "description": "",
+      "name": "toggleMenu",
+      "type": "(event?: Event | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "tooltipRef",
+      "type": "TooltipInstance | undefined"
+    },
+    {
+      "description": "",
+      "name": "updateOptions",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "updateTagTooltip",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "updateTooltip",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "validateIcon",
+      "type": "\"\" | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>"
+    },
+    {
+      "description": "",
+      "name": "validateState",
+      "type": "\"\" | \"success\" | \"error\" | \"validating\""
+    },
+    {
+      "description": "",
+      "name": "wrapperRef",
+      "type": "HTMLElement | undefined"
+    }
+  ],
+  "props": [
+    {
+      "default": "-",
+      "description": "",
+      "name": "allowCreate",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "appendTo",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | HTMLElement) | (() => EpPropMergeType<(new (...args: any[]) => string | HTMLElement) | (() => string | HTMLElement) | ((new (...args: any[]) => string | HTMLElement) | (() => string | HTMLElement))[], unknown, unknown>) | ((new (...args: any[]) => string | HTMLElement) | (() => EpPropMergeType<(new (...args: any[]) => string | HTMLElement) | (() => string | HTMLElement) | ((new (...args: any[]) => string | HTMLElement) | (() => string | HTMLElement))[], unknown, unknown>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "ariaLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "autocomplete",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "automaticDropdown",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "clearable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "clearIcon",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "collapseTags",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "collapseTagsTooltip",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "debounce",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "defaultFirstOption",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "disabled",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "effect",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string) | (() => PopperEffect) | ((new (...args: any[]) => string) | (() => PopperEffect))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "emptyValues",
+      "required": false,
+      "type": "unknown[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "fallbackPlacements",
+      "required": false,
+      "type": "Placement[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "filterable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "filterMethod",
+      "required": false,
+      "type": "((query: string) => void) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "fitInputWidth",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "id",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否进入错误态。",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否用于表格单元格内选择场景。",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "loading",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "loadingText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "maxCollapseTags",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "modelValue",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | number | boolean | Record<string, any> | EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>[]) | (() => EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown> | EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>[] | null) | ((new (...args: any[]) => string | number | boolean | Record<string, any> | EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>[]) | (() => EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown> | EpPropMergeType<(StringConstructor | BooleanConstructor | ObjectConstructor | NumberConstructor)[], unknown, unknown>[] | null))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "multiple",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "multipleLimit",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "name",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "noDataText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "noMatchText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "offset",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onBlur",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onChange",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onClear",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onFocus",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onPopup-scroll",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onRemove-tag",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onUpdate:modelValue",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onVisible-change",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "options",
+      "required": false,
+      "type": "Record<string, any>[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "persistent",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "placeholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "placement",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => \"auto\" | \"auto-start\" | \"auto-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | \"top-start\" | \"top-end\" | \"bottom-start\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\") | (() => Placement) | ((new (...args: any[]) => \"auto\" | \"auto-start\" | \"auto-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | \"top-start\" | \"top-end\" | \"bottom-start\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\") | (() => Placement))[], Placement, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "popperClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "popperOptions",
+      "required": false,
+      "type": "Partial<Options> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "popperStyle",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | CSSProperties) | (() => string | CSSProperties) | ((new (...args: any[]) => string | CSSProperties) | (() => string | CSSProperties))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "props",
+      "required": false,
+      "type": "Props | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "remote",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "remoteMethod",
+      "required": false,
+      "type": "((query: string) => void) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "remoteShowSuffix",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "reserveKeyword",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showArrow",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "size",
+      "required": false,
+      "type": "EpPropMergeType<StringConstructor, \"\" | \"default\" | \"small\" | \"large\", never> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "suffixIcon",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tabindex",
+      "required": false,
+      "type": "EpPropMergeType<(StringConstructor | NumberConstructor)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tagEffect",
+      "required": false,
+      "type": "EpPropMergeType<StringConstructor, \"plain\" | \"dark\" | \"light\", unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tagType",
+      "required": false,
+      "type": "EpPropMergeType<StringConstructor, \"primary\" | \"success\" | \"warning\" | \"info\" | \"danger\", unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "teleported",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "validateEvent",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "valueKey",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "valueOnClear",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | number | boolean | Function) | (() => string | number | boolean | Function | null) | ((new (...args: any[]) => string | number | boolean | Function) | (() => string | number | boolean | Function | null))[], unknown, unknown> | undefined"
+    }
+  ],
+  "slots": []
+}

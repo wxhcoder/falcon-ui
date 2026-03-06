@@ -38,7 +38,9 @@ export default defineConfig({
             { text: '总览', link: '/components/index' },
             { text: 'FlButton', link: '/components/button' },
             { text: 'FlDialog', link: '/components/dialog' },
+            { text: 'FlDatePicker', link: '/components/date-picker' },
             { text: 'FlInput', link: '/components/input' },
+            { text: 'FlSelect', link: '/components/select' },
             { text: 'FlInputSearch', link: '/components/input-search' },
             { text: 'FlInputNumber', link: '/components/input-number' }
           ]
