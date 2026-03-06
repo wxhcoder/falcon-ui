@@ -129,7 +129,9 @@ export const flInputSearchEmits = {
   'selection-commit': (payload: FlInputSearchSelectionCommitPayload) =>
     typeof payload.label === 'string' &&
     payload.source === 'enter' &&
-    (payload.value === null || typeof payload.value === 'string' || typeof payload.value === 'number'),
+    (payload.value === null ||
+      typeof payload.value === 'string' ||
+      typeof payload.value === 'number'),
   /**
    * 回车检索失败事件。
    */

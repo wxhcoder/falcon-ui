@@ -17,9 +17,15 @@
         </thead>
         <tbody>
           <tr v-for="item in meta.props" :key="item.name">
-            <td><code>{{ item.name }}</code></td>
-            <td><code>{{ item.type }}</code></td>
-            <td><code>{{ item.default }}</code></td>
+            <td>
+              <code>{{ item.name }}</code>
+            </td>
+            <td>
+              <code>{{ item.type }}</code>
+            </td>
+            <td>
+              <code>{{ item.default }}</code>
+            </td>
             <td>{{ item.required ? '是' : '否' }}</td>
             <td>{{ item.description || '-' }}</td>
           </tr>
@@ -37,9 +43,15 @@
         </thead>
         <tbody>
           <tr v-for="item in meta.events" :key="item.name">
-            <td><code>{{ item.name }}</code></td>
-            <td><code>{{ item.signature }}</code></td>
-            <td><code>{{ item.type }}</code></td>
+            <td>
+              <code>{{ item.name }}</code>
+            </td>
+            <td>
+              <code>{{ item.signature }}</code>
+            </td>
+            <td>
+              <code>{{ item.type }}</code>
+            </td>
             <td>{{ item.description || '-' }}</td>
           </tr>
         </tbody>
@@ -55,8 +67,12 @@
         </thead>
         <tbody>
           <tr v-for="item in meta.slots" :key="item.name">
-            <td><code>{{ item.name }}</code></td>
-            <td><code>{{ item.type }}</code></td>
+            <td>
+              <code>{{ item.name }}</code>
+            </td>
+            <td>
+              <code>{{ item.type }}</code>
+            </td>
             <td>{{ item.description || '-' }}</td>
           </tr>
         </tbody>
@@ -75,8 +91,12 @@
             <td colspan="3">-</td>
           </tr>
           <tr v-for="item in meta.exposes" :key="item.name">
-            <td><code>{{ item.name }}</code></td>
-            <td><code>{{ item.type }}</code></td>
+            <td>
+              <code>{{ item.name }}</code>
+            </td>
+            <td>
+              <code>{{ item.type }}</code>
+            </td>
             <td>{{ item.description || '-' }}</td>
           </tr>
         </tbody>

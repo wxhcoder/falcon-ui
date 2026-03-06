@@ -11,7 +11,9 @@
 
     <div class="demo-result">openDialog 次数：{{ panelCount }}</div>
     <div class="demo-result">最近原因：{{ panelReason || '(none)' }}</div>
-    <div class="demo-result">关键词 / 结果数：{{ panelKeyword || '(empty)' }} / {{ panelSize }}</div>
+    <div class="demo-result">
+      关键词 / 结果数：{{ panelKeyword || '(empty)' }} / {{ panelSize }}
+    </div>
     <div class="demo-result">当前回填：{{ value ?? '(null)' }} / {{ label || '(empty)' }}</div>
     <div class="demo-result">useDialog 确认次数：{{ confirmCount }}</div>
     <div class="demo-result">useDialog 最近拒绝动作：{{ latestRejectedAction || '(none)' }}</div>

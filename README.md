@@ -30,6 +30,27 @@ Commit quality gate:
 - `pnpm precommit:format` format staged files with `lint-staged`
 - `pnpm precommit:quality` run `pnpm lint && pnpm test`
 
+## Git Hook Troubleshooting (Windows)
+
+If commit fails with errors similar to:
+
+- `env.exe: ... CreateFileMapping ... Win32 error 5`
+- `bash.exe: ... couldn't create signal pipe, Win32 error 5`
+
+This is usually a Git for Windows MSYS runtime permission issue, not a hook script bug.
+
+Run diagnosis:
+
+- `pnpm doctor:git-hook-env`
+
+If diagnosis fails:
+
+1. Use the same privilege level for terminal and IDE (do not mix admin/non-admin).
+2. Reinstall Git for Windows to `C:\\Program Files\\Git` and update PATH.
+3. Add these binaries to your security software allowlist:
+4. `Git\\usr\\bin\\env.exe`, `Git\\usr\\bin\\bash.exe`, `Git\\usr\\bin\\msys-2.0.dll`.
+5. Restart terminal/IDE and rerun `pnpm doctor:git-hook-env`.
+
 ## Play Shell
 
 Use the play shell app for local preview:

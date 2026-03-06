@@ -5,8 +5,9 @@
 <script lang="ts" setup>
 import { ElSelect } from 'element-plus'
 import type { ComponentInstance } from 'vue'
-import { computed, h, useAttrs, useSlots } from 'vue'
+import { computed, h, useAttrs, useSlots, watch } from 'vue'
 import { useMergedAttrs, useMergedExpose } from '@falcon-ui/hooks'
+import { invokeListener } from '@falcon-ui/utils'
 import { flSelectEmits, flSelectProps } from './select'
 
 defineOptions({
@@ -36,11 +37,27 @@ const resolveClearable = (): boolean => {
   return true
 }
 
+const isMultipleMode = () => rawAttrs.multiple === true || rawAttrs.multiple === ''
+
+const clearModelValue = () => {
+  invokeListener(rawAttrs['onUpdate:modelValue'], isMultipleMode() ? [] : undefined)
+}
+
 const mergedSelectAttrs = computed(() => ({
   ...mergedAttrs.value,
   clearable: resolveClearable(),
   class: [mergedAttrs.value.class, { 'is-error': props.isError, 'is-table': props.isTable }]
 }))
+
+watch(
+  () => props.isError,
+  (isError, previousIsError) => {
+    if (isError && previousIsError !== true) {
+      clearModelValue()
+    }
+  },
+  { immediate: true }
+)
 
 defineExpose({} as ComponentInstance<typeof ElSelect>)
 </script>

@@ -11,4 +11,3 @@ export type {
   FlDatePickerEmits,
   FlDatePickerProps
 } from './src/date-picker'
-

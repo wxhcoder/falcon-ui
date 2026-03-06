@@ -7,11 +7,7 @@
     </div>
 
     <FlSelect v-model="value" :is-error="isError" placeholder="请选择审批状态">
-      <ElOption
-        v-for="item in options"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value" />
+      <ElOption v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
     </FlSelect>
 
     <div class="demo-result">错误状态：{{ isError ? '开启' : '关闭' }}</div>

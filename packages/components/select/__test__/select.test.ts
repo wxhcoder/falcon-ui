@@ -67,6 +67,61 @@ describe('FlSelect', () => {
     expect(select.classes()).toContain('is-table')
   })
 
+  it('clears model value immediately when isError is true', () => {
+    const onUpdateModelValue = vi.fn()
+
+    mount(FlSelect, {
+      attrs: {
+        'onUpdate:modelValue': onUpdateModelValue
+      },
+      props: {
+        isError: true,
+        modelValue: 'A'
+      }
+    })
+
+    expect(onUpdateModelValue).toHaveBeenCalledTimes(1)
+    expect(onUpdateModelValue).toHaveBeenCalledWith(undefined)
+  })
+
+  it('clears model value when isError switches to true', async () => {
+    const onUpdateModelValue = vi.fn()
+    const wrapper = mount(FlSelect, {
+      attrs: {
+        'onUpdate:modelValue': onUpdateModelValue
+      },
+      props: {
+        isError: false,
+        modelValue: 'A'
+      }
+    })
+
+    expect(onUpdateModelValue).not.toHaveBeenCalled()
+
+    await wrapper.setProps({ isError: true })
+
+    expect(onUpdateModelValue).toHaveBeenCalledTimes(1)
+    expect(onUpdateModelValue).toHaveBeenCalledWith(undefined)
+  })
+
+  it('uses empty array as clear payload in multiple mode', () => {
+    const onUpdateModelValue = vi.fn()
+
+    mount(FlSelect, {
+      attrs: {
+        multiple: true,
+        'onUpdate:modelValue': onUpdateModelValue
+      },
+      props: {
+        isError: true,
+        modelValue: ['A']
+      }
+    })
+
+    expect(onUpdateModelValue).toHaveBeenCalledTimes(1)
+    expect(onUpdateModelValue).toHaveBeenCalledWith([])
+  })
+
   it('keeps original change and update:modelValue listeners working', () => {
     const onChange = vi.fn()
     const onUpdateModelValue = vi.fn()

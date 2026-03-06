@@ -40,9 +40,7 @@ const theme: Theme = {
     }) as Record<string, { default: Component }>
 
     for (const [modulePath, mod] of Object.entries(demoModules)) {
-      const relativePath = modulePath
-        .replace(/^.*\/examples\//, '')
-        .replaceAll('\\', '/')
+      const relativePath = modulePath.replace(/^.*\/examples\//, '').replaceAll('\\', '/')
       const componentName = toDemoComponentName(relativePath)
       app.component(componentName, mod.default)
     }

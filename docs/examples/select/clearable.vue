@@ -1,19 +1,11 @@
 <template>
   <div class="demo-col">
     <FlSelect v-model="defaultClearableValue" placeholder="默认 clearable=true">
-      <ElOption
-        v-for="item in options"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value" />
+      <ElOption v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
     </FlSelect>
 
     <FlSelect v-model="disabledClearableValue" :clearable="false" placeholder="显式关闭 clearable">
-      <ElOption
-        v-for="item in options"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value" />
+      <ElOption v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
     </FlSelect>
 
     <div class="demo-result">

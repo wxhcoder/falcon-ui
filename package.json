@@ -23,6 +23,7 @@
     "docs:preview": "vitepress preview docs",
     "docs:api": "node scripts/docs/generate-api-meta.mjs",
     "docs:check": "pnpm docs:api && pnpm docs:build",
+    "doctor:git-hook-env": "powershell -ExecutionPolicy Bypass -File scripts/doctor-git-hook-env.ps1",
     "prepare": "husky",
     "build": "pnpm build:lib",
     "build:lib": "gulp --gulpfile scripts/gulpfile.mjs build",

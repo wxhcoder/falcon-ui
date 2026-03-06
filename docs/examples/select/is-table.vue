@@ -1,11 +1,16 @@
 <template>
-  <div class="vp-raw">
+  <div class="demo-col">
+    <div class="demo-actions">
+      <span class="demo-label">表格错误态</span>
+      <ElSwitch v-model="isError" />
+    </div>
+
     <ElTable :data="tableData" border style="width: 100%">
       <ElTableColumn label="编号" prop="id" width="90" />
       <ElTableColumn label="商品" prop="name" />
       <ElTableColumn label="状态" width="220">
         <template #default="{ row }">
-          <FlSelect v-model="row.status" is-table placeholder="请选择状态">
+          <FlSelect v-model="row.status" is-table :is-error="isError" placeholder="请选择状态">
             <ElOption
               v-for="item in statusOptions"
               :key="item.value"
@@ -15,6 +20,8 @@
         </template>
       </ElTableColumn>
     </ElTable>
+
+    <div class="demo-result">isError：{{ isError ? '开启' : '关闭' }}</div>
   </div>
 </template>
 
@@ -26,6 +33,8 @@ type RowData = {
   name: string
   status: string
 }
+
+const isError = ref(false)
 
 const tableData = ref<RowData[]>([
   { id: 'SKU-001', name: '机械键盘', status: 'normal' },
@@ -39,3 +48,26 @@ const statusOptions = [
   { label: '下架', value: 'offline' }
 ]
 </script>
+
+<style scoped>
+.demo-col {
+  display: grid;
+  gap: 10px;
+}
+
+.demo-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.demo-label {
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+}
+
+.demo-result {
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+}
+</style>

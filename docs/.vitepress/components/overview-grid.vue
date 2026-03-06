@@ -38,7 +38,9 @@
             :href="withBase(item.link)">
             <div class="falcon-overview-card__header">
               <span class="falcon-overview-card__title">{{ item.title }}</span>
-              <span v-if="item.version" class="falcon-overview-card__version">{{ item.version }}</span>
+              <span v-if="item.version" class="falcon-overview-card__version">{{
+                item.version
+              }}</span>
             </div>
             <div class="falcon-overview-card__preview">
               <img :src="withBase(item.icon)" :alt="`${item.name} 预览图`" loading="lazy" />
@@ -188,7 +190,10 @@ const hasResults = computed(() => filteredGroups.value.length > 0)
   background: var(--vp-c-bg-soft);
   color: inherit;
   text-decoration: none;
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   overflow: hidden;
 }
 

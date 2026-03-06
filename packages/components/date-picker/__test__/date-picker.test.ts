@@ -128,4 +128,30 @@ describe('FlDatePicker', () => {
       expect(onUpdateModelValue).toHaveBeenCalledWith(null)
     }
   })
+
+  it('keeps emitted value as null when selecting during isError state', () => {
+    const onUpdateModelValue = vi.fn()
+    const wrapper = mount(FlDatePicker, {
+      attrs: {
+        'onUpdate:modelValue': onUpdateModelValue
+      },
+      props: {
+        isError: true,
+        modelValue: '2026-03-05'
+      }
+    })
+
+    const elDatePicker = wrapper.findComponent(ElDatePicker)
+    const vnodeProps = (elDatePicker.vm.$.vnode.props ?? {}) as {
+      'onUpdate:modelValue'?: (value: unknown) => void
+    }
+    const innerUpdateModelValue = vnodeProps['onUpdate:modelValue']
+    expect(typeof innerUpdateModelValue).toBe('function')
+
+    innerUpdateModelValue?.('2026-03-10')
+
+    expect(onUpdateModelValue).toHaveBeenCalledTimes(2)
+    expect(onUpdateModelValue).toHaveBeenNthCalledWith(1, null)
+    expect(onUpdateModelValue).toHaveBeenNthCalledWith(2, null)
+  })
 })

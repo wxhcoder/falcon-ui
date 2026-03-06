@@ -7,7 +7,6 @@ import { ElDatePicker } from 'element-plus'
 import type { ComponentInstance } from 'vue'
 import { computed, h, useAttrs, useSlots, watch } from 'vue'
 import { useMergedAttrs, useMergedExpose } from '@falcon-ui/hooks'
-import { invokeListener } from '@falcon-ui/utils'
 import { flDatePickerEmits, flDatePickerProps } from './date-picker'
 
 defineOptions({
@@ -16,7 +15,7 @@ defineOptions({
 })
 
 const props = defineProps(flDatePickerProps)
-defineEmits(flDatePickerEmits)
+const emit = defineEmits(flDatePickerEmits)
 const attrs = useAttrs()
 const slots = useSlots()
 const rawAttrs = attrs as Record<string, unknown>
@@ -28,13 +27,24 @@ const { mergedAttrs } = useMergedAttrs({
   listenerName: 'onChange'
 })
 
+const updateModelValue = (value: unknown) => {
+  if (props.isError) {
+    emit('update:modelValue', null)
+    return
+  }
+
+  emit('update:modelValue', value)
+}
+
 const mergedDatePickerAttrs = computed(() => ({
   ...mergedAttrs.value,
+  modelValue: props.modelValue,
+  'onUpdate:modelValue': updateModelValue,
   class: [mergedAttrs.value.class, { 'is-error': props.isError, 'is-table': props.isTable }]
 }))
 
 const clearModelValue = () => {
-  invokeListener(rawAttrs['onUpdate:modelValue'], null)
+  emit('update:modelValue', null)
 }
 
 watch(
@@ -49,4 +59,3 @@ watch(
 
 defineExpose({} as ComponentInstance<typeof ElDatePicker>)
 </script>
-
