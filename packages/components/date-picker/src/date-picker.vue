@@ -1,0 +1,52 @@
+<template>
+  <component :is="h(ElDatePicker, { ...mergedDatePickerAttrs, ref: changeRef }, slots)" />
+</template>
+
+<script lang="ts" setup>
+import { ElDatePicker } from 'element-plus'
+import type { ComponentInstance } from 'vue'
+import { computed, h, useAttrs, useSlots, watch } from 'vue'
+import { useMergedAttrs, useMergedExpose } from '@falcon-ui/hooks'
+import { invokeListener } from '@falcon-ui/utils'
+import { flDatePickerEmits, flDatePickerProps } from './date-picker'
+
+defineOptions({
+  name: 'FlDatePicker',
+  inheritAttrs: false
+})
+
+const props = defineProps(flDatePickerProps)
+defineEmits(flDatePickerEmits)
+const attrs = useAttrs()
+const slots = useSlots()
+const rawAttrs = attrs as Record<string, unknown>
+
+const { changeRef } = useMergedExpose({})
+const { mergedAttrs } = useMergedAttrs({
+  attrs: rawAttrs,
+  block: 'date-picker',
+  listenerName: 'onChange'
+})
+
+const mergedDatePickerAttrs = computed(() => ({
+  ...mergedAttrs.value,
+  class: [mergedAttrs.value.class, { 'is-error': props.isError, 'is-table': props.isTable }]
+}))
+
+const clearModelValue = () => {
+  invokeListener(rawAttrs['onUpdate:modelValue'], null)
+}
+
+watch(
+  () => props.isError,
+  (isError, previousIsError) => {
+    if (isError && previousIsError !== true) {
+      clearModelValue()
+    }
+  },
+  { immediate: true }
+)
+
+defineExpose({} as ComponentInstance<typeof ElDatePicker>)
+</script>
+

@@ -1,0 +1,78 @@
+@use './mixins/bem.scss' as bem;
+@use './ep-vars.scss' as ep-var;
+@use 'element-plus/theme-chalk/src/mixins/_var.scss' as ep-var-mixin;
+@use 'element-plus/theme-chalk/src/date-picker.scss';
+
+// Keep EP date-picker style as baseline, then place Falcon extension in this block.
+@include bem.b(date-picker) {
+  @include ep-var-mixin.set-component-css-var('input', ep-var.$input);
+  @include ep-var-mixin.set-component-css-var('input-disabled', ep-var.$input-disabled);
+
+  &.el-date-editor .el-input__wrapper,
+  &.el-date-editor.el-input__wrapper,
+  &.el-date-editor--daterange,
+  &.el-date-editor--datetimerange,
+  &.el-date-editor--monthrange,
+  &.el-date-editor--yearrange {
+    border-radius: var(--fl-radius-sm);
+  }
+
+  &.is-error {
+    --el-input-border-color: var(--el-color-danger);
+    --el-input-hover-border-color: var(--el-color-danger);
+    --el-input-focus-border-color: var(--el-color-danger);
+    --el-input-placeholder-color: var(--el-color-danger);
+  }
+
+  &.is-error .el-input__wrapper,
+  &.is-error .el-input__wrapper:hover,
+  &.is-error .el-input__wrapper.is-focus,
+  &.is-error.el-input__wrapper,
+  &.is-error.el-input__wrapper:hover {
+    box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+  }
+
+  &.is-error .el-input__inner::placeholder,
+  &.is-error .el-range-input::placeholder {
+    color: var(--el-color-danger);
+  }
+
+  &.is-table {
+    --el-input-bg-color: transparent;
+    --el-input-border-color: transparent;
+    --el-input-hover-border-color: transparent;
+    --el-input-focus-border-color: transparent;
+    --el-input-padding-horizontal: 0;
+  }
+
+  &.is-table .el-input__wrapper,
+  &.is-table .el-input__wrapper:hover,
+  &.is-table .el-input__wrapper.is-focus,
+  &.is-table.el-input__wrapper,
+  &.is-table.el-input__wrapper:hover {
+    background-color: transparent;
+    box-shadow: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &.is-table .el-input__inner,
+  &.is-table .el-range-input {
+    background-color: transparent;
+  }
+
+  &.is-table.is-error {
+    --el-input-border-color: transparent;
+    --el-input-hover-border-color: transparent;
+    --el-input-focus-border-color: transparent;
+    --el-input-placeholder-color: var(--el-color-danger);
+  }
+
+  &.is-table.is-error .el-input__wrapper,
+  &.is-table.is-error .el-input__wrapper:hover,
+  &.is-table.is-error .el-input__wrapper.is-focus,
+  &.is-table.is-error.el-input__wrapper,
+  &.is-table.is-error.el-input__wrapper:hover {
+    box-shadow: none;
+  }
+}

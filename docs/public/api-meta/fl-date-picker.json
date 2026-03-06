@@ -1,0 +1,345 @@
+{
+  "component": "fl-date-picker",
+  "description": "",
+  "events": [
+    {
+      "description": "",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", ...args: any[]): void",
+      "type": "any[]"
+    }
+  ],
+  "exposes": [],
+  "props": [
+    {
+      "default": "-",
+      "description": "",
+      "name": "ariaLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "arrowControl",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "automaticDropdown",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "cellClassName",
+      "required": false,
+      "type": "Function | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "clearable",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "clearIcon",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "dateFormat",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "defaultTime",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | ((new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "defaultValue",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | ((new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "disabled",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "disabledDate",
+      "required": false,
+      "type": "Function | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "disabledHours",
+      "required": false,
+      "type": "GetDisabledHours | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "disabledMinutes",
+      "required": false,
+      "type": "GetDisabledMinutes | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "disabledSeconds",
+      "required": false,
+      "type": "GetDisabledSeconds | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "editable",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "emptyValues",
+      "required": false,
+      "type": "unknown[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "endPlaceholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "fallbackPlacements",
+      "required": false,
+      "type": "Placement[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "format",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "id",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | ((new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether the component is in error state.",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "isRange",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether the component is used in a table-cell context.",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "modelValue",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | number | string[] | Date | number[] | Date[]) | (() => ModelValueType | null) | ((new (...args: any[]) => string | number | string[] | Date | number[] | Date[]) | (() => ModelValueType | null))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "name",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | ((new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "placeholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "placement",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => \"auto\" | \"auto-start\" | \"auto-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | \"top-start\" | \"top-end\" | \"bottom-start\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\") | (() => Placement) | ((new (...args: any[]) => \"auto\" | \"auto-start\" | \"auto-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | \"top-start\" | \"top-end\" | \"bottom-start\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\") | (() => Placement))[], Placement, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "popperClass",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | (() => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | ((new (...args: any[]) => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | (() => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "popperOptions",
+      "required": false,
+      "type": "Partial<Options> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "popperStyle",
+      "required": false,
+      "type": "StyleValue"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "prefixIcon",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "rangeSeparator",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "readonly",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "shortcuts",
+      "required": false,
+      "type": "unknown[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showConfirm",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showFooter",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showNow",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showWeekNumber",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "size",
+      "required": false,
+      "type": "EpPropMergeType<StringConstructor, \"\" | \"default\" | \"small\" | \"large\", never> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "startPlaceholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tabindex",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | number) | (() => string | number) | ((new (...args: any[]) => string | number) | (() => string | number))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "timeFormat",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "type",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => \"date\" | \"year\" | \"years\" | \"month\" | \"months\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType) | ((new (...args: any[]) => \"date\" | \"year\" | \"years\" | \"month\" | \"months\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType))[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "unlinkPanels",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "validateEvent",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "valueFormat",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "valueOnClear",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | number | boolean | Function) | (() => string | number | boolean | Function | null) | ((new (...args: any[]) => string | number | boolean | Function) | (() => string | number | boolean | Function | null))[], unknown, unknown> | undefined"
+    }
+  ],
+  "slots": []
+}
