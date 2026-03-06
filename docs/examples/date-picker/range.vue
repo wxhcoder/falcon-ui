@@ -22,7 +22,6 @@ const rangeValue = ref<[string, string] | null>(null)
   width: 100%;
   display: grid;
   gap: 10px;
-  max-width: 420px;
 }
 
 .demo-result {

@@ -52,7 +52,6 @@ const mapResult = (item: unknown) => {
   width: 100%;
   display: grid;
   gap: 10px;
-  max-width: 420px;
 }
 
 .demo-result {

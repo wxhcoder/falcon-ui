@@ -16,7 +16,6 @@ const value = ref<string | null>(null)
   width: 100%;
   display: grid;
   gap: 10px;
-  max-width: 320px;
 }
 
 .demo-result {

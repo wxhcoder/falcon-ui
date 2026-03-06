@@ -19,6 +19,5 @@ const largeValue = ref('')
   width: 100%;
   display: grid;
   gap: 10px;
-  max-width: 360px;
 }
 </style>
