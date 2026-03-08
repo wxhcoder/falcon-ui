@@ -1,4 +1,4 @@
-﻿import fs from 'node:fs'
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createChecker } from 'vue-component-meta'
@@ -36,6 +36,10 @@ const targets = [
   {
     id: 'fl-dialog',
     filePath: path.resolve(rootDir, 'packages/components/dialog/src/dialog.vue')
+  },
+  {
+    id: 'fl-table',
+    filePath: path.resolve(rootDir, 'packages/components/table/src/table.vue')
   }
 ]
 
@@ -75,6 +79,38 @@ const customDescriptionOverrides = {
       'custom-input': '输入值变化时触发，携带当前原始值与归一化数值。',
       'strict-error': 'STRICT 模式下当输入精度超限时触发。',
       'update:isError': '内部严格模式错误态变化时触发。'
+    }
+  },
+  'fl-table': {
+    component: {
+      '': '基于 Element Plus ElTable 的二次封装，提供默认样式、多选增强、Proxy 变更劫持与行列拖拽能力。'
+    },
+    props: {
+      data: '表格数据源。',
+      selectionRowClick: '存在 selection 列时，是否支持点击行联动选中。',
+      selectionSingle: '多选模式下是否限制为仅能选中一行。',
+      enableCellProxyIntercept: '是否开启单元格数据写入劫持并触发 cell-change。',
+      cellProxyMaxDepth: 'Proxy 劫持的最大深度。',
+      rowDraggable: '是否开启行拖拽。',
+      columnDraggable: '是否开启列拖拽。',
+      rowDragHandleColumnIndex: '行拖拽控制柄所在列索引。',
+      rowKeyField: '事件回调中用于标识行主键的字段名。'
+    },
+    events: {
+      'selection-row-toggle': '点击行或选择变化导致选中状态切换时触发。',
+      'selection-single-conflict': '单选约束与原生多选行为冲突时触发。',
+      'cell-change': '代理数据检测到单元格字段写入时触发。',
+      'row-drag-start': '开始拖拽行时触发。',
+      'row-drag-end': '结束拖拽行时触发。',
+      'row-order-change': '行顺序发生变化时触发。',
+      'column-drag-start': '开始拖拽列时触发。',
+      'column-drag-end': '结束拖拽列时触发。',
+      'column-order-change': '列顺序发生变化时触发。'
+    },
+    slots: {
+      default: '表格列内容插槽。',
+      append: '表格底部附加内容插槽。',
+      empty: '空状态内容插槽。'
     }
   }
 }

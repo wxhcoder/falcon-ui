@@ -14,7 +14,8 @@
     "./input-search": "./input-search/index.ts",
     "./input-number": "./input-number/index.ts",
     "./date-picker": "./date-picker/index.ts",
-    "./select": "./select/index.ts"
+    "./select": "./select/index.ts",
+    "./table": "./table/index.ts"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

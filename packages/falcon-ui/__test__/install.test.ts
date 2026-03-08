@@ -8,6 +8,7 @@ import FalconUI, {
   FlInputNumber,
   FlInputSearch,
   FlSelect,
+  FlTable,
   install
 } from '..'
 
@@ -41,6 +42,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
+    expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
   })
 
   it('registers all components via default plugin', () => {
@@ -55,5 +57,6 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
+    expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
   })
 })

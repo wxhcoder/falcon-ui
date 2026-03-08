@@ -7,7 +7,8 @@ import {
   FlInput,
   FlInputNumber,
   FlInputSearch,
-  FlSelect
+  FlSelect,
+  FlTable
 } from '..'
 
 type AppMock = App & {
@@ -56,6 +57,7 @@ describe('@falcon-ui/components exports', () => {
     app.use(FlInputSearch)
     app.use(FlInputNumber)
     app.use(FlSelect)
+    app.use(FlTable)
 
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
     expect(app.component).toHaveBeenCalledWith('FlDialog', FlDialog)
@@ -64,5 +66,6 @@ describe('@falcon-ui/components exports', () => {
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
+    expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
   })
 })

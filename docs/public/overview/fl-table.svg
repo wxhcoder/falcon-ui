@@ -1,0 +1,16 @@
+<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="40" y="30" width="240" height="120" rx="12" fill="#FFFFFF" stroke="#DDE3EE" stroke-width="2" />
+  <rect x="40" y="30" width="240" height="30" rx="12" fill="#EAF1FF" />
+  <path d="M40 60H280" stroke="#DDE3EE" stroke-width="2" />
+  <path d="M110 30V150" stroke="#DDE3EE" stroke-width="2" />
+  <path d="M190 30V150" stroke="#DDE3EE" stroke-width="2" />
+  <rect x="50" y="70" width="50" height="12" rx="6" fill="#DCE8FF" />
+  <rect x="120" y="70" width="60" height="12" rx="6" fill="#EAF1FF" />
+  <rect x="200" y="70" width="70" height="12" rx="6" fill="#DCE8FF" />
+  <rect x="50" y="95" width="50" height="12" rx="6" fill="#EAF1FF" />
+  <rect x="120" y="95" width="60" height="12" rx="6" fill="#DCE8FF" />
+  <rect x="200" y="95" width="70" height="12" rx="6" fill="#EAF1FF" />
+  <rect x="50" y="120" width="50" height="12" rx="6" fill="#DCE8FF" />
+  <rect x="120" y="120" width="60" height="12" rx="6" fill="#EAF1FF" />
+  <rect x="200" y="120" width="70" height="12" rx="6" fill="#DCE8FF" />
+</svg>

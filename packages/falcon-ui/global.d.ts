@@ -5,7 +5,8 @@ import type {
   FlInput,
   FlInputNumber,
   FlInputSearch,
-  FlSelect
+  FlSelect,
+  FlTable
 } from '@falcon-ui/components'
 
 declare module 'vue' {
@@ -17,6 +18,7 @@ declare module 'vue' {
     FlInputSearch: typeof FlInputSearch
     FlInputNumber: typeof FlInputNumber
     FlSelect: typeof FlSelect
+    FlTable: typeof FlTable
   }
 }
 

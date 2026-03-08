@@ -1,0 +1,793 @@
+{
+  "component": "fl-table",
+  "description": "基于 Element Plus ElTable 的二次封装，提供默认样式、多选增强、Proxy 变更劫持与行列拖拽能力。",
+  "events": [
+    {
+      "description": "代理数据检测到单元格字段写入时触发。",
+      "name": "cell-change",
+      "signature": "(event: \"cell-change\", payload: FlTableCellChangePayload): void",
+      "type": "[payload: FlTableCellChangePayload]"
+    },
+    {
+      "description": "结束拖拽列时触发。",
+      "name": "column-drag-end",
+      "signature": "(event: \"column-drag-end\", payload: FlTableColumnDragPayload): void",
+      "type": "[payload: FlTableColumnDragPayload]"
+    },
+    {
+      "description": "开始拖拽列时触发。",
+      "name": "column-drag-start",
+      "signature": "(event: \"column-drag-start\", payload: FlTableColumnDragPayload): void",
+      "type": "[payload: FlTableColumnDragPayload]"
+    },
+    {
+      "description": "列顺序发生变化时触发。",
+      "name": "column-order-change",
+      "signature": "(event: \"column-order-change\", payload: FlTableColumnOrderChangePayload): void",
+      "type": "[payload: FlTableColumnOrderChangePayload]"
+    },
+    {
+      "description": "结束拖拽行时触发。",
+      "name": "row-drag-end",
+      "signature": "(event: \"row-drag-end\", payload: FlTableRowDragPayload): void",
+      "type": "[payload: FlTableRowDragPayload]"
+    },
+    {
+      "description": "开始拖拽行时触发。",
+      "name": "row-drag-start",
+      "signature": "(event: \"row-drag-start\", payload: FlTableRowDragPayload): void",
+      "type": "[payload: FlTableRowDragPayload]"
+    },
+    {
+      "description": "行顺序发生变化时触发。",
+      "name": "row-order-change",
+      "signature": "(event: \"row-order-change\", payload: FlTableRowOrderChangePayload): void",
+      "type": "[payload: FlTableRowOrderChangePayload]"
+    },
+    {
+      "description": "点击行或选择变化导致选中状态切换时触发。",
+      "name": "selection-row-toggle",
+      "signature": "(event: \"selection-row-toggle\", payload: FlTableSelectionRowTogglePayload): void",
+      "type": "[payload: FlTableSelectionRowTogglePayload]"
+    },
+    {
+      "description": "单选约束与原生多选行为冲突时触发。",
+      "name": "selection-single-conflict",
+      "signature": "(event: \"selection-single-conflict\", payload: FlTableSelectionSingleConflictPayload): void",
+      "type": "[payload: FlTableSelectionSingleConflictPayload]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "",
+      "name": "bodyWidth",
+      "type": "string"
+    },
+    {
+      "description": "",
+      "name": "clearFilter",
+      "type": "(columnKeys?: string | string[] | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "clearSelection",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "clearSort",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "columns",
+      "type": "TableColumnCtx<any>[]"
+    },
+    {
+      "description": "",
+      "name": "computedEmptyText",
+      "type": "string"
+    },
+    {
+      "description": "",
+      "name": "computedSumText",
+      "type": "string"
+    },
+    {
+      "description": "",
+      "name": "computedTooltipEffect",
+      "type": "string | undefined"
+    },
+    {
+      "description": "",
+      "name": "computedTooltipOptions",
+      "type": "Partial<Pick<UseTooltipProps, \"effect\" | \"popperClass\" | \"popperOptions\" | \"showArrow\" | \"offset\" | \"placement\" | \"appendTo\" | \"enterable\" | \"transition\" | \"showAfter\" | \"hideAfter\">> | undefined"
+    },
+    {
+      "description": "",
+      "name": "context",
+      "type": "Table<any>"
+    },
+    {
+      "description": "",
+      "name": "debouncedUpdateLayout",
+      "type": "_.DebouncedFunc<() => void>"
+    },
+    {
+      "description": "",
+      "name": "doLayout",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "emptyBlockStyle",
+      "type": "{ width: string; height: string; } | undefined"
+    },
+    {
+      "description": "",
+      "name": "getSelectionRows",
+      "type": "() => any[]"
+    },
+    {
+      "description": "",
+      "name": "handleHeaderFooterMousewheel",
+      "type": "(_event: WheelEvent, data: any) => void"
+    },
+    {
+      "description": "",
+      "name": "handleMouseLeave",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "isEmpty",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "isGroup",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "isHidden",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "layout",
+      "type": "TableLayout<any>"
+    },
+    {
+      "description": "",
+      "name": "ns",
+      "type": "{ namespace: ComputedRef<string>; b: (blockSuffix?: string | undefined) => string; e: (element?: string | undefined) => string; m: (modifier?: string | undefined) => string; be: (blockSuffix?: string | undefined, element?: string | undefined) => string; em: (element?: string | undefined, modifier?: string | undefined) => string; bm: (blockSuffix?: string | undefined, modifier?: string | undefined) => string; bem: (blockSuffix?: string | undefined, element?: string | undefined, modifier?: string | undefined) => string; is: { (name: string, state: boolean | undefined): string; (name: string): string; }; cssVar: (object: Record<string, string>) => Record<string, string>; cssVarName: (name: string) => string; cssVarBlock: (object: Record<string, string>) => Record<string, string>; cssVarBlockName: (name: string) => string; }"
+    },
+    {
+      "description": "",
+      "name": "renderExpanded",
+      "type": "RenderExpanded<any> | null"
+    },
+    {
+      "description": "",
+      "name": "resizeProxyVisible",
+      "type": "boolean"
+    },
+    {
+      "description": "",
+      "name": "resizeState",
+      "type": "{ width: number | null; height: number | null; headerHeight: number | null; }"
+    },
+    {
+      "description": "",
+      "name": "scrollBarRef",
+      "type": "any"
+    },
+    {
+      "description": "",
+      "name": "scrollbarStyle",
+      "type": "{ height: string; maxHeight?: undefined; } | { maxHeight: string; height?: undefined; } | { height?: undefined; maxHeight?: undefined; }"
+    },
+    {
+      "description": "",
+      "name": "scrollbarViewStyle",
+      "type": "{ display: string; verticalAlign: string; }"
+    },
+    {
+      "description": "",
+      "name": "scrollTo",
+      "type": "(options: number | ScrollToOptions, yCoord?: number | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "setCurrentRow",
+      "type": "(row: any) => void"
+    },
+    {
+      "description": "",
+      "name": "setDragVisible",
+      "type": "(visible: boolean) => void"
+    },
+    {
+      "description": "",
+      "name": "setScrollLeft",
+      "type": "(left?: number | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "setScrollTop",
+      "type": "(top?: number | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "sort",
+      "type": "(prop: string, order: string) => void"
+    },
+    {
+      "description": "",
+      "name": "store",
+      "type": "{ mutations: { setData(states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, data: any[]): void; insertColumn(states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, column: TableColumnCtx<any>, parent: TableColumnCtx<any>, updateColumnOrder: () => void): void; updateColumnOrder(states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, column: TableColumnCtx<any>): void; removeColumn(states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, column: TableColumnCtx<any>, parent: TableColumnCtx<any>, updateColumnOrder: () => void): void; sort(states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, options: Sort): void; changeSortCondition(states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, options: Sort): void; filterChange(_states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, options: Filter<any>): void; toggleAllSelection(): void; rowSelectedChanged(_states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, row: any): void; setHoverRow(states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, row: any): void; setCurrentRow(_states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }, row: any): void; }; commit: (name: \"sort\" | \"setCurrentRow\" | \"toggleAllSelection\" | \"setData\" | \"insertColumn\" | \"updateColumnOrder\" | \"removeColumn\" | \"changeSortCondition\" | \"filterChange\" | \"rowSelectedChanged\" | \"setHoverRow\", ...args: any[]) => void; updateTableScrollY: () => void; assertRowKey: () => void; updateColumns: () => void; scheduleLayout: (needUpdateColumns?: boolean | undefined, immediate?: boolean | undefined) => void; isSelected: (row: any) => boolean; clearSelection: () => void; cleanSelection: () => void; getSelectionRows: () => any[]; toggleRowSelection: (row: any, selected?: boolean | undefined, emitChange?: boolean | undefined, ignoreSelectable?: boolean | undefined) => void; _toggleAllSelection: () => void; toggleAllSelection: (() => void) | null; updateAllSelected: () => void; updateFilters: (column: TableColumnCtx<any>, values: string[]) => Record<string, string[]>; updateCurrentRow: (_currentRow: any) => void; updateSort: (column: TableColumnCtx<any> | null, prop: string | null, order: TableSortOrder | null) => void; execFilter: () => void; execSort: () => void; execQuery: (ignore?: { filter: boolean; } | undefined) => void; clearFilter: (columnKeys?: string | string[] | undefined) => void; clearSort: () => void; toggleRowExpansion: (row: any, expanded?: boolean | undefined) => void; setExpandRowKeysAdapter: (val: string[]) => void; setCurrentRowKey: (key: string) => void; toggleRowExpansionAdapter: (row: any, expanded?: boolean | undefined) => void; isRowExpanded: (row: any) => boolean; updateExpandRows: () => void; updateCurrentRowData: () => void; loadOrToggle: (row: any) => void; updateTreeData: (ifChangeExpandRowKeys?: boolean | undefined, ifExpandAll?: boolean | undefined) => void; updateKeyChildren: (key: string, data: any[]) => void; states: { _currentRowKey: Ref<string | null, string | null>; currentRow: Ref<any, any>; expandRowKeys: Ref<string[], string[]>; treeData: Ref<Record<string, TreeData>, Record<string, TreeData>>; indent: Ref<number, number>; lazy: Ref<boolean, boolean>; lazyTreeNodeMap: Ref<Record<string, any[]>, Record<string, any[]>>; lazyColumnIdentifier: Ref<string, string>; childrenColumnName: Ref<string, string>; checkStrictly: Ref<boolean, boolean>; expandRows: Ref<any[], any[]>; defaultExpandAll: Ref<boolean, boolean>; tableSize: Ref<any, any>; rowKey: Ref<string | null, string | null>; data: Ref<any[], any[]>; _data: Ref<any[], any[]>; isComplex: Ref<boolean, boolean>; _columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; originColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; columns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; leafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; fixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; rightFixedLeafColumns: Ref<TableColumnCtx<any>[], TableColumnCtx<any>[]>; updateOrderFns: (() => void)[]; leafColumnsLength: Ref<number, number>; fixedLeafColumnsLength: Ref<number, number>; rightFixedLeafColumnsLength: Ref<number, number>; isAllSelected: Ref<boolean, boolean>; selection: Ref<any[], any[]>; reserveSelection: Ref<boolean, boolean>; selectOnIndeterminate: Ref<boolean, boolean>; selectable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; rowExpandable: Ref<((row: any, index: number) => boolean) | null, ((row: any, index: number) => boolean) | null>; filters: Ref<StoreFilter, StoreFilter>; filteredData: Ref<any[] | null, any[] | null>; sortingColumn: Ref<TableColumnCtx<any> | null, TableColumnCtx<any> | null>; sortProp: Ref<string | null, string | null>; sortOrder: Ref<string | number | null, string | number | null>; hoverRow: Ref<any, any>; }; ns: { namespace: ComputedRef<string>; b: (blockSuffix?: string | undefined) => string; e: (element?: string | undefined) => string; m: (modifier?: string | undefined) => string; be: (blockSuffix?: string | undefined, element?: string | undefined) => string; em: (element?: string | undefined, modifier?: string | undefined) => string; bm: (blockSuffix?: string | undefined, modifier?: string | undefined) => string; bem: (blockSuffix?: string | undefined, element?: string | undefined, modifier?: string | undefined) => string; is: { (name: string, state: boolean | undefined): string; (name: string): string; }; cssVar: (object: Record<string, string>) => Record<string, string>; cssVarName: (name: string) => string; cssVarBlock: (object: Record<string, string>) => Record<string, string>; cssVarBlockName: (name: string) => string; }; t: Translator; }"
+    },
+    {
+      "description": "",
+      "name": "t",
+      "type": "Translator"
+    },
+    {
+      "description": "",
+      "name": "tableBodyStyles",
+      "type": "{ width: string; }"
+    },
+    {
+      "description": "",
+      "name": "tableId",
+      "type": "string"
+    },
+    {
+      "description": "",
+      "name": "tableSize",
+      "type": "\"\" | \"default\" | \"small\" | \"large\""
+    },
+    {
+      "description": "",
+      "name": "toggleAllSelection",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "toggleRowExpansion",
+      "type": "(row: any, expanded?: boolean | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "toggleRowSelection",
+      "type": "(row: any, selected?: boolean | undefined, ignoreSelectable?: boolean | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "updateKeyChildren",
+      "type": "(key: string, data: any[]) => void"
+    }
+  ],
+  "props": [
+    {
+      "default": "-",
+      "description": "",
+      "name": "allowDragLastColumn",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "appendFilterPanelTo",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "border",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "cellClassName",
+      "required": false,
+      "type": "CellCls<any> | undefined"
+    },
+    {
+      "default": "4",
+      "description": "Maximum proxy depth for nested row fields.",
+      "name": "cellProxyMaxDepth",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "cellStyle",
+      "required": false,
+      "type": "CellStyle<any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "className",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Enable column drag sorting.",
+      "name": "columnDraggable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "currentRowKey",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "[]",
+      "description": "Bound data source. Falls through to ElTable `data`.",
+      "name": "data",
+      "required": false,
+      "type": "(FlTableRowData[] & any[]) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "defaultExpandAll",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "defaultSort",
+      "required": false,
+      "type": "Sort | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "emptyText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Enable proxy intercept for row field assignments.",
+      "name": "enableCellProxyIntercept",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "expandRowKeys",
+      "required": false,
+      "type": "string[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "fit",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "flexible",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "headerCellClassName",
+      "required": false,
+      "type": "CellCls<any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "headerCellStyle",
+      "required": false,
+      "type": "CellStyle<any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "headerRowClassName",
+      "required": false,
+      "type": "ColumnCls<any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "headerRowStyle",
+      "required": false,
+      "type": "ColumnStyle<any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "height",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "highlightCurrentRow",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "indent",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "lazy",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "load",
+      "required": false,
+      "type": "((row: any, treeNode: TreeNode, resolve: (data: any[]) => void) => void) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "maxHeight",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "nativeScrollbar",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onCell-click",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onCell-contextmenu",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onCell-dblclick",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onCell-mouse-enter",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onCell-mouse-leave",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onCurrent-change",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onExpand-change",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onFilter-change",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onHeader-click",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onHeader-contextmenu",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onHeader-dragend",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onRow-click",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onRow-contextmenu",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onRow-dblclick",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onScroll",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onSelect",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onSelect-all",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onSelection-change",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "onSort-change",
+      "required": false,
+      "type": "((...args: any[]) => any) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "preserveExpandedContent",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "rowClassName",
+      "required": false,
+      "type": "ColumnCls<any> | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Enable row drag sorting.",
+      "name": "rowDraggable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "0",
+      "description": "Which column index should act as row drag handle.",
+      "name": "rowDragHandleColumnIndex",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "rowExpandable",
+      "required": false,
+      "type": "((row: any, index: number) => boolean) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "rowKey",
+      "required": false,
+      "type": "string | ((row: any) => string) | undefined"
+    },
+    {
+      "default": "'id'",
+      "description": "Field name used as row key in emitted payload.",
+      "name": "rowKeyField",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "rowStyle",
+      "required": false,
+      "type": "ColumnStyle<any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "scrollbarAlwaysOn",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "scrollbarTabindex",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Enable row click to toggle selection when selection column exists.",
+      "name": "selectionRowClick",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Restrict selection to one row in selection-table mode.",
+      "name": "selectionSingle",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "selectOnIndeterminate",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showHeader",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showOverflowTooltip",
+      "required": false,
+      "type": "boolean | Partial<Pick<UseTooltipProps, \"effect\" | \"popperClass\" | \"popperOptions\" | \"showArrow\" | \"offset\" | \"placement\" | \"appendTo\" | \"enterable\" | \"transition\" | \"showAfter\" | \"hideAfter\">> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "showSummary",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "size",
+      "required": false,
+      "type": "EpPropMergeType<StringConstructor, \"\" | \"default\" | \"small\" | \"large\", never> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "spanMethod",
+      "required": false,
+      "type": "((data: { row: any; rowIndex: number; column: TableColumnCtx<any>; columnIndex: number; }) => number[] | { rowspan: number; colspan: number; } | undefined) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "stripe",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "summaryMethod",
+      "required": false,
+      "type": "SummaryMethod<any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "sumText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tableLayout",
+      "required": false,
+      "type": "\"fixed\" | \"auto\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tooltipEffect",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tooltipFormatter",
+      "required": false,
+      "type": "TableOverflowTooltipFormatter<any> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "tooltipOptions",
+      "required": false,
+      "type": "Partial<Pick<UseTooltipProps, \"effect\" | \"popperClass\" | \"popperOptions\" | \"showArrow\" | \"offset\" | \"placement\" | \"appendTo\" | \"enterable\" | \"transition\" | \"showAfter\" | \"hideAfter\">> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "treeProps",
+      "required": false,
+      "type": "TreeProps | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "width",
+      "required": false,
+      "type": "string | number | undefined"
+    }
+  ],
+  "slots": []
+}

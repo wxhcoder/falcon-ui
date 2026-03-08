@@ -6,7 +6,8 @@ import {
   FlInput,
   FlInputNumber,
   FlInputSearch,
-  FlSelect
+  FlSelect,
+  FlTable
 } from '@falcon-ui/components'
 
 export * from '@falcon-ui/components'
@@ -21,7 +22,8 @@ const components = [
   FlInput,
   FlInputSearch,
   FlInputNumber,
-  FlSelect
+  FlSelect,
+  FlTable
 ] as const
 
 export const install = (app: App) => {

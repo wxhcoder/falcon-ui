@@ -71,6 +71,15 @@ export const overviewComponents: readonly OverviewItem[] = [
     icon: '/overview/fl-input-number.svg'
   },
   {
+    name: 'FlTable',
+    title: 'Table',
+    group: 'interaction',
+    link: '/components/table',
+    description:
+      'Table wrapper with sortable rows/columns, selection enhancement and cell change intercept.',
+    icon: '/overview/fl-table.svg'
+  },
+  {
     name: 'FlDialog',
     title: 'Dialog',
     group: 'feedback',

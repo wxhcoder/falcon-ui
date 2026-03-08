@@ -1,0 +1,39 @@
+@use './mixins/bem.scss' as bem;
+@use 'element-plus/theme-chalk/src/table.scss';
+
+@include bem.b(table) {
+  --el-table-header-bg-color: var(--el-fill-color-lighter);
+
+  .fl-table__header-row > th.el-table__cell {
+    background-color: var(--el-table-header-bg-color);
+  }
+
+  .fl-table__row-drag-cell {
+    position: relative;
+    cursor: grab;
+    padding-left: 24px;
+
+    &::before {
+      content: '⋮⋮';
+      position: absolute;
+      top: 50%;
+      left: 8px;
+      transform: translateY(-50%);
+      color: var(--el-text-color-secondary);
+      font-size: 12px;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+      user-select: none;
+    }
+  }
+
+  .el-table__row:hover .fl-table__row-drag-cell::before {
+    opacity: 1;
+  }
+
+  .sortable-ghost > td {
+    opacity: 0.65;
+  }
+}

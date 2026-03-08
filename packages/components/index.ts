@@ -39,3 +39,18 @@ export type {
 } from './date-picker'
 export { FlSelect } from './select'
 export type { FlSelectEmits, FlSelectProps, SelectEmits, SelectProps } from './select'
+export { FlTable } from './table'
+export type {
+  FlTableCellChangePayload,
+  FlTableColumnDragPayload,
+  FlTableColumnOrderChangePayload,
+  FlTableEmits,
+  FlTableProps,
+  FlTableRowData,
+  FlTableRowDragPayload,
+  FlTableRowOrderChangePayload,
+  FlTableSelectionRowTogglePayload,
+  FlTableSelectionSingleConflictPayload,
+  TableEmits,
+  TableProps
+} from './table'

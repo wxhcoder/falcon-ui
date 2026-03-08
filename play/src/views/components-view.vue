@@ -1,9 +1,9 @@
-﻿<template>
+<template>
   <section class="page">
     <h2 class="page-title">Components</h2>
     <p class="page-desc">
       Element Plus passthrough wrappers: FlButton, FlInput, FlDatePicker, FlSelect, FlInputSearch,
-      FlInputNumber and FlDialog.
+      FlInputNumber, FlTable and FlDialog.
     </p>
     <article class="card demo-card">
       <h3>FlButton</h3>
@@ -200,7 +200,42 @@
         formatted values: {{ formattedValue ?? '(null)' }} / {{ customFormattedValue ?? '(null)' }}
       </p>
     </article>
-
+    <article class="card demo-card">
+      <h3>FlTable</h3>
+      <div class="demo-row">
+        <FlButton @click="tableSelectionSingle = !tableSelectionSingle">
+          Toggle selectionSingle: {{ tableSelectionSingle ? 'on' : 'off' }}
+        </FlButton>
+      </div>
+      <FlTable
+        :data="tableRows"
+        :selection-single="tableSelectionSingle"
+        row-key="id"
+        style="width: 100%"
+        @cell-change="handleTableCellChange"
+        @row-order-change="handleTableRowOrderChange"
+        @column-order-change="handleTableColumnOrderChange">
+        <ElTableColumn type="selection" width="52" />
+        <ElTableColumn prop="id" label="ID" width="72" />
+        <ElTableColumn prop="name" label="Name" min-width="120" />
+        <ElTableColumn prop="score" label="Score" min-width="180">
+          <template #default="{ row }">
+            <FlInputNumber
+              :model-value="row.score"
+              :precision="0"
+              @update:model-value="row.score = $event ?? 0" />
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="profile.nickname" label="Nickname" min-width="220">
+          <template #default="{ row }">
+            <FlInput v-model="row.profile.nickname" />
+          </template>
+        </ElTableColumn>
+      </FlTable>
+      <p class="demo-result">cell-change: {{ tableCellChangeLog }}</p>
+      <p class="demo-result">row-order-change: {{ tableRowOrder || '(none)' }}</p>
+      <p class="demo-result">column-order-change: {{ tableColumnOrder || '(none)' }}</p>
+    </article>
     <article class="card demo-card">
       <h3>FlDialog</h3>
       <div class="demo-row">
@@ -224,7 +259,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
-import { ElIcon, ElOption } from 'element-plus'
+import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
 
 const buttonClicks = ref(0)
 const inputValue = ref('')
@@ -255,6 +290,24 @@ const strictIsError = ref(false)
 const strictErrors = ref(0)
 const formattedValue = ref<number | null>(12345.67)
 const customFormattedValue = ref<number | null>(1200)
+type TableRow = {
+  id: number
+  name: string
+  score: number
+  profile: {
+    nickname: string
+  }
+}
+
+const tableRows = ref<TableRow[]>([
+  { id: 1, name: 'Falcon A', score: 88, profile: { nickname: 'A-01' } },
+  { id: 2, name: 'Falcon B', score: 92, profile: { nickname: 'B-02' } },
+  { id: 3, name: 'Falcon C', score: 77, profile: { nickname: 'C-03' } }
+])
+const tableSelectionSingle = ref(false)
+const tableCellChangeLog = ref('(none)')
+const tableRowOrder = ref('')
+const tableColumnOrder = ref('')
 
 const dialogVisible = ref(false)
 const confirmCount = ref(0)
@@ -308,6 +361,23 @@ const handleOpenDialog = (payload: {
   panelResultSize.value = payload.results?.length ?? 0
 }
 
+const handleTableCellChange = (payload: {
+  rowIndex: number
+  columnKey: string
+  path: string
+  prevValue: unknown
+  nextValue: unknown
+}) => {
+  tableCellChangeLog.value = `[row:${payload.rowIndex}] ${payload.path} (${payload.columnKey}) ${String(payload.prevValue)} -> ${String(payload.nextValue)}`
+}
+
+const handleTableRowOrderChange = (payload: { data: TableRow[] }) => {
+  tableRowOrder.value = payload.data.map((item) => item.id).join(' -> ')
+}
+
+const handleTableColumnOrderChange = (payload: { order: number[] }) => {
+  tableColumnOrder.value = payload.order.join(' -> ')
+}
 const selectOptions = [
   { label: 'Shanghai', value: 'shanghai' },
   { label: 'Beijing', value: 'beijing' },

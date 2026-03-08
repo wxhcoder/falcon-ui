@@ -50,6 +50,9 @@ const entryPoints = {
   'components/select/index': resolve(packagesDir, 'components/select/index.ts'),
   'components/select/src/select': resolve(packagesDir, 'components/select/src/select.ts'),
   'components/select/src/select.vue': resolve(packagesDir, 'components/select/src/select.vue'),
+  'components/table/index': resolve(packagesDir, 'components/table/index.ts'),
+  'components/table/src/table': resolve(packagesDir, 'components/table/src/table.ts'),
+  'components/table/src/table.vue': resolve(packagesDir, 'components/table/src/table.vue'),
   'utils/index': resolve(packagesDir, 'utils/index.ts'),
   'hooks/index': resolve(packagesDir, 'hooks/index.ts'),
   'icons/index': resolve(packagesDir, 'icons/index.ts')

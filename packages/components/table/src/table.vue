@@ -1,0 +1,751 @@
+<template>
+  <component :is="h(ElTable, { ...mergedTableAttrs, ref: setTableRef }, tableSlots)" />
+</template>
+
+<script lang="ts" setup>
+import Sortable from 'sortablejs'
+import type { MoveEvent, SortableEvent } from 'sortablejs'
+import { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
+import type { ComponentInstance, VNode } from 'vue'
+import {
+  Comment,
+  Fragment,
+  Text,
+  cloneVNode,
+  computed,
+  isVNode,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  useAttrs,
+  useSlots,
+  h,
+  watch
+} from 'vue'
+import { useMergedExpose } from '@falcon-ui/hooks'
+import { invokeListener, useNamespace } from '@falcon-ui/utils'
+import type {
+  FlTableCellChangePayload,
+  FlTableColumnDragPayload,
+  FlTableColumnOrderChangePayload,
+  FlTableRowData,
+  FlTableRowDragPayload,
+  FlTableRowOrderChangePayload,
+  FlTableSelectionRowTogglePayload
+} from './table'
+import { flTableEmits, flTableProps } from './table'
+import { createTableProxyDataBuilder } from './proxy-data'
+
+defineOptions({
+  name: 'FlTable',
+  inheritAttrs: false
+})
+
+type CellClassNameScope = {
+  row: FlTableRowData
+  column: unknown
+  rowIndex: number
+  columnIndex: number
+}
+
+const props = defineProps(flTableProps)
+const emit = defineEmits(flTableEmits)
+const attrs = useAttrs()
+const slots = useSlots()
+const ns = useNamespace('table')
+const rawAttrs = attrs as Record<string, unknown>
+
+const tableRef = shallowRef<TableInstance | null>(null)
+const rowSortable = shallowRef<Sortable | null>(null)
+const columnSortable = shallowRef<Sortable | null>(null)
+const columnOrder = ref<number[]>([])
+const visibleColumnCount = ref<number>(0)
+const draggingColumnOldDisplayIndex = ref<number | null>(null)
+const pendingColumnDropDisplayIndex = ref<number | null>(null)
+const columnDragPointerMoveListener = ref<((event: Event) => void) | null>(null)
+const buildProxyData = createTableProxyDataBuilder()
+
+const { changeRef } = useMergedExpose({})
+
+const setTableRef = (instance: unknown) => {
+  tableRef.value = instance as TableInstance | null
+  changeRef(instance)
+}
+
+const flattenSlotNodes = (nodes: unknown): VNode[] => {
+  const flatNodes: VNode[] = []
+  const list = Array.isArray(nodes) ? nodes : []
+
+  const visit = (node: unknown) => {
+    if (!isVNode(node)) {
+      return
+    }
+
+    if (node.type === Comment || node.type === Text) {
+      return
+    }
+
+    if (node.type === Fragment && Array.isArray(node.children)) {
+      for (const child of node.children) {
+        visit(child)
+      }
+      return
+    }
+
+    flatNodes.push(node)
+  }
+
+  for (const node of list) {
+    visit(node)
+  }
+
+  return flatNodes
+}
+
+const createColumnOrder = (count: number): number[] =>
+  Array.from({ length: count }, (_, index) => index)
+
+const resolveColumnOrder = (
+  count: number,
+  currentOrder: number[] = columnOrder.value
+): number[] => {
+  if (
+    count <= 0 ||
+    currentOrder.length !== count ||
+    new Set(currentOrder).size !== count ||
+    currentOrder.some((index) => index < 0 || index >= count)
+  ) {
+    return createColumnOrder(count)
+  }
+
+  return currentOrder
+}
+
+const reorderColumnOrder = (order: number[], oldIndex: number, newIndex: number): number[] => {
+  if (oldIndex === newIndex) {
+    return [...order]
+  }
+
+  const nextOrder = [...order]
+  const [moved] = nextOrder.splice(oldIndex, 1)
+  if (moved === undefined) {
+    return [...order]
+  }
+
+  nextOrder.splice(newIndex, 0, moved)
+  return nextOrder
+}
+
+const tableSlots = computed(() => {
+  const orderSnapshot = columnOrder.value
+  const userDefaultSlot = slots.default
+
+  if (!userDefaultSlot) {
+    return slots
+  }
+
+  return {
+    ...slots,
+    default: (...args: unknown[]) => {
+      const rawNodes = userDefaultSlot(...args)
+      const columnNodes = flattenSlotNodes(rawNodes)
+      if (columnNodes.length === 0) {
+        return rawNodes
+      }
+
+      const activeOrder = resolveColumnOrder(columnNodes.length, orderSnapshot)
+      return activeOrder
+        .map((sourceIndex) => {
+          const node = columnNodes[sourceIndex]
+          if (!node) {
+            return null
+          }
+
+          return cloneVNode(node, {
+            key: node.key ?? `fl-table-column-${sourceIndex}`
+          })
+        })
+        .filter((node): node is VNode => node !== null)
+    }
+  }
+})
+
+const controlledAttrKeys = [
+  'class',
+  'data',
+  'border',
+  'stripe',
+  'highlightCurrentRow',
+  'highlight-current-row',
+  'headerRowClassName',
+  'header-row-class-name',
+  'cellClassName',
+  'cell-class-name',
+  'headerCellClassName',
+  'header-cell-class-name',
+  'onRowClick',
+  'onSelect',
+  'onSelectAll'
+]
+
+const readAttr = <T = unknown,>(...keys: string[]): T | undefined => {
+  for (const key of keys) {
+    if (key in rawAttrs) {
+      return rawAttrs[key] as T
+    }
+  }
+
+  return undefined
+}
+
+const normalizeClass = (value: unknown): string[] => {
+  if (!value) {
+    return []
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(' ')
+      .map((item) => item.trim())
+      .filter(Boolean)
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => normalizeClass(item))
+  }
+
+  if (typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>)
+      .filter(([, enabled]) => Boolean(enabled))
+      .map(([name]) => name)
+  }
+
+  return []
+}
+
+const mergeClass = (...values: unknown[]): string => {
+  const classSet = new Set<string>()
+  for (const item of values.flatMap((value) => normalizeClass(value))) {
+    classSet.add(item)
+  }
+
+  return Array.from(classSet).join(' ')
+}
+
+const resolveBooleanAttr = (defaultValue: boolean, ...keys: string[]): boolean => {
+  const value = readAttr(...keys)
+  if (value === undefined) {
+    return defaultValue
+  }
+
+  if (value === '') {
+    return true
+  }
+
+  if (typeof value === 'boolean') {
+    return value
+  }
+
+  return Boolean(value)
+}
+
+const toNullableIndex = (value: unknown): number | null =>
+  typeof value === 'number' && Number.isInteger(value) ? value : null
+
+const reorderRows = (
+  rows: FlTableRowData[],
+  oldIndex: number,
+  newIndex: number
+): FlTableRowData[] => {
+  if (oldIndex === newIndex) {
+    return [...rows]
+  }
+
+  const next = [...rows]
+  const [moved] = next.splice(oldIndex, 1)
+  if (!moved) {
+    return [...rows]
+  }
+
+  next.splice(newIndex, 0, moved)
+  return next
+}
+
+const getTableElement = (): HTMLElement | null => {
+  const candidate = (tableRef.value as unknown as { $el?: Element | null })?.$el
+  return candidate instanceof HTMLElement ? candidate : null
+}
+
+const hasSelectionColumn = (): boolean => {
+  const tableElement = getTableElement()
+  if (!tableElement) {
+    return false
+  }
+
+  return (
+    tableElement.querySelector('.el-table__header-wrapper th.el-table-column--selection') !== null
+  )
+}
+
+const getSelectionRows = (): FlTableRowData[] => {
+  const rows = tableRef.value?.getSelectionRows?.()
+  return Array.isArray(rows) ? (rows as FlTableRowData[]) : []
+}
+
+const sourceData = computed<FlTableRowData[]>(() => props.data)
+
+const tableData = computed<FlTableRowData[]>(() => {
+  if (!props.enableCellProxyIntercept) {
+    return sourceData.value
+  }
+
+  return buildProxyData({
+    data: sourceData.value,
+    rowKeyField: props.rowKeyField,
+    maxDepth: props.cellProxyMaxDepth,
+    resolveRowIndex: (row) => sourceData.value.indexOf(row),
+    onCellChange: (payload: FlTableCellChangePayload) => {
+      emit('cell-change', payload)
+    }
+  })
+})
+
+const forwardedAttrs = computed(() => {
+  const next = { ...rawAttrs }
+  for (const key of controlledAttrKeys) {
+    delete next[key]
+  }
+
+  return next
+})
+
+const resolveSelectionTogglePayload = (
+  row: FlTableRowData,
+  selectionBefore: FlTableRowData[],
+  selectionAfter: FlTableRowData[],
+  trigger: FlTableSelectionRowTogglePayload['trigger']
+): FlTableSelectionRowTogglePayload => ({
+  row,
+  rowIndex: sourceData.value.indexOf(row),
+  selected: selectionAfter.includes(row),
+  selectionBefore,
+  selectionAfter,
+  trigger
+})
+
+const handleRowClick = (row: FlTableRowData, column: unknown, event: Event) => {
+  if (props.selectionRowClick && hasSelectionColumn() && tableRef.value) {
+    const selectionBefore = getSelectionRows()
+
+    if (props.selectionSingle) {
+      tableRef.value.clearSelection()
+      tableRef.value.toggleRowSelection(row, true)
+    } else {
+      const nextSelected = !selectionBefore.includes(row)
+      tableRef.value.toggleRowSelection(row, nextSelected)
+    }
+
+    const selectionAfter = getSelectionRows()
+    emit(
+      'selection-row-toggle',
+      resolveSelectionTogglePayload(row, selectionBefore, selectionAfter, 'row-click')
+    )
+  }
+
+  invokeListener(readAttr('onRowClick'), row, column, event)
+}
+
+const handleSelect = (selection: FlTableRowData[], row: FlTableRowData) => {
+  if (props.selectionSingle && tableRef.value && selection.length > 1) {
+    tableRef.value.clearSelection()
+    tableRef.value.toggleRowSelection(row, true)
+
+    const nextSelection = getSelectionRows()
+
+    emit('selection-single-conflict', {
+      reason: 'multiple-selected',
+      selection
+    })
+
+    emit(
+      'selection-row-toggle',
+      resolveSelectionTogglePayload(row, selection, nextSelection, 'selection-change')
+    )
+
+    invokeListener(readAttr('onSelect'), nextSelection, row)
+    return
+  }
+
+  invokeListener(readAttr('onSelect'), selection, row)
+}
+
+const handleSelectAll = (selection: FlTableRowData[]) => {
+  if (props.selectionSingle && tableRef.value) {
+    tableRef.value.clearSelection()
+
+    emit('selection-single-conflict', {
+      reason: 'select-all-disabled',
+      selection
+    })
+
+    invokeListener(readAttr('onSelectAll'), [])
+    return
+  }
+
+  invokeListener(readAttr('onSelectAll'), selection)
+}
+
+const resolveHeaderRowClassName = () => {
+  const baseClass = ns.e('header-row')
+  const userClassName = readAttr('headerRowClassName', 'header-row-class-name')
+
+  if (typeof userClassName === 'function') {
+    return (...args: unknown[]) => mergeClass(userClassName(...args), baseClass)
+  }
+
+  return mergeClass(userClassName, baseClass)
+}
+
+const resolveCellClassName = () => {
+  const userCellClassName = readAttr('cellClassName', 'cell-class-name')
+
+  const resolveByScope = (scope: CellClassNameScope) =>
+    mergeClass(
+      typeof userCellClassName === 'function' ? userCellClassName(scope) : userCellClassName,
+      props.rowDraggable &&
+        scope.columnIndex === props.rowDragHandleColumnIndex &&
+        ns.e('row-drag-cell')
+    )
+
+  return (scope: CellClassNameScope) => resolveByScope(scope)
+}
+
+const resolveHeaderCellClassName = () => {
+  const userHeaderCellClassName = readAttr('headerCellClassName', 'header-cell-class-name')
+
+  const resolveByScope = (scope: { columnIndex: number }) =>
+    mergeClass(
+      typeof userHeaderCellClassName === 'function'
+        ? userHeaderCellClassName(scope)
+        : userHeaderCellClassName
+    )
+
+  return (scope: { columnIndex: number }) => resolveByScope(scope)
+}
+
+const syncVisibleColumnCount = (headerRow: HTMLElement) => {
+  const cells = headerRow.querySelectorAll<HTMLElement>('th.el-table__cell')
+  visibleColumnCount.value = cells.length
+}
+
+const destroyRowSortable = () => {
+  rowSortable.value?.destroy()
+  rowSortable.value = null
+}
+
+const destroyColumnSortable = () => {
+  columnSortable.value?.destroy()
+  columnSortable.value = null
+  if (columnDragPointerMoveListener.value) {
+    document.removeEventListener('mousemove', columnDragPointerMoveListener.value)
+    document.removeEventListener('touchmove', columnDragPointerMoveListener.value)
+    columnDragPointerMoveListener.value = null
+  }
+  draggingColumnOldDisplayIndex.value = null
+  pendingColumnDropDisplayIndex.value = null
+}
+
+const readClientXFromEvent = (event: Event): number | null => {
+  if (typeof MouseEvent !== 'undefined' && event instanceof MouseEvent) {
+    return event.clientX
+  }
+
+  if (typeof TouchEvent !== 'undefined' && event instanceof TouchEvent) {
+    const touch = event.touches[0] ?? event.changedTouches[0]
+    return touch ? touch.clientX : null
+  }
+
+  return null
+}
+
+const resolveColumnDropDisplayIndexByClientX = (
+  clientX: number,
+  oldIndex: number | null
+): number | null => {
+  const tableElement = getTableElement()
+  const headerRow = tableElement?.querySelector('.el-table__header-wrapper thead tr')
+  if (!(headerRow instanceof HTMLElement)) {
+    return oldIndex
+  }
+
+  const cells = Array.from(headerRow.querySelectorAll<HTMLElement>('th.el-table__cell'))
+  if (cells.length === 0) {
+    return oldIndex
+  }
+
+  let markerCellIndex = cells.length - 1
+  let markerPlacement: 'before' | 'after' = 'after'
+
+  for (let index = 0; index < cells.length; index += 1) {
+    const rect = cells[index].getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    if (clientX < centerX) {
+      markerCellIndex = index
+      markerPlacement = 'before'
+      break
+    }
+  }
+
+  let nextIndex = markerCellIndex + (markerPlacement === 'after' ? 1 : 0)
+  if (oldIndex !== null && nextIndex > oldIndex) {
+    nextIndex -= 1
+  }
+
+  const maxIndex = cells.length - 1
+  return Math.min(Math.max(nextIndex, 0), maxIndex)
+}
+
+const startColumnDragPointerTracking = (oldIndex: number | null) => {
+  if (columnDragPointerMoveListener.value) {
+    document.removeEventListener('mousemove', columnDragPointerMoveListener.value)
+    document.removeEventListener('touchmove', columnDragPointerMoveListener.value)
+  }
+
+  const listener = (event: Event) => {
+    const clientX = readClientXFromEvent(event)
+    if (clientX === null) {
+      return
+    }
+
+    pendingColumnDropDisplayIndex.value = resolveColumnDropDisplayIndexByClientX(clientX, oldIndex)
+  }
+
+  columnDragPointerMoveListener.value = listener
+  document.addEventListener('mousemove', listener)
+  document.addEventListener('touchmove', listener)
+}
+
+const resolveColumnDropDisplayIndex = (
+  event: MoveEvent,
+  oldIndex: number | null
+): number | null => {
+  const cells = Array.from(event.to.querySelectorAll<HTMLElement>('th.el-table__cell'))
+  if (cells.length === 0) {
+    return oldIndex
+  }
+
+  const relatedIndex = cells.indexOf(event.related)
+  if (relatedIndex < 0) {
+    return oldIndex
+  }
+
+  let nextIndex = relatedIndex + (event.willInsertAfter ? 1 : 0)
+  if (oldIndex !== null && nextIndex > oldIndex) {
+    nextIndex -= 1
+  }
+
+  const maxIndex = cells.length - 1
+  return Math.min(Math.max(nextIndex, 0), maxIndex)
+}
+
+const initRowSortable = () => {
+  destroyRowSortable()
+
+  if (!props.rowDraggable) {
+    return
+  }
+
+  const tableElement = getTableElement()
+  const body = tableElement?.querySelector('.el-table__body-wrapper tbody')
+
+  if (!(body instanceof HTMLElement)) {
+    return
+  }
+
+  rowSortable.value = Sortable.create(body, {
+    animation: 180,
+    draggable: 'tr',
+    handle: `.${ns.e('row-drag-cell')}`,
+    onStart: (event: SortableEvent) => {
+      const oldIndex = toNullableIndex(event.oldIndex)
+      const payload: FlTableRowDragPayload = {
+        oldIndex,
+        newIndex: null,
+        row: oldIndex === null ? null : (sourceData.value[oldIndex] ?? null)
+      }
+
+      emit('row-drag-start', payload)
+    },
+    onEnd: (event: SortableEvent) => {
+      const oldIndex = toNullableIndex(event.oldIndex)
+      const newIndex = toNullableIndex(event.newIndex)
+      const row = oldIndex === null ? null : (sourceData.value[oldIndex] ?? null)
+      const payload: FlTableRowDragPayload = {
+        oldIndex,
+        newIndex,
+        row
+      }
+
+      emit('row-drag-end', payload)
+
+      if (row && oldIndex !== null && newIndex !== null && oldIndex !== newIndex) {
+        const orderPayload: FlTableRowOrderChangePayload = {
+          oldIndex,
+          newIndex,
+          row,
+          data: reorderRows(sourceData.value, oldIndex, newIndex)
+        }
+        emit('row-order-change', orderPayload)
+      }
+    }
+  })
+}
+
+const initColumnSortable = () => {
+  destroyColumnSortable()
+
+  if (!props.columnDraggable) {
+    return
+  }
+
+  const tableElement = getTableElement()
+  const headerRow = tableElement?.querySelector('.el-table__header-wrapper thead tr')
+
+  if (!(headerRow instanceof HTMLElement)) {
+    return
+  }
+
+  syncVisibleColumnCount(headerRow)
+
+  columnSortable.value = Sortable.create(headerRow, {
+    animation: 180,
+    draggable: 'th.el-table__cell',
+    sort: false,
+    onStart: (event: SortableEvent) => {
+      const oldIndex = toNullableIndex(event.oldIndex)
+      draggingColumnOldDisplayIndex.value = oldIndex
+      pendingColumnDropDisplayIndex.value = oldIndex
+      startColumnDragPointerTracking(oldIndex)
+      const count = Math.max(
+        visibleColumnCount.value,
+        columnOrder.value.length,
+        (oldIndex ?? -1) + 1
+      )
+      const activeOrder = resolveColumnOrder(count)
+      const payload: FlTableColumnDragPayload = {
+        oldIndex,
+        newIndex: null,
+        columnIndex: oldIndex === null ? null : (activeOrder[oldIndex] ?? oldIndex)
+      }
+
+      emit('column-drag-start', payload)
+    },
+    onMove: (event: MoveEvent) => {
+      const oldIndex = draggingColumnOldDisplayIndex.value
+      pendingColumnDropDisplayIndex.value = resolveColumnDropDisplayIndex(event, oldIndex)
+    },
+    onEnd: (event: SortableEvent) => {
+      if (columnDragPointerMoveListener.value) {
+        document.removeEventListener('mousemove', columnDragPointerMoveListener.value)
+        document.removeEventListener('touchmove', columnDragPointerMoveListener.value)
+        columnDragPointerMoveListener.value = null
+      }
+
+      const oldIndex = toNullableIndex(event.oldIndex) ?? draggingColumnOldDisplayIndex.value
+      const fallbackNewIndex = toNullableIndex(event.newIndex)
+      const originalEvent = (event as { originalEvent?: Event }).originalEvent
+      const clientX = originalEvent ? readClientXFromEvent(originalEvent) : null
+      const pointerNewIndex =
+        clientX === null
+          ? null
+          : resolveColumnDropDisplayIndexByClientX(clientX, draggingColumnOldDisplayIndex.value)
+      const newIndex = pointerNewIndex ?? pendingColumnDropDisplayIndex.value ?? fallbackNewIndex
+      const maxDragIndex = Math.max(oldIndex ?? -1, newIndex ?? -1)
+      const count = Math.max(visibleColumnCount.value, columnOrder.value.length, maxDragIndex + 1)
+      const activeOrder = resolveColumnOrder(count)
+      const columnIndex = oldIndex === null ? null : (activeOrder[oldIndex] ?? oldIndex)
+      const payload: FlTableColumnDragPayload = {
+        oldIndex,
+        newIndex,
+        columnIndex
+      }
+
+      emit('column-drag-end', payload)
+
+      if (oldIndex !== null && newIndex !== null && oldIndex !== newIndex) {
+        const nextOrder = reorderColumnOrder(activeOrder, oldIndex, newIndex)
+        const movedColumnSourceIndex = activeOrder[oldIndex] ?? oldIndex
+        columnOrder.value = nextOrder
+
+        const orderPayload: FlTableColumnOrderChangePayload = {
+          oldIndex,
+          newIndex,
+          columnIndex: movedColumnSourceIndex,
+          order: nextOrder
+        }
+
+        emit('column-order-change', orderPayload)
+
+        void nextTick(() => {
+          const tableElement = getTableElement()
+          const latestHeaderRow = tableElement?.querySelector('.el-table__header-wrapper thead tr')
+          if (latestHeaderRow instanceof HTMLElement) {
+            syncVisibleColumnCount(latestHeaderRow)
+          }
+        })
+      }
+
+      draggingColumnOldDisplayIndex.value = null
+      pendingColumnDropDisplayIndex.value = null
+    }
+  })
+}
+
+const refreshSortables = async () => {
+  await nextTick()
+  initRowSortable()
+  initColumnSortable()
+}
+
+const mergedTableAttrs = computed(() => ({
+  ...forwardedAttrs.value,
+  class: [ns.b(), readAttr('class')],
+  data: tableData.value,
+  border: resolveBooleanAttr(true, 'border'),
+  stripe: resolveBooleanAttr(true, 'stripe'),
+  highlightCurrentRow: resolveBooleanAttr(true, 'highlightCurrentRow', 'highlight-current-row'),
+  headerRowClassName: resolveHeaderRowClassName(),
+  cellClassName: resolveCellClassName(),
+  headerCellClassName: resolveHeaderCellClassName(),
+  onRowClick: handleRowClick,
+  onSelect: handleSelect,
+  onSelectAll: handleSelectAll
+}))
+
+onMounted(() => {
+  void refreshSortables()
+})
+
+watch(
+  () => [
+    props.rowDraggable,
+    props.columnDraggable,
+    props.rowDragHandleColumnIndex,
+    sourceData.value.length
+  ],
+  () => {
+    void refreshSortables()
+  },
+  { flush: 'post' }
+)
+
+onBeforeUnmount(() => {
+  destroyRowSortable()
+  destroyColumnSortable()
+})
+
+defineExpose({} as ComponentInstance<typeof ElTable>)
+</script>

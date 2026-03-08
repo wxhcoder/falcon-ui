@@ -42,6 +42,11 @@ const buildMeta = async () => {
         import: './esm/components/input-number/index.mjs',
         require: './cjs/components/input-number/index.cjs'
       },
+      './components/table': {
+        types: './types/components/table/index.d.ts',
+        import: './esm/components/table/index.mjs',
+        require: './cjs/components/table/index.cjs'
+      },
       './utils': {
         types: './types/utils/index.d.ts',
         import: './esm/utils/index.mjs',

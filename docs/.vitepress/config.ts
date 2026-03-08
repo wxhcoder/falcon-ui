@@ -1,10 +1,11 @@
-﻿import { fileURLToPath } from 'node:url'
+import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { defineConfig, postcssIsolateStyles } from 'vitepress'
 import { useDemoContainer } from './plugins/demo-container'
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url))
 const docsRoot = path.resolve(currentDir, '..')
+const repoRoot = path.resolve(docsRoot, '..')
 
 export default defineConfig({
   title: 'Falcon UI',
@@ -42,7 +43,8 @@ export default defineConfig({
             { text: 'FlInput', link: '/components/input' },
             { text: 'FlSelect', link: '/components/select' },
             { text: 'FlInputSearch', link: '/components/input-search' },
-            { text: 'FlInputNumber', link: '/components/input-number' }
+            { text: 'FlInputNumber', link: '/components/input-number' },
+            { text: 'FlTable', link: '/components/table' }
           ]
         }
       ]
@@ -68,7 +70,13 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        '@docs': docsRoot
+        '@docs': docsRoot,
+        '@falcon-ui/falcon-ui': path.resolve(repoRoot, 'packages/falcon-ui/index.ts'),
+        '@falcon-ui/components': path.resolve(repoRoot, 'packages/components/index.ts'),
+        '@falcon-ui/hooks': path.resolve(repoRoot, 'packages/hooks/index.ts'),
+        '@falcon-ui/icons': path.resolve(repoRoot, 'packages/icons/index.ts'),
+        '@falcon-ui/utils': path.resolve(repoRoot, 'packages/utils/index.ts'),
+        '@falcon-ui/theme': path.resolve(repoRoot, 'packages/theme')
       }
     }
   }
