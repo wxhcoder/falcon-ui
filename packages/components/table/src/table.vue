@@ -4,7 +4,7 @@
 
 <script lang="ts" setup>
 import Sortable from 'sortablejs'
-import type { MoveEvent, SortableEvent } from 'sortablejs'
+import type { SortableEvent } from 'sortablejs'
 import { ElTable } from 'element-plus'
 import type { TableInstance } from 'element-plus'
 import type { ComponentInstance, VNode } from 'vue'
@@ -51,6 +51,19 @@ type CellClassNameScope = {
   columnIndex: number
 }
 
+type ClientPoint = {
+  x: number
+  y: number
+}
+
+type ColumnDragIndicatorSide = 'left' | 'right'
+
+type ColumnDropState = {
+  dropDisplayIndex: number
+  targetDisplayIndex: number
+  side: ColumnDragIndicatorSide
+}
+
 const props = defineProps(flTableProps)
 const emit = defineEmits(flTableEmits)
 const attrs = useAttrs()
@@ -65,6 +78,9 @@ const columnOrder = ref<number[]>([])
 const visibleColumnCount = ref<number>(0)
 const draggingColumnOldDisplayIndex = ref<number | null>(null)
 const pendingColumnDropDisplayIndex = ref<number | null>(null)
+const columnDragIndicatorDisplayIndex = ref<number | null>(null)
+const columnDragIndicatorSide = ref<ColumnDragIndicatorSide | null>(null)
+const isColumnDragging = ref<boolean>(false)
 const columnDragPointerMoveListener = ref<((event: Event) => void) | null>(null)
 const buildProxyData = createTableProxyDataBuilder()
 
@@ -450,105 +466,167 @@ const destroyColumnSortable = () => {
   columnSortable.value?.destroy()
   columnSortable.value = null
   if (columnDragPointerMoveListener.value) {
+    document.removeEventListener('dragover', columnDragPointerMoveListener.value)
+    document.removeEventListener('pointermove', columnDragPointerMoveListener.value)
     document.removeEventListener('mousemove', columnDragPointerMoveListener.value)
     document.removeEventListener('touchmove', columnDragPointerMoveListener.value)
     columnDragPointerMoveListener.value = null
   }
+  isColumnDragging.value = false
   draggingColumnOldDisplayIndex.value = null
   pendingColumnDropDisplayIndex.value = null
+  columnDragIndicatorDisplayIndex.value = null
+  columnDragIndicatorSide.value = null
+  const tableElement = getTableElement()
+  if (tableElement) {
+    const leftClass = ns.e('column-drag-indicator-left')
+    const rightClass = ns.e('column-drag-indicator-right')
+    tableElement
+      .querySelectorAll<HTMLElement>('th.el-table__cell, td.el-table__cell')
+      .forEach((cell) => {
+        cell.classList.remove(leftClass, rightClass)
+      })
+  }
 }
 
-const readClientXFromEvent = (event: Event): number | null => {
+const readClientPointFromEvent = (event: Event): ClientPoint | null => {
+  const pointEvent = event as { clientX?: unknown; clientY?: unknown }
+  if (typeof pointEvent.clientX === 'number' && typeof pointEvent.clientY === 'number') {
+    return { x: pointEvent.clientX, y: pointEvent.clientY }
+  }
+
   if (typeof MouseEvent !== 'undefined' && event instanceof MouseEvent) {
-    return event.clientX
+    return { x: event.clientX, y: event.clientY }
   }
 
   if (typeof TouchEvent !== 'undefined' && event instanceof TouchEvent) {
     const touch = event.touches[0] ?? event.changedTouches[0]
-    return touch ? touch.clientX : null
+    return touch
+      ? {
+          x: touch.clientX,
+          y: touch.clientY
+        }
+      : null
   }
 
   return null
 }
 
-const resolveColumnDropDisplayIndexByClientX = (
-  clientX: number,
+const updateColumnDragState = (state: ColumnDropState | null) => {
+  const leftClass = ns.e('column-drag-indicator-left')
+  const rightClass = ns.e('column-drag-indicator-right')
+  const tableElement = getTableElement()
+  if (tableElement) {
+    tableElement
+      .querySelectorAll<HTMLElement>('th.el-table__cell, td.el-table__cell')
+      .forEach((cell) => {
+        cell.classList.remove(leftClass, rightClass)
+      })
+  }
+  if (!state) {
+    pendingColumnDropDisplayIndex.value = null
+    columnDragIndicatorDisplayIndex.value = null
+    columnDragIndicatorSide.value = null
+    return
+  }
+  pendingColumnDropDisplayIndex.value = state.dropDisplayIndex
+  columnDragIndicatorDisplayIndex.value = state.targetDisplayIndex
+  columnDragIndicatorSide.value = state.side
+  if (!tableElement) {
+    return
+  }
+  const indicatorClass = state.side === 'left' ? leftClass : rightClass
+  const headerCells = Array.from(
+    tableElement.querySelectorAll<HTMLElement>('.el-table__header-wrapper th.el-table__cell')
+  )
+  const headerCell = headerCells[state.targetDisplayIndex]
+  headerCell?.classList.add(indicatorClass)
+
+  const bodyRows = Array.from(
+    tableElement.querySelectorAll<HTMLElement>('.el-table__body-wrapper tbody tr')
+  )
+  for (const row of bodyRows) {
+    const bodyCells = Array.from(row.querySelectorAll<HTMLElement>('td.el-table__cell'))
+    bodyCells[state.targetDisplayIndex]?.classList.add(indicatorClass)
+  }
+}
+
+const resolveColumnDropStateByClientPoint = (
+  point: ClientPoint,
   oldIndex: number | null
-): number | null => {
+): ColumnDropState | null => {
   const tableElement = getTableElement()
   const headerRow = tableElement?.querySelector('.el-table__header-wrapper thead tr')
   if (!(headerRow instanceof HTMLElement)) {
-    return oldIndex
+    return null
+  }
+
+  const headerRowRect = headerRow.getBoundingClientRect()
+  if (
+    point.x < headerRowRect.left ||
+    point.x > headerRowRect.right ||
+    point.y < headerRowRect.top ||
+    point.y > headerRowRect.bottom
+  ) {
+    return null
   }
 
   const cells = Array.from(headerRow.querySelectorAll<HTMLElement>('th.el-table__cell'))
   if (cells.length === 0) {
-    return oldIndex
+    return null
   }
 
-  let markerCellIndex = cells.length - 1
-  let markerPlacement: 'before' | 'after' = 'after'
-
+  let targetDisplayIndex = cells.length - 1
   for (let index = 0; index < cells.length; index += 1) {
     const rect = cells[index].getBoundingClientRect()
-    const centerX = rect.left + rect.width / 2
-    if (clientX < centerX) {
-      markerCellIndex = index
-      markerPlacement = 'before'
+    if (point.x <= rect.right) {
+      targetDisplayIndex = index
       break
     }
   }
 
-  let nextIndex = markerCellIndex + (markerPlacement === 'after' ? 1 : 0)
-  if (oldIndex !== null && nextIndex > oldIndex) {
-    nextIndex -= 1
+  const targetCellRect = cells[targetDisplayIndex]?.getBoundingClientRect()
+  if (!targetCellRect) {
+    return null
   }
 
+  const targetCenterX = targetCellRect.left + targetCellRect.width / 2
+  const side: ColumnDragIndicatorSide = point.x < targetCenterX ? 'left' : 'right'
+
+  let dropDisplayIndex = targetDisplayIndex + (side === 'right' ? 1 : 0)
+  if (oldIndex !== null && dropDisplayIndex > oldIndex) {
+    dropDisplayIndex -= 1
+  }
   const maxIndex = cells.length - 1
-  return Math.min(Math.max(nextIndex, 0), maxIndex)
+  return {
+    dropDisplayIndex: Math.min(Math.max(dropDisplayIndex, 0), maxIndex),
+    targetDisplayIndex,
+    side
+  }
 }
 
 const startColumnDragPointerTracking = (oldIndex: number | null) => {
   if (columnDragPointerMoveListener.value) {
+    document.removeEventListener('dragover', columnDragPointerMoveListener.value)
+    document.removeEventListener('pointermove', columnDragPointerMoveListener.value)
     document.removeEventListener('mousemove', columnDragPointerMoveListener.value)
     document.removeEventListener('touchmove', columnDragPointerMoveListener.value)
   }
 
   const listener = (event: Event) => {
-    const clientX = readClientXFromEvent(event)
-    if (clientX === null) {
+    const point = readClientPointFromEvent(event)
+    if (!point) {
       return
     }
 
-    pendingColumnDropDisplayIndex.value = resolveColumnDropDisplayIndexByClientX(clientX, oldIndex)
+    updateColumnDragState(resolveColumnDropStateByClientPoint(point, oldIndex))
   }
 
   columnDragPointerMoveListener.value = listener
+  document.addEventListener('dragover', listener)
+  document.addEventListener('pointermove', listener)
   document.addEventListener('mousemove', listener)
   document.addEventListener('touchmove', listener)
-}
-
-const resolveColumnDropDisplayIndex = (
-  event: MoveEvent,
-  oldIndex: number | null
-): number | null => {
-  const cells = Array.from(event.to.querySelectorAll<HTMLElement>('th.el-table__cell'))
-  if (cells.length === 0) {
-    return oldIndex
-  }
-
-  const relatedIndex = cells.indexOf(event.related)
-  if (relatedIndex < 0) {
-    return oldIndex
-  }
-
-  let nextIndex = relatedIndex + (event.willInsertAfter ? 1 : 0)
-  if (oldIndex !== null && nextIndex > oldIndex) {
-    nextIndex -= 1
-  }
-
-  const maxIndex = cells.length - 1
-  return Math.min(Math.max(nextIndex, 0), maxIndex)
 }
 
 const initRowSortable = () => {
@@ -626,8 +704,9 @@ const initColumnSortable = () => {
     sort: false,
     onStart: (event: SortableEvent) => {
       const oldIndex = toNullableIndex(event.oldIndex)
+      isColumnDragging.value = true
       draggingColumnOldDisplayIndex.value = oldIndex
-      pendingColumnDropDisplayIndex.value = oldIndex
+      updateColumnDragState(null)
       startColumnDragPointerTracking(oldIndex)
       const count = Math.max(
         visibleColumnCount.value,
@@ -643,12 +722,10 @@ const initColumnSortable = () => {
 
       emit('column-drag-start', payload)
     },
-    onMove: (event: MoveEvent) => {
-      const oldIndex = draggingColumnOldDisplayIndex.value
-      pendingColumnDropDisplayIndex.value = resolveColumnDropDisplayIndex(event, oldIndex)
-    },
     onEnd: (event: SortableEvent) => {
       if (columnDragPointerMoveListener.value) {
+        document.removeEventListener('dragover', columnDragPointerMoveListener.value)
+        document.removeEventListener('pointermove', columnDragPointerMoveListener.value)
         document.removeEventListener('mousemove', columnDragPointerMoveListener.value)
         document.removeEventListener('touchmove', columnDragPointerMoveListener.value)
         columnDragPointerMoveListener.value = null
@@ -657,12 +734,13 @@ const initColumnSortable = () => {
       const oldIndex = toNullableIndex(event.oldIndex) ?? draggingColumnOldDisplayIndex.value
       const fallbackNewIndex = toNullableIndex(event.newIndex)
       const originalEvent = (event as { originalEvent?: Event }).originalEvent
-      const clientX = originalEvent ? readClientXFromEvent(originalEvent) : null
-      const pointerNewIndex =
-        clientX === null
+      const point = originalEvent ? readClientPointFromEvent(originalEvent) : null
+      const pointerState =
+        point === null
           ? null
-          : resolveColumnDropDisplayIndexByClientX(clientX, draggingColumnOldDisplayIndex.value)
-      const newIndex = pointerNewIndex ?? pendingColumnDropDisplayIndex.value ?? fallbackNewIndex
+          : resolveColumnDropStateByClientPoint(point, draggingColumnOldDisplayIndex.value)
+      const newIndex =
+        pointerState?.dropDisplayIndex ?? pendingColumnDropDisplayIndex.value ?? fallbackNewIndex
       const maxDragIndex = Math.max(oldIndex ?? -1, newIndex ?? -1)
       const count = Math.max(visibleColumnCount.value, columnOrder.value.length, maxDragIndex + 1)
       const activeOrder = resolveColumnOrder(count)
@@ -698,8 +776,9 @@ const initColumnSortable = () => {
         })
       }
 
+      isColumnDragging.value = false
       draggingColumnOldDisplayIndex.value = null
-      pendingColumnDropDisplayIndex.value = null
+      updateColumnDragState(null)
     }
   })
 }

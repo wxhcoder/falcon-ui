@@ -60,6 +60,28 @@ const createRows = (): RowData[] => [
   { id: 3, name: 'C', age: 21, profile: { nickname: 'C-1' } }
 ]
 
+const setElementRect = (
+  element: Element,
+  rect: { left: number; top: number; width: number; height: number }
+) => {
+  const nextRect = {
+    x: rect.left,
+    y: rect.top,
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+    right: rect.left + rect.width,
+    bottom: rect.top + rect.height,
+    toJSON: () => ({})
+  }
+
+  Object.defineProperty(element, 'getBoundingClientRect', {
+    configurable: true,
+    value: () => nextRect
+  })
+}
+
 beforeEach(() => {
   sortableCreate.mockClear()
   vi.stubGlobal('ResizeObserver', ResizeObserverMock)
@@ -305,24 +327,12 @@ describe('FlTable', () => {
 
     const columnOptions = columnCall?.[1] as Record<string, (...args: unknown[]) => unknown>
 
-    const headerRow = columnCall?.[0] as HTMLElement
-    const headerCell0 = Array.from(headerRow.querySelectorAll<HTMLElement>('th.el-table__cell'))[0]
-    expect(headerCell0).toBeDefined()
-    if (!headerCell0) {
-      throw new Error('header cell missing')
-    }
-
     const draggingCell = document.createElement('th')
     columnOptions.onStart?.({ oldIndex: 1 })
-    columnOptions.onMove?.({
-      to: headerRow,
-      related: headerCell0,
-      willInsertAfter: false
-    })
 
     columnOptions.onEnd?.({
       oldIndex: 1,
-      newIndex: 1,
+      newIndex: 0,
       item: draggingCell,
       to: document.createElement('tr')
     })
@@ -399,6 +409,94 @@ describe('FlTable', () => {
       .filter(Boolean)
 
     expect(firstRowCells.slice(0, 3)).toEqual(['18', '1', 'A'])
+  })
+
+  it('applies column drag indicator to header/body by pointer side and clears out-of-range', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+
+    const columnCall = sortableCreate.mock.calls.find(
+      (call) => (call[1] as Record<string, unknown>).draggable === 'th.el-table__cell'
+    )
+    expect(columnCall).toBeDefined()
+
+    const columnOptions = columnCall?.[1] as Record<string, (...args: unknown[]) => unknown>
+    const headerRow = columnCall?.[0] as HTMLElement
+    const headerCells = Array.from(headerRow.querySelectorAll<HTMLElement>('th.el-table__cell'))
+
+    expect(headerCells.length).toBeGreaterThanOrEqual(3)
+    if (headerCells.length < 3) {
+      throw new Error('header cells missing')
+    }
+
+    setElementRect(headerRow, { left: 0, top: 0, width: 300, height: 40 })
+    headerCells.forEach((cell, index) => {
+      setElementRect(cell, { left: index * 100, top: 0, width: 100, height: 40 })
+    })
+
+    const firstRowTds = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    expect(firstRowTds.length).toBeGreaterThanOrEqual(3)
+
+    columnOptions.onStart?.({ oldIndex: 0 })
+    document.dispatchEvent(
+      new MouseEvent('dragover', {
+        clientX: 130,
+        clientY: 20
+      })
+    )
+
+    await nextTick()
+
+    expect(headerCells[1].classList.contains('fl-table__column-drag-indicator-left')).toBe(true)
+    expect(firstRowTds[1]?.classes()).toContain('fl-table__column-drag-indicator-left')
+
+    document.dispatchEvent(
+      new MouseEvent('dragover', {
+        clientX: 170,
+        clientY: 20
+      })
+    )
+
+    await nextTick()
+
+    expect(headerCells[1].classList.contains('fl-table__column-drag-indicator-right')).toBe(true)
+    expect(firstRowTds[1]?.classes()).toContain('fl-table__column-drag-indicator-right')
+
+    document.dispatchEvent(
+      new MouseEvent('dragover', {
+        clientX: 20,
+        clientY: 20
+      })
+    )
+
+    await nextTick()
+
+    expect(headerCells[0].classList.contains('fl-table__column-drag-indicator-left')).toBe(true)
+    expect(firstRowTds[0]?.classes()).toContain('fl-table__column-drag-indicator-left')
+
+    document.dispatchEvent(
+      new MouseEvent('mousemove', {
+        clientX: 320,
+        clientY: 200
+      })
+    )
+
+    await nextTick()
+
+    expect(headerCells[1].classList.contains('fl-table__column-drag-indicator-left')).toBe(false)
+    expect(headerCells[1].classList.contains('fl-table__column-drag-indicator-right')).toBe(false)
+    expect(firstRowTds[1]?.classes()).not.toContain('fl-table__column-drag-indicator-left')
+    expect(firstRowTds[1]?.classes()).not.toContain('fl-table__column-drag-indicator-right')
   })
 
   it('reorders columns when dragged header has no source-index dataset', async () => {

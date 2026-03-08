@@ -123,11 +123,10 @@
   - 鼠标松开后一次性提交列顺序变更。
 - 实现逻辑：
   - 使用 `Sortable` 绑定表头 `tr`，并配置 `sort: false`，禁止拖拽中 DOM 位移。
-  - `onMove` 时按 `event.related + event.willInsertAfter` 计算目标显示索引。
-  - 增加指针位置兜底：在 `mousemove/touchmove` 中按 `clientX` 与表头单元格中心点计算目标索引，解决部分场景下 `onEnd.newIndex` 不变的问题。
+  - 指标线与目标索引计算主路径基于指针事件：监听 `dragover/pointermove/mousemove/touchmove`，按 `clientX/clientY` 命中目标列并判定左右侧。
+  - 不依赖 `onMove` 作为主要命中来源，避免不同运行环境下 `onMove` 不触发导致指标线失效。
   - `onEnd` 时按优先级取 `newIndex`：
     - 指针计算结果
-    - `onMove` 期间缓存结果
     - `event.newIndex`（兜底）
   - 当 `oldIndex !== newIndex` 时才更新 `columnOrder` 并触发 `column-order-change`。
 
@@ -197,3 +196,38 @@ type CellChange = {
 - 单元格写回 row 的变更可被统一上报，且不需要大量组件级监听。
 - 行拖拽仅控制柄可拖，排序结果可回传。
 - 列拖拽过程中表头不发生实时位移，松开后可正确回传并应用列顺序。
+
+## 9. 列拖拽指标线交互（当前实现）
+
+- 拖拽库固定使用 `sortablejs`，列拖拽保持 `sort: false`，拖拽中不改变表头 DOM 顺序。
+- 拖拽移动时实时计算“目标列 + 目标侧”：
+  - 目标列：指针命中的表头单元格（`th.el-table__cell`）。
+  - 目标侧：按指针相对该单元格中心点判定，左侧为 `left`，右侧为 `right`。
+- 指标线计算来源：
+  - 主路径：`dragover/pointermove/mousemove/touchmove` 实时计算并更新目标列。
+  - `onMove` 不作为主处理链路，避免在部分浏览器/场景不触发导致指标线丢失。
+- 视觉反馈作用范围为整列：目标列的表头单元格与所有 body 单元格同步高亮。
+- 视觉样式规则：
+  - `left`：目标列增加 `fl-table__column-drag-indicator-left` 高亮样式。
+  - `right`：目标列增加 `fl-table__column-drag-indicator-right` 高亮样式。
+  - 目标线宽度为 `2px`。
+  - 高亮颜色使用 `var(--el-color-primary)`。
+- 指针离开表头命中区域时立即清空高亮，不保留上一次命中结果。
+- 仅在 `onEnd` 时提交排序结果；排序索引仍采用显示索引口径，并通过 `column-order-change` 回传。
+
+### 9.1 目标实现逻辑（本次确认）
+
+- 拖拽引擎：
+  - 固定使用 `sortablejs`，不自研拖拽实现。
+  - 列拖拽启用 `sort: false`，拖拽过程中不改变表头可见顺序。
+- 命中计算：
+  - 在拖拽过程中通过 `dragover/pointermove/mousemove/touchmove` 获取指针坐标。
+  - 先命中目标列，再按是否越过目标列中心点判定 `left/right`。
+- 指标线渲染：
+  - 命中后给目标列 `th` + 对应列全部 `td` 同步加类名。
+  - 左移命中使用 `fl-table__column-drag-indicator-left`，右移命中使用
+    `fl-table__column-drag-indicator-right`。
+  - 指标线视觉宽度统一为 `2px`。
+- 提交时机：
+  - 拖拽中只做命中态与视觉反馈，不提交列顺序。
+  - 仅在 `onEnd` 计算并提交 `column-order-change`，再清理指标线状态。

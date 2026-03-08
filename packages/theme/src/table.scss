@@ -33,6 +33,14 @@
     opacity: 1;
   }
 
+  .fl-table__column-drag-indicator-left {
+    box-shadow: inset 2px 0 0 var(--el-color-primary);
+  }
+
+  .fl-table__column-drag-indicator-right {
+    box-shadow: inset -2px 0 0 var(--el-color-primary);
+  }
+
   .sortable-ghost > td {
     opacity: 0.65;
   }
