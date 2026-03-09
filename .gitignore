@@ -11,7 +11,11 @@ coverage/
 logs/
 *.log
 .DS_Store
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/component-development-playbook/
+!.agents/skills/component-development-playbook/**
 .changeset/
 .idea/
 .husky/_/
