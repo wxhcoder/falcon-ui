@@ -8,6 +8,7 @@ import type { ComponentInstance } from 'vue'
 import { computed, h, useAttrs, useSlots, watch } from 'vue'
 import { useMergedAttrs, useMergedExpose } from '@falcon-ui/hooks'
 import { flDatePickerEmits, flDatePickerProps } from './date-picker'
+import type { FlDatePickerValue } from './date-picker'
 
 defineOptions({
   name: 'FlDatePicker',
@@ -27,7 +28,7 @@ const { mergedAttrs } = useMergedAttrs({
   listenerName: 'onChange'
 })
 
-const updateModelValue = (value: unknown) => {
+const updateModelValue = (value: FlDatePickerValue) => {
   if (props.isError) {
     emit('update:modelValue', null)
     return
