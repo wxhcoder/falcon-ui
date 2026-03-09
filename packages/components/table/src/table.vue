@@ -64,6 +64,8 @@ type ColumnDropState = {
   side: ColumnDragIndicatorSide
 }
 
+const COLUMN_RESIZE_HOTZONE_PX = 8
+
 const props = defineProps(flTableProps)
 const emit = defineEmits(flTableEmits)
 const attrs = useAttrs()
@@ -82,6 +84,10 @@ const columnDragIndicatorDisplayIndex = ref<number | null>(null)
 const columnDragIndicatorSide = ref<ColumnDragIndicatorSide | null>(null)
 const isColumnDragging = ref<boolean>(false)
 const columnDragPointerMoveListener = ref<((event: Event) => void) | null>(null)
+const isColumnResizeGesture = ref<boolean>(false)
+const columnResizeGuardHeaderRow = shallowRef<HTMLElement | null>(null)
+const columnResizePointerDownListener = ref<((event: Event) => void) | null>(null)
+const columnResizePointerUpListener = ref<((event: Event) => void) | null>(null)
 const buildProxyData = createTableProxyDataBuilder()
 
 const { changeRef } = useMergedExpose({})
@@ -462,7 +468,51 @@ const destroyRowSortable = () => {
   rowSortable.value = null
 }
 
+const stopColumnResizeGestureReleaseTracking = () => {
+  if (!columnResizePointerUpListener.value) {
+    return
+  }
+
+  document.removeEventListener('pointerup', columnResizePointerUpListener.value)
+  document.removeEventListener('mouseup', columnResizePointerUpListener.value)
+  document.removeEventListener('touchend', columnResizePointerUpListener.value)
+  document.removeEventListener('touchcancel', columnResizePointerUpListener.value)
+  document.removeEventListener('dragend', columnResizePointerUpListener.value)
+  columnResizePointerUpListener.value = null
+}
+
+const clearColumnResizeGesture = () => {
+  stopColumnResizeGestureReleaseTracking()
+  columnSortable.value?.option?.('disabled', false)
+  isColumnResizeGesture.value = false
+}
+
+const unbindColumnResizeGuard = () => {
+  if (columnResizeGuardHeaderRow.value && columnResizePointerDownListener.value) {
+    columnResizeGuardHeaderRow.value.removeEventListener(
+      'pointerdown',
+      columnResizePointerDownListener.value,
+      true
+    )
+    columnResizeGuardHeaderRow.value.removeEventListener(
+      'mousedown',
+      columnResizePointerDownListener.value,
+      true
+    )
+    columnResizeGuardHeaderRow.value.removeEventListener(
+      'touchstart',
+      columnResizePointerDownListener.value,
+      true
+    )
+  }
+
+  columnResizeGuardHeaderRow.value = null
+  columnResizePointerDownListener.value = null
+}
+
 const destroyColumnSortable = () => {
+  clearColumnResizeGesture()
+  unbindColumnResizeGuard()
   columnSortable.value?.destroy()
   columnSortable.value = null
   if (columnDragPointerMoveListener.value) {
@@ -510,6 +560,70 @@ const readClientPointFromEvent = (event: Event): ClientPoint | null => {
   }
 
   return null
+}
+
+const resolveHeaderCellFromEvent = (event: Event): HTMLElement | null => {
+  const target = event.target
+  if (!(target instanceof Element)) {
+    return null
+  }
+
+  const headerCell = target.closest('th.el-table__cell')
+  return headerCell instanceof HTMLElement ? headerCell : null
+}
+
+const isColumnResizeHotzone = (headerCell: HTMLElement, clientX: number): boolean => {
+  const rect = headerCell.getBoundingClientRect()
+  if (rect.width <= 0) {
+    return false
+  }
+
+  const hotzoneWidth = Math.min(COLUMN_RESIZE_HOTZONE_PX, rect.width / 2)
+  return clientX - rect.left <= hotzoneWidth || rect.right - clientX <= hotzoneWidth
+}
+
+const startColumnResizeGestureReleaseTracking = () => {
+  stopColumnResizeGestureReleaseTracking()
+
+  const listener = () => {
+    clearColumnResizeGesture()
+  }
+
+  columnResizePointerUpListener.value = listener
+  document.addEventListener('pointerup', listener)
+  document.addEventListener('mouseup', listener)
+  document.addEventListener('touchend', listener)
+  document.addEventListener('touchcancel', listener)
+  document.addEventListener('dragend', listener)
+}
+
+const bindColumnResizeGuard = (headerRow: HTMLElement) => {
+  unbindColumnResizeGuard()
+
+  const listener = (event: Event) => {
+    const point = readClientPointFromEvent(event)
+    const headerCell = resolveHeaderCellFromEvent(event)
+    const hitResizeHotzone =
+      point !== null && headerCell !== null && isColumnResizeHotzone(headerCell, point.x)
+
+    if (!hitResizeHotzone) {
+      if (!isColumnDragging.value && isColumnResizeGesture.value) {
+        clearColumnResizeGesture()
+      }
+      return
+    }
+
+    isColumnResizeGesture.value = true
+    updateColumnDragState(null)
+    columnSortable.value?.option?.('disabled', true)
+    startColumnResizeGestureReleaseTracking()
+  }
+
+  columnResizeGuardHeaderRow.value = headerRow
+  columnResizePointerDownListener.value = listener
+  headerRow.addEventListener('pointerdown', listener, true)
+  headerRow.addEventListener('mousedown', listener, true)
+  headerRow.addEventListener('touchstart', listener, true)
 }
 
 const updateColumnDragState = (state: ColumnDropState | null) => {
@@ -703,6 +817,10 @@ const initColumnSortable = () => {
     draggable: 'th.el-table__cell',
     sort: false,
     onStart: (event: SortableEvent) => {
+      if (isColumnResizeGesture.value) {
+        return
+      }
+
       const oldIndex = toNullableIndex(event.oldIndex)
       isColumnDragging.value = true
       draggingColumnOldDisplayIndex.value = oldIndex
@@ -723,6 +841,11 @@ const initColumnSortable = () => {
       emit('column-drag-start', payload)
     },
     onEnd: (event: SortableEvent) => {
+      if (isColumnResizeGesture.value) {
+        clearColumnResizeGesture()
+        return
+      }
+
       if (columnDragPointerMoveListener.value) {
         document.removeEventListener('dragover', columnDragPointerMoveListener.value)
         document.removeEventListener('pointermove', columnDragPointerMoveListener.value)
@@ -781,6 +904,8 @@ const initColumnSortable = () => {
       updateColumnDragState(null)
     }
   })
+
+  bindColumnResizeGuard(headerRow)
 }
 
 const refreshSortables = async () => {

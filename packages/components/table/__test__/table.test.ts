@@ -499,6 +499,86 @@ describe('FlTable', () => {
     expect(firstRowTds[1]?.classes()).not.toContain('fl-table__column-drag-indicator-right')
   })
 
+  it('does not trigger column reorder when pointer starts in resize hotzone', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+
+    const columnCall = sortableCreate.mock.calls.find(
+      (call) => (call[1] as Record<string, unknown>).draggable === 'th.el-table__cell'
+    )
+    expect(columnCall).toBeDefined()
+
+    const columnOptions = columnCall?.[1] as Record<string, (...args: unknown[]) => unknown>
+    const headerRow = columnCall?.[0] as HTMLElement
+    const headerCells = Array.from(headerRow.querySelectorAll<HTMLElement>('th.el-table__cell'))
+
+    expect(headerCells.length).toBeGreaterThanOrEqual(3)
+    if (headerCells.length < 3) {
+      throw new Error('header cells missing')
+    }
+
+    setElementRect(headerRow, { left: 0, top: 0, width: 300, height: 40 })
+    headerCells.forEach((cell, index) => {
+      setElementRect(cell, { left: index * 100, top: 0, width: 100, height: 40 })
+    })
+
+    const firstRowTds = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    expect(firstRowTds.length).toBeGreaterThanOrEqual(3)
+
+    headerCells[1]?.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        clientX: 101,
+        clientY: 20
+      })
+    )
+
+    columnOptions.onStart?.({ oldIndex: 1 })
+    document.dispatchEvent(
+      new MouseEvent('dragover', {
+        clientX: 150,
+        clientY: 20
+      })
+    )
+
+    await nextTick()
+
+    expect(wrapper.emitted('column-drag-start')).toBeUndefined()
+    expect(wrapper.emitted('column-order-change')).toBeUndefined()
+    expect(headerCells[1].classList.contains('fl-table__column-drag-indicator-left')).toBe(false)
+    expect(headerCells[1].classList.contains('fl-table__column-drag-indicator-right')).toBe(false)
+    expect(firstRowTds[1]?.classes()).not.toContain('fl-table__column-drag-indicator-left')
+    expect(firstRowTds[1]?.classes()).not.toContain('fl-table__column-drag-indicator-right')
+
+    document.dispatchEvent(
+      new MouseEvent('mouseup', {
+        clientX: 101,
+        clientY: 20
+      })
+    )
+
+    columnOptions.onStart?.({ oldIndex: 1 })
+    columnOptions.onEnd?.({ oldIndex: 1, newIndex: 0 })
+
+    await nextTick()
+
+    const payload = wrapper.emitted('column-order-change')?.[0]?.[0] as
+      | FlTableColumnOrderChangePayload
+      | undefined
+
+    expect(payload?.oldIndex).toBe(1)
+    expect(payload?.newIndex).toBe(0)
+  })
   it('reorders columns when dragged header has no source-index dataset', async () => {
     const rows = createRows()
     const wrapper = mount(FlTable, {

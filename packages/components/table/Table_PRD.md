@@ -231,3 +231,20 @@ type CellChange = {
 - 提交时机：
   - 拖拽中只做命中态与视觉反馈，不提交列顺序。
   - 仅在 `onEnd` 计算并提交 `column-order-change`，再清理指标线状态。
+
+### 9.2 列宽拖拽与列排序解耦（本次新增）
+
+- 问题背景：列排序拖拽命中整列 `th` 时，会与 Element Plus 的列宽拖拽（表头边缘手势）冲突。
+- 热区判定：在表头 `pointerdown/mousedown/touchstart` 捕获阶段，按单元格左右边缘热区判定列宽手势。
+  - 热区宽度常量：`8px`（`COLUMN_RESIZE_HOTZONE_PX`）。
+  - 命中条件：`clientX` 距离 `th` 左/右边界小于等于热区宽度。
+- 手势隔离：
+  - 命中列宽热区后，标记 `isColumnResizeGesture=true`。
+  - 临时禁用列排序 `Sortable`（`option('disabled', true)`）。
+  - 清空当前列排序指标线，避免视觉误导。
+  - 列排序 `onStart/onEnd` 在 `isColumnResizeGesture=true` 时直接短路，不触发排序事件计算。
+- 手势恢复：在 `pointerup/mouseup/touchend/touchcancel/dragend` 统一清理列宽手势状态并恢复列排序能力。
+- 生命周期清理：组件销毁或重建列拖拽实例时，同步解绑热区监听与释放监听，避免残留状态影响后续交互。
+- 验证要求：
+  - 命中边缘拖拽仅触发列宽调整，不触发列排序、不显示列排序指标线。
+  - 边缘手势结束后，列排序拖拽可立即恢复并正常回传 `column-order-change`。
