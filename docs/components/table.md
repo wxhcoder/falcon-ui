@@ -12,6 +12,7 @@ FlTable 是基于 Element Plus `ElTable` 的二次封装组件。
 
 通过 `selection-row-click` 可以在点击行时联动复选状态。
 开启 `selection-single` 后，多选 UI 下会强制仅保留一条选中记录。
+示例内置模式开关，可实时切换单选与多选并观察行为差异。
 
 ::: demo table/selection-single
 :::

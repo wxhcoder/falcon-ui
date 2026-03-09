@@ -1,8 +1,14 @@
 <template>
   <div class="demo-col">
+    <div class="demo-toolbar">
+      <span class="demo-toolbar__label">选择模式</span>
+      <el-switch v-model="selectionSingle" active-text="单选" inactive-text="多选" />
+    </div>
+
     <FlTable
+      ref="tableRef"
       :data="rows"
-      selection-single
+      :selection-single="selectionSingle"
       style="width: 100%"
       @selection-row-toggle="handleSelectionToggle"
       @selection-single-conflict="handleSelectionConflict">
@@ -12,18 +18,29 @@
       <el-table-column prop="role" label="角色" min-width="140" />
     </FlTable>
 
+    <div class="demo-result">当前模式：{{ selectionSingle ? '单选' : '多选' }}</div>
     <div class="demo-result">当前选中：{{ selectedText || '（无）' }}</div>
     <div class="demo-result">冲突原因：{{ conflictText || '（无）' }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 interface TableRow {
   id: number
   name: string
   role: string
+}
+
+interface SelectionRowTogglePayload {
+  row: TableRow
+  selected: boolean
+  selectionAfter: TableRow[]
+}
+
+interface TableExpose {
+  clearSelection?: () => void
 }
 
 const rows: TableRow[] = [
@@ -32,15 +49,25 @@ const rows: TableRow[] = [
   { id: 2003, name: '妮娜', role: '访客' }
 ]
 
-const selectedRow = ref<TableRow | null>(null)
+const tableRef = ref<TableExpose | null>(null)
+const selectionSingle = ref(true)
+const selectedRows = ref<TableRow[]>([])
 const conflictText = ref('')
 
 const selectedText = computed(() =>
-  selectedRow.value ? `${selectedRow.value.id} - ${selectedRow.value.name}` : ''
+  selectedRows.value.length
+    ? selectedRows.value.map((row) => `${row.id} - ${row.name}`).join('，')
+    : ''
 )
 
-const handleSelectionToggle = (payload: { row: TableRow; selected: boolean }) => {
-  selectedRow.value = payload.selected ? payload.row : null
+watch(selectionSingle, () => {
+  tableRef.value?.clearSelection?.()
+  selectedRows.value = []
+  conflictText.value = ''
+})
+
+const handleSelectionToggle = (payload: SelectionRowTogglePayload) => {
+  selectedRows.value = payload.selectionAfter
 }
 
 const handleSelectionConflict = (payload: { reason: string }) => {
@@ -49,6 +76,18 @@ const handleSelectionConflict = (payload: { reason: string }) => {
 </script>
 
 <style scoped>
+.demo-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.demo-toolbar__label {
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+}
+
 .demo-result {
   color: var(--vp-c-text-2);
   font-size: 13px;
