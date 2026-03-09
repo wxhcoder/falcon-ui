@@ -3,13 +3,13 @@ import {
   toArray,
   tryOnScopeDispose,
   unrefElement
-} from "./chunk-6FZ35DRC.js";
+} from "./chunk-J7XPWLT7.js";
 import {
   computed,
   shallowRef,
   toValue,
   watch
-} from "./chunk-6XXLIVGJ.js";
+} from "./chunk-VLS4B2PU.js";
 import "./chunk-5WRI5ZAA.js";
 
 // node_modules/.pnpm/tabbable@6.4.0/node_modules/tabbable/dist/index.esm.js
@@ -1273,7 +1273,7 @@ var createFocusTrap = function createFocusTrap2(elements, userOptions) {
   return trap;
 };
 
-// node_modules/.pnpm/@vueuse+integrations@12.8.2_c48c080257872dd59710c47f6acf1e4a/node_modules/@vueuse/integrations/useFocusTrap.mjs
+// node_modules/.pnpm/@vueuse+integrations@12.8.2_1d3ed5325c3d746f2ae7f7be4d9084da/node_modules/@vueuse/integrations/useFocusTrap.mjs
 function useFocusTrap(target, options = {}) {
   let trap;
   const { immediate, ...focusTrapOptions } = options;

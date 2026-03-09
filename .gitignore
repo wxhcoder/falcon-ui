@@ -15,3 +15,4 @@ logs/
 .changeset/
 .idea/
 .husky/_/
+docs/.vitepress/cache/
