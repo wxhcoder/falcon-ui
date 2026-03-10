@@ -26,7 +26,6 @@ const isError = ref(false)
 </script>
 
 <style scoped>
-
 .demo-actions {
   display: flex;
 }

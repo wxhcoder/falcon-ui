@@ -23,7 +23,6 @@ const open = ref(false)
 </script>
 
 <style scoped>
-
 .header-slot {
   align-items: center;
   display: inline-flex;

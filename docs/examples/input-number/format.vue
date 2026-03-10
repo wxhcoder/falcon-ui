@@ -28,7 +28,6 @@ const currencyParser = (value: string) => value.replace(/^USD\s*/, '')
 </script>
 
 <style scoped>
-
 .demo-result {
   color: var(--vp-c-text-2);
   font-size: 13px;

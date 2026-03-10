@@ -5,6 +5,12 @@
     {
       "description": "",
       "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", _value: FlDatePickerValue): void",
+      "type": "[_value: FlDatePickerValue]"
+    },
+    {
+      "description": "",
+      "name": "update:modelValue",
       "signature": "(event: \"update:modelValue\", ...args: any[]): void",
       "type": "any[]"
     }
@@ -173,11 +179,11 @@
       "type": "boolean | undefined"
     },
     {
-      "default": "-",
-      "description": "",
+      "default": "null",
+      "description": "Bound value. Keeps the wrapper on explicit v-model contract.",
       "name": "modelValue",
       "required": false,
-      "type": "EpPropMergeType<(new (...args: any[]) => string | number | string[] | Date | number[] | Date[]) | (() => ModelValueType | null) | ((new (...args: any[]) => string | number | string[] | Date | number[] | Date[]) | (() => ModelValueType | null))[], unknown, unknown> | undefined"
+      "type": "((string | number | string[] | Date | number[] | Date[]) & ModelValueType) | null | undefined"
     },
     {
       "default": "-",
@@ -241,6 +247,13 @@
       "name": "readonly",
       "required": false,
       "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "saveOnBlur",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
@@ -310,7 +323,7 @@
       "description": "",
       "name": "type",
       "required": false,
-      "type": "EpPropMergeType<(new (...args: any[]) => \"date\" | \"year\" | \"years\" | \"month\" | \"months\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType) | ((new (...args: any[]) => \"date\" | \"year\" | \"years\" | \"month\" | \"months\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType))[], unknown, unknown> | undefined"
+      "type": "EpPropMergeType<(new (...args: any[]) => \"date\" | \"year\" | \"months\" | \"years\" | \"month\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType) | ((new (...args: any[]) => \"date\" | \"year\" | \"months\" | \"years\" | \"month\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType))[], unknown, unknown> | undefined"
     },
     {
       "default": "-",

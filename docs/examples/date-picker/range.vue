@@ -18,7 +18,6 @@ const rangeValue = ref<[string, string] | null>(null)
 </script>
 
 <style scoped>
-
 .demo-result {
   color: var(--vp-c-text-2);
   font-size: 13px;

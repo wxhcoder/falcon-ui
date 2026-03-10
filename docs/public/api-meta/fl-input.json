@@ -17,8 +17,8 @@
     {
       "description": "",
       "name": "clear",
-      "signature": "(event: \"clear\"): void",
-      "type": "[]"
+      "signature": "(event: \"clear\", evt: MouseEvent | undefined): void",
+      "type": "[evt: MouseEvent | undefined]"
     },
     {
       "description": "",
@@ -96,7 +96,7 @@
     {
       "description": "",
       "name": "clear",
-      "type": "() => void"
+      "type": "(evt?: MouseEvent | undefined) => void"
     },
     {
       "description": "",
@@ -185,7 +185,7 @@
       "description": "",
       "name": "clearIcon",
       "required": false,
-      "type": "string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any> | undefined"
+      "type": "IconPropType | undefined"
     },
     {
       "default": "-",
@@ -318,7 +318,7 @@
       "description": "",
       "name": "prefixIcon",
       "required": false,
-      "type": "string | Component | undefined"
+      "type": "IconPropType | undefined"
     },
     {
       "default": "-",
@@ -367,7 +367,7 @@
       "description": "",
       "name": "suffixIcon",
       "required": false,
-      "type": "string | Component | undefined"
+      "type": "IconPropType | undefined"
     },
     {
       "default": "-",

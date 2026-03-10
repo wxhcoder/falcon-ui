@@ -172,7 +172,7 @@
       "description": "",
       "name": "closeIcon",
       "required": false,
-      "type": "string | Component | undefined"
+      "type": "IconPropType | undefined"
     },
     {
       "default": "-",

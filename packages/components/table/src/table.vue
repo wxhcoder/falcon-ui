@@ -77,6 +77,7 @@ const tableRef = shallowRef<TableInstance | null>(null)
 const rowSortable = shallowRef<Sortable | null>(null)
 const columnSortable = shallowRef<Sortable | null>(null)
 const columnOrder = ref<number[]>([])
+const columnDragCount = ref<number | null>(null)
 const visibleColumnCount = ref<number>(0)
 const draggingColumnOldDisplayIndex = ref<number | null>(null)
 const pendingColumnDropDisplayIndex = ref<number | null>(null)
@@ -459,6 +460,28 @@ const syncVisibleColumnCount = (headerRow: HTMLElement) => {
   visibleColumnCount.value = cells.length
 }
 
+const readStoreColumnCount = (): number => {
+  const columns = (
+    tableRef.value as unknown as {
+      store?: {
+        states?: {
+          columns?: {
+            value?: unknown[]
+          }
+        }
+      }
+    }
+  )?.store?.states?.columns?.value
+
+  return Array.isArray(columns) ? columns.length : 0
+}
+
+const resolveColumnCount = (headerRow: HTMLElement | null, minimumCount = 0): number => {
+  const headerCount = headerRow?.querySelectorAll<HTMLElement>('th.el-table__cell').length ?? 0
+
+  return Math.max(minimumCount, columnOrder.value.length, readStoreColumnCount(), headerCount)
+}
+
 const destroyRowSortable = () => {
   rowSortable.value?.destroy()
   rowSortable.value = null
@@ -519,6 +542,7 @@ const destroyColumnSortable = () => {
     columnDragPointerMoveListener.value = null
   }
   isColumnDragging.value = false
+  columnDragCount.value = null
   draggingColumnOldDisplayIndex.value = null
   pendingColumnDropDisplayIndex.value = null
   columnDragIndicatorDisplayIndex.value = null
@@ -822,11 +846,8 @@ const initColumnSortable = () => {
       draggingColumnOldDisplayIndex.value = oldIndex
       updateColumnDragState(null)
       startColumnDragPointerTracking(oldIndex)
-      const count = Math.max(
-        visibleColumnCount.value,
-        columnOrder.value.length,
-        (oldIndex ?? -1) + 1
-      )
+      const count = resolveColumnCount(headerRow, (oldIndex ?? -1) + 1)
+      columnDragCount.value = count
       const activeOrder = resolveColumnOrder(count)
       const payload: ColumnDragEvent = {
         oldIndex,
@@ -849,7 +870,6 @@ const initColumnSortable = () => {
         document.removeEventListener('touchmove', columnDragPointerMoveListener.value)
         columnDragPointerMoveListener.value = null
       }
-
       const oldIndex = toNullableIndex(event.oldIndex) ?? draggingColumnOldDisplayIndex.value
       const fallbackNewIndex = toNullableIndex(event.newIndex)
       const originalEvent = (event as { originalEvent?: Event }).originalEvent
@@ -861,7 +881,14 @@ const initColumnSortable = () => {
       const newIndex =
         pointerState?.dropDisplayIndex ?? pendingColumnDropDisplayIndex.value ?? fallbackNewIndex
       const maxDragIndex = Math.max(oldIndex ?? -1, newIndex ?? -1)
-      const count = Math.max(visibleColumnCount.value, columnOrder.value.length, maxDragIndex + 1)
+      const latestHeaderRow = getTableElement()?.querySelector('.el-table__header-wrapper thead tr')
+      const count = Math.max(
+        columnDragCount.value ?? 0,
+        resolveColumnCount(
+          latestHeaderRow instanceof HTMLElement ? latestHeaderRow : headerRow,
+          maxDragIndex + 1
+        )
+      )
       const activeOrder = resolveColumnOrder(count)
       const columnIndex = oldIndex === null ? null : (activeOrder[oldIndex] ?? oldIndex)
       const payload: ColumnDragEvent = {
@@ -896,6 +923,7 @@ const initColumnSortable = () => {
       }
 
       isColumnDragging.value = false
+      columnDragCount.value = null
       draggingColumnOldDisplayIndex.value = null
       updateColumnDragState(null)
     }

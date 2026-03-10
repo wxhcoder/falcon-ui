@@ -71,6 +71,13 @@
       "type": "boolean | undefined"
     },
     {
+      "default": "-",
+      "description": "",
+      "name": "dashed",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
       "default": "''",
       "description": "调试事件标签，在开启调试模式后会随 `debug-click` 一起抛出。",
       "name": "debugLabel",
@@ -96,7 +103,7 @@
       "description": "",
       "name": "icon",
       "required": false,
-      "type": "string | Component | undefined"
+      "type": "IconPropType | undefined"
     },
     {
       "default": "-",
@@ -117,7 +124,7 @@
       "description": "",
       "name": "loadingIcon",
       "required": false,
-      "type": "string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any> | undefined"
+      "type": "IconPropType | undefined"
     },
     {
       "default": "-",

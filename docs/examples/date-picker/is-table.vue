@@ -46,7 +46,6 @@ const tableData = ref<RowData[]>([
 </script>
 
 <style scoped>
-
 .demo-actions {
   display: flex;
 }

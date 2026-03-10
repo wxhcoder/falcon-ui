@@ -800,6 +800,13 @@
     {
       "default": "-",
       "description": "",
+      "name": "tagTooltip",
+      "required": false,
+      "type": "TagTooltipProps | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
       "name": "tagType",
       "required": false,
       "type": "EpPropMergeType<StringConstructor, \"primary\" | \"success\" | \"warning\" | \"info\" | \"danger\", unknown> | undefined"

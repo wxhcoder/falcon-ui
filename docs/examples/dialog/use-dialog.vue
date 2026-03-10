@@ -76,7 +76,6 @@ const closeAll = (reason: DialogCloseReason = 'closeAll') => {
 </script>
 
 <style scoped>
-
 .demo-actions {
   display: flex;
   gap: 10px;

@@ -28,7 +28,6 @@ const options = [
 </script>
 
 <style scoped>
-
 .demo-actions {
   display: flex;
 }

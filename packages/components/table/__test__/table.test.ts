@@ -345,7 +345,7 @@ describe('FlTable', () => {
     expect(payload?.oldIndex).toBe(1)
     expect(payload?.newIndex).toBe(0)
     expect(payload?.columnIndex).toBe(1)
-    expect(payload?.order).toEqual([1, 0])
+    expect(payload?.order).toEqual([1, 0, 2])
   })
 
   it('reorders rendered columns when column drag order changes', async () => {
@@ -410,6 +410,89 @@ describe('FlTable', () => {
       .filter(Boolean)
 
     expect(firstRowCells.slice(0, 3)).toEqual(['18', '1', 'A'])
+  })
+
+  it('keeps full column order when drag lifecycle column count shrinks temporarily', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+
+    const table = wrapper.getComponent(ElTable)
+    const tableVm = table.vm as unknown as {
+      store?: {
+        states?: {
+          columns?: {
+            value?: Array<{ property?: string }>
+          }
+        }
+      }
+    }
+    const internalInstance = (wrapper.vm as unknown as { $?: Record<string, unknown> }).$ as
+      | {
+          devtoolsRawSetupState?: Record<string, { value: unknown }>
+          setupState?: Record<string, { value: unknown }>
+        }
+      | undefined
+    const setupState =
+      internalInstance?.devtoolsRawSetupState ?? internalInstance?.setupState ?? undefined
+
+    if (!setupState) {
+      throw new Error('component setup state missing')
+    }
+
+    const readColumnProps = () =>
+      (tableVm.store?.states?.columns?.value ?? [])
+        .map((column) => column.property)
+        .filter((value): value is string => Boolean(value))
+
+    expect(readColumnProps().slice(0, 3)).toEqual(['name', 'age', 'id'])
+
+    const columnCall = sortableCreate.mock.calls.find(
+      (call) => (call[1] as Record<string, unknown>).draggable === 'th.el-table__cell'
+    )
+    expect(columnCall).toBeDefined()
+
+    const columnOptions = columnCall?.[1] as Record<
+      string,
+      (event: Record<string, unknown>) => void
+    >
+    const visibleColumnCount = setupState.visibleColumnCount as { value: number }
+
+    columnOptions.onStart?.({ oldIndex: 0 })
+    visibleColumnCount.value = 2
+
+    columnOptions.onEnd?.({
+      oldIndex: 0,
+      newIndex: 1,
+      item: document.createElement('th'),
+      to: document.createElement('tr')
+    })
+
+    await nextTick()
+    await nextTick()
+
+    expect(wrapper.emitted('column-order-change')?.[0]?.[0]).toMatchObject({
+      oldIndex: 0,
+      newIndex: 1,
+      order: [1, 0, 2]
+    })
+    expect(readColumnProps().slice(0, 3)).toEqual(['age', 'name', 'id'])
+
+    const firstRowCells = wrapper
+      .findAll('.el-table__body-wrapper tbody tr:first-child td .cell')
+      .map((cell) => cell.text().trim())
+      .filter(Boolean)
+
+    expect(firstRowCells.slice(0, 3)).toEqual(['18', 'A', '1'])
   })
 
   it('applies column drag indicator to header/body by pointer side and clears out-of-range', async () => {
