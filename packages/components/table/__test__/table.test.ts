@@ -3,11 +3,12 @@ import { ElTable, ElTableColumn } from 'element-plus'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { h, nextTick } from 'vue'
 import type {
-  FlTableCellChangePayload,
-  FlTableColumnOrderChangePayload,
-  FlTableProps,
-  FlTableRowOrderChangePayload,
-  FlTableSelectionRowTogglePayload
+  CellChangeEvent,
+  ColumnOrderChangeEvent,
+  RowData,
+  RowOrderChangeEvent,
+  SelectionRowToggleEvent,
+  TableProps
 } from '..'
 import FlTable from '../src/table.vue'
 
@@ -33,7 +34,7 @@ class ResizeObserverMock {
   disconnect() {}
 }
 
-type RowData = {
+type TestRowData = {
   id: number
   name: string
   age: number
@@ -54,7 +55,7 @@ const createPlainColumns = () => [
   h(ElTableColumn, { prop: 'id', label: 'ID' })
 ]
 
-const createRows = (): RowData[] => [
+const createRows = (): TestRowData[] => [
   { id: 1, name: 'A', age: 18, profile: { nickname: 'A-1' } },
   { id: 2, name: 'B', age: 20, profile: { nickname: 'B-1' } },
   { id: 3, name: 'C', age: 21, profile: { nickname: 'C-1' } }
@@ -169,13 +170,13 @@ describe('FlTable', () => {
     const table = wrapper.getComponent(ElTable)
     const tableVm = table.vm as unknown as {
       getSelectionRows: () => RowData[]
-      toggleRowSelection: (row: RowData, selected?: boolean) => void
+      toggleRowSelection: (row: TestRowData, selected?: boolean) => void
       clearSelection: () => void
     }
 
-    const selection: RowData[] = []
+    const selection: TestRowData[] = []
     tableVm.getSelectionRows = vi.fn(() => [...selection])
-    tableVm.toggleRowSelection = vi.fn((row: RowData, selected = false) => {
+    tableVm.toggleRowSelection = vi.fn((row: TestRowData, selected = false) => {
       const index = selection.indexOf(row)
       if (selected) {
         if (index < 0) {
@@ -200,7 +201,7 @@ describe('FlTable', () => {
 
     expect(tableVm.toggleRowSelection).toHaveBeenCalledWith(rows[0], true)
     const payload = wrapper.emitted('selection-row-toggle')?.[0]?.[0] as
-      | FlTableSelectionRowTogglePayload
+      | SelectionRowToggleEvent
       | undefined
 
     expect(payload?.row).toBe(rows[0])
@@ -225,7 +226,7 @@ describe('FlTable', () => {
     const table = wrapper.getComponent(ElTable)
     const tableVm = table.vm as unknown as {
       getSelectionRows: () => RowData[]
-      toggleRowSelection: (row: RowData, selected?: boolean) => void
+      toggleRowSelection: (row: TestRowData, selected?: boolean) => void
       clearSelection: () => void
     }
 
@@ -270,12 +271,12 @@ describe('FlTable', () => {
     await nextTick()
 
     const table = wrapper.getComponent(ElTable)
-    const proxiedRows = table.props('data') as RowData[]
+    const proxiedRows = table.props('data') as TestRowData[]
 
     proxiedRows[0].profile.nickname = 'A-2'
     await nextTick()
 
-    const payload = wrapper.emitted('cell-change')?.[0]?.[0] as FlTableCellChangePayload | undefined
+    const payload = wrapper.emitted('cell-change')?.[0]?.[0] as CellChangeEvent | undefined
 
     expect(payload?.rowIndex).toBe(0)
     expect(payload?.rowKey).toBe(1)
@@ -311,7 +312,7 @@ describe('FlTable', () => {
     rowOptions.onEnd?.({ oldIndex: 0, newIndex: 1 })
 
     const rowOrderPayload = wrapper.emitted('row-order-change')?.[0]?.[0] as
-      | FlTableRowOrderChangePayload
+      | RowOrderChangeEvent
       | undefined
 
     expect(rowOrderPayload?.oldIndex).toBe(0)
@@ -338,7 +339,7 @@ describe('FlTable', () => {
     })
 
     const payload = wrapper.emitted('column-order-change')?.[0]?.[0] as
-      | FlTableColumnOrderChangePayload
+      | ColumnOrderChangeEvent
       | undefined
 
     expect(payload?.oldIndex).toBe(1)
@@ -573,7 +574,7 @@ describe('FlTable', () => {
     await nextTick()
 
     const payload = wrapper.emitted('column-order-change')?.[0]?.[0] as
-      | FlTableColumnOrderChangePayload
+      | ColumnOrderChangeEvent
       | undefined
 
     expect(payload?.oldIndex).toBe(1)
@@ -631,7 +632,7 @@ describe('FlTable', () => {
     await nextTick()
 
     const payload = wrapper.emitted('column-order-change')?.[0]?.[0] as
-      | FlTableColumnOrderChangePayload
+      | ColumnOrderChangeEvent
       | undefined
     expect(payload?.columnIndex).toBe(0)
     expect(payload?.order).toEqual([1, 2, 0])
@@ -640,11 +641,12 @@ describe('FlTable', () => {
 
   it('supports public type exports', () => {
     type TypeSmoke = [
-      FlTableProps,
-      FlTableSelectionRowTogglePayload,
-      FlTableCellChangePayload,
-      FlTableRowOrderChangePayload,
-      FlTableColumnOrderChangePayload
+      TableProps,
+      RowData,
+      SelectionRowToggleEvent,
+      CellChangeEvent,
+      RowOrderChangeEvent,
+      ColumnOrderChangeEvent
     ]
 
     const typeSmoke: TypeSmoke | null = null

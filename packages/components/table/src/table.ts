@@ -1,24 +1,24 @@
 import type { ExtractPublicPropTypes, PropType } from 'vue'
 
-export type FlTableRowData = Record<string, unknown>
+export type RowData = Record<string, unknown>
 
-export type FlTableEmitTrigger = 'row-click' | 'selection-change' | 'proxy-set'
+export type EmitTrigger = 'row-click' | 'selection-change' | 'proxy-set'
 
-export interface FlTableSelectionRowTogglePayload {
-  row: FlTableRowData
+export interface SelectionRowToggleEvent {
+  row: RowData
   rowIndex: number
   selected: boolean
-  selectionBefore: FlTableRowData[]
-  selectionAfter: FlTableRowData[]
-  trigger: Exclude<FlTableEmitTrigger, 'proxy-set'>
+  selectionBefore: RowData[]
+  selectionAfter: RowData[]
+  trigger: Exclude<EmitTrigger, 'proxy-set'>
 }
 
-export interface FlTableSelectionSingleConflictPayload {
+export interface SelectionSingleConflictEvent {
   reason: 'multiple-selected' | 'select-all-disabled'
-  selection: FlTableRowData[]
+  selection: RowData[]
 }
 
-export interface FlTableCellChangePayload {
+export interface CellChangeEvent {
   rowIndex: number
   rowKey: string | number
   columnKey: string
@@ -28,33 +28,33 @@ export interface FlTableCellChangePayload {
   trigger: 'proxy-set'
 }
 
-export interface FlTableRowDragPayload {
+export interface RowDragEvent {
   oldIndex: number | null
   newIndex: number | null
-  row: FlTableRowData | null
+  row: RowData | null
 }
 
-export interface FlTableRowOrderChangePayload {
+export interface RowOrderChangeEvent {
   oldIndex: number
   newIndex: number
-  row: FlTableRowData
-  data: FlTableRowData[]
+  row: RowData
+  data: RowData[]
 }
 
-export interface FlTableColumnDragPayload {
+export interface ColumnDragEvent {
   oldIndex: number | null
   newIndex: number | null
   columnIndex: number | null
 }
 
-export interface FlTableColumnOrderChangePayload {
+export interface ColumnOrderChangeEvent {
   oldIndex: number
   newIndex: number
   columnIndex: number
   order: number[]
 }
 
-export const flTableProps = {
+export const tableProps = {
   /**
    * Enable row click to toggle selection when selection column exists.
    */
@@ -117,7 +117,7 @@ export const flTableProps = {
    * Bound data source. Falls through to ElTable `data`.
    */
   data: {
-    type: Array as PropType<FlTableRowData[]>,
+    type: Array as PropType<RowData[]>,
     default: () => []
   }
 } as const
@@ -127,11 +127,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const isNumber = (value: unknown): value is number => typeof value === 'number'
 
-export const flTableEmits = {
+export const tableEmits = {
   /**
    * Emit when row click triggers selection toggle.
    */
-  'selection-row-toggle': (payload: FlTableSelectionRowTogglePayload) =>
+  'selection-row-toggle': (payload: SelectionRowToggleEvent) =>
     isRecord(payload) &&
     isRecord(payload.row) &&
     isNumber(payload.rowIndex) &&
@@ -142,14 +142,14 @@ export const flTableEmits = {
   /**
    * Emit when single-selection rule conflicts with native selection behavior.
    */
-  'selection-single-conflict': (payload: FlTableSelectionSingleConflictPayload) =>
+  'selection-single-conflict': (payload: SelectionSingleConflictEvent) =>
     isRecord(payload) &&
     (payload.reason === 'multiple-selected' || payload.reason === 'select-all-disabled') &&
     Array.isArray(payload.selection),
   /**
    * Emit when proxy-tracked row field value is changed.
    */
-  'cell-change': (payload: FlTableCellChangePayload) =>
+  'cell-change': (payload: CellChangeEvent) =>
     isRecord(payload) &&
     isNumber(payload.rowIndex) &&
     (typeof payload.rowKey === 'string' || typeof payload.rowKey === 'number') &&
@@ -159,21 +159,21 @@ export const flTableEmits = {
   /**
    * Emit when row drag starts.
    */
-  'row-drag-start': (payload: FlTableRowDragPayload) =>
+  'row-drag-start': (payload: RowDragEvent) =>
     isRecord(payload) &&
     (payload.oldIndex === null || isNumber(payload.oldIndex)) &&
     (payload.newIndex === null || isNumber(payload.newIndex)),
   /**
    * Emit when row drag ends.
    */
-  'row-drag-end': (payload: FlTableRowDragPayload) =>
+  'row-drag-end': (payload: RowDragEvent) =>
     isRecord(payload) &&
     (payload.oldIndex === null || isNumber(payload.oldIndex)) &&
     (payload.newIndex === null || isNumber(payload.newIndex)),
   /**
    * Emit when row order has changed.
    */
-  'row-order-change': (payload: FlTableRowOrderChangePayload) =>
+  'row-order-change': (payload: RowOrderChangeEvent) =>
     isRecord(payload) &&
     isNumber(payload.oldIndex) &&
     isNumber(payload.newIndex) &&
@@ -182,7 +182,7 @@ export const flTableEmits = {
   /**
    * Emit when column drag starts.
    */
-  'column-drag-start': (payload: FlTableColumnDragPayload) =>
+  'column-drag-start': (payload: ColumnDragEvent) =>
     isRecord(payload) &&
     (payload.oldIndex === null || isNumber(payload.oldIndex)) &&
     (payload.newIndex === null || isNumber(payload.newIndex)) &&
@@ -190,7 +190,7 @@ export const flTableEmits = {
   /**
    * Emit when column drag ends.
    */
-  'column-drag-end': (payload: FlTableColumnDragPayload) =>
+  'column-drag-end': (payload: ColumnDragEvent) =>
     isRecord(payload) &&
     (payload.oldIndex === null || isNumber(payload.oldIndex)) &&
     (payload.newIndex === null || isNumber(payload.newIndex)) &&
@@ -198,7 +198,7 @@ export const flTableEmits = {
   /**
    * Emit when column order has changed.
    */
-  'column-order-change': (payload: FlTableColumnOrderChangePayload) =>
+  'column-order-change': (payload: ColumnOrderChangeEvent) =>
     isRecord(payload) &&
     isNumber(payload.oldIndex) &&
     isNumber(payload.newIndex) &&
@@ -206,8 +206,5 @@ export const flTableEmits = {
     Array.isArray(payload.order)
 } as const
 
-export type FlTableProps = ExtractPublicPropTypes<typeof flTableProps>
-export type FlTableEmits = typeof flTableEmits
-
-export type TableProps = FlTableProps
-export type TableEmits = FlTableEmits
+export type TableProps = ExtractPublicPropTypes<typeof tableProps>
+export type TableEmits = typeof tableEmits

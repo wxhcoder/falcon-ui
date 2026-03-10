@@ -11,7 +11,7 @@
   .fl-table__row-drag-cell {
     position: relative;
     cursor: grab;
-    padding-left: 24px;
+    transition: padding-left 0.2s ease;
 
     &::before {
       content: '⋮⋮';
@@ -27,6 +27,10 @@
       pointer-events: none;
       user-select: none;
     }
+  }
+
+  .el-table__row:hover .fl-table__row-drag-cell {
+    padding-left: 24px;
   }
 
   .el-table__row:hover .fl-table__row-drag-cell::before {

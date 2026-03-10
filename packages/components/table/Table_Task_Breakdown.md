@@ -5,7 +5,7 @@
 ### 阶段 A：契约定义
 
 - 新建 `src/table.ts`
-- 定义 `flTableProps` 与 `flTableEmits`
+- 定义 `tableProps` 与 `tableEmits`
 - 明确 `CellChange`、拖拽事件 payload
 - 产出：可被测试与组件实现直接消费的类型契约
 

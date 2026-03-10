@@ -5,56 +5,56 @@
     {
       "description": "代理数据检测到单元格字段写入时触发。",
       "name": "cell-change",
-      "signature": "(event: \"cell-change\", payload: FlTableCellChangePayload): void",
-      "type": "[payload: FlTableCellChangePayload]"
+      "signature": "(event: \"cell-change\", payload: CellChangeEvent): void",
+      "type": "[payload: CellChangeEvent]"
     },
     {
       "description": "结束拖拽列时触发。",
       "name": "column-drag-end",
-      "signature": "(event: \"column-drag-end\", payload: FlTableColumnDragPayload): void",
-      "type": "[payload: FlTableColumnDragPayload]"
+      "signature": "(event: \"column-drag-end\", payload: ColumnDragEvent): void",
+      "type": "[payload: ColumnDragEvent]"
     },
     {
       "description": "开始拖拽列时触发。",
       "name": "column-drag-start",
-      "signature": "(event: \"column-drag-start\", payload: FlTableColumnDragPayload): void",
-      "type": "[payload: FlTableColumnDragPayload]"
+      "signature": "(event: \"column-drag-start\", payload: ColumnDragEvent): void",
+      "type": "[payload: ColumnDragEvent]"
     },
     {
       "description": "列顺序发生变化时触发。",
       "name": "column-order-change",
-      "signature": "(event: \"column-order-change\", payload: FlTableColumnOrderChangePayload): void",
-      "type": "[payload: FlTableColumnOrderChangePayload]"
+      "signature": "(event: \"column-order-change\", payload: ColumnOrderChangeEvent): void",
+      "type": "[payload: ColumnOrderChangeEvent]"
     },
     {
       "description": "结束拖拽行时触发。",
       "name": "row-drag-end",
-      "signature": "(event: \"row-drag-end\", payload: FlTableRowDragPayload): void",
-      "type": "[payload: FlTableRowDragPayload]"
+      "signature": "(event: \"row-drag-end\", payload: RowDragEvent): void",
+      "type": "[payload: RowDragEvent]"
     },
     {
       "description": "开始拖拽行时触发。",
       "name": "row-drag-start",
-      "signature": "(event: \"row-drag-start\", payload: FlTableRowDragPayload): void",
-      "type": "[payload: FlTableRowDragPayload]"
+      "signature": "(event: \"row-drag-start\", payload: RowDragEvent): void",
+      "type": "[payload: RowDragEvent]"
     },
     {
       "description": "行顺序发生变化时触发。",
       "name": "row-order-change",
-      "signature": "(event: \"row-order-change\", payload: FlTableRowOrderChangePayload): void",
-      "type": "[payload: FlTableRowOrderChangePayload]"
+      "signature": "(event: \"row-order-change\", payload: RowOrderChangeEvent): void",
+      "type": "[payload: RowOrderChangeEvent]"
     },
     {
       "description": "点击行或选择变化导致选中状态切换时触发。",
       "name": "selection-row-toggle",
-      "signature": "(event: \"selection-row-toggle\", payload: FlTableSelectionRowTogglePayload): void",
-      "type": "[payload: FlTableSelectionRowTogglePayload]"
+      "signature": "(event: \"selection-row-toggle\", payload: SelectionRowToggleEvent): void",
+      "type": "[payload: SelectionRowToggleEvent]"
     },
     {
       "description": "单选约束与原生多选行为冲突时触发。",
       "name": "selection-single-conflict",
-      "signature": "(event: \"selection-single-conflict\", payload: FlTableSelectionSingleConflictPayload): void",
-      "type": "[payload: FlTableSelectionSingleConflictPayload]"
+      "signature": "(event: \"selection-single-conflict\", payload: SelectionSingleConflictEvent): void",
+      "type": "[payload: SelectionSingleConflictEvent]"
     }
   ],
   "exposes": [
@@ -338,7 +338,7 @@
       "description": "Bound data source. Falls through to ElTable `data`.",
       "name": "data",
       "required": false,
-      "type": "(FlTableRowData[] & any[]) | undefined"
+      "type": "(RowData[] & any[]) | undefined"
     },
     {
       "default": "-",

@@ -6,16 +6,15 @@ export const FlTable = withInstall(Table)
 export default FlTable
 
 export type {
-  FlTableCellChangePayload,
-  FlTableColumnDragPayload,
-  FlTableColumnOrderChangePayload,
-  FlTableEmits,
-  FlTableProps,
-  FlTableRowData,
-  FlTableRowDragPayload,
-  FlTableRowOrderChangePayload,
-  FlTableSelectionRowTogglePayload,
-  FlTableSelectionSingleConflictPayload,
+  CellChangeEvent,
+  ColumnDragEvent,
+  ColumnOrderChangeEvent,
+  EmitTrigger,
+  RowData,
+  RowDragEvent,
+  RowOrderChangeEvent,
+  SelectionRowToggleEvent,
+  SelectionSingleConflictEvent,
   TableEmits,
   TableProps
 } from './src/table'

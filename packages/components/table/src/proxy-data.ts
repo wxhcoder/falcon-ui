@@ -1,16 +1,16 @@
-import type { FlTableCellChangePayload, FlTableRowData } from './table'
+import type { CellChangeEvent, RowData } from './table'
 
 type ProxyRuntime = {
-  onCellChange: (payload: FlTableCellChangePayload) => void
-  resolveRowIndex: (row: FlTableRowData) => number
+  onCellChange: (payload: CellChangeEvent) => void
+  resolveRowIndex: (row: RowData) => number
   rowKeyField: string
   maxDepth: number
 }
 
 type BuildProxyDataOptions = {
-  data: FlTableRowData[]
-  onCellChange: (payload: FlTableCellChangePayload) => void
-  resolveRowIndex: (row: FlTableRowData) => number
+  data: RowData[]
+  onCellChange: (payload: CellChangeEvent) => void
+  resolveRowIndex: (row: RowData) => number
   rowKeyField: string
   maxDepth: number
 }
@@ -29,11 +29,7 @@ const composePath = (base: string, key: PropertyKey) => {
   return base ? `${base}.${keyText}` : keyText
 }
 
-const resolveRowKey = (
-  row: FlTableRowData,
-  rowIndex: number,
-  rowKeyField: string
-): string | number => {
+const resolveRowKey = (row: RowData, rowIndex: number, rowKeyField: string): string | number => {
   const candidate = row[rowKeyField]
   if (typeof candidate === 'string' || typeof candidate === 'number') {
     return candidate
@@ -71,17 +67,17 @@ export const createTableProxyDataBuilder = () => {
     cache.get(target)?.set(path, proxy)
   }
 
-  const toNullableRow = (value: unknown): FlTableRowData | null => {
+  const toNullableRow = (value: unknown): RowData | null => {
     if (!isObjectLike(value)) {
       return null
     }
 
-    return value as FlTableRowData
+    return value as RowData
   }
 
   const createProxy = (
     target: Record<PropertyKey, unknown>,
-    rootRow: FlTableRowData,
+    rootRow: RowData,
     path: string,
     depth: number
   ): unknown => {
@@ -152,7 +148,7 @@ export const createTableProxyDataBuilder = () => {
         return row
       }
 
-      return createProxy(rawRow, rawRow, '', 0) as FlTableRowData
+      return createProxy(rawRow, rawRow, '', 0) as RowData
     })
   }
 }

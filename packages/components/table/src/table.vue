@@ -28,15 +28,15 @@ import {
 import { useMergedExpose } from '@falcon-ui/hooks'
 import { invokeListener, useNamespace } from '@falcon-ui/utils'
 import type {
-  FlTableCellChangePayload,
-  FlTableColumnDragPayload,
-  FlTableColumnOrderChangePayload,
-  FlTableRowData,
-  FlTableRowDragPayload,
-  FlTableRowOrderChangePayload,
-  FlTableSelectionRowTogglePayload
+  CellChangeEvent,
+  ColumnDragEvent,
+  ColumnOrderChangeEvent,
+  RowData,
+  RowDragEvent,
+  RowOrderChangeEvent,
+  SelectionRowToggleEvent
 } from './table'
-import { flTableEmits, flTableProps } from './table'
+import { tableEmits, tableProps } from './table'
 import { createTableProxyDataBuilder } from './proxy-data'
 
 defineOptions({
@@ -45,7 +45,7 @@ defineOptions({
 })
 
 type CellClassNameScope = {
-  row: FlTableRowData
+  row: RowData
   column: unknown
   rowIndex: number
   columnIndex: number
@@ -66,8 +66,8 @@ type ColumnDropState = {
 
 const COLUMN_RESIZE_HOTZONE_PX = 8
 
-const props = defineProps(flTableProps)
-const emit = defineEmits(flTableEmits)
+const props = defineProps(tableProps)
+const emit = defineEmits(tableEmits)
 const attrs = useAttrs()
 const slots = useSlots()
 const ns = useNamespace('table')
@@ -277,11 +277,7 @@ const resolveBooleanAttr = (defaultValue: boolean, ...keys: string[]): boolean =
 const toNullableIndex = (value: unknown): number | null =>
   typeof value === 'number' && Number.isInteger(value) ? value : null
 
-const reorderRows = (
-  rows: FlTableRowData[],
-  oldIndex: number,
-  newIndex: number
-): FlTableRowData[] => {
+const reorderRows = (rows: RowData[], oldIndex: number, newIndex: number): RowData[] => {
   if (oldIndex === newIndex) {
     return [...rows]
   }
@@ -312,14 +308,14 @@ const hasSelectionColumn = (): boolean => {
   )
 }
 
-const getSelectionRows = (): FlTableRowData[] => {
+const getSelectionRows = (): RowData[] => {
   const rows = tableRef.value?.getSelectionRows?.()
-  return Array.isArray(rows) ? (rows as FlTableRowData[]) : []
+  return Array.isArray(rows) ? (rows as RowData[]) : []
 }
 
-const sourceData = computed<FlTableRowData[]>(() => props.data)
+const sourceData = computed<RowData[]>(() => props.data)
 
-const tableData = computed<FlTableRowData[]>(() => {
+const tableData = computed<RowData[]>(() => {
   if (!props.enableCellProxyIntercept) {
     return sourceData.value
   }
@@ -329,7 +325,7 @@ const tableData = computed<FlTableRowData[]>(() => {
     rowKeyField: props.rowKeyField,
     maxDepth: props.cellProxyMaxDepth,
     resolveRowIndex: (row) => sourceData.value.indexOf(row),
-    onCellChange: (payload: FlTableCellChangePayload) => {
+    onCellChange: (payload: CellChangeEvent) => {
       emit('cell-change', payload)
     }
   })
@@ -345,11 +341,11 @@ const forwardedAttrs = computed(() => {
 })
 
 const resolveSelectionTogglePayload = (
-  row: FlTableRowData,
-  selectionBefore: FlTableRowData[],
-  selectionAfter: FlTableRowData[],
-  trigger: FlTableSelectionRowTogglePayload['trigger']
-): FlTableSelectionRowTogglePayload => ({
+  row: RowData,
+  selectionBefore: RowData[],
+  selectionAfter: RowData[],
+  trigger: SelectionRowToggleEvent['trigger']
+): SelectionRowToggleEvent => ({
   row,
   rowIndex: sourceData.value.indexOf(row),
   selected: selectionAfter.includes(row),
@@ -358,7 +354,7 @@ const resolveSelectionTogglePayload = (
   trigger
 })
 
-const handleRowClick = (row: FlTableRowData, column: unknown, event: Event) => {
+const handleRowClick = (row: RowData, column: unknown, event: Event) => {
   if (props.selectionRowClick && hasSelectionColumn() && tableRef.value) {
     const selectionBefore = getSelectionRows()
 
@@ -380,7 +376,7 @@ const handleRowClick = (row: FlTableRowData, column: unknown, event: Event) => {
   invokeListener(readAttr('onRowClick'), row, column, event)
 }
 
-const handleSelect = (selection: FlTableRowData[], row: FlTableRowData) => {
+const handleSelect = (selection: RowData[], row: RowData) => {
   if (props.selectionSingle && tableRef.value && selection.length > 1) {
     tableRef.value.clearSelection()
     tableRef.value.toggleRowSelection(row, true)
@@ -404,7 +400,7 @@ const handleSelect = (selection: FlTableRowData[], row: FlTableRowData) => {
   invokeListener(readAttr('onSelect'), selection, row)
 }
 
-const handleSelectAll = (selection: FlTableRowData[]) => {
+const handleSelectAll = (selection: RowData[]) => {
   if (props.selectionSingle && tableRef.value) {
     tableRef.value.clearSelection()
 
@@ -763,7 +759,7 @@ const initRowSortable = () => {
     handle: `.${ns.e('row-drag-cell')}`,
     onStart: (event: SortableEvent) => {
       const oldIndex = toNullableIndex(event.oldIndex)
-      const payload: FlTableRowDragPayload = {
+      const payload: RowDragEvent = {
         oldIndex,
         newIndex: null,
         row: oldIndex === null ? null : (sourceData.value[oldIndex] ?? null)
@@ -775,7 +771,7 @@ const initRowSortable = () => {
       const oldIndex = toNullableIndex(event.oldIndex)
       const newIndex = toNullableIndex(event.newIndex)
       const row = oldIndex === null ? null : (sourceData.value[oldIndex] ?? null)
-      const payload: FlTableRowDragPayload = {
+      const payload: RowDragEvent = {
         oldIndex,
         newIndex,
         row
@@ -784,7 +780,7 @@ const initRowSortable = () => {
       emit('row-drag-end', payload)
 
       if (row && oldIndex !== null && newIndex !== null && oldIndex !== newIndex) {
-        const orderPayload: FlTableRowOrderChangePayload = {
+        const orderPayload: RowOrderChangeEvent = {
           oldIndex,
           newIndex,
           row,
@@ -832,7 +828,7 @@ const initColumnSortable = () => {
         (oldIndex ?? -1) + 1
       )
       const activeOrder = resolveColumnOrder(count)
-      const payload: FlTableColumnDragPayload = {
+      const payload: ColumnDragEvent = {
         oldIndex,
         newIndex: null,
         columnIndex: oldIndex === null ? null : (activeOrder[oldIndex] ?? oldIndex)
@@ -868,7 +864,7 @@ const initColumnSortable = () => {
       const count = Math.max(visibleColumnCount.value, columnOrder.value.length, maxDragIndex + 1)
       const activeOrder = resolveColumnOrder(count)
       const columnIndex = oldIndex === null ? null : (activeOrder[oldIndex] ?? oldIndex)
-      const payload: FlTableColumnDragPayload = {
+      const payload: ColumnDragEvent = {
         oldIndex,
         newIndex,
         columnIndex
@@ -881,7 +877,7 @@ const initColumnSortable = () => {
         const movedColumnSourceIndex = activeOrder[oldIndex] ?? oldIndex
         columnOrder.value = nextOrder
 
-        const orderPayload: FlTableColumnOrderChangePayload = {
+        const orderPayload: ColumnOrderChangeEvent = {
           oldIndex,
           newIndex,
           columnIndex: movedColumnSourceIndex,
