@@ -369,13 +369,6 @@
       "type": "string | undefined"
     },
     {
-      "default": "true",
-      "description": "Enable proxy intercept for row field assignments.",
-      "name": "enableCellProxyIntercept",
-      "required": false,
-      "type": "boolean | undefined"
-    },
-    {
       "default": "-",
       "description": "",
       "name": "expandRowKeys",
@@ -444,6 +437,13 @@
       "name": "indent",
       "required": false,
       "type": "number | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Enable editable cell mode with proxy intercept for row field assignments.",
+      "name": "isEdit",
+      "required": false,
+      "type": "boolean | undefined"
     },
     {
       "default": "-",

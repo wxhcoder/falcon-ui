@@ -343,7 +343,7 @@ const getSelectionRows = (): RowData[] => {
 const sourceData = computed<RowData[]>(() => props.data)
 
 const tableData = computed<RowData[]>(() => {
-  if (!props.enableCellProxyIntercept) {
+  if (!props.isEdit) {
     return sourceData.value
   }
 

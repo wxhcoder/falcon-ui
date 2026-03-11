@@ -184,7 +184,7 @@
 
 - `selectionRowClick: boolean`，默认 `true`
 - `selectionSingle: boolean`，默认 `false`
-- `enableCellProxyIntercept: boolean`，默认 `true`
+- `isEdit: boolean`，默认 `true`
 - `cellProxyMaxDepth: number`，默认 `4`
 - `crossHighlight: boolean`，默认 `false`
 - `rowDraggable: boolean`，默认 `true`

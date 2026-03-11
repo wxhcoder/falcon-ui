@@ -1,4 +1,4 @@
-﻿# FlTable
+# FlTable
 
 FlTable 是基于 Element Plus `ElTable` 的二次封装组件。
 在保持原生表格语义的前提下，补充了 Falcon UI 的默认样式和增强能力。
@@ -25,10 +25,10 @@ FlTable 是基于 Element Plus `ElTable` 的二次封装组件。
 ::: demo table/selection-single
 :::
 
-## 单元格变更劫持（Proxy）
+## 表格编辑状态
 
-开启 `enable-cell-proxy-intercept` 后，行数据字段写入会被统一捕获，并通过
-`cell-change` 事件上报。
+开启 `is-edit` 后，表格进入编辑状态，行数据字段写入会被统一捕获，并通过
+`cell-change` 事件上报。当前示例提供“开启交叉高亮”开关，便于观察当前编辑单元格。
 
 ::: demo table/cell-change
 :::

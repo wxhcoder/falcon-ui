@@ -306,7 +306,7 @@ describe('FlTable', () => {
     const wrapper = mount(FlTable, {
       props: {
         data: rows,
-        enableCellProxyIntercept: true,
+        isEdit: true,
         rowKeyField: 'id'
       },
       slots: {

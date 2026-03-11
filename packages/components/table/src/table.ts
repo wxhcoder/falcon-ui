@@ -70,9 +70,9 @@ export const tableProps = {
     default: false
   },
   /**
-   * Enable proxy intercept for row field assignments.
+   * Enable editable cell mode with proxy intercept for row field assignments.
    */
-  enableCellProxyIntercept: {
+  isEdit: {
     type: Boolean,
     default: true
   },

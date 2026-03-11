@@ -1,6 +1,15 @@
 <template>
   <div class="demo-col">
-    <FlTable :data="rows" style="width: 100%" @cell-change="handleCellChange">
+    <div class="demo-toolbar">
+      <span class="demo-toolbar__label">开启交叉高亮</span>
+      <el-switch v-model="crossHighlight" />
+    </div>
+
+    <FlTable
+      :data="rows"
+      :cross-highlight="crossHighlight"
+      style="width: 100%"
+      @cell-change="handleCellChange">
       <el-table-column prop="id" label="ID" width="90" />
       <el-table-column label="名称" min-width="180">
         <template #default="{ row }">
@@ -70,6 +79,7 @@ const rows: TableRow[] = [
   { id: 3003, name: '条目 C', category: 'ops', amount: 5, planDate: '2026-03-15' }
 ]
 
+const crossHighlight = ref(true)
 const lastChangeText = ref('')
 
 const handleCellChange = (payload: CellChangePayload) => {
@@ -84,6 +94,18 @@ const handleCellChange = (payload: CellChangePayload) => {
 </script>
 
 <style scoped>
+.demo-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.demo-toolbar__label {
+  color: var(--vp-c-text-1);
+  font-size: 14px;
+}
+
 .demo-result {
   color: var(--vp-c-text-2);
   font-size: 13px;
