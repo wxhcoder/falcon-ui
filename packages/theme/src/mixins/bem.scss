@@ -1,7 +1,17 @@
 $namespace: 'fl';
 
+@function selector($block, $element: null) {
+  $value: '.#{$namespace}-#{$block}';
+
+  @if $element != null {
+    $value: '#{$value}__#{$element}';
+  }
+
+  @return $value;
+}
+
 @mixin b($block) {
-  .#{$namespace}-#{$block} {
+  #{selector($block)} {
     @content;
   }
 }

@@ -4,15 +4,17 @@
 @include bem.b(table) {
   --el-table-header-bg-color: var(--el-fill-color-lighter);
 
-  .fl-table__header-row > th.el-table__cell {
-    background-color: var(--el-table-header-bg-color);
+  @include bem.e(header-row) {
+    > th.el-table__cell {
+      background-color: var(--el-table-header-bg-color);
+    }
+
+    > th#{bem.selector('table', 'cross-column')}.el-table__cell {
+      background-color: var(--el-table-current-row-bg-color);
+    }
   }
 
-  .fl-table__header-row > th.fl-table__cross-column.el-table__cell {
-    background-color: var(--el-table-current-row-bg-color);
-  }
-
-  .fl-table__row-drag-cell {
+  @include bem.e(row-drag-cell) {
     position: relative;
     cursor: grab;
     transition: padding-left 0.2s ease;
@@ -33,60 +35,69 @@
     }
   }
 
-  .el-table__row:hover .fl-table__row-drag-cell {
-    padding-left: 24px;
+  .el-table__row:hover #{bem.selector('table', 'row-drag-cell')} {
+    padding-left: 10px;
   }
 
-  .el-table__row:hover .fl-table__row-drag-cell::before {
+  .el-table__row:hover #{bem.selector('table', 'row-drag-cell')}::before {
     opacity: 1;
   }
 
-  .el-table__body tr > td.fl-table__cross-row,
-  .el-table__body tr > td.fl-table__cross-column {
+  .el-table__body tr > td#{bem.selector('table', 'cross-row')},
+  .el-table__body tr > td#{bem.selector('table', 'cross-column')} {
     background-color: var(--el-table-current-row-bg-color);
   }
 
-  &.el-table--striped .el-table__body tr.el-table__row--striped > td.fl-table__cross-row,
-  &.el-table--striped .el-table__body tr.el-table__row--striped > td.fl-table__cross-column {
+  &.el-table--striped
+    .el-table__body
+    tr.el-table__row--striped
+    > td#{bem.selector('table', 'cross-row')},
+  &.el-table--striped
+    .el-table__body
+    tr.el-table__row--striped
+    > td#{bem.selector('table', 'cross-column')} {
     background-color: var(--el-table-current-row-bg-color);
   }
 
-  .el-table__body tr > td.fl-table__cross-active {
+  .el-table__body tr > td#{bem.selector('table', 'cross-active')} {
     background-color: var(--el-table-tr-bg-color);
     box-shadow: inset 0 0 0 1px var(--el-color-primary);
   }
 
-  .el-table__body tr.current-row > td.fl-table__cross-active {
+  .el-table__body tr.current-row > td#{bem.selector('table', 'cross-active')} {
     background-color: var(--el-table-tr-bg-color);
   }
 
-  &.el-table--striped .el-table__body tr.el-table__row--striped > td.fl-table__cross-active {
+  &.el-table--striped
+    .el-table__body
+    tr.el-table__row--striped
+    > td#{bem.selector('table', 'cross-active')} {
     background-color: var(--el-fill-color-lighter);
   }
 
   &.el-table--striped
     .el-table__body
     tr.el-table__row--striped.current-row
-    > td.fl-table__cross-active {
+    > td#{bem.selector('table', 'cross-active')} {
     background-color: var(--el-fill-color-lighter);
   }
 
-  .el-table__body tr.current-row > td.fl-table__cross-control-cell {
+  .el-table__body tr.current-row > td#{bem.selector('table', 'cross-control-cell')} {
     background-color: var(--el-table-tr-bg-color);
   }
 
   &.el-table--striped
     .el-table__body
     tr.el-table__row--striped.current-row
-    > td.fl-table__cross-control-cell {
+    > td#{bem.selector('table', 'cross-control-cell')} {
     background-color: var(--el-fill-color-lighter);
   }
 
-  .fl-table__column-drag-indicator-left {
+  @include bem.e(column-drag-indicator-left) {
     box-shadow: inset 2px 0 0 var(--el-color-primary);
   }
 
-  .fl-table__column-drag-indicator-right {
+  @include bem.e(column-drag-indicator-right) {
     box-shadow: inset -2px 0 0 var(--el-color-primary);
   }
 

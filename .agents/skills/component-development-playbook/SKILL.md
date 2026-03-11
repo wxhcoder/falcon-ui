@@ -90,11 +90,15 @@ description: 用于将 Element Plus 组件二次封装为 Falcon UI 组件的标
 
 ## 组件命名与样式命名规范（必须）
 
-1. 组件名统一使用 `Fl` 前缀：`FlXxx`（例如 `FlButton`、`FlInput`）。
-2. `defineOptions` 的 `name` 必须与组件名一致（例如 `name: 'FlButton'`）。
-3. BEM 命名空间统一为 `fl`：类名形如 `fl-button`、`fl-input__inner`。
-4. CSS 变量统一使用 `--fl-` 前缀，不再新增 `--f-` 变量。
-5. 禁止新增旧命名：`F*`、`f-*`、`--f-*`。
+详细规范见：
+
+1. `references/naming-and-style-conventions.md`
+
+最低要求：
+
+1. 组件名统一使用 `Fl` 前缀：`FlXxx`。
+2. `defineOptions.name`、安装导出名、全局组件名保持一致。
+3. `fl` 命名空间的 BEM 类名和 `--fl-*` 变量命名必须统一遵循引用文档。
 
 ## 变量与类型命名规范（必须）
 
@@ -108,12 +112,27 @@ description: 用于将 Element Plus 组件二次封装为 Falcon UI 组件的标
 8. 只有在跨包公共导出确实会产生命名冲突时，才补充最小必要前缀；即使如此，也优先补业务域前缀，不引入 `Fl` 品牌前缀和 `Payload` 后缀。
 9. 新增或重构组件时，如果发现旧命名与本规范冲突，应在当前任务范围内一并收敛，避免新旧规范并存。
 
+## SCSS 开发规范（必须）
+
+详细规范见：
+
+1. `references/scss-development-guidelines.md`
+
+最低要求：
+
+1. 组件主题文件统一落在 `packages/theme/src/<component>.scss`。
+2. `fl` 命名空间类名优先使用 `b`、`e`、`m`、`when` 生成。
+3. 只有复合选择器场景才允许使用 `bem.selector(...)`。
+4. 样式改动完成后，至少执行 `pnpm build:lib:style`。
+
 ## 参考资料
 
 1. FlInput 模板与映射：`references/finput-standard-workflow.md`
 2. 封装完成定义检查清单：`references/component-checklist.md`
 3. 测试矩阵：`references/test-matrix.md`
 4. PR 输出模板：`references/pr-template.md`
+5. 组件命名与样式命名规范：`references/naming-and-style-conventions.md`
+6. SCSS 开发规范：`references/scss-development-guidelines.md`
 
 ## Shared Hook Refactor Rule (Mandatory)
 
