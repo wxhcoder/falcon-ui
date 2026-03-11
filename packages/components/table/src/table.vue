@@ -46,9 +46,26 @@ defineOptions({
 
 type CellClassNameScope = {
   row: RowData
-  column: unknown
+  column: ColumnState
   rowIndex: number
   columnIndex: number
+}
+
+type HeaderCellClassNameScope = {
+  column: ColumnState
+  rowIndex: number
+  columnIndex: number
+}
+
+type ColumnState = {
+  type?: string
+  columnKey?: string
+  rawColumnKey?: string
+}
+
+type ActiveCell = {
+  rowKey: string | number
+  columnKey: string
 }
 
 type ClientPoint = {
@@ -65,6 +82,8 @@ type ColumnDropState = {
 }
 
 const COLUMN_RESIZE_HOTZONE_PX = 8
+const ROW_DRAG_HANDLE_HOTZONE_PX = 24
+const CONTROL_COLUMN_TYPES = new Set(['selection', 'index', 'expand'])
 
 const props = defineProps(tableProps)
 const emit = defineEmits(tableEmits)
@@ -89,6 +108,8 @@ const isColumnResizeGesture = ref<boolean>(false)
 const columnResizeGuardHeaderRow = shallowRef<HTMLElement | null>(null)
 const columnResizePointerDownListener = ref<((event: Event) => void) | null>(null)
 const columnResizePointerUpListener = ref<((event: Event) => void) | null>(null)
+const activeCell = ref<ActiveCell | null>(null)
+const outsidePointerDownListener = ref<((event: Event) => void) | null>(null)
 const buildProxyData = createTableProxyDataBuilder()
 
 const { changeRef } = useMergedExpose({})
@@ -127,6 +148,8 @@ const flattenSlotNodes = (nodes: unknown): VNode[] => {
 
   return flatNodes
 }
+
+const getInternalColumnKey = (sourceIndex: number) => `column-${sourceIndex}`
 
 const createColumnOrder = (count: number): number[] =>
   Array.from({ length: count }, (_, index) => index)
@@ -188,7 +211,8 @@ const tableSlots = computed(() => {
           }
 
           return cloneVNode(node, {
-            key: node.key ?? `fl-table-column-${sourceIndex}`
+            key: node.key ?? `fl-table-column-${sourceIndex}`,
+            columnKey: getInternalColumnKey(sourceIndex)
           })
         })
         .filter((node): node is VNode => node !== null)
@@ -209,6 +233,8 @@ const controlledAttrKeys = [
   'cell-class-name',
   'headerCellClassName',
   'header-cell-class-name',
+  'onCellClick',
+  'onCell-click',
   'onRowClick',
   'onSelect',
   'onSelectAll'
@@ -341,6 +367,91 @@ const forwardedAttrs = computed(() => {
   return next
 })
 
+const readRowKey = (row: RowData): string | number | null => {
+  const candidate = row[props.rowKeyField]
+  return typeof candidate === 'string' || typeof candidate === 'number' ? candidate : null
+}
+
+const isControlColumn = (column: ColumnState | null | undefined): boolean =>
+  typeof column?.type === 'string' && CONTROL_COLUMN_TYPES.has(column.type)
+
+const resolveColumnKey = (
+  column: ColumnState | null | undefined,
+  displayIndex: number | null = null
+): string | null => {
+  if (typeof column?.columnKey === 'string' && column.columnKey) {
+    return column.columnKey
+  }
+
+  if (typeof column?.rawColumnKey === 'string' && column.rawColumnKey) {
+    return column.rawColumnKey
+  }
+
+  if (displayIndex === null) {
+    return null
+  }
+
+  const count = Math.max(columnOrder.value.length, displayIndex + 1, visibleColumnCount.value)
+  const activeOrder = resolveColumnOrder(count)
+  const sourceIndex = activeOrder[displayIndex] ?? displayIndex
+  return getInternalColumnKey(sourceIndex)
+}
+
+const resolveCellDisplayIndex = (cell: Element | null): number | null => {
+  if (
+    !(cell instanceof HTMLTableCellElement) ||
+    !(cell.parentElement instanceof HTMLTableRowElement)
+  ) {
+    return null
+  }
+
+  return Array.from(cell.parentElement.children).indexOf(cell)
+}
+
+const isRowDragHandleHotzone = (
+  cell: Element | null,
+  event: Event,
+  displayIndex: number | null
+) => {
+  if (
+    !props.rowDraggable ||
+    displayIndex !== props.rowDragHandleColumnIndex ||
+    !(cell instanceof HTMLElement)
+  ) {
+    return false
+  }
+
+  const point = readClientPointFromEvent(event)
+  if (!point) {
+    return false
+  }
+
+  const rect = cell.getBoundingClientRect()
+  return point.x - rect.left <= Math.min(ROW_DRAG_HANDLE_HOTZONE_PX, rect.width)
+}
+
+const setActiveCell = (
+  row: RowData,
+  column: ColumnState | null | undefined,
+  displayIndex: number
+) => {
+  if (!props.crossHighlight || isControlColumn(column)) {
+    return
+  }
+
+  const rowKey = readRowKey(row)
+  const columnKey = resolveColumnKey(column, displayIndex)
+
+  if (rowKey === null || !columnKey) {
+    return
+  }
+
+  activeCell.value = {
+    rowKey,
+    columnKey
+  }
+}
+
 const resolveSelectionTogglePayload = (
   row: RowData,
   selectionBefore: RowData[],
@@ -375,6 +486,17 @@ const handleRowClick = (row: RowData, column: unknown, event: Event) => {
   }
 
   invokeListener(readAttr('onRowClick'), row, column, event)
+}
+
+const handleCellClick = (row: RowData, column: ColumnState, cell: Element, event: Event) => {
+  const displayIndex = resolveCellDisplayIndex(cell)
+  const isHandleHotzone = isRowDragHandleHotzone(cell, event, displayIndex)
+
+  if (!isHandleHotzone && displayIndex !== null) {
+    setActiveCell(row, column, displayIndex)
+  }
+
+  invokeListener(readAttr('onCellClick', 'onCell-click'), row, column, cell, event)
 }
 
 const handleSelect = (selection: RowData[], row: RowData) => {
@@ -431,12 +553,50 @@ const resolveHeaderRowClassName = () => {
 const resolveCellClassName = () => {
   const userCellClassName = readAttr('cellClassName', 'cell-class-name')
 
+  const resolveCrossClass = (scope: CellClassNameScope): string | null => {
+    if (!props.crossHighlight || !activeCell.value) {
+      return null
+    }
+
+    const rowKey = readRowKey(scope.row)
+    if (rowKey === null) {
+      return null
+    }
+
+    if (isControlColumn(scope.column)) {
+      return rowKey === activeCell.value.rowKey ? ns.e('cross-control-cell') : null
+    }
+
+    const columnKey = resolveColumnKey(scope.column, scope.columnIndex)
+    if (!columnKey) {
+      return null
+    }
+
+    const isActiveRow = rowKey === activeCell.value.rowKey
+    const isActiveColumn = columnKey === activeCell.value.columnKey
+
+    if (isActiveRow && isActiveColumn) {
+      return ns.e('cross-active')
+    }
+
+    if (isActiveRow) {
+      return ns.e('cross-row')
+    }
+
+    if (isActiveColumn) {
+      return ns.e('cross-column')
+    }
+
+    return null
+  }
+
   const resolveByScope = (scope: CellClassNameScope) =>
     mergeClass(
       typeof userCellClassName === 'function' ? userCellClassName(scope) : userCellClassName,
       props.rowDraggable &&
         scope.columnIndex === props.rowDragHandleColumnIndex &&
-        ns.e('row-drag-cell')
+        ns.e('row-drag-cell'),
+      resolveCrossClass(scope)
     )
 
   return (scope: CellClassNameScope) => resolveByScope(scope)
@@ -445,14 +605,24 @@ const resolveCellClassName = () => {
 const resolveHeaderCellClassName = () => {
   const userHeaderCellClassName = readAttr('headerCellClassName', 'header-cell-class-name')
 
-  const resolveByScope = (scope: { columnIndex: number }) =>
-    mergeClass(
+  const resolveByScope = (scope: HeaderCellClassNameScope) => {
+    const columnClass =
+      props.crossHighlight &&
+      activeCell.value &&
+      !isControlColumn(scope.column) &&
+      resolveColumnKey(scope.column, scope.columnIndex) === activeCell.value.columnKey
+        ? ns.e('cross-column')
+        : null
+
+    return mergeClass(
       typeof userHeaderCellClassName === 'function'
         ? userHeaderCellClassName(scope)
-        : userHeaderCellClassName
+        : userHeaderCellClassName,
+      columnClass
     )
+  }
 
-  return (scope: { columnIndex: number }) => resolveByScope(scope)
+  return (scope: HeaderCellClassNameScope) => resolveByScope(scope)
 }
 
 const syncVisibleColumnCount = (headerRow: HTMLElement) => {
@@ -460,8 +630,8 @@ const syncVisibleColumnCount = (headerRow: HTMLElement) => {
   visibleColumnCount.value = cells.length
 }
 
-const readStoreColumnCount = (): number => {
-  const columns = (
+const readStoreColumns = () =>
+  (
     tableRef.value as unknown as {
       store?: {
         states?: {
@@ -472,6 +642,29 @@ const readStoreColumnCount = (): number => {
       }
     }
   )?.store?.states?.columns?.value
+
+const columnStoreSignature = computed(() => {
+  const columns = readStoreColumns()
+  if (!Array.isArray(columns)) {
+    return ''
+  }
+
+  return columns
+    .map((column, index) => {
+      const current = column as ColumnState & { label?: unknown; property?: unknown }
+      return [
+        index,
+        String(current.columnKey ?? ''),
+        String(current.type ?? ''),
+        String(current.label ?? ''),
+        String(current.property ?? '')
+      ].join(':')
+    })
+    .join('|')
+})
+
+const readStoreColumnCount = (): number => {
+  const columns = readStoreColumns()
 
   return Array.isArray(columns) ? columns.length : 0
 }
@@ -557,6 +750,40 @@ const destroyColumnSortable = () => {
         cell.classList.remove(leftClass, rightClass)
       })
   }
+}
+
+const unbindOutsidePointerDown = () => {
+  if (!outsidePointerDownListener.value) {
+    return
+  }
+
+  document.removeEventListener('pointerdown', outsidePointerDownListener.value, true)
+  document.removeEventListener('mousedown', outsidePointerDownListener.value, true)
+  document.removeEventListener('touchstart', outsidePointerDownListener.value, true)
+  outsidePointerDownListener.value = null
+}
+
+const bindOutsidePointerDown = () => {
+  unbindOutsidePointerDown()
+
+  const listener = (event: Event) => {
+    if (!props.crossHighlight || !activeCell.value) {
+      return
+    }
+
+    const tableElement = getTableElement()
+    const target = event.target
+    if (!tableElement || !(target instanceof Node) || tableElement.contains(target)) {
+      return
+    }
+
+    activeCell.value = null
+  }
+
+  outsidePointerDownListener.value = listener
+  document.addEventListener('pointerdown', listener, true)
+  document.addEventListener('mousedown', listener, true)
+  document.addEventListener('touchstart', listener, true)
 }
 
 const readClientPointFromEvent = (event: Event): ClientPoint | null => {
@@ -948,12 +1175,45 @@ const mergedTableAttrs = computed(() => ({
   headerRowClassName: resolveHeaderRowClassName(),
   cellClassName: resolveCellClassName(),
   headerCellClassName: resolveHeaderCellClassName(),
+  onCellClick: handleCellClick,
   onRowClick: handleRowClick,
   onSelect: handleSelect,
   onSelectAll: handleSelectAll
 }))
 
+watch(
+  () => props.crossHighlight,
+  (enabled) => {
+    if (!enabled) {
+      activeCell.value = null
+    }
+  }
+)
+
+watch(columnStoreSignature, (next, prev) => {
+  if (prev !== undefined && next !== prev) {
+    activeCell.value = null
+  }
+})
+
+watch(
+  () => [sourceData.value.length, props.rowKeyField],
+  () => {
+    if (!activeCell.value) {
+      return
+    }
+
+    const hasActiveRow = sourceData.value.some(
+      (row) => readRowKey(row) === activeCell.value?.rowKey
+    )
+    if (!hasActiveRow) {
+      activeCell.value = null
+    }
+  }
+)
+
 onMounted(() => {
+  bindOutsidePointerDown()
   void refreshSortables()
 })
 
@@ -971,6 +1231,7 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  unbindOutsidePointerDown()
   destroyRowSortable()
   destroyColumnSortable()
 })

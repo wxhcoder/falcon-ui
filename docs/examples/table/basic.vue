@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="demo-col">
     <FlTable :data="rows" style="width: 100%">
       <el-table-column prop="id" label="ID" width="90" />

@@ -327,6 +327,13 @@
       "type": "boolean | undefined"
     },
     {
+      "default": "false",
+      "description": "Enable cross highlight for clicked data cells.",
+      "name": "crossHighlight",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
       "default": "-",
       "description": "",
       "name": "currentRowKey",

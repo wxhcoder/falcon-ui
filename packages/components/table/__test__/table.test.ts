@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { ElTable, ElTableColumn } from 'element-plus'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { h, nextTick } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import type {
   CellChangeEvent,
   ColumnOrderChangeEvent,
@@ -81,6 +81,52 @@ const setElementRect = (
     configurable: true,
     value: () => nextRect
   })
+}
+
+const getStoreColumns = (wrapper: ReturnType<typeof mount>) => {
+  const table = wrapper.getComponent(ElTable)
+  const tableVm = table.vm as unknown as {
+    store?: {
+      states?: {
+        columns?: {
+          value?: Array<{ property?: string; type?: string; columnKey?: string }>
+        }
+      }
+    }
+  }
+
+  return tableVm.store?.states?.columns?.value ?? []
+}
+
+const emitCellClick = async (
+  wrapper: ReturnType<typeof mount>,
+  row: RowData,
+  columnIndex: number,
+  eventInit: MouseEventInit = {}
+) => {
+  const table = wrapper.getComponent(ElTable)
+  const columns = getStoreColumns(wrapper)
+  const cells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+  const cell = cells[columnIndex]?.element as HTMLElement | undefined
+
+  if (!cell) {
+    throw new Error(`cell ${columnIndex} missing`)
+  }
+
+  table.vm.$emit(
+    'cell-click',
+    row,
+    columns[columnIndex],
+    cell,
+    new MouseEvent('click', {
+      bubbles: true,
+      clientX: eventInit.clientX ?? 0,
+      clientY: eventInit.clientY ?? 0
+    })
+  )
+
+  await nextTick()
+  await nextTick()
 }
 
 beforeEach(() => {
@@ -284,6 +330,238 @@ describe('FlTable', () => {
     expect(payload?.path).toBe('profile.nickname')
     expect(payload?.prevValue).toBe('A-1')
     expect(payload?.nextValue).toBe('A-2')
+  })
+
+  it('does not apply cross highlight classes when crossHighlight is disabled', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: false
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    const headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
+    const bodyCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+
+    expect(headerCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))).toBe(
+      false
+    )
+    expect(bodyCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))).toBe(
+      false
+    )
+  })
+
+  it('applies row, column, and active classes when crossHighlight is enabled', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    const headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const secondRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:nth-child(2) td')
+
+    expect(headerCells[1]?.classes()).toContain('fl-table__cross-column')
+    expect(firstRowCells[0]?.classes()).toContain('fl-table__cross-row')
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(firstRowCells[1]?.classes()).not.toContain('fl-table__cross-row')
+    expect(firstRowCells[1]?.classes()).not.toContain('fl-table__cross-column')
+    expect(secondRowCells[1]?.classes()).toContain('fl-table__cross-column')
+  })
+
+  it('clears cross highlight when clicking outside the table', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    const outside = document.createElement('button')
+    document.body.appendChild(outside)
+    outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+
+    await nextTick()
+    await nextTick()
+
+    const headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+
+    expect(headerCells[1]?.classes()).not.toContain('fl-table__cross-column')
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-row')
+    expect(firstRowCells[1]?.classes()).not.toContain('fl-table__cross-active')
+
+    outside.remove()
+  })
+
+  it('skips control columns for cross highlight', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 0)
+
+    const headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+
+    expect(headerCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))).toBe(
+      false
+    )
+    expect(
+      firstRowCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))
+    ).toBe(false)
+
+    await emitCellClick(wrapper, rows[0], 1)
+
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-row')
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+  })
+
+  it('does not activate cross highlight when clicking the row drag handle hotzone', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: true,
+        rowDraggable: true
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const firstCell = firstRowCells[0]?.element as HTMLElement | undefined
+
+    if (!firstCell) {
+      throw new Error('first row first cell missing')
+    }
+
+    setElementRect(firstCell, { left: 0, top: 0, width: 120, height: 40 })
+
+    await emitCellClick(wrapper, rows[0], 0, { clientX: 12, clientY: 20 })
+
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-active')
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-row')
+
+    await emitCellClick(wrapper, rows[0], 0, { clientX: 72, clientY: 20 })
+
+    expect(firstRowCells[0]?.classes()).toContain('fl-table__cross-active')
+  })
+
+  it('clears active cross highlight when source columns change', async () => {
+    const rows = createRows()
+    const Host = defineComponent({
+      components: { FlTable, ElTableColumn },
+      setup() {
+        const showId = ref(true)
+        return {
+          rows,
+          showId
+        }
+      },
+      render() {
+        return h(
+          FlTable,
+          {
+            data: this.rows,
+            crossHighlight: true
+          },
+          {
+            default: () => [
+              h(ElTableColumn, { prop: 'name', label: 'Name' }),
+              h(ElTableColumn, { prop: 'age', label: 'Age' }),
+              ...(this.showId ? [h(ElTableColumn, { prop: 'id', label: 'ID' })] : [])
+            ]
+          }
+        )
+      }
+    })
+
+    const wrapper = mount(Host)
+
+    await nextTick()
+    await nextTick()
+
+    const tableWrapper = wrapper.getComponent(FlTable)
+    await emitCellClick(tableWrapper, rows[0], 2)
+
+    expect(
+      tableWrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')[2]?.classes()
+    ).toContain('fl-table__cross-active')
+    ;(wrapper.vm as unknown as { showId: boolean }).showId = false
+    await nextTick()
+    await nextTick()
+
+    const nextTableWrapper = wrapper.getComponent(FlTable)
+    const firstRowCells = nextTableWrapper.findAll(
+      '.el-table__body-wrapper tbody tr:first-child td'
+    )
+
+    expect(
+      firstRowCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))
+    ).toBe(false)
+  })
+
+  it('does not activate cross highlight when rowKeyField is missing', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: true,
+        rowKeyField: 'missing'
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    expect(
+      firstRowCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))
+    ).toBe(false)
   })
 
   it('uses sortablejs for row/column drag and emits reorder payloads', async () => {

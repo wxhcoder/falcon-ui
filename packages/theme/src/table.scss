@@ -8,6 +8,10 @@
     background-color: var(--el-table-header-bg-color);
   }
 
+  .fl-table__header-row > th.fl-table__cross-column.el-table__cell {
+    background-color: var(--el-table-current-row-bg-color);
+  }
+
   .fl-table__row-drag-cell {
     position: relative;
     cursor: grab;
@@ -35,6 +39,47 @@
 
   .el-table__row:hover .fl-table__row-drag-cell::before {
     opacity: 1;
+  }
+
+  .el-table__body tr > td.fl-table__cross-row,
+  .el-table__body tr > td.fl-table__cross-column {
+    background-color: var(--el-table-current-row-bg-color);
+  }
+
+  &.el-table--striped .el-table__body tr.el-table__row--striped > td.fl-table__cross-row,
+  &.el-table--striped .el-table__body tr.el-table__row--striped > td.fl-table__cross-column {
+    background-color: var(--el-table-current-row-bg-color);
+  }
+
+  .el-table__body tr > td.fl-table__cross-active {
+    background-color: var(--el-table-tr-bg-color);
+    box-shadow: inset 0 0 0 1px var(--el-color-primary);
+  }
+
+  .el-table__body tr.current-row > td.fl-table__cross-active {
+    background-color: var(--el-table-tr-bg-color);
+  }
+
+  &.el-table--striped .el-table__body tr.el-table__row--striped > td.fl-table__cross-active {
+    background-color: var(--el-fill-color-lighter);
+  }
+
+  &.el-table--striped
+    .el-table__body
+    tr.el-table__row--striped.current-row
+    > td.fl-table__cross-active {
+    background-color: var(--el-fill-color-lighter);
+  }
+
+  .el-table__body tr.current-row > td.fl-table__cross-control-cell {
+    background-color: var(--el-table-tr-bg-color);
+  }
+
+  &.el-table--striped
+    .el-table__body
+    tr.el-table__row--striped.current-row
+    > td.fl-table__cross-control-cell {
+    background-color: var(--el-fill-color-lighter);
   }
 
   .fl-table__column-drag-indicator-left {
