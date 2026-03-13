@@ -1,4 +1,4 @@
-# FlTable
+﻿# FlTable
 
 FlTable 是基于 Element Plus `ElTable` 的二次封装组件。
 在保持原生表格语义的前提下，补充了 Falcon UI 的默认样式和增强能力。
@@ -13,7 +13,7 @@ FlTable 是基于 Element Plus `ElTable` 的二次封装组件。
 ## 交叉高亮
 
 点击数据单元格后，`FlTable` 默认会保留当前单元格的焦点边框。
-开启 `cross-highlight` 后，会在该焦点边框基础上同步高亮当前行、当前列与对应表头列。
+开启 `cross-highlight` 后，会在该焦点边框基础上同步高亮当前行、当前列与对应表头列。示例内置固定列开关，可切换固定前 3 列并验证 fixed 场景下的高亮表现。
 当前单元格保持原始背景色，仅通过边框突出当前关注点。
 ::: demo table/cross-highlight
 :::
