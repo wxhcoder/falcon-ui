@@ -332,7 +332,7 @@ describe('FlTable', () => {
     expect(payload?.nextValue).toBe('A-2')
   })
 
-  it('does not apply cross highlight classes when crossHighlight is disabled', async () => {
+  it('keeps cell focus active without row and column highlight when crossHighlight is disabled', async () => {
     const rows = createRows()
     const wrapper = mount(FlTable, {
       props: {
@@ -349,14 +349,39 @@ describe('FlTable', () => {
     await emitCellClick(wrapper, rows[0], 1)
 
     const headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
-    const bodyCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const secondRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:nth-child(2) td')
 
     expect(headerCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))).toBe(
       false
     )
-    expect(bodyCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))).toBe(
-      false
-    )
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(firstRowCells[1]?.classes()).not.toContain('fl-table__cross-row')
+    expect(firstRowCells[1]?.classes()).not.toContain('fl-table__cross-column')
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-row')
+    expect(secondRowCells[1]?.classes()).not.toContain('fl-table__cross-column')
+  })
+
+  it('does not apply control column classes when crossHighlight is disabled', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: false
+      },
+      slots: {
+        default: () => createColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-control-cell')
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
   })
 
   it('applies row, column, and active classes when crossHighlight is enabled', async () => {
@@ -387,12 +412,12 @@ describe('FlTable', () => {
     expect(secondRowCells[1]?.classes()).toContain('fl-table__cross-column')
   })
 
-  it('clears cross highlight when clicking outside the table', async () => {
+  it('clears active cell focus when clicking outside the table', async () => {
     const rows = createRows()
     const wrapper = mount(FlTable, {
       props: {
         data: rows,
-        crossHighlight: true
+        crossHighlight: false
       },
       slots: {
         default: () => createPlainColumns()
@@ -452,12 +477,12 @@ describe('FlTable', () => {
     expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
   })
 
-  it('does not activate cross highlight when clicking the row drag handle hotzone', async () => {
+  it('does not activate cell focus when clicking the row drag handle hotzone', async () => {
     const rows = createRows()
     const wrapper = mount(FlTable, {
       props: {
         data: rows,
-        crossHighlight: true,
+        crossHighlight: false,
         rowDraggable: true
       },
       slots: {
@@ -487,7 +512,39 @@ describe('FlTable', () => {
     expect(firstRowCells[0]?.classes()).toContain('fl-table__cross-active')
   })
 
-  it('clears active cross highlight when source columns change', async () => {
+  it('keeps cell focus when crossHighlight is turned off after activation', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    await wrapper.setProps({
+      crossHighlight: false
+    })
+    await nextTick()
+    await nextTick()
+
+    const headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const secondRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:nth-child(2) td')
+
+    expect(headerCells[1]?.classes()).not.toContain('fl-table__cross-column')
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-row')
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(secondRowCells[1]?.classes()).not.toContain('fl-table__cross-column')
+  })
+
+  it('clears active cell focus when source columns change', async () => {
     const rows = createRows()
     const Host = defineComponent({
       components: { FlTable, ElTableColumn },
@@ -541,12 +598,12 @@ describe('FlTable', () => {
     ).toBe(false)
   })
 
-  it('does not activate cross highlight when rowKeyField is missing', async () => {
+  it('does not activate cell focus when rowKeyField is missing', async () => {
     const rows = createRows()
     const wrapper = mount(FlTable, {
       props: {
         data: rows,
-        crossHighlight: true,
+        crossHighlight: false,
         rowKeyField: 'missing'
       },
       slots: {

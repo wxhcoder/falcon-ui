@@ -85,7 +85,7 @@ export const tableProps = {
     validator: (value: number) => Number.isInteger(value) && value >= 1
   },
   /**
-   * Enable cross highlight for clicked data cells.
+   * Extend clicked data cells with row and column cross highlight.
    */
   crossHighlight: {
     type: Boolean,

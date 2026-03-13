@@ -328,7 +328,7 @@
     },
     {
       "default": "false",
-      "description": "Enable cross highlight for clicked data cells.",
+      "description": "Extend clicked data cells with row and column cross highlight.",
       "name": "crossHighlight",
       "required": false,
       "type": "boolean | undefined"

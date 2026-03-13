@@ -435,7 +435,7 @@ const setActiveCell = (
   column: ColumnState | null | undefined,
   displayIndex: number
 ) => {
-  if (!props.crossHighlight || isControlColumn(column)) {
+  if (isControlColumn(column)) {
     return
   }
 
@@ -554,7 +554,7 @@ const resolveCellClassName = () => {
   const userCellClassName = readAttr('cellClassName', 'cell-class-name')
 
   const resolveCrossClass = (scope: CellClassNameScope): string | null => {
-    if (!props.crossHighlight || !activeCell.value) {
+    if (!activeCell.value) {
       return null
     }
 
@@ -564,7 +564,9 @@ const resolveCellClassName = () => {
     }
 
     if (isControlColumn(scope.column)) {
-      return rowKey === activeCell.value.rowKey ? ns.e('cross-control-cell') : null
+      return props.crossHighlight && rowKey === activeCell.value.rowKey
+        ? ns.e('cross-control-cell')
+        : null
     }
 
     const columnKey = resolveColumnKey(scope.column, scope.columnIndex)
@@ -577,6 +579,10 @@ const resolveCellClassName = () => {
 
     if (isActiveRow && isActiveColumn) {
       return ns.e('cross-active')
+    }
+
+    if (!props.crossHighlight) {
+      return null
     }
 
     if (isActiveRow) {
@@ -767,7 +773,7 @@ const bindOutsidePointerDown = () => {
   unbindOutsidePointerDown()
 
   const listener = (event: Event) => {
-    if (!props.crossHighlight || !activeCell.value) {
+    if (!activeCell.value) {
       return
     }
 
@@ -1180,15 +1186,6 @@ const mergedTableAttrs = computed(() => ({
   onSelect: handleSelect,
   onSelectAll: handleSelectAll
 }))
-
-watch(
-  () => props.crossHighlight,
-  (enabled) => {
-    if (!enabled) {
-      activeCell.value = null
-    }
-  }
-)
 
 watch(columnStoreSignature, (next, prev) => {
   if (prev !== undefined && next !== prev) {
