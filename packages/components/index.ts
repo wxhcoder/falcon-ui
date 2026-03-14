@@ -40,6 +40,7 @@ export type {
 export { FlSelect } from './select'
 export type { FlSelectEmits, FlSelectProps, SelectEmits, SelectProps } from './select'
 export { FlTable } from './table'
+export { FlTableEditor } from './table'
 export type {
   CellChangeEvent,
   ColumnDragEvent,
@@ -50,6 +51,8 @@ export type {
   RowOrderChangeEvent,
   SelectionRowToggleEvent,
   SelectionSingleConflictEvent,
+  TableEditorMode,
+  TableEditorProps,
   TableEmits,
   TableProps
 } from './table'

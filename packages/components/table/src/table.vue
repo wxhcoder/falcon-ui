@@ -38,6 +38,8 @@ import type {
 } from './table'
 import { tableEmits, tableProps } from './table'
 import { createTableProxyDataBuilder } from './proxy-data'
+import type { TableEditorEndpoint, TableEditorRegistry } from './editor-registry'
+import { tableEditorRegistryDomKey } from './editor-registry'
 
 defineOptions({
   name: 'FlTable',
@@ -81,6 +83,21 @@ type ColumnDropState = {
   side: ColumnDragIndicatorSide
 }
 
+type DirectionKey = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
+
+type VisibleColumnEntry = {
+  displayIndex: number
+  columnKey: string
+  column: ColumnState
+}
+
+type ActiveCellPosition = {
+  rowIndex: number
+  row: RowData
+  column: VisibleColumnEntry
+  columns: VisibleColumnEntry[]
+}
+
 const COLUMN_RESIZE_HOTZONE_PX = 8
 const ROW_DRAG_HANDLE_HOTZONE_PX = 24
 const CONTROL_COLUMN_TYPES = new Set(['selection', 'index', 'expand'])
@@ -109,10 +126,25 @@ const columnResizeGuardHeaderRow = shallowRef<HTMLElement | null>(null)
 const columnResizePointerDownListener = ref<((event: Event) => void) | null>(null)
 const columnResizePointerUpListener = ref<((event: Event) => void) | null>(null)
 const activeCell = ref<ActiveCell | null>(null)
+const isEditing = ref(false)
 const outsidePointerDownListener = ref<((event: Event) => void) | null>(null)
+const keyboardListener = ref<((event: KeyboardEvent) => void) | null>(null)
+const editorFocusInListener = ref<((event: FocusEvent) => void) | null>(null)
+const editorEndpoints = ref<TableEditorEndpoint[]>([])
 const buildProxyData = createTableProxyDataBuilder()
 
 const { changeRef } = useMergedExpose({})
+
+const editorRegistry: TableEditorRegistry = {
+  register(endpoint) {
+    editorEndpoints.value = [...editorEndpoints.value, endpoint]
+
+    return () => {
+      editorEndpoints.value = editorEndpoints.value.filter((item) => item.id !== endpoint.id)
+    }
+  },
+  getEditors: () => editorEndpoints.value
+}
 
 const setTableRef = (instance: unknown) => {
   tableRef.value = instance as TableInstance | null
@@ -324,6 +356,26 @@ const getTableElement = (): HTMLElement | null => {
   return candidate instanceof HTMLElement ? candidate : null
 }
 
+const bindEditorRegistryHost = () => {
+  const tableElement = getTableElement() as
+    | (HTMLElement & { [tableEditorRegistryDomKey]?: TableEditorRegistry })
+    | null
+
+  if (tableElement) {
+    tableElement[tableEditorRegistryDomKey] = editorRegistry
+  }
+}
+
+const unbindEditorRegistryHost = () => {
+  const tableElement = getTableElement() as
+    | (HTMLElement & { [tableEditorRegistryDomKey]?: TableEditorRegistry })
+    | null
+
+  if (tableElement?.[tableEditorRegistryDomKey]) {
+    delete tableElement[tableEditorRegistryDomKey]
+  }
+}
+
 const hasSelectionColumn = (): boolean => {
   const tableElement = getTableElement()
   if (!tableElement) {
@@ -427,6 +479,10 @@ const isRowDragHandleHotzone = (
   }
 
   const rect = cell.getBoundingClientRect()
+  if (rect.width <= 0 || rect.height <= 0) {
+    return false
+  }
+
   return point.x - rect.left <= Math.min(ROW_DRAG_HANDLE_HOTZONE_PX, rect.width)
 }
 
@@ -450,6 +506,191 @@ const setActiveCell = (
     rowKey,
     columnKey
   }
+}
+
+const resolveVisibleColumns = (): VisibleColumnEntry[] => {
+  const columns = readStoreColumns()
+  if (!Array.isArray(columns)) {
+    return []
+  }
+
+  return columns.flatMap((item, displayIndex) => {
+    const column = item as ColumnState
+    if (isControlColumn(column)) {
+      return []
+    }
+
+    const columnKey = resolveColumnKey(column, displayIndex)
+    if (!columnKey) {
+      return []
+    }
+
+    return [
+      {
+        displayIndex,
+        columnKey,
+        column
+      }
+    ]
+  })
+}
+
+const resolveActiveCellPosition = (): ActiveCellPosition | null => {
+  if (!activeCell.value) {
+    return null
+  }
+
+  const rowIndex = sourceData.value.findIndex((row) => readRowKey(row) === activeCell.value?.rowKey)
+  if (rowIndex < 0) {
+    return null
+  }
+
+  const columns = resolveVisibleColumns()
+  const column = columns.find((item) => item.columnKey === activeCell.value?.columnKey)
+  if (!column) {
+    return null
+  }
+
+  const row = sourceData.value[rowIndex]
+  if (!row) {
+    return null
+  }
+
+  return {
+    rowIndex,
+    row,
+    column,
+    columns
+  }
+}
+
+const getBodyWrappers = (): HTMLElement[] => {
+  const tableElement = getTableElement()
+  if (!tableElement) {
+    return []
+  }
+
+  return Array.from(
+    tableElement.querySelectorAll<HTMLElement>(
+      '.el-table__body-wrapper, .el-table__fixed-body-wrapper'
+    )
+  )
+}
+
+const isFixedCloneElement = (element: Element | null): boolean =>
+  Boolean(element?.closest('.el-table__fixed, .el-table__fixed-right'))
+
+const resolveBodyCellsByPosition = (rowIndex: number, displayIndex: number): HTMLElement[] =>
+  getBodyWrappers().flatMap((wrapper) => {
+    const rows = wrapper.querySelectorAll<HTMLTableRowElement>('tbody tr')
+    const row = rows[rowIndex]
+    if (!row) {
+      return []
+    }
+
+    const cell = row.querySelectorAll<HTMLElement>('td.el-table__cell')[displayIndex]
+    return cell ? [cell] : []
+  })
+
+const pickPrimaryCell = (cells: HTMLElement[]): HTMLElement | null =>
+  cells.find((cell) => !isFixedCloneElement(cell)) ?? cells[0] ?? null
+
+const sortEditorCandidates = (items: TableEditorEndpoint[]): TableEditorEndpoint[] =>
+  [...items].sort((left, right) => {
+    const fixedDelta = Number(Boolean(left.isFixedClone)) - Number(Boolean(right.isFixedClone))
+    if (fixedDelta !== 0) {
+      return fixedDelta
+    }
+
+    return (right.priority ?? 0) - (left.priority ?? 0)
+  })
+
+const findEditorsInCells = (cells: HTMLElement[]): TableEditorEndpoint[] =>
+  sortEditorCandidates(
+    editorEndpoints.value.filter((endpoint) => {
+      const root = endpoint.getRootEl()
+      return root !== null && cells.some((cell) => cell.contains(root))
+    })
+  )
+
+const findEditorForActiveCell = (): TableEditorEndpoint | null => {
+  const position = resolveActiveCellPosition()
+  if (!position) {
+    return null
+  }
+
+  const cells = resolveBodyCellsByPosition(position.rowIndex, position.column.displayIndex)
+  return findEditorsInCells(cells)[0] ?? null
+}
+
+const resolveNextActiveCell = (direction: DirectionKey): ActiveCell | null => {
+  const position = resolveActiveCellPosition()
+  if (!position) {
+    return null
+  }
+
+  if (direction === 'ArrowUp' || direction === 'ArrowDown') {
+    const nextRowIndex = position.rowIndex + (direction === 'ArrowDown' ? 1 : -1)
+    const nextRow = sourceData.value[nextRowIndex]
+    const nextRowKey = nextRow ? readRowKey(nextRow) : null
+    if (nextRowIndex < 0 || !nextRow || nextRowKey === null) {
+      return null
+    }
+
+    return {
+      rowKey: nextRowKey,
+      columnKey: position.column.columnKey
+    }
+  }
+
+  const currentColumnIndex = position.columns.findIndex(
+    (item) => item.columnKey === position.column.columnKey
+  )
+  if (currentColumnIndex < 0) {
+    return null
+  }
+
+  const nextColumnIndex = currentColumnIndex + (direction === 'ArrowRight' ? 1 : -1)
+  const nextColumn = position.columns[nextColumnIndex]
+  if (!nextColumn) {
+    return null
+  }
+
+  const rowKey = readRowKey(position.row)
+  if (rowKey === null) {
+    return null
+  }
+
+  return {
+    rowKey,
+    columnKey: nextColumn.columnKey
+  }
+}
+
+const scrollActiveCellIntoView = () => {
+  const position = resolveActiveCellPosition()
+  if (!position) {
+    return
+  }
+
+  const targetCell = pickPrimaryCell(
+    resolveBodyCellsByPosition(position.rowIndex, position.column.displayIndex)
+  )
+  targetCell?.scrollIntoView({
+    block: 'nearest',
+    inline: 'nearest'
+  })
+}
+
+const blurActiveEditor = async () => {
+  const editor = findEditorForActiveCell()
+  if (!editor) {
+    return
+  }
+
+  await Promise.resolve(editor.close?.())
+  await Promise.resolve(editor.blur())
+  isEditing.value = false
 }
 
 const resolveSelectionTogglePayload = (
@@ -494,6 +735,7 @@ const handleCellClick = (row: RowData, column: ColumnState, cell: Element, event
 
   if (!isHandleHotzone && displayIndex !== null) {
     setActiveCell(row, column, displayIndex)
+    syncEditingStateFromTarget(event.target)
   }
 
   invokeListener(readAttr('onCellClick', 'onCell-click'), row, column, cell, event)
@@ -779,10 +1021,21 @@ const bindOutsidePointerDown = () => {
 
     const tableElement = getTableElement()
     const target = event.target
-    if (!tableElement || !(target instanceof Node) || tableElement.contains(target)) {
+    const isOverlayTarget =
+      target instanceof Element &&
+      Boolean(target.closest('.el-select__popper, .el-picker__popper, .el-popper'))
+
+    if (
+      !tableElement ||
+      !(target instanceof Node) ||
+      tableElement.contains(target) ||
+      (isEditing.value && isOverlayTarget)
+    ) {
       return
     }
 
+    void blurActiveEditor()
+    isEditing.value = false
     activeCell.value = null
   }
 
@@ -790,6 +1043,134 @@ const bindOutsidePointerDown = () => {
   document.addEventListener('pointerdown', listener, true)
   document.addEventListener('mousedown', listener, true)
   document.addEventListener('touchstart', listener, true)
+}
+
+const isDirectionKey = (value: string): value is DirectionKey =>
+  value === 'ArrowUp' || value === 'ArrowDown' || value === 'ArrowLeft' || value === 'ArrowRight'
+
+const isInputActivationKey = (event: KeyboardEvent) =>
+  event.key.length === 1 ||
+  event.key === 'Backspace' ||
+  event.key === 'Delete' ||
+  event.key === 'Enter' ||
+  event.key === 'F2'
+
+const canHandleKeyEvent = (event: KeyboardEvent) => {
+  if (!activeCell.value || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) {
+    return false
+  }
+
+  const tableElement = getTableElement()
+  if (!tableElement) {
+    return false
+  }
+
+  if (isEditing.value) {
+    return true
+  }
+
+  const target = event.target
+  if (target instanceof Node && tableElement.contains(target)) {
+    return true
+  }
+
+  const activeElement = document.activeElement
+  return (
+    activeElement === null ||
+    activeElement === document.body ||
+    activeElement === document.documentElement ||
+    (activeElement instanceof Node && tableElement.contains(activeElement))
+  )
+}
+
+const syncEditingStateFromTarget = (target: EventTarget | null) => {
+  if (!activeCell.value) {
+    isEditing.value = false
+    return
+  }
+
+  const editor = findEditorForActiveCell()
+  const root = editor?.getRootEl()
+  if (root && target instanceof Node && root.contains(target)) {
+    isEditing.value = true
+    return
+  }
+
+  const tableElement = getTableElement()
+  if (tableElement && target instanceof Node && tableElement.contains(target)) {
+    isEditing.value = false
+  }
+}
+
+const unbindKeyboardListener = () => {
+  if (!keyboardListener.value) {
+    return
+  }
+
+  document.removeEventListener('keydown', keyboardListener.value, true)
+  keyboardListener.value = null
+}
+
+const bindKeyboardListener = () => {
+  unbindKeyboardListener()
+
+  const listener = async (event: KeyboardEvent) => {
+    if (!canHandleKeyEvent(event)) {
+      return
+    }
+
+    if (isDirectionKey(event.key)) {
+      const nextActive = resolveNextActiveCell(event.key)
+      if (!nextActive) {
+        return
+      }
+
+      event.preventDefault()
+      await blurActiveEditor()
+      activeCell.value = nextActive
+      await nextTick()
+      scrollActiveCellIntoView()
+      return
+    }
+
+    if (!isInputActivationKey(event) || isEditing.value) {
+      return
+    }
+
+    const editor = findEditorForActiveCell()
+    if (!editor) {
+      return
+    }
+
+    event.preventDefault()
+    const handled = await editor.handoffFirstKey(event)
+    if (handled) {
+      isEditing.value = true
+    }
+  }
+
+  keyboardListener.value = listener
+  document.addEventListener('keydown', listener, true)
+}
+
+const unbindEditorFocusTracking = () => {
+  if (!editorFocusInListener.value) {
+    return
+  }
+
+  document.removeEventListener('focusin', editorFocusInListener.value, true)
+  editorFocusInListener.value = null
+}
+
+const bindEditorFocusTracking = () => {
+  unbindEditorFocusTracking()
+
+  const listener = (event: FocusEvent) => {
+    syncEditingStateFromTarget(event.target)
+  }
+
+  editorFocusInListener.value = listener
+  document.addEventListener('focusin', listener, true)
 }
 
 const readClientPointFromEvent = (event: Event): ClientPoint | null => {
@@ -1189,6 +1570,8 @@ const mergedTableAttrs = computed(() => ({
 
 watch(columnStoreSignature, (next, prev) => {
   if (prev !== undefined && next !== prev) {
+    void blurActiveEditor()
+    isEditing.value = false
     activeCell.value = null
   }
 })
@@ -1204,13 +1587,24 @@ watch(
       (row) => readRowKey(row) === activeCell.value?.rowKey
     )
     if (!hasActiveRow) {
+      void blurActiveEditor()
+      isEditing.value = false
       activeCell.value = null
     }
   }
 )
 
+watch(activeCell, (nextActiveCell) => {
+  if (!nextActiveCell) {
+    isEditing.value = false
+  }
+})
+
 onMounted(() => {
+  bindEditorRegistryHost()
   bindOutsidePointerDown()
+  bindKeyboardListener()
+  bindEditorFocusTracking()
   void refreshSortables()
 })
 
@@ -1228,7 +1622,10 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  unbindEditorRegistryHost()
   unbindOutsidePointerDown()
+  unbindKeyboardListener()
+  unbindEditorFocusTracking()
   destroyRowSortable()
   destroyColumnSortable()
 })

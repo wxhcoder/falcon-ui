@@ -1,7 +1,10 @@
-import { mount } from '@vue/test-utils'
+/* eslint-disable vue/one-component-per-file */
+import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { ElTable, ElTableColumn } from 'element-plus'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { ComponentPublicInstance } from 'vue'
 import { defineComponent, h, nextTick, ref } from 'vue'
+import { FlTableEditor } from '..'
 import type {
   CellChangeEvent,
   ColumnOrderChangeEvent,
@@ -10,6 +13,7 @@ import type {
   SelectionRowToggleEvent,
   TableProps
 } from '..'
+import { tableEditorRegistryDomKey } from '../src/editor-registry'
 import FlTable from '../src/table.vue'
 
 const { sortableCreate } = vi.hoisted(() => {
@@ -28,6 +32,8 @@ vi.mock('sortablejs', () => ({
   }
 }))
 
+enableAutoUnmount(afterEach)
+
 class ResizeObserverMock {
   observe() {}
   unobserve() {}
@@ -38,6 +44,7 @@ type TestRowData = {
   id: number
   name: string
   age: number
+  status: string
   profile: {
     nickname: string
   }
@@ -56,9 +63,153 @@ const createPlainColumns = () => [
 ]
 
 const createRows = (): TestRowData[] => [
-  { id: 1, name: 'A', age: 18, profile: { nickname: 'A-1' } },
-  { id: 2, name: 'B', age: 20, profile: { nickname: 'B-1' } },
-  { id: 3, name: 'C', age: 21, profile: { nickname: 'C-1' } }
+  { id: 1, name: 'A', age: 18, status: 'ready', profile: { nickname: 'A-1' } },
+  { id: 2, name: 'B', age: 20, status: 'ready', profile: { nickname: 'B-1' } },
+  { id: 3, name: 'C', age: 21, status: 'ready', profile: { nickname: 'C-1' } }
+]
+
+const TextEditorCell = defineComponent({
+  name: 'TextEditorCell',
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    return () =>
+      h(FlTableEditor, { mode: 'text' }, () =>
+        h('input', {
+          class: 'text-editor-input',
+          value: props.modelValue,
+          onInput: (event: Event) =>
+            emit('update:modelValue', (event.target as HTMLInputElement).value)
+        })
+      )
+  }
+})
+
+const ControlledEditorCore = defineComponent({
+  name: 'ControlledEditorCore',
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit, expose }) {
+    const rootRef = ref<HTMLElement | null>(null)
+    const isOpen = ref(false)
+
+    const focus = () => {
+      rootRef.value?.querySelector<HTMLElement>('button, input')?.focus()
+    }
+
+    const blur = () => {
+      const activeElement = document.activeElement
+      if (activeElement instanceof HTMLElement && rootRef.value?.contains(activeElement)) {
+        activeElement.blur()
+      }
+    }
+
+    const handleOpen = async () => {
+      isOpen.value = true
+      await nextTick()
+    }
+
+    const handleClose = async () => {
+      isOpen.value = false
+      await nextTick()
+    }
+
+    expose({
+      focus,
+      blur,
+      handleOpen,
+      handleClose
+    })
+
+    return () =>
+      h('div', { ref: rootRef, class: 'controlled-editor-core' }, [
+        h(
+          'button',
+          {
+            class: 'controlled-editor-trigger',
+            type: 'button'
+          },
+          'open'
+        ),
+        isOpen.value
+          ? h('input', {
+              class: 'controlled-editor-input',
+              value: props.modelValue,
+              onInput: (event: Event) =>
+                emit('update:modelValue', (event.target as HTMLInputElement).value)
+            })
+          : null
+      ])
+  }
+})
+
+const ControlledEditorCell = defineComponent({
+  name: 'ControlledEditorCell',
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    const editorRef = ref<ComponentPublicInstance | null>(null)
+
+    return () =>
+      h(
+        FlTableEditor,
+        {
+          mode: 'controlled',
+          targetRef: editorRef
+        },
+        () =>
+          h(ControlledEditorCore, {
+            ref: editorRef,
+            modelValue: props.modelValue,
+            'onUpdate:modelValue': (value: string) => emit('update:modelValue', value)
+          })
+      )
+  }
+})
+
+const createKeyboardEditorColumns = () => [
+  h(
+    ElTableColumn,
+    { label: 'Name', minWidth: 160 },
+    {
+      default: ({ row }: { row: TestRowData }) =>
+        h(TextEditorCell, {
+          modelValue: row.name,
+          'onUpdate:modelValue': (value: string) => {
+            row.name = value
+          }
+        })
+    }
+  ),
+  h(
+    ElTableColumn,
+    { label: 'Status', minWidth: 180 },
+    {
+      default: ({ row }: { row: TestRowData }) =>
+        h(ControlledEditorCell, {
+          modelValue: row.status,
+          'onUpdate:modelValue': (value: string) => {
+            row.status = value
+          }
+        })
+    }
+  ),
+  h(ElTableColumn, { prop: 'age', label: 'Age', width: 120 })
 ]
 
 const setElementRect = (
@@ -129,9 +280,24 @@ const emitCellClick = async (
   await nextTick()
 }
 
+const waitForKeyboardEffect = async () => {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await Promise.resolve()
+    await nextTick()
+    await new Promise((resolve) => window.setTimeout(resolve, 0))
+  }
+
+  await nextTick()
+  await nextTick()
+}
+
 beforeEach(() => {
   sortableCreate.mockClear()
   vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+    configurable: true,
+    value: vi.fn()
+  })
 })
 
 describe('FlTable', () => {
@@ -619,6 +785,150 @@ describe('FlTable', () => {
     expect(
       firstRowCells.some((cell) => cell.classes().some((name) => name.includes('cross-')))
     ).toBe(false)
+  })
+
+  it('moves active cell by arrow keys and skips control columns', async () => {
+    const rows = createRows()
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 2)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
+    await nextTick()
+    await nextTick()
+
+    let headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
+    let firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const secondRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:nth-child(2) td')
+
+    expect(headerCells[1]?.classes()).toContain('fl-table__cross-column')
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(firstRowCells[2]?.classes()).not.toContain('fl-table__cross-active')
+    expect(secondRowCells[1]?.classes()).toContain('fl-table__cross-column')
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
+    await nextTick()
+    await nextTick()
+
+    headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
+    firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+
+    expect(headerCells[1]?.classes()).toContain('fl-table__cross-column')
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-active')
+  })
+
+  it('hands off the first key to a text editor without targetRef', async () => {
+    const rows = createRows()
+    rows[0].name = ''
+
+    const wrapper = mount(FlTable, {
+      attachTo: document.body,
+      props: {
+        data: rows
+      },
+      slots: {
+        default: () => createKeyboardEditorColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 0)
+
+    const registryHost = wrapper.element as HTMLElement & {
+      [tableEditorRegistryDomKey]?: {
+        getEditors: () => Array<{ getRootEl: () => HTMLElement | null }>
+      }
+    }
+    expect(registryHost[tableEditorRegistryDomKey]?.getEditors().length).toBeGreaterThan(0)
+    const firstBodyCell = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')[0]
+      ?.element as HTMLElement | undefined
+    const firstEditorRoot = registryHost[tableEditorRegistryDomKey]?.getEditors()[0]?.getRootEl()
+    expect(firstBodyCell?.contains(firstEditorRoot ?? null)).toBe(true)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'X', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    const input = wrapper.get('.text-editor-input').element as HTMLInputElement
+
+    expect(rows[0].name).toBe('X')
+    expect(input.value).toBe('X')
+    expect(document.activeElement).toBe(input)
+  })
+
+  it('blurs the current editor before moving focus to the next cell', async () => {
+    const rows = createRows()
+    rows[0].name = ''
+
+    const wrapper = mount(FlTable, {
+      attachTo: document.body,
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createKeyboardEditorColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 0)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'X', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    const textInput = wrapper.get('.text-editor-input').element as HTMLInputElement
+    expect(document.activeElement).toBe(textInput)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const statusCell = firstRowCells[1]?.element as HTMLElement | undefined
+
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(statusCell?.contains(document.activeElement)).toBe(false)
+    expect(document.activeElement).not.toBe(textInput)
+  })
+
+  it('waits for controlled editors to open before handing off the first key', async () => {
+    const rows = createRows()
+    rows[0].status = ''
+
+    const wrapper = mount(FlTable, {
+      attachTo: document.body,
+      props: {
+        data: rows
+      },
+      slots: {
+        default: () => createKeyboardEditorColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'R', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    const input = wrapper.get('.controlled-editor-input').element as HTMLInputElement
+
+    expect(rows[0].status).toBe('R')
+    expect(input.value).toBe('R')
+    expect(document.activeElement).toBe(input)
   })
 
   it('uses sortablejs for row/column drag and emits reorder payloads', async () => {

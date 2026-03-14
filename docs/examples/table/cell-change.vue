@@ -13,33 +13,41 @@
       <el-table-column prop="id" label="ID" width="90" />
       <el-table-column label="名称" min-width="180">
         <template #default="{ row }">
-          <FlInput v-model="row.name" is-table placeholder="请输入名称" />
+          <FlTableEditor mode="text">
+            <FlInput v-model="row.name" is-table placeholder="请输入名称" />
+          </FlTableEditor>
         </template>
       </el-table-column>
       <el-table-column label="分类" width="180">
         <template #default="{ row }">
-          <FlSelect v-model="row.category" is-table placeholder="请选择分类">
-            <el-option
-              v-for="item in categoryOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value" />
-          </FlSelect>
+          <FlTableEditor mode="controlled">
+            <FlSelect v-model="row.category" is-table placeholder="请选择分类">
+              <el-option
+                v-for="item in categoryOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value" />
+            </FlSelect>
+          </FlTableEditor>
         </template>
       </el-table-column>
       <el-table-column label="数量" width="160">
         <template #default="{ row }">
-          <FlInputNumber v-model="row.amount" is-table :min="0" :precision="0" />
+          <FlTableEditor mode="text">
+            <FlInputNumber v-model="row.amount" is-table :min="0" :precision="0" />
+          </FlTableEditor>
         </template>
       </el-table-column>
       <el-table-column label="计划日期" width="200">
         <template #default="{ row }">
-          <FlDatePicker
-            v-model="row.planDate"
-            is-table
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择日期" />
+          <FlTableEditor mode="controlled">
+            <FlDatePicker
+              v-model="row.planDate"
+              is-table
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="请选择日期" />
+          </FlTableEditor>
         </template>
       </el-table-column>
     </FlTable>
