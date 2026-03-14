@@ -101,10 +101,11 @@ const ControlledEditorCore = defineComponent({
   emits: ['update:modelValue'],
   setup(props, { emit, expose }) {
     const rootRef = ref<HTMLElement | null>(null)
+    const triggerRef = ref<HTMLButtonElement | null>(null)
     const isOpen = ref(false)
 
     const focus = () => {
-      rootRef.value?.querySelector<HTMLElement>('button, input')?.focus()
+      rootRef.value?.querySelector<HTMLElement>('input, button')?.focus()
     }
 
     const blur = () => {
@@ -122,6 +123,7 @@ const ControlledEditorCore = defineComponent({
     const handleClose = async () => {
       isOpen.value = false
       await nextTick()
+      triggerRef.value?.focus()
     }
 
     expose({
@@ -136,8 +138,15 @@ const ControlledEditorCore = defineComponent({
         h(
           'button',
           {
+            ref: triggerRef,
             class: 'controlled-editor-trigger',
-            type: 'button'
+            type: 'button',
+            'aria-expanded': isOpen.value ? 'true' : 'false',
+            onKeydown: (event: KeyboardEvent) => {
+              if (!isOpen.value && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+                isOpen.value = true
+              }
+            }
           },
           'open'
         ),
@@ -804,8 +813,7 @@ describe('FlTable', () => {
     await emitCellClick(wrapper, rows[0], 2)
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
-    await nextTick()
-    await nextTick()
+    await waitForKeyboardEffect()
 
     let headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
     let firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
@@ -817,8 +825,7 @@ describe('FlTable', () => {
     expect(secondRowCells[1]?.classes()).toContain('fl-table__cross-column')
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
-    await nextTick()
-    await nextTick()
+    await waitForKeyboardEffect()
 
     headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
     firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
@@ -929,6 +936,132 @@ describe('FlTable', () => {
     expect(rows[0].status).toBe('R')
     expect(input.value).toBe('R')
     expect(document.activeElement).toBe(input)
+  })
+
+  it('does not move active cell while a controlled editor panel is open', async () => {
+    const rows = createRows()
+    rows[0].status = ''
+
+    const wrapper = mount(FlTable, {
+      attachTo: document.body,
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createKeyboardEditorColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'R', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    const controlledInput = wrapper.get('.controlled-editor-input').element as HTMLInputElement
+    const trigger = wrapper.get('.controlled-editor-trigger')
+
+    expect(trigger.attributes('aria-expanded')).toBe('true')
+    expect(document.activeElement).toBe(controlledInput)
+
+    controlledInput.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })
+    )
+    await waitForKeyboardEffect()
+
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(firstRowCells[2]?.classes()).not.toContain('fl-table__cross-active')
+    expect(document.activeElement).toBe(controlledInput)
+  })
+
+  it('moves active cell without reopening a closed controlled editor panel', async () => {
+    const rows = createRows()
+    rows[0].status = ''
+
+    const wrapper = mount(FlTable, {
+      attachTo: document.body,
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createKeyboardEditorColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 1)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'R', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    const controlledEditor = wrapper.findComponent(ControlledEditorCore)
+    await Promise.resolve(
+      (
+        controlledEditor.vm as ComponentPublicInstance & {
+          $?: {
+            exposed?: {
+              handleClose?: () => void | Promise<void>
+            }
+          }
+        }
+      ).$?.exposed?.handleClose?.()
+    )
+    await waitForKeyboardEffect()
+
+    const trigger = wrapper.get('.controlled-editor-trigger')
+    expect(trigger.attributes('aria-expanded')).toBe('false')
+    expect(document.activeElement).toBe(trigger.element)
+    ;(trigger.element as HTMLButtonElement).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })
+    )
+    await waitForKeyboardEffect()
+
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const secondRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:nth-child(2) td')
+
+    expect(firstRowCells[1]?.classes()).not.toContain('fl-table__cross-active')
+    expect(secondRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(trigger.attributes('aria-expanded')).toBe('false')
+  })
+
+  it('keeps closed controlled editor panels closed when direction navigation hits a boundary', async () => {
+    const rows = createRows()
+    rows[2].status = ''
+
+    const wrapper = mount(FlTable, {
+      attachTo: document.body,
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      slots: {
+        default: () => createKeyboardEditorColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[2], 1)
+
+    const triggers = wrapper.findAll('.controlled-editor-trigger')
+    const lastTrigger = triggers[2]
+    expect(lastTrigger).toBeDefined()
+    ;(lastTrigger?.element as HTMLButtonElement | undefined)?.focus()
+    ;(lastTrigger?.element as HTMLButtonElement | undefined)?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })
+    )
+    await waitForKeyboardEffect()
+
+    const lastRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:nth-child(3) td')
+
+    expect(lastRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(lastTrigger?.attributes('aria-expanded')).toBe('false')
   })
 
   it('uses sortablejs for row/column drag and emits reorder payloads', async () => {

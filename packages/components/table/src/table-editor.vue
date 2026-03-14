@@ -99,6 +99,45 @@ const getInstanceMethod = <TArgs extends unknown[]>(
   return typeof candidate === 'function' ? (candidate as (...args: TArgs) => unknown) : null
 }
 
+const getInstanceBoolean = (name: string): boolean | null => {
+  const target = resolveTargetValue()
+  if (!target || target instanceof HTMLElement) {
+    return null
+  }
+
+  const candidate = (target as ComponentPublicInstance & Record<string, unknown>)[name]
+  if (typeof candidate === 'boolean') {
+    return candidate
+  }
+
+  if (
+    typeof candidate === 'object' &&
+    candidate !== null &&
+    'value' in candidate &&
+    typeof (candidate as { value?: unknown }).value === 'boolean'
+  ) {
+    return (candidate as { value: boolean }).value
+  }
+
+  return null
+}
+
+const hasExpandedTrigger = (root: HTMLElement | null) => {
+  if (!root) {
+    return false
+  }
+
+  if (root.getAttribute('aria-expanded') === 'true') {
+    return true
+  }
+
+  return (
+    root.querySelector(
+      '[aria-expanded="true"], .el-date-editor.is-focus, .el-range-editor.is-active'
+    ) !== null
+  )
+}
+
 const cloneKeyboardEventInit = (event: KeyboardEvent) => ({
   key: event.key,
   code: event.code,
@@ -242,6 +281,22 @@ const closeEditor = async () => {
   }
 }
 
+const isPanelOpen = () => {
+  const getPanelState = getInstanceMethod<[]>('isPanelOpen')
+  if (getPanelState) {
+    return Boolean(getPanelState())
+  }
+
+  for (const key of ['expanded', 'pickerVisible', 'dropdownMenuVisible', 'visible']) {
+    const state = getInstanceBoolean(key)
+    if (state !== null) {
+      return state
+    }
+  }
+
+  return hasExpandedTrigger(resolveRootEl())
+}
+
 const handoffTextKey = async (event: KeyboardEvent) => {
   const input = focusTextTarget()
   if (!input) {
@@ -299,6 +354,7 @@ const endpoint: TableEditorEndpoint = {
   blur: () => blurEditor(),
   handoffFirstKey: (event) =>
     props.mode === 'text' ? handoffTextKey(event) : handoffControlledKey(event),
+  isPanelOpen: () => (props.mode === 'controlled' ? isPanelOpen() : false),
   open: () => openEditor(),
   close: () => closeEditor(),
   get isFixedClone() {

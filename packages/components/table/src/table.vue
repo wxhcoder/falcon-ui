@@ -693,6 +693,15 @@ const blurActiveEditor = async () => {
   isEditing.value = false
 }
 
+const isActiveEditorPanelOpen = () => {
+  const editor = findEditorForActiveCell()
+  if (!editor?.isPanelOpen) {
+    return false
+  }
+
+  return Boolean(editor.isPanelOpen())
+}
+
 const resolveSelectionTogglePayload = (
   row: RowData,
   selectionBefore: RowData[],
@@ -1120,16 +1129,26 @@ const bindKeyboardListener = () => {
     }
 
     if (isDirectionKey(event.key)) {
+      if (isActiveEditorPanelOpen()) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+
       const nextActive = resolveNextActiveCell(event.key)
       if (!nextActive) {
         return
       }
 
-      event.preventDefault()
       await blurActiveEditor()
       activeCell.value = nextActive
       await nextTick()
       scrollActiveCellIntoView()
+      return
+    }
+
+    if (isActiveEditorPanelOpen()) {
       return
     }
 

@@ -10,6 +10,7 @@ export type TableEditorEndpoint = {
   focus: () => void | Promise<void>
   blur: () => void | Promise<void>
   handoffFirstKey: (event: KeyboardEvent) => Promise<boolean>
+  isPanelOpen?: () => boolean
   open?: () => void | Promise<void>
   close?: () => void | Promise<void>
   isFixedClone?: boolean
