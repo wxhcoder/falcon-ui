@@ -62,7 +62,7 @@ interface CellChangePayload {
 }
 
 const crossHighlight = ref(true)
-const rowCount = ref(100)
+const rowCount = ref(50)
 const columnCount = ref(20)
 const columns = ref<DynamicColumn[]>([])
 const rows = ref<DynamicRow[]>([])
