@@ -3,7 +3,8 @@ import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { ElTable, ElTableColumn } from 'element-plus'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ComponentPublicInstance } from 'vue'
-import { defineComponent, h, nextTick, ref } from 'vue'
+import { defineComponent, h, nextTick, reactive, ref } from 'vue'
+import { FlInput } from '../../input'
 import { FlTableEditor } from '..'
 import type {
   CellChangeEvent,
@@ -50,6 +51,10 @@ type TestRowData = {
   }
 }
 
+type DynamicKeyRow = {
+  id: number
+} & Record<string, string | number>
+
 const createColumns = () => [
   h(ElTableColumn, { type: 'selection', width: 48 }),
   h(ElTableColumn, { prop: 'name', label: 'Name' }),
@@ -85,6 +90,27 @@ const TextEditorCell = defineComponent({
           value: props.modelValue,
           onInput: (event: Event) =>
             emit('update:modelValue', (event.target as HTMLInputElement).value)
+        })
+      )
+  }
+})
+
+const FlInputEditorCell = defineComponent({
+  name: 'FlInputEditorCell',
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    return () =>
+      h(FlTableEditor, { mode: 'text' }, () =>
+        h(FlInput, {
+          modelValue: props.modelValue,
+          isTable: true,
+          'onUpdate:modelValue': (value: string) => emit('update:modelValue', value)
         })
       )
   }
@@ -221,6 +247,44 @@ const createKeyboardEditorColumns = () => [
   h(ElTableColumn, { prop: 'age', label: 'Age', width: 120 })
 ]
 
+const createDynamicKeyRows = (): DynamicKeyRow[] => [
+  { id: 1, col1: '', col2: 'B-1' },
+  { id: 2, col1: 'A-2', col2: 'B-2' }
+]
+
+const createFlInputColumns = () => [
+  h(
+    ElTableColumn,
+    { label: 'Name', minWidth: 180 },
+    {
+      default: ({ row }: { row: TestRowData }) =>
+        h(FlInputEditorCell, {
+          modelValue: row.name,
+          'onUpdate:modelValue': (value: string) => {
+            row.name = value
+          }
+        })
+    }
+  )
+]
+
+const createFlInputDynamicKeyColumns = (keys: string[]) =>
+  keys.map((key) =>
+    h(
+      ElTableColumn,
+      { label: key.toUpperCase(), minWidth: 180 },
+      {
+        default: ({ row }: { row: DynamicKeyRow }) =>
+          h(FlInputEditorCell, {
+            modelValue: String(row[key] ?? ''),
+            'onUpdate:modelValue': (value: string) => {
+              row[key] = value
+            }
+          })
+      }
+    )
+  )
+
 const setElementRect = (
   element: Element,
   rect: { left: number; top: number; width: number; height: number }
@@ -287,6 +351,23 @@ const emitCellClick = async (
 
   await nextTick()
   await nextTick()
+}
+
+const getBodyCell = (wrapper: ReturnType<typeof mount>, rowIndex: number, columnIndex: number) =>
+  wrapper.findAll(`.el-table__body-wrapper tbody tr:nth-child(${rowIndex + 1}) td`)[columnIndex]
+
+const getBodyCellInput = (
+  wrapper: ReturnType<typeof mount>,
+  rowIndex: number,
+  columnIndex: number
+) => {
+  const cell = getBodyCell(wrapper, rowIndex, columnIndex)
+
+  if (!cell) {
+    throw new Error(`cell ${rowIndex}:${columnIndex} missing`)
+  }
+
+  return cell.get('input')
 }
 
 const waitForKeyboardEffect = async () => {
@@ -872,6 +953,94 @@ describe('FlTable', () => {
     expect(rows[0].name).toBe('X')
     expect(input.value).toBe('X')
     expect(document.activeElement).toBe(input)
+  })
+
+  it('keeps reactive row fields in sync while typing through FlInput', async () => {
+    const rows = reactive(createRows())
+    const Host = defineComponent({
+      name: 'ReactiveFlInputFieldHost',
+      setup() {
+        return () =>
+          h(
+            FlTable,
+            {
+              data: rows,
+              isEdit: true,
+              rowKeyField: 'id'
+            },
+            {
+              default: () => createFlInputColumns()
+            }
+          )
+      }
+    })
+
+    const wrapper = mount(Host, {
+      attachTo: document.body
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 0)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'X', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    let input = getBodyCellInput(wrapper, 0, 0)
+    expect(rows[0].name).toBe('AX')
+    expect((input.element as HTMLInputElement).value).toBe('AX')
+
+    await input.setValue('XYZ')
+    await nextTick()
+    await nextTick()
+
+    input = getBodyCellInput(wrapper, 0, 0)
+    expect(rows[0].name).toBe('XYZ')
+    expect((input.element as HTMLInputElement).value).toBe('XYZ')
+  })
+
+  it('keeps reactive dynamic key cells in sync while typing through FlInput', async () => {
+    const rows = ref(createDynamicKeyRows())
+    const Host = defineComponent({
+      name: 'ReactiveFlInputDynamicKeyHost',
+      setup() {
+        return () =>
+          h(
+            FlTable,
+            {
+              data: rows.value,
+              isEdit: true,
+              rowKeyField: 'id'
+            },
+            {
+              default: () => createFlInputDynamicKeyColumns(['col1', 'col2'])
+            }
+          )
+      }
+    })
+
+    const wrapper = mount(Host, {
+      attachTo: document.body
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows.value[0], 0)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'X', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    let input = getBodyCellInput(wrapper, 0, 0)
+    expect(rows.value[0].col1).toBe('X')
+    expect((input.element as HTMLInputElement).value).toBe('X')
+
+    await input.setValue('XYZ')
+    await nextTick()
+    await nextTick()
+
+    input = getBodyCellInput(wrapper, 0, 0)
+    expect(rows.value[0].col1).toBe('XYZ')
+    expect((input.element as HTMLInputElement).value).toBe('XYZ')
   })
 
   it('blurs the current editor before moving focus to the next cell', async () => {

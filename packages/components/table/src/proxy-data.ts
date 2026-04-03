@@ -87,8 +87,8 @@ export const createTableProxyDataBuilder = () => {
     }
 
     const proxy = new Proxy(target, {
-      get(currentTarget, key, receiver) {
-        const value = Reflect.get(currentTarget, key, receiver)
+      get(currentTarget, key) {
+        const value = Reflect.get(currentTarget, key)
 
         if (!isObjectLike(value)) {
           return value
@@ -101,9 +101,9 @@ export const createTableProxyDataBuilder = () => {
         const nextPath = composePath(path, key)
         return createProxy(value, rootRow, nextPath, depth + 1)
       },
-      set(currentTarget, key, value, receiver) {
-        const previousValue = Reflect.get(currentTarget, key, receiver)
-        const result = Reflect.set(currentTarget, key, value, receiver)
+      set(currentTarget, key, value) {
+        const previousValue = Reflect.get(currentTarget, key)
+        const result = Reflect.set(currentTarget, key, value)
 
         if (!result || typeof key === 'symbol' || Object.is(previousValue, value)) {
           return result
