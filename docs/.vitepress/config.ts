@@ -41,6 +41,8 @@ export default defineConfig({
             { text: 'FlDialog', link: '/components/dialog' },
             { text: 'FlDatePicker', link: '/components/date-picker' },
             { text: 'FlInput', link: '/components/input' },
+            { text: 'FlQrCode', link: '/components/qr-code' },
+            { text: 'FlBarcode', link: '/components/barcode' },
             { text: 'FlSelect', link: '/components/select' },
             { text: 'FlInputSearch', link: '/components/input-search' },
             { text: 'FlInputNumber', link: '/components/input-number' },

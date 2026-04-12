@@ -31,6 +31,31 @@ export const overviewComponents: readonly OverviewItem[] = [
     icon: '/overview/fl-button.svg'
   },
   {
+    name: 'FlQrCode',
+    title: 'QR Code',
+    group: 'interaction',
+    link: '/components/qr-code',
+    description: '二维码展示组件，支持 canvas 和 SVG 两种渲染模式。',
+    icon: '/overview/fl-qr-code.svg'
+  },
+  {
+    name: 'FlBarcode',
+    title: 'Barcode',
+    group: 'interaction',
+    link: '/components/barcode',
+    description: '一维码展示组件，支持常见业务格式和文本显示控制。',
+    icon: '/overview/fl-barcode.svg'
+  },
+  {
+    name: 'FlTable',
+    title: 'Table',
+    group: 'interaction',
+    link: '/components/table',
+    description:
+      'Table wrapper with sortable rows/columns, selection enhancement and cell change intercept.',
+    icon: '/overview/fl-table.svg'
+  },
+  {
     name: 'FlInput',
     title: 'Input',
     group: 'form',
@@ -69,15 +94,6 @@ export const overviewComponents: readonly OverviewItem[] = [
     link: '/components/input-number',
     description: '数字输入组件，减少单元格切换造成的误触增减。',
     icon: '/overview/fl-input-number.svg'
-  },
-  {
-    name: 'FlTable',
-    title: 'Table',
-    group: 'interaction',
-    link: '/components/table',
-    description:
-      'Table wrapper with sortable rows/columns, selection enhancement and cell change intercept.',
-    icon: '/overview/fl-table.svg'
   },
   {
     name: 'FlDialog',

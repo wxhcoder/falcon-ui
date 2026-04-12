@@ -246,7 +246,7 @@
       "description": "",
       "name": "inputStyle",
       "required": false,
-      "type": "string | false | CSSProperties | StyleValue[] | null | undefined"
+      "type": "StyleValue"
     },
     {
       "default": "false",
@@ -429,6 +429,11 @@
       "description": "",
       "name": "append",
       "type": "{}"
+    },
+    {
+      "description": "",
+      "name": "password-icon",
+      "type": "{ visible: boolean; }"
     },
     {
       "description": "",

@@ -1,0 +1,86 @@
+{
+  "component": "fl-qr-code",
+  "description": "",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "'#ffffff'",
+      "description": "浅色背景颜色。",
+      "name": "backgroundColor",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'#000000'",
+      "description": "深色模块颜色。",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'M'",
+      "description": "容错等级。",
+      "name": "errorCorrectionLevel",
+      "required": false,
+      "type": "\"M\" | \"L\" | \"Q\" | \"H\" | undefined"
+    },
+    {
+      "default": "'#ffffff'",
+      "description": "图标底板背景色。",
+      "name": "iconBackgroundColor",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "4",
+      "description": "图标底板圆角，单位 px。",
+      "name": "iconBorderRadius",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "24",
+      "description": "居中覆盖层图标尺寸，单位 px。",
+      "name": "iconSize",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "居中覆盖层图标地址。",
+      "name": "iconSrc",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "12",
+      "description": "二维码内容区域的内边距，单位 px。",
+      "name": "padding",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "100",
+      "description": "二维码外部显示尺寸，单位 px。",
+      "name": "size",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'canvas'",
+      "description": "输出方式。",
+      "name": "type",
+      "required": false,
+      "type": "\"canvas\" | \"svg\" | undefined"
+    },
+    {
+      "default": "''",
+      "description": "需要编码到二维码中的字符串内容。",
+      "name": "value",
+      "required": false,
+      "type": "string | undefined"
+    }
+  ],
+  "slots": []
+}

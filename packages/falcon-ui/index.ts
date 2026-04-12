@@ -1,11 +1,13 @@
 import type { App, Plugin } from 'vue'
 import {
+  FlBarcode,
   FlButton,
   FlDatePicker,
   FlDialog,
   FlInput,
   FlInputNumber,
   FlInputSearch,
+  FlQrCode,
   FlSelect,
   FlTable,
   FlTableEditor
@@ -17,12 +19,14 @@ export * from '@falcon-ui/icons'
 export * from '@falcon-ui/utils'
 
 const components = [
+  FlBarcode,
   FlButton,
   FlDialog,
   FlDatePicker,
   FlInput,
   FlInputSearch,
   FlInputNumber,
+  FlQrCode,
   FlSelect,
   FlTable,
   FlTableEditor

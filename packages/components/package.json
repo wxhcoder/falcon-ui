@@ -14,6 +14,8 @@
     "./input-search": "./input-search/index.ts",
     "./input-number": "./input-number/index.ts",
     "./date-picker": "./date-picker/index.ts",
+    "./qr-code": "./qr-code/index.ts",
+    "./barcode": "./barcode/index.ts",
     "./select": "./select/index.ts",
     "./table": "./table/index.ts"
   },

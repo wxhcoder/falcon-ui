@@ -37,8 +37,32 @@ export type {
   FlDatePickerEmits,
   FlDatePickerProps
 } from './date-picker'
+export { FlQrCode } from './qr-code'
+export type {
+  FlQrCodeErrorCorrectionLevel,
+  FlQrCodeProps,
+  FlQrCodeType,
+  QrCodeErrorCorrectionLevel,
+  QrCodeProps,
+  QrCodeType
+} from './qr-code'
+export { FlBarcode } from './barcode'
+export type {
+  BarcodeProps,
+  FlBarcodeFormat,
+  FlBarcodeProps,
+  FlBarcodeTextAlign,
+  FlBarcodeTextPosition
+} from './barcode'
 export { FlSelect } from './select'
-export type { FlSelectEmits, FlSelectProps, SelectEmits, SelectProps } from './select'
+export type {
+  FlSelectEmits,
+  FlSelectExpose,
+  FlSelectProps,
+  SelectEmits,
+  SelectExpose,
+  SelectProps
+} from './select'
 export { FlTable } from './table'
 export { FlTableEditor } from './table'
 export type {
@@ -46,11 +70,13 @@ export type {
   ColumnDragEvent,
   ColumnOrderChangeEvent,
   EmitTrigger,
+  FlTableExpose,
   RowData,
   RowDragEvent,
   RowOrderChangeEvent,
   SelectionRowToggleEvent,
   SelectionSingleConflictEvent,
+  TableExpose,
   TableEditorMode,
   TableEditorProps,
   TableEmits,

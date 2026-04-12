@@ -42,6 +42,16 @@ const buildMeta = async () => {
         import: './esm/components/input-number/index.mjs',
         require: './cjs/components/input-number/index.cjs'
       },
+      './components/qr-code': {
+        types: './types/components/qr-code/index.d.ts',
+        import: './esm/components/qr-code/index.mjs',
+        require: './cjs/components/qr-code/index.cjs'
+      },
+      './components/barcode': {
+        types: './types/components/barcode/index.d.ts',
+        import: './esm/components/barcode/index.mjs',
+        require: './cjs/components/barcode/index.cjs'
+      },
       './components/table': {
         types: './types/components/table/index.d.ts',
         import: './esm/components/table/index.mjs',

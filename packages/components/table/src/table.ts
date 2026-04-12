@@ -54,6 +54,25 @@ export interface ColumnOrderChangeEvent {
   order: number[]
 }
 
+export interface FlTableExpose {
+  clearSelection: () => void
+  getSelectionRows: () => RowData[]
+  toggleRowSelection: (row: RowData, selected?: boolean, ignoreSelectable?: boolean) => void
+  toggleAllSelection: () => void
+  toggleRowExpansion: (row: RowData, expanded?: boolean) => void
+  setCurrentRow: (row?: RowData) => void
+  clearSort: () => void
+  clearFilter: (columnKeys?: string | string[]) => void
+  doLayout: () => void
+  sort: (prop: string, order: 'ascending' | 'descending' | null) => void
+  scrollTo: {
+    (options: ScrollToOptions): void
+    (xCoord: number, yCoord?: number): void
+  }
+  setScrollTop: (top: number) => void
+  setScrollLeft: (left: number) => void
+}
+
 export const tableProps = {
   /**
    * Enable row click to toggle selection when selection column exists.
@@ -215,3 +234,4 @@ export const tableEmits = {
 
 export type TableProps = ExtractPublicPropTypes<typeof tableProps>
 export type TableEmits = typeof tableEmits
+export type TableExpose = FlTableExpose

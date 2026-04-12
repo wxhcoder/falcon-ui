@@ -6,8 +6,7 @@
 import Sortable from 'sortablejs'
 import type { SortableEvent } from 'sortablejs'
 import { ElTable } from 'element-plus'
-import type { TableInstance } from 'element-plus'
-import type { ComponentInstance, VNode } from 'vue'
+import type { VNode } from 'vue'
 import {
   Comment,
   Fragment,
@@ -31,6 +30,7 @@ import type {
   CellChangeEvent,
   ColumnDragEvent,
   ColumnOrderChangeEvent,
+  FlTableExpose,
   RowData,
   RowDragEvent,
   RowOrderChangeEvent,
@@ -109,7 +109,7 @@ const slots = useSlots()
 const ns = useNamespace('table')
 const rawAttrs = attrs as Record<string, unknown>
 
-const tableRef = shallowRef<TableInstance | null>(null)
+const tableRef = shallowRef<FlTableExpose | null>(null)
 const rowSortable = shallowRef<Sortable | null>(null)
 const columnSortable = shallowRef<Sortable | null>(null)
 const columnOrder = ref<number[]>([])
@@ -147,7 +147,7 @@ const editorRegistry: TableEditorRegistry = {
 }
 
 const setTableRef = (instance: unknown) => {
-  tableRef.value = instance as TableInstance | null
+  tableRef.value = instance as FlTableExpose | null
   changeRef(instance)
 }
 
@@ -1649,5 +1649,5 @@ onBeforeUnmount(() => {
   destroyColumnSortable()
 })
 
-defineExpose({} as ComponentInstance<typeof ElTable>)
+defineExpose({} as FlTableExpose)
 </script>

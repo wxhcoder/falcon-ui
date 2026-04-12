@@ -4,10 +4,10 @@
 
 <script lang="ts" setup>
 import { ElSelect } from 'element-plus'
-import type { ComponentInstance } from 'vue'
 import { computed, h, useAttrs, useSlots, watch } from 'vue'
 import { useMergedAttrs, useMergedExpose } from '@falcon-ui/hooks'
 import { invokeListener } from '@falcon-ui/utils'
+import type { FlSelectExpose } from './select'
 import { flSelectEmits, flSelectProps } from './select'
 
 defineOptions({
@@ -59,5 +59,5 @@ watch(
   { immediate: true }
 )
 
-defineExpose({} as ComponentInstance<typeof ElSelect>)
+defineExpose({} as FlSelectExpose)
 </script>

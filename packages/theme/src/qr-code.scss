@@ -1,0 +1,23 @@
+@use './mixins/bem.scss' as bem;
+
+@include bem.b(qr-code) {
+  box-sizing: border-box;
+  line-height: 0;
+  vertical-align: middle;
+
+  @include bem.e(render) {
+    width: 100%;
+    height: 100%;
+  }
+
+  @include bem.e(icon) {
+    box-sizing: border-box;
+  }
+
+  @include bem.e(icon-image) {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+}

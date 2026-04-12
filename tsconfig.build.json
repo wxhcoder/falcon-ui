@@ -5,6 +5,7 @@
     "declaration": true,
     "declarationMap": false,
     "emitDeclarationOnly": true,
+    "ignoreDeprecations": "6.0",
     "noEmit": false,
     "outDir": "./dist/falcon-ui/types",
     "rootDir": "./packages",

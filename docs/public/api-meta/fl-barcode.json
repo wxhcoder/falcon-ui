@@ -1,0 +1,142 @@
+{
+  "component": "fl-barcode",
+  "description": "",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "'#ffffff'",
+      "description": "Background color.",
+      "name": "backgroundColor",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'#000000'",
+      "description": "Bar color.",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether to display readable text.",
+      "name": "displayValue",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'monospace'",
+      "description": "Text font family.",
+      "name": "font",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Text font style flags.",
+      "name": "fontOptions",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "20",
+      "description": "Text font size.",
+      "name": "fontSize",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'CODE128'",
+      "description": "Supported barcode format.",
+      "name": "format",
+      "required": false,
+      "type": "\"CODE128\" | \"CODE39\" | \"EAN13\" | \"EAN8\" | \"UPCA\" | \"UPCE\" | undefined"
+    },
+    {
+      "default": "100",
+      "description": "Barcode height.",
+      "name": "height",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "10",
+      "description": "Global margin around the barcode.",
+      "name": "margin",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Overrides the bottom margin when provided.",
+      "name": "marginBottom",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Overrides the left margin when provided.",
+      "name": "marginLeft",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Overrides the right margin when provided.",
+      "name": "marginRight",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Overrides the top margin when provided.",
+      "name": "marginTop",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Custom text. Falls back to value when empty.",
+      "name": "text",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'center'",
+      "description": "Text alignment.",
+      "name": "textAlign",
+      "required": false,
+      "type": "\"right\" | \"left\" | \"center\" | undefined"
+    },
+    {
+      "default": "2",
+      "description": "Distance between barcode bars and text.",
+      "name": "textMargin",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'bottom'",
+      "description": "Text position.",
+      "name": "textPosition",
+      "required": false,
+      "type": "\"top\" | \"bottom\" | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Barcode payload.",
+      "name": "value",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "2",
+      "description": "Width of each bar.",
+      "name": "width",
+      "required": false,
+      "type": "number | undefined"
+    }
+  ],
+  "slots": []
+}

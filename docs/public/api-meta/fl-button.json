@@ -159,7 +159,7 @@
       "description": "",
       "name": "tag",
       "required": false,
-      "type": "string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any> | undefined"
+      "type": "string | Component | undefined"
     },
     {
       "default": "-",

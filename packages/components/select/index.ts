@@ -1,8 +1,16 @@
 import Select from './src/select.vue'
 import { withInstall } from '@falcon-ui/utils'
+import type { SFCWithInstall } from '@falcon-ui/utils'
 
-export const FlSelect = withInstall(Select)
+export const FlSelect: SFCWithInstall<typeof Select> = withInstall(Select)
 
 export default FlSelect
 
-export type { FlSelectEmits, FlSelectProps, SelectEmits, SelectProps } from './src/select'
+export type {
+  FlSelectEmits,
+  FlSelectExpose,
+  FlSelectProps,
+  SelectEmits,
+  SelectExpose,
+  SelectProps
+} from './src/select'

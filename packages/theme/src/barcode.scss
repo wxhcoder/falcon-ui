@@ -1,0 +1,14 @@
+@use './mixins/bem.scss' as bem;
+
+@include bem.b(barcode) {
+  display: inline-block;
+  line-height: 0;
+  max-width: 100%;
+  vertical-align: middle;
+
+  shape-rendering: crispEdges;
+
+  text {
+    user-select: none;
+  }
+}

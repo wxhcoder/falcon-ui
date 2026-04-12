@@ -2,8 +2,9 @@
   <section class="page">
     <h2 class="page-title">Components</h2>
     <p class="page-desc">
-      Element Plus passthrough wrappers: FlButton, FlInput, FlDatePicker, FlSelect, FlInputSearch,
-      FlInputNumber, FlTable and FlDialog.
+      Element Plus passthrough wrappers plus code display components: FlButton, FlInput,
+      FlDatePicker, FlQrCode, FlBarcode, FlSelect, FlInputSearch, FlInputNumber, FlTable and
+      FlDialog.
     </p>
     <article class="card demo-card">
       <h3>FlButton</h3>
@@ -20,6 +21,48 @@
         <FlButton type="primary" @click="buttonClicks += 1">Click +1</FlButton>
       </div>
       <p class="demo-result">Click count: {{ buttonClicks }}</p>
+    </article>
+
+    <article class="card demo-card">
+      <h3>FlQrCode</h3>
+      <div class="demo-row">
+        <FlQrCode
+          :value="qrCodeValue"
+          :size="qrCodeSize"
+          :type="qrCodeType"
+          :icon-src="qrCodeType === 'svg' ? qrCodeIcon : ''" />
+        <div class="demo-column">
+          <FlButton @click="qrCodeType = qrCodeType === 'canvas' ? 'svg' : 'canvas'">
+            Toggle type: {{ qrCodeType }}
+          </FlButton>
+          <FlButton @click="qrCodeSize = qrCodeSize === 140 ? 180 : 140">
+            Toggle size: {{ qrCodeSize }}
+          </FlButton>
+        </div>
+      </div>
+      <p class="demo-result">value: {{ qrCodeValue }}</p>
+      <p class="demo-result">type / size: {{ qrCodeType }} / {{ qrCodeSize }}</p>
+    </article>
+
+    <article class="card demo-card">
+      <h3>FlBarcode</h3>
+      <div class="demo-row">
+        <FlBarcode
+          :value="barcodeValue"
+          :format="barcodeFormat"
+          :display-value="barcodeDisplayValue"
+          :margin="8" />
+        <div class="demo-column">
+          <FlSelect v-model="barcodeFormat" placeholder="Format" style="width: 160px">
+            <ElOption v-for="item in barcodeFormats" :key="item" :label="item" :value="item" />
+          </FlSelect>
+          <FlButton @click="barcodeDisplayValue = !barcodeDisplayValue">
+            Toggle text: {{ barcodeDisplayValue ? 'on' : 'off' }}
+          </FlButton>
+        </div>
+      </div>
+      <p class="demo-result">value: {{ barcodeValue }}</p>
+      <p class="demo-result">format / text: {{ barcodeFormat }} / {{ barcodeDisplayValue }}</p>
     </article>
 
     <article class="card demo-card">
@@ -262,6 +305,14 @@ import { Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
 
 const buttonClicks = ref(0)
+const qrCodeValue = ref('https://falcon-ui.dev')
+const qrCodeType = ref<'canvas' | 'svg'>('canvas')
+const qrCodeSize = ref(140)
+const qrCodeIcon =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='10' fill='%230f172a'/%3E%3Cpath d='M10 16h12M16 10v12' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"
+const barcodeValue = ref('FALCON-2026')
+const barcodeFormat = ref<'CODE128' | 'CODE39' | 'EAN13' | 'EAN8' | 'UPCA' | 'UPCE'>('CODE128')
+const barcodeDisplayValue = ref(true)
 const inputValue = ref('')
 const iconInputValue = ref('')
 const disabledValue = ref('disabled text')
@@ -383,6 +434,7 @@ const selectOptions = [
   { label: 'Beijing', value: 'beijing' },
   { label: 'Shenzhen', value: 'shenzhen' }
 ]
+const barcodeFormats = ['CODE128', 'CODE39', 'EAN13', 'EAN8', 'UPCA', 'UPCE'] as const
 </script>
 
 <style scoped>
@@ -395,6 +447,12 @@ const selectOptions = [
   flex-wrap: wrap;
   gap: 10px;
   margin: 10px 0;
+}
+
+.demo-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .demo-result {

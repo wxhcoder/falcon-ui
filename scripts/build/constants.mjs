@@ -47,6 +47,12 @@ const entryPoints = {
     packagesDir,
     'components/date-picker/src/date-picker.vue'
   ),
+  'components/qr-code/index': resolve(packagesDir, 'components/qr-code/index.ts'),
+  'components/qr-code/src/qr-code': resolve(packagesDir, 'components/qr-code/src/qr-code.ts'),
+  'components/qr-code/src/qr-code.vue': resolve(packagesDir, 'components/qr-code/src/qr-code.vue'),
+  'components/barcode/index': resolve(packagesDir, 'components/barcode/index.ts'),
+  'components/barcode/src/barcode': resolve(packagesDir, 'components/barcode/src/barcode.ts'),
+  'components/barcode/src/barcode.vue': resolve(packagesDir, 'components/barcode/src/barcode.vue'),
   'components/select/index': resolve(packagesDir, 'components/select/index.ts'),
   'components/select/src/select': resolve(packagesDir, 'components/select/src/select.ts'),
   'components/select/src/select.vue': resolve(packagesDir, 'components/select/src/select.vue'),

@@ -21,6 +21,14 @@ export const flSelectEmits = {} as const
 
 export type FlSelectProps = ExtractPublicPropTypes<typeof flSelectProps>
 export type FlSelectEmits = typeof flSelectEmits
+export interface FlSelectExpose {
+  focus: () => void
+  blur: () => void
+  selectedLabel?: string | string[]
+  toggleMenu?: (event?: Event) => void
+  handleClearClick?: (event: Event) => void
+}
 
 export type SelectProps = FlSelectProps
 export type SelectEmits = FlSelectEmits
+export type SelectExpose = FlSelectExpose

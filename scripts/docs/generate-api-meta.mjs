@@ -34,6 +34,14 @@ const targets = [
     filePath: path.resolve(rootDir, 'packages/components/date-picker/src/date-picker.vue')
   },
   {
+    id: 'fl-qr-code',
+    filePath: path.resolve(rootDir, 'packages/components/qr-code/src/qr-code.vue')
+  },
+  {
+    id: 'fl-barcode',
+    filePath: path.resolve(rootDir, 'packages/components/barcode/src/barcode.vue')
+  },
+  {
     id: 'fl-dialog',
     filePath: path.resolve(rootDir, 'packages/components/dialog/src/dialog.vue')
   },

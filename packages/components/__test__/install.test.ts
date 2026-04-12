@@ -1,12 +1,14 @@
 import type { App, Plugin } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 import {
+  FlBarcode,
   FlButton,
   FlDatePicker,
   FlDialog,
   FlInput,
   FlInputNumber,
   FlInputSearch,
+  FlQrCode,
   FlSelect,
   FlTable
 } from '..'
@@ -56,15 +58,19 @@ describe('@falcon-ui/components exports', () => {
     app.use(FlInput)
     app.use(FlInputSearch)
     app.use(FlInputNumber)
+    app.use(FlQrCode)
+    app.use(FlBarcode)
     app.use(FlSelect)
     app.use(FlTable)
 
+    expect(app.component).toHaveBeenCalledWith('FlBarcode', FlBarcode)
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
     expect(app.component).toHaveBeenCalledWith('FlDialog', FlDialog)
     expect(app.component).toHaveBeenCalledWith('FlDatePicker', FlDatePicker)
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
+    expect(app.component).toHaveBeenCalledWith('FlQrCode', FlQrCode)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
   })
