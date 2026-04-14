@@ -33,6 +33,7 @@ const resolvedSize = computed(() =>
 const resolvedPadding = computed(() =>
   Number.isFinite(props.padding) && props.padding >= 0 ? Math.trunc(props.padding) : -1
 )
+const resolvedRenderSize = computed(() => resolvedSize.value - resolvedPadding.value * 2)
 const resolvedIconSize = computed(() =>
   Number.isFinite(props.iconSize) && props.iconSize > 0 ? Math.trunc(props.iconSize) : 0
 )
@@ -48,7 +49,9 @@ const rootStyle = computed<CSSProperties>(() => ({
 
 const renderStyle = computed<CSSProperties>(() => ({
   position: 'absolute',
-  inset: 0
+  inset: `${resolvedPadding.value}px`,
+  width: 'auto',
+  height: 'auto'
 }))
 
 const shouldShowIcon = computed(() => hasRendered.value && Boolean(props.iconSrc))
@@ -85,8 +88,8 @@ const clearRender = () => {
 }
 
 const buildRenderOptions = (): QRCodeRenderersOptions => ({
-  width: resolvedSize.value,
-  margin: resolvedPadding.value,
+  width: resolvedRenderSize.value,
+  margin: 0,
   errorCorrectionLevel: props.errorCorrectionLevel,
   color: {
     dark: props.color,

@@ -80,8 +80,8 @@ describe('FlQrCode', () => {
       'https://falcon-ui.dev',
       expect.objectContaining({
         type: 'svg',
-        width: 180,
-        margin: 20,
+        width: 140,
+        margin: 0,
         errorCorrectionLevel: 'H',
         color: {
           dark: '#111111',
@@ -100,10 +100,12 @@ describe('FlQrCode', () => {
     expect(toStringMock).toHaveBeenLastCalledWith(
       'https://falcon-ui.dev/docs',
       expect.objectContaining({
-        width: 160,
-        margin: 12
+        width: 136,
+        margin: 0
       })
     )
+
+    expect(wrapper.get('.fl-qr-code__render').attributes('style')).toContain('inset: 12px')
   })
 
   it('renders icon overlay on top of the QR code', async () => {
