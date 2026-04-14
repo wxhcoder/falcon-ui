@@ -6,11 +6,44 @@
 
 $fl-button-primary-base-color: map.get(ep-var.$colors, 'primary', 'base');
 $fl-button-primary-gradient-end-color: color-mixin.get-nearby-color($fl-button-primary-base-color);
+$fl-button-wave-spread-size: 6px;
+$fl-button-wave-box-shadow-duration: 0.4s;
+$fl-button-wave-opacity-duration: 2s;
+$fl-button-wave-ease-out-circ: cubic-bezier(0.08, 0.82, 0.17, 1);
 
 // Keep EP button style as baseline, then place Falcon extension in this block.
 @include bem.b(button) {
   &.el-button {
     margin: 0;
+  }
+
+  &.el-button:not(.is-disabled):not(.is-loading):not(.is-text):not(.is-link) {
+    --fl-button-wave-color: var(--el-button-border-color);
+
+    position: relative;
+    overflow: visible;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      pointer-events: none;
+      box-sizing: border-box;
+      border-radius: inherit;
+      color: var(--fl-button-wave-color);
+      background: transparent;
+      box-shadow: 0 0 0 $fl-button-wave-spread-size currentcolor;
+      opacity: 0;
+      transition:
+        box-shadow $fl-button-wave-box-shadow-duration $fl-button-wave-ease-out-circ,
+        opacity $fl-button-wave-opacity-duration $fl-button-wave-ease-out-circ;
+    }
+
+    &:active::after {
+      box-shadow: 0 0 0 0 currentcolor;
+      opacity: 0.2;
+      transition: none;
+    }
   }
 
   &.el-button--primary:not(.is-disabled):not(.is-plain):not(.is-link):not(.is-text) {
@@ -21,5 +54,12 @@ $fl-button-primary-gradient-end-color: color-mixin.get-nearby-color($fl-button-p
       var(--el-color-primary) 0%,
       var(--fl-button-primary-gradient-end-color) 100%
     );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &.el-button:not(.is-disabled):not(.is-loading):not(.is-text):not(.is-link)::after {
+      display: none;
+      transition: none;
+    }
   }
 }
