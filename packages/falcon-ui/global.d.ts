@@ -8,6 +8,7 @@ import type {
   FlInputSearch,
   FlQrCode,
   FlSelect,
+  FlTree,
   FlTable,
   FlTableEditor
 } from '@falcon-ui/components'
@@ -23,6 +24,7 @@ declare module 'vue' {
     FlInputNumber: typeof FlInputNumber
     FlQrCode: typeof FlQrCode
     FlSelect: typeof FlSelect
+    FlTree: typeof FlTree
     FlTable: typeof FlTable
     FlTableEditor: typeof FlTableEditor
   }

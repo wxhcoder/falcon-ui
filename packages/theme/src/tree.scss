@@ -1,0 +1,72 @@
+@use './mixins/bem.scss' as bem;
+@use 'element-plus/theme-chalk/src/tree.scss';
+
+/**
+ * 树组件样式优先继承 Element Plus Tree 视觉变量。
+ */
+@include bem.b(tree) {
+  color: var(--el-tree-text-color);
+  font-size: var(--el-font-size-base);
+  line-height: 1.5;
+  --fl-tree-node-content-height: var(--el-tree-node-content-height);
+  --fl-tree-node-hover-bg-color: var(--el-tree-node-hover-bg-color);
+  --fl-tree-node-text-color: var(--el-tree-text-color);
+  --fl-tree-node-icon-color: var(--el-tree-expand-icon-color);
+  --fl-tree-leaf-dot-color: var(--el-text-color-secondary);
+  --fl-tree-node-indent: 20px;
+
+  @include bem.e(item) {
+    position: relative;
+    box-sizing: border-box;
+    padding-inline-start: calc((var(--fl-tree-level, 1) - 1) * var(--fl-tree-node-indent));
+
+    &:hover > #{bem.selector('tree', 'item-content')} {
+      background-color: var(--fl-tree-node-hover-bg-color);
+    }
+  }
+
+  @include bem.e(item-content) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: var(--fl-tree-node-content-height);
+    padding: 0 8px;
+    border-radius: var(--fl-radius-sm);
+    transition: background-color var(--el-transition-duration);
+  }
+
+  @include bem.e(item-icon) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 16px;
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+    color: var(--fl-tree-node-icon-color);
+  }
+
+  @include bem.e(switcher-icon) {
+    font-size: 14px;
+  }
+
+  @include bem.e(switcher-dot) {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background-color: var(--fl-tree-leaf-dot-color);
+  }
+
+  @include bem.e(item-title) {
+    min-width: 0;
+    color: var(--fl-tree-node-text-color);
+    font-size: inherit;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  @include bem.e(children) {
+    display: flex;
+    flex-direction: column;
+  }
+}

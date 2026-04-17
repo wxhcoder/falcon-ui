@@ -194,6 +194,15 @@
     </article>
 
     <article class="card demo-card">
+      <h3>FlTree</h3>
+      <div class="demo-row">
+        <FlTree :data="treeData" :props="treeNodeProps" />
+      </div>
+      <p class="demo-result">Root nodes: {{ treeData.length }}</p>
+      <p class="demo-result">Mapped label field: `name`, children field: `nodes`.</p>
+    </article>
+
+    <article class="card demo-card">
       <h3>FlInputNumber</h3>
       <div class="demo-row">
         <FlInputNumber v-model="numberValue" placeholder="Only number value" />
@@ -303,6 +312,7 @@
 import { ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
+import type { FlTreeNodePropsConfig, FlTreeRawNode } from 'falcon-ui'
 
 const buttonClicks = ref(0)
 const qrCodeValue = ref('https://falcon-ui.dev')
@@ -435,6 +445,46 @@ const selectOptions = [
   { label: 'Shenzhen', value: 'shenzhen' }
 ]
 const barcodeFormats = ['CODE128', 'CODE39', 'EAN13', 'EAN8', 'UPCA', 'UPCE'] as const
+
+// 阶段 1 树示例使用自定义字段名，直接验证 props 映射链路。
+const treeNodeProps: FlTreeNodePropsConfig = {
+  label: 'name',
+  children: 'nodes',
+  disabled: 'locked',
+  isLeaf: 'leaf',
+  class: 'className'
+}
+
+const treeData: FlTreeRawNode[] = [
+  {
+    key: 'workspace',
+    name: 'Workspace',
+    nodes: [
+      {
+        key: 'workspace-forms',
+        name: 'Forms',
+        leaf: true
+      },
+      {
+        key: 'workspace-layout',
+        name: 'Layout',
+        nodes: [
+          {
+            key: 'workspace-layout-grid',
+            name: 'Grid',
+            leaf: true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    key: 'archive',
+    name: 'Archive',
+    locked: true,
+    leaf: true
+  }
+]
 </script>
 
 <style scoped>

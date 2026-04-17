@@ -63,6 +63,20 @@ export type {
   SelectExpose,
   SelectProps
 } from './select'
+export { FlTree } from './tree'
+export type {
+  FlTreeClassNames,
+  FlTreeClassValue,
+  FlTreeIndex,
+  FlTreeKey,
+  FlTreeNodePropsConfig,
+  FlTreeNormalizedNode,
+  FlTreeProps,
+  FlTreeRawNode,
+  FlTreeSemanticDOM,
+  FlTreeSemanticRecord,
+  FlTreeStyles
+} from './tree'
 export { FlTable } from './table'
 export { FlTableEditor } from './table'
 export type {

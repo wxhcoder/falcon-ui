@@ -17,6 +17,7 @@
     "./qr-code": "./qr-code/index.ts",
     "./barcode": "./barcode/index.ts",
     "./select": "./select/index.ts",
+    "./tree": "./tree/index.ts",
     "./table": "./table/index.ts"
   },
   "scripts": {

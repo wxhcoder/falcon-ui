@@ -9,6 +9,7 @@ import {
   FlInputSearch,
   FlQrCode,
   FlSelect,
+  FlTree,
   FlTable,
   FlTableEditor
 } from '@falcon-ui/components'
@@ -28,6 +29,7 @@ const components = [
   FlInputNumber,
   FlQrCode,
   FlSelect,
+  FlTree,
   FlTable,
   FlTableEditor
 ] as const
