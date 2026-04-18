@@ -1,4 +1,4 @@
-import type { PropType, ExtractPublicPropTypes } from 'vue'
+﻿import type { ExtractPublicPropTypes, PropType } from 'vue'
 import type {
   FlTreeClassNames,
   FlTreeClassValue,
@@ -24,7 +24,7 @@ export const flTreeNodePropsDefaults: Required<FlTreeNodePropsConfig> = {
 }
 
 /**
- * 首版公开属性仅保留基础数据、字段映射和语义化样式挂点。
+ * 阶段 2 公开属性仍然只覆盖基础数据、字段映射和语义化样式挂点。
  */
 export const flTreeProps = {
   data: {
@@ -117,7 +117,7 @@ export const normalizeTreeNode = (
 }
 
 /**
- * 在递归树结构之外，同时建立平铺索引，供后续阶段复用。
+ * 在递归树结构之外，同时建立扁平索引，供后续阶段复用。
  */
 export const buildTreeIndex = (
   data: FlTreeRawNode[],
@@ -161,6 +161,31 @@ export const buildTreeIndex = (
     childrenKeyMap,
     visibleNodeKeys
   }
+}
+
+/**
+ * 收集当前树中所有可展开节点的 key，供阶段 2 初始化默认展开状态使用。
+ */
+export const collectInitiallyExpandedKeys = (nodes: FlTreeNormalizedNode[]): Set<FlTreeKey> => {
+  const expandedKeys = new Set<FlTreeKey>()
+
+  /**
+   * 递归遍历存在子节点的分支节点，并记录其 key。
+   */
+  const visit = (currentNodes: FlTreeNormalizedNode[]) => {
+    for (const node of currentNodes) {
+      if (node.children.length === 0) {
+        continue
+      }
+
+      expandedKeys.add(node.key)
+      visit(node.children)
+    }
+  }
+
+  visit(nodes)
+
+  return expandedKeys
 }
 
 /**

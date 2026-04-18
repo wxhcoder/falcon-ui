@@ -1,5 +1,6 @@
+﻿import type { VueWrapper } from '@vue/test-utils'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
-import { CaretBottom } from '@element-plus/icons-vue'
+import { CaretBottom, CaretRight } from '@element-plus/icons-vue'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -15,10 +16,10 @@ import FalconUI, { install as installFalconUI } from '@falcon-ui/falcon-ui'
 enableAutoUnmount(afterEach)
 
 /**
- * 阶段 1 只验证基础渲染、字段映射、递归骨架、视觉变量来源和最小导出链路。
- * 本文件不覆盖阶段 2 及以后能力。
+ * 阶段 1 到阶段 2 的测试只覆盖基础渲染、导出链路与展开收起能力。
+ * 默认展开与受控展开属于阶段 3，不在本文件当前覆盖范围内。
  */
-describe('FlTree 阶段 1 契约', () => {
+describe('FlTree 阶段 1-2 契约', () => {
   /**
    * 读取项目文件内容，用于验证导出链路和样式接入。
    */
@@ -49,6 +50,21 @@ describe('FlTree 阶段 1 契约', () => {
     }
 
     return app
+  }
+
+  /**
+   * 通过标题文本定位树节点条目，便于验证节点级无障碍属性与展开状态。
+   */
+  const findTreeItemByText = (wrapper: VueWrapper, label: string) => {
+    const item = wrapper
+      .findAll('.fl-tree__item')
+      .find((currentItem) => currentItem.text().includes(label))
+
+    if (!item) {
+      throw new Error(`Unable to find tree item: ${label}`)
+    }
+
+    return item
   }
 
   it('使用默认字段映射渲染树数据', async () => {
@@ -195,7 +211,7 @@ describe('FlTree 阶段 1 契约', () => {
     const componentsTreeModule = await import('@falcon-ui/components/tree')
     const componentsModule = await import('@falcon-ui/components')
     const falconUiModule = await import('@falcon-ui/falcon-ui')
-    await import('../../../../packages/theme/index.scss')
+    // 样式文件已在测试环境统一引入，无需重复动态加载
 
     const app = createAppMock()
 
@@ -227,7 +243,7 @@ describe('FlTree 阶段 1 契约', () => {
     expect(treeTypeSmoke).toBeNull()
   })
 
-  it('浣跨敤 bem 宸ュ叿缁熶竴鐢熸垚鏍戠粍浠跺熀纭€绫诲悕', () => {
+  it('使用 bem 工具统一生成树组件基础类名', () => {
     const treeSource = readProjectFile('packages/components/tree/src/tree.vue')
     const treeNodeSource = readProjectFile('packages/components/tree/src/tree-node.vue')
 
@@ -239,5 +255,82 @@ describe('FlTree 阶段 1 契约', () => {
     expect(treeNodeSource).toContain("const itemIconClassName = ns.e('item-icon')")
     expect(treeNodeSource).toContain("const itemTitleClassName = ns.e('item-title')")
     expect(treeNodeSource).toContain("const childrenClassName = ns.e('children')")
+  })
+
+  it('支持非叶子节点展开与收起', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: [
+          {
+            key: 'root',
+            label: 'Root',
+            children: [
+              {
+                key: 'leaf',
+                label: 'Leaf'
+              }
+            ]
+          }
+        ]
+      }
+    })
+
+    await nextTick()
+
+    const rootItem = findTreeItemByText(wrapper, 'Root')
+    const switcherButton = rootItem.get('.fl-tree__switcher-button')
+
+    expect(rootItem.attributes('aria-expanded')).toBe('true')
+    expect(rootItem.find('[role="group"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Leaf')
+    expect(wrapper.findComponent(CaretBottom).exists()).toBe(true)
+
+    await switcherButton.trigger('click')
+    await nextTick()
+
+    expect(rootItem.attributes('aria-expanded')).toBe('false')
+    expect(rootItem.find('[role="group"]').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Leaf')
+    expect(wrapper.findComponent(CaretRight).exists()).toBe(true)
+
+    await switcherButton.trigger('click')
+    await nextTick()
+
+    expect(rootItem.attributes('aria-expanded')).toBe('true')
+    expect(rootItem.find('[role="group"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Leaf')
+    expect(wrapper.findComponent(CaretBottom).exists()).toBe(true)
+  })
+
+  it('叶子节点不暴露展开属性并继续显示圆点', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: [
+          {
+            key: 'root',
+            label: 'Root',
+            children: [
+              {
+                key: 'leaf',
+                label: 'Leaf'
+              }
+            ]
+          },
+          {
+            key: 'archive',
+            label: 'Archive',
+            isLeaf: true
+          }
+        ]
+      }
+    })
+
+    await nextTick()
+
+    const archiveItem = findTreeItemByText(wrapper, 'Archive')
+
+    expect(archiveItem.attributes('aria-expanded')).toBeUndefined()
+    expect(archiveItem.find('.fl-tree__switcher-dot').exists()).toBe(true)
+    expect(archiveItem.find('.fl-tree__switcher-button').exists()).toBe(false)
   })
 })

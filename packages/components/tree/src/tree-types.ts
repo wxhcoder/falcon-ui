@@ -1,7 +1,7 @@
-import type { CSSProperties } from 'vue'
+﻿import type { CSSProperties } from 'vue'
 
 /**
- * 树节点主键仅允许字符串或数字，避免首版引入额外的键值归一化成本。
+ * 树节点主键仅允许字符串或数字，避免首版引入额外的键值归一成本。
  */
 export type FlTreeKey = string | number
 
@@ -70,7 +70,7 @@ export interface FlTreeNormalizedNode {
 }
 
 /**
- * 首版先建立节点索引，为后续交互阶段复用。
+ * 树索引为后续展开、选择、勾选等交互能力提供基础结构。
  */
 export interface FlTreeIndex {
   nodes: FlTreeNormalizedNode[]

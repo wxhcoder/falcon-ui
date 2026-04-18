@@ -1,4 +1,4 @@
-# FlTree 需求文档（Tree PRD）
+﻿# FlTree 需求文档（Tree PRD）
 
 ## 0. 开发阶段状态
 
@@ -13,7 +13,7 @@
   - `TreeNode` 递归渲染骨架
   - Element Plus Tree 视觉变量继承
   - 最小可用导出链路
-- [ ] 阶段 2：开发树节点展开 / 收起功能
+- [x] 阶段 2：开发树节点展开 / 收起功能
 - [ ] 阶段 3：开发默认展开与受控展开功能
 - [ ] 阶段 4：开发树节点单选功能
 - [ ] 阶段 5：开发树节点多选功能
@@ -631,4 +631,55 @@ interface FlTreeExpose {
 ### 11.4 结果判定
 
 - 当前判定：阶段 1 已完成。
-- 下一阶段状态：继续阻塞，等待用户确认后进入阶段 2。
+- 下一阶段状态：阶段 1 已归档；阶段 2 结果见“阶段 2 测试文档”，阶段 3 继续阻塞。
+
+## 12. 阶段 2 测试文档
+
+### 12.1 测试范围
+
+阶段 2 只验证以下内容，不进入阶段 3 及以后：
+
+1. 非叶子节点默认展开
+2. 非叶子节点可通过 switcher 收起与再次展开
+3. `CaretBottom / CaretRight` 随展开状态切换
+4. 子节点容器跟随展开状态显隐
+5. 非叶子节点 `aria-expanded` 与内部展开状态同步
+6. 叶子节点继续显示圆点，且不暴露展开属性
+
+### 12.2 测试内容
+
+| 编号 | 测试内容     | 关注点                                       | 预期结果                                              |
+| ---- | ------------ | -------------------------------------------- | ----------------------------------------------------- |
+| 1    | 展开收起交互 | switcher 点击后是否能收起并再次展开          | 初始展开，点击后收起，再点击恢复                      |
+| 2    | 图标切换     | `CaretBottom / CaretRight` 是否与状态同步    | 展开显示 `CaretBottom`，收起显示 `CaretRight`         |
+| 3    | 子节点显隐   | `role="group"` 子节点容器是否跟随状态挂载    | 展开时存在，收起时移除                                |
+| 4    | 无障碍属性   | 非叶子节点 `aria-expanded` 是否输出正确      | 展开为 `true`，收起为 `false`                         |
+| 5    | 叶子节点渲染 | 叶子节点是否仍显示圆点且不暴露展开交互与属性 | 无 switcher button，保留圆点，无 `aria-expanded` 属性 |
+
+### 12.3 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 已执行命令：
+  - `pnpm exec eslint packages/components/tree/src/tree-types.ts packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vitest run packages/components/__test__/install.test.ts packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+- 执行结果：
+  - `packages/components/tree/__test__/tree.test.ts`：`8 passed`
+  - 组合安装回归：`10 passed`
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+- 结论：
+  - 非叶子节点默认展开通过
+  - switcher 点击收起 / 再展开通过
+  - `CaretBottom / CaretRight` 切换通过
+  - 子节点容器显隐通过
+  - `aria-expanded` 同步通过
+  - 叶子节点圆点与无展开属性约定通过
+
+### 12.4 结果判定
+
+- 当前判定：阶段 2 已完成。
+- 下一阶段状态：继续阻塞，等待用户确认后进入阶段 3。
