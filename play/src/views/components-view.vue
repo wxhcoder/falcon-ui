@@ -196,10 +196,57 @@
     <article class="card demo-card">
       <h3>FlTree</h3>
       <div class="demo-row">
-        <FlTree :data="treeData" :props="treeNodeProps" />
+        <FlSelect v-model="treeDefaultExpandMode" placeholder="默认展开方式" style="width: 220px">
+          <ElOption
+            v-for="item in treeDefaultExpandOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value" />
+        </FlSelect>
+        <FlButton @click="applyTreeDefaultExpandMode">应用默认展开</FlButton>
+        <FlButton @click="expandAllTreeNodes">全部展开</FlButton>
+        <FlButton @click="collapseAllTreeNodes">全部折叠</FlButton>
+        <FlButton @click="restoreTreeDefaultExpandMode">恢复默认模式</FlButton>
+        <FlButton @click="resetTreeEventRecords">Clear event log</FlButton>
+      </div>
+      <div class="demo-row tree-demo-row">
+        <FlTree
+          :key="treeDemoVersion"
+          class="tree-demo"
+          :data="treeData"
+          :props="treeNodeProps"
+          :default-expand-all="treeDefaultExpandAll"
+          :default-expanded-keys="treeDefaultExpandedKeys"
+          :default-expand-parent="treeDefaultExpandParent"
+          :expanded-keys="treeUseControlledExpand ? treeControlledExpandedKeys : undefined"
+          @update:expanded-keys="handleTreeExpandedKeysChange"
+          @node-click="handleTreeNodeClick"
+          @node-expand="handleTreeNodeExpand"
+          @node-collapse="handleTreeNodeCollapse" />
       </div>
       <p class="demo-result">Root nodes: {{ treeData.length }}</p>
       <p class="demo-result">Mapped label field: `name`, children field: `nodes`.</p>
+      <p class="demo-result">
+        默认展开方式: {{ currentTreeDefaultExpandLabel }}，当前模式:
+        {{ treeUseControlledExpand ? '受控展开' : '默认展开' }}
+      </p>
+      <p class="demo-result">
+        当前源展开 keys:
+        {{ currentTreeExpandedKeys.length ? currentTreeExpandedKeys.join(', ') : '(empty)' }}
+      </p>
+      <p class="demo-result">
+        Event counts: click={{ treeNodeClickCount }}, expand={{ treeNodeExpandCount }}, collapse={{
+          treeNodeCollapseCount
+        }}
+      </p>
+      <p class="demo-result">Last node-click: {{ treeLastNodeClick }}</p>
+      <p class="demo-result">Last node-expand: {{ treeLastNodeExpand }}</p>
+      <p class="demo-result">Last node-collapse: {{ treeLastNodeCollapse }}</p>
+      <ul class="tree-event-list">
+        <li v-for="item in treeEventRecords" :key="item.id" class="tree-event-item">
+          {{ item.message }}
+        </li>
+      </ul>
     </article>
 
     <article class="card demo-card">
@@ -309,10 +356,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
-import type { FlTreeNodePropsConfig, FlTreeRawNode } from 'falcon-ui'
+import type { TreeData, TreeKey, TreeNode, TreeNodeInstance, TreeNodeProps } from 'falcon-ui'
 
 const buttonClicks = ref(0)
 const qrCodeValue = ref('https://falcon-ui.dev')
@@ -446,8 +493,29 @@ const selectOptions = [
 ]
 const barcodeFormats = ['CODE128', 'CODE39', 'EAN13', 'EAN8', 'UPCA', 'UPCE'] as const
 
-// 阶段 1 树示例使用自定义字段名，直接验证 props 映射链路。
-const treeNodeProps: FlTreeNodePropsConfig = {
+type TreeDefaultExpandMode = 'collapsed' | 'roots' | 'focus-path' | 'all'
+
+interface TreeDefaultExpandOption {
+  label: string
+  value: TreeDefaultExpandMode
+}
+
+interface TreeDefaultExpandConfig {
+  defaultExpandAll: boolean
+  defaultExpandedKeys: TreeKey[] | undefined
+  defaultExpandParent: boolean
+  sourceExpandedKeys: TreeKey[]
+}
+
+type TreeEventName = 'node-click' | 'node-expand' | 'node-collapse'
+
+interface TreeEventRecord {
+  id: number
+  message: string
+}
+
+// 树组件示例继续使用自定义字段名，直接验证 props 映射链路。
+const treeNodeProps: TreeNodeProps = {
   label: 'name',
   children: 'nodes',
   disabled: 'locked',
@@ -455,7 +523,7 @@ const treeNodeProps: FlTreeNodePropsConfig = {
   class: 'className'
 }
 
-const treeData: FlTreeRawNode[] = [
+const treeData: TreeData[] = [
   {
     key: 'workspace',
     name: 'Workspace',
@@ -473,6 +541,113 @@ const treeData: FlTreeRawNode[] = [
             key: 'workspace-layout-grid',
             name: 'Grid',
             leaf: true
+          },
+          {
+            key: 'workspace-layout-splitter',
+            name: 'Splitter',
+            leaf: true
+          }
+        ]
+      },
+      {
+        key: 'workspace-feedback',
+        name: 'Feedback',
+        nodes: [
+          {
+            key: 'workspace-feedback-dialog',
+            name: 'Dialog',
+            leaf: true
+          },
+          {
+            key: 'workspace-feedback-notification',
+            name: 'Notification',
+            leaf: true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    key: 'design-system',
+    name: 'Design System',
+    nodes: [
+      {
+        key: 'design-system-tokens',
+        name: 'Tokens',
+        nodes: [
+          {
+            key: 'design-system-tokens-color',
+            name: 'Color',
+            leaf: true
+          },
+          {
+            key: 'design-system-tokens-typography',
+            name: 'Typography',
+            leaf: true
+          }
+        ]
+      },
+      {
+        key: 'design-system-components',
+        name: 'Components',
+        nodes: [
+          {
+            key: 'design-system-components-button',
+            name: 'Button',
+            leaf: true
+          },
+          {
+            key: 'design-system-components-table',
+            name: 'Table',
+            leaf: true
+          },
+          {
+            key: 'design-system-components-tree',
+            name: 'Tree',
+            leaf: true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    key: 'delivery',
+    name: 'Delivery',
+    nodes: [
+      {
+        key: 'delivery-roadmap',
+        name: 'Roadmap',
+        nodes: [
+          {
+            key: 'delivery-roadmap-stage-1',
+            name: 'Stage 1',
+            leaf: true
+          },
+          {
+            key: 'delivery-roadmap-stage-2',
+            name: 'Stage 2',
+            leaf: true
+          },
+          {
+            key: 'delivery-roadmap-stage-3',
+            name: 'Stage 3',
+            leaf: true
+          }
+        ]
+      },
+      {
+        key: 'delivery-quality',
+        name: 'Quality',
+        nodes: [
+          {
+            key: 'delivery-quality-unit-test',
+            name: 'Unit Test',
+            leaf: true
+          },
+          {
+            key: 'delivery-quality-playground',
+            name: 'Playground',
+            leaf: true
           }
         ]
       }
@@ -485,6 +660,260 @@ const treeData: FlTreeRawNode[] = [
     leaf: true
   }
 ]
+
+const treeDefaultExpandOptions: TreeDefaultExpandOption[] = [
+  { label: '默认收起', value: 'collapsed' },
+  { label: '默认展开一级分组', value: 'roots' },
+  { label: '默认展开关键路径', value: 'focus-path' },
+  { label: '默认全部展开', value: 'all' }
+]
+const treeDefaultExpandMode = ref<TreeDefaultExpandMode>('roots')
+const treeDemoVersion = ref(0)
+const treeDefaultExpandAll = ref(false)
+const treeDefaultExpandedKeys = ref<TreeKey[] | undefined>(undefined)
+const treeDefaultExpandParent = ref(true)
+const treeUseControlledExpand = ref(false)
+const treeControlledExpandedKeys = ref<TreeKey[]>([])
+const treeObservedExpandedKeys = ref<TreeKey[]>([])
+const treeNodeClickCount = ref(0)
+const treeNodeExpandCount = ref(0)
+const treeNodeCollapseCount = ref(0)
+const treeLastNodeClick = ref('(none)')
+const treeLastNodeExpand = ref('(none)')
+const treeLastNodeCollapse = ref('(none)')
+const treeEventSequence = ref(0)
+const treeEventRecords = ref<TreeEventRecord[]>([])
+
+/**
+ * 读取当前树示例的子节点字段，避免示例中的遍历逻辑写死字段名。
+ */
+const readTreeChildren = (node: TreeData): TreeData[] => {
+  const childrenFieldName = treeNodeProps.children ?? 'children'
+  const childrenValue = node[childrenFieldName]
+
+  return Array.isArray(childrenValue) ? (childrenValue as TreeData[]) : []
+}
+
+/**
+ * 按当前字段映射读取树节点标题，确保事件展示的是原始数据对象里的值。
+ */
+const readTreeLabel = (node: TreeData): string => {
+  const labelFieldName = treeNodeProps.label ?? 'label'
+  const labelValue = node[labelFieldName]
+
+  return labelValue == null ? '(empty)' : String(labelValue)
+}
+
+/**
+ * 格式化事件返回的树节点对象，便于在 play 中直接观察关键字段。
+ */
+const formatTreeNodeSummary = (node: TreeNode) => {
+  const parentKey = node.parent ? String(node.parent.key) : 'root'
+
+  return `key=${String(node.key)}, label=${node.label}, level=${node.level}, leaf=${node.isLeaf}, parent=${parentKey}, children=${node.childNodes.length}`
+}
+
+/**
+ * 记录最近一次树事件，控制日志条数，避免示例页信息过载。
+ */
+const appendTreeEventRecord = (eventName: TreeEventName, message: string) => {
+  treeEventSequence.value += 1
+  treeEventRecords.value = [
+    {
+      id: treeEventSequence.value,
+      message: `${eventName}: ${message}`
+    },
+    ...treeEventRecords.value
+  ].slice(0, 6)
+}
+
+/**
+ * 收集当前示例里所有可展开节点的 key，供“全部展开”与默认全展开复用。
+ */
+const collectTreeExpandableKeys = (nodes: TreeData[]): TreeKey[] => {
+  const expandedKeys: TreeKey[] = []
+
+  for (const node of nodes) {
+    const children = readTreeChildren(node)
+
+    if (children.length === 0) {
+      continue
+    }
+
+    expandedKeys.push(node.key)
+    expandedKeys.push(...collectTreeExpandableKeys(children))
+  }
+
+  return expandedKeys
+}
+
+/**
+ * 按默认展开方式生成树示例的初始化配置。
+ */
+const createTreeDefaultExpandConfig = (mode: TreeDefaultExpandMode): TreeDefaultExpandConfig => {
+  if (mode === 'all') {
+    const expandedKeys = collectTreeExpandableKeys(treeData)
+
+    return {
+      defaultExpandAll: true,
+      defaultExpandedKeys: undefined,
+      defaultExpandParent: true,
+      sourceExpandedKeys: expandedKeys
+    }
+  }
+
+  if (mode === 'roots') {
+    const expandedKeys: TreeKey[] = ['workspace', 'design-system']
+
+    return {
+      defaultExpandAll: false,
+      defaultExpandedKeys: expandedKeys,
+      defaultExpandParent: false,
+      sourceExpandedKeys: expandedKeys
+    }
+  }
+
+  if (mode === 'focus-path') {
+    const expandedKeys: TreeKey[] = ['design-system-components-table']
+
+    return {
+      defaultExpandAll: false,
+      defaultExpandedKeys: expandedKeys,
+      defaultExpandParent: true,
+      sourceExpandedKeys: expandedKeys
+    }
+  }
+
+  return {
+    defaultExpandAll: false,
+    defaultExpandedKeys: undefined,
+    defaultExpandParent: true,
+    sourceExpandedKeys: []
+  }
+}
+
+/**
+ * 将当前选择的默认展开方式重新应用到树示例中。
+ */
+const applyTreeDefaultExpandMode = () => {
+  const nextConfig = createTreeDefaultExpandConfig(treeDefaultExpandMode.value)
+
+  treeUseControlledExpand.value = false
+  treeDefaultExpandAll.value = nextConfig.defaultExpandAll
+  treeDefaultExpandedKeys.value = nextConfig.defaultExpandedKeys
+  treeDefaultExpandParent.value = nextConfig.defaultExpandParent
+  treeControlledExpandedKeys.value = nextConfig.sourceExpandedKeys
+  treeObservedExpandedKeys.value = nextConfig.sourceExpandedKeys
+  treeDemoVersion.value += 1
+}
+
+/**
+ * 将树示例切换到受控模式并展开全部分支。
+ */
+const expandAllTreeNodes = () => {
+  const expandedKeys = collectTreeExpandableKeys(treeData)
+
+  treeUseControlledExpand.value = true
+  treeControlledExpandedKeys.value = expandedKeys
+  treeObservedExpandedKeys.value = expandedKeys
+}
+
+/**
+ * 将树示例切换到受控模式并收起全部分支。
+ */
+const collapseAllTreeNodes = () => {
+  treeUseControlledExpand.value = true
+  treeControlledExpandedKeys.value = []
+  treeObservedExpandedKeys.value = []
+}
+
+/**
+ * 恢复到当前默认展开方式对应的非受控示例状态。
+ */
+const restoreTreeDefaultExpandMode = () => {
+  applyTreeDefaultExpandMode()
+}
+
+/**
+ * 同步树示例抛出的源展开键，并在受控模式下回写到示例状态。
+ */
+const handleTreeExpandedKeysChange = (expandedKeys: TreeKey[]) => {
+  treeObservedExpandedKeys.value = expandedKeys
+
+  if (treeUseControlledExpand.value) {
+    treeControlledExpandedKeys.value = expandedKeys
+  }
+}
+
+/**
+ * 返回当前默认展开方式的中文标签，便于在示例说明中展示。
+ */
+/**
+ * 清空树事件记录与计数，便于重复验证事件行为。
+ */
+const resetTreeEventRecords = () => {
+  treeNodeClickCount.value = 0
+  treeNodeExpandCount.value = 0
+  treeNodeCollapseCount.value = 0
+  treeLastNodeClick.value = '(none)'
+  treeLastNodeExpand.value = '(none)'
+  treeLastNodeCollapse.value = '(none)'
+  treeEventSequence.value = 0
+  treeEventRecords.value = []
+}
+
+/**
+ * 演示 `node-click` 事件，展示原始数据、节点对象、组件实例和原生事件的关键信息。
+ */
+const handleTreeNodeClick = (
+  data: TreeData,
+  node: TreeNode,
+  component: TreeNodeInstance,
+  event: MouseEvent
+) => {
+  const summary = `${formatTreeNodeSummary(node)}, rawLabel=${readTreeLabel(data)}, event=${event.type}, component=${component ? 'ready' : 'null'}`
+
+  treeNodeClickCount.value += 1
+  treeLastNodeClick.value = summary
+  appendTreeEventRecord('node-click', summary)
+}
+
+/**
+ * 演示 `node-expand` 事件，重点展示切换后的展开状态与节点层级信息。
+ */
+const handleTreeNodeExpand = (data: TreeData, node: TreeNode, instance: TreeNodeInstance) => {
+  const summary = `${formatTreeNodeSummary(node)}, rawLabel=${readTreeLabel(data)}, expanded=${node.expanded}, instance=${instance ? 'ready' : 'null'}`
+
+  treeNodeExpandCount.value += 1
+  treeLastNodeExpand.value = summary
+  appendTreeEventRecord('node-expand', summary)
+}
+
+/**
+ * 演示 `node-collapse` 事件，重点展示切换后的展开状态与节点层级信息。
+ */
+const handleTreeNodeCollapse = (data: TreeData, node: TreeNode, instance: TreeNodeInstance) => {
+  const summary = `${formatTreeNodeSummary(node)}, rawLabel=${readTreeLabel(data)}, expanded=${node.expanded}, instance=${instance ? 'ready' : 'null'}`
+
+  treeNodeCollapseCount.value += 1
+  treeLastNodeCollapse.value = summary
+  appendTreeEventRecord('node-collapse', summary)
+}
+
+const currentTreeDefaultExpandLabel = computed(
+  () =>
+    treeDefaultExpandOptions.find((item) => item.value === treeDefaultExpandMode.value)?.label ??
+    '默认收起'
+)
+
+/**
+ * 返回当前树示例对外可见的源展开键集合。
+ */
+const currentTreeExpandedKeys = computed(() =>
+  treeUseControlledExpand.value ? treeControlledExpandedKeys.value : treeObservedExpandedKeys.value
+)
+
+applyTreeDefaultExpandMode()
 </script>
 
 <style scoped>
@@ -507,5 +936,23 @@ const treeData: FlTreeRawNode[] = [
 
 .demo-result {
   margin: 6px 0 0;
+}
+
+.tree-demo-row {
+  width: 100%;
+}
+
+.tree-demo {
+  min-width: 280px;
+}
+
+.tree-event-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.tree-event-item {
+  margin-top: 4px;
+  word-break: break-all;
 }
 </style>

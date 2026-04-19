@@ -1,4 +1,4 @@
-﻿import type { VueWrapper } from '@vue/test-utils'
+import type { VueWrapper } from '@vue/test-utils'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { CaretBottom, CaretRight } from '@element-plus/icons-vue'
 import { readFileSync } from 'node:fs'
@@ -7,8 +7,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import FlTree, {
   FlTree as FlTreeFromTreePackage,
-  type FlTreeKey,
-  type FlTreeProps
+  type TreeEmits,
+  type TreeExpandPayload,
+  type TreeKey,
+  type TreeNode,
+  type TreeNodeModel,
+  type TreeProps
 } from '@falcon-ui/components/tree'
 import { FlTree as FlTreeFromComponents } from '@falcon-ui/components'
 import FalconUI, { install as installFalconUI } from '@falcon-ui/falcon-ui'
@@ -16,10 +20,9 @@ import FalconUI, { install as installFalconUI } from '@falcon-ui/falcon-ui'
 enableAutoUnmount(afterEach)
 
 /**
- * 阶段 1 到阶段 2 的测试只覆盖基础渲染、导出链路与展开收起能力。
- * 默认展开与受控展开属于阶段 3，不在本文件当前覆盖范围内。
+ * 阶段 1 到当前事件扩展阶段的测试覆盖基础渲染、导出链路与正式展开状态契约。
  */
-describe('FlTree 阶段 1-2 契约', () => {
+describe('FlTree 契约', () => {
   /**
    * 读取项目文件内容，用于验证导出链路和样式接入。
    */
@@ -58,7 +61,7 @@ describe('FlTree 阶段 1-2 契约', () => {
   const findTreeItemByText = (wrapper: VueWrapper, label: string) => {
     const item = wrapper
       .findAll('.fl-tree__item')
-      .find((currentItem) => currentItem.text().includes(label))
+      .find((currentItem) => currentItem.find('.fl-tree__item-title').text() === label)
 
     if (!item) {
       throw new Error(`Unable to find tree item: ${label}`)
@@ -67,21 +70,60 @@ describe('FlTree 阶段 1-2 契约', () => {
     return item
   }
 
-  it('使用默认字段映射渲染树数据', async () => {
+  /**
+   * 读取指定树节点上的内容区。
+   */
+  const getItemContent = (wrapper: VueWrapper, label: string) =>
+    findTreeItemByText(wrapper, label).get('.fl-tree__item-content')
+
+  /**
+   * 读取指定树节点上的 switcher 按钮。
+   */
+  const getSwitcherButton = (wrapper: VueWrapper, label: string) =>
+    findTreeItemByText(wrapper, label).get('.fl-tree__switcher-button')
+
+  /**
+   * 提供基础树数据，便于覆盖展开相关测试。
+   */
+  const createNestedTreeData = () => [
+    {
+      key: 'root',
+      label: 'Root',
+      children: [
+        {
+          key: 'branch',
+          label: 'Branch',
+          children: [
+            {
+              key: 'leaf',
+              label: 'Leaf'
+            }
+          ]
+        }
+      ]
+    }
+  ]
+
+  /**
+   * 提供根节点带叶子节点的最小展开树。
+   */
+  const createSimpleTreeData = () => [
+    {
+      key: 'root',
+      label: 'Root',
+      children: [
+        {
+          key: 'leaf',
+          label: 'Leaf'
+        }
+      ]
+    }
+  ]
+
+  it('在未传展开属性时默认收起树节点', async () => {
     const wrapper = mount(FlTree, {
       props: {
-        data: [
-          {
-            key: 'root',
-            label: 'Root',
-            children: [
-              {
-                key: 'leaf',
-                label: 'Leaf'
-              }
-            ]
-          }
-        ]
+        data: createSimpleTreeData()
       }
     })
 
@@ -89,15 +131,16 @@ describe('FlTree 阶段 1-2 契约', () => {
 
     const tree = wrapper.get('[role="tree"]')
     const items = wrapper.findAll('.fl-tree__item')
+    const rootItem = findTreeItemByText(wrapper, 'Root')
 
     expect(tree.classes()).toContain('fl-tree')
-    expect(items).toHaveLength(2)
+    expect(items).toHaveLength(1)
     expect(wrapper.text()).toContain('Root')
-    expect(wrapper.text()).toContain('Leaf')
-    expect(wrapper.findComponent(CaretBottom).exists()).toBe(true)
-    expect(wrapper.find('.fl-tree__switcher-dot').exists()).toBe(true)
-    expect(items[0]?.attributes('aria-level')).toBe('1')
-    expect(items[1]?.attributes('aria-level')).toBe('2')
+    expect(wrapper.text()).not.toContain('Leaf')
+    expect(rootItem.attributes('aria-level')).toBe('1')
+    expect(rootItem.attributes('aria-expanded')).toBe('false')
+    expect(wrapper.findComponent(CaretRight).exists()).toBe(true)
+    expect(wrapper.findComponent(CaretBottom).exists()).toBe(false)
   })
 
   it('通过 `props` 映射 label、children 和 class', async () => {
@@ -121,7 +164,8 @@ describe('FlTree 阶段 1-2 契约', () => {
           label: 'title',
           children: 'nodes',
           class: 'nodeClass'
-        }
+        },
+        defaultExpandAll: true
       }
     })
 
@@ -140,24 +184,8 @@ describe('FlTree 阶段 1-2 契约', () => {
   it('保持递归 TreeNode 骨架在多层级下可见', async () => {
     const wrapper = mount(FlTree, {
       props: {
-        data: [
-          {
-            key: 'root',
-            label: 'Root',
-            children: [
-              {
-                key: 'branch',
-                label: 'Branch',
-                children: [
-                  {
-                    key: 'leaf',
-                    label: 'Leaf'
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        data: createNestedTreeData(),
+        defaultExpandAll: true
       }
     })
 
@@ -173,7 +201,7 @@ describe('FlTree 阶段 1-2 契约', () => {
     expect(items.every((item) => item.find('.fl-tree__item-title').exists())).toBe(true)
   })
 
-  it('继承阶段 1 的 Element Plus 视觉变量契约', async () => {
+  it('继承 Element Plus 视觉变量契约', async () => {
     const treeScss = readProjectFile('packages/theme/src/tree.scss')
 
     expect(treeScss).toContain("@use 'element-plus/theme-chalk/src/tree.scss';")
@@ -207,12 +235,10 @@ describe('FlTree 阶段 1-2 契约', () => {
     expect(title.classes()).toContain('fl-tree__item-title')
   })
 
-  it('暴露最小可用导出链路', async () => {
+  it('暴露最小可用导出链路与最新 Tree 类型导出', async () => {
     const componentsTreeModule = await import('@falcon-ui/components/tree')
     const componentsModule = await import('@falcon-ui/components')
     const falconUiModule = await import('@falcon-ui/falcon-ui')
-    // 样式文件已在测试环境统一引入，无需重复动态加载
-
     const app = createAppMock()
 
     expect(FlTreeFromTreePackage).toBe(FlTree)
@@ -231,14 +257,26 @@ describe('FlTree 阶段 1-2 契约', () => {
     expect(app._registered.FlTree).toBe(FlTree)
 
     const treePackageSource = readProjectFile('packages/components/package.json')
+    const treeIndexSource = readProjectFile('packages/components/tree/index.ts')
+    const componentsIndexSource = readProjectFile('packages/components/index.ts')
     const globalDts = readProjectFile('packages/falcon-ui/global.d.ts')
     const themeIndex = readProjectFile('packages/theme/index.scss')
 
     expect(treePackageSource).toContain('"./tree": "./tree/index.ts"')
+    expect(treeIndexSource).toContain('TreeEmits')
+    expect(treeIndexSource).toContain('TreeExpandPayload')
+    expect(treeIndexSource).toContain('TreeNodeModel')
+    expect(treeIndexSource).toContain('TreeNode')
+    expect(treeIndexSource).not.toContain('FlTreeEmits')
+    expect(componentsIndexSource).toContain('TreeEmits')
+    expect(componentsIndexSource).toContain('TreeExpandPayload')
+    expect(componentsIndexSource).toContain('TreeNodeModel')
+    expect(componentsIndexSource).toContain('TreeNode')
+    expect(componentsIndexSource).not.toContain('FlTreeEmits')
     expect(globalDts).toContain('FlTree: typeof FlTree')
     expect(themeIndex).toContain("@use './src/tree.scss';")
 
-    type TreeTypeSmoke = [FlTreeKey, FlTreeProps]
+    type TreeTypeSmoke = [TreeKey, TreeProps, TreeExpandPayload, TreeEmits, TreeNodeModel]
     const treeTypeSmoke: TreeTypeSmoke | null = null
     expect(treeTypeSmoke).toBeNull()
   })
@@ -257,65 +295,396 @@ describe('FlTree 阶段 1-2 契约', () => {
     expect(treeNodeSource).toContain("const childrenClassName = ns.e('children')")
   })
 
-  it('支持非叶子节点展开与收起', async () => {
+  it('`defaultExpandAll` 只在初始化时展开已有分支', async () => {
     const wrapper = mount(FlTree, {
       props: {
-        data: [
-          {
-            key: 'root',
-            label: 'Root',
-            children: [
-              {
-                key: 'leaf',
-                label: 'Leaf'
-              }
-            ]
-          }
-        ]
+        data: createNestedTreeData(),
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+
+    expect(wrapper.text()).toContain('Leaf')
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Branch').attributes('aria-expanded')).toBe('true')
+
+    await wrapper.setProps({
+      data: [
+        {
+          key: 'root',
+          label: 'Root',
+          children: [
+            {
+              key: 'branch',
+              label: 'Branch',
+              children: [
+                {
+                  key: 'leaf',
+                  label: 'Leaf'
+                }
+              ]
+            },
+            {
+              key: 'branch-2',
+              label: 'Branch 2',
+              children: [
+                {
+                  key: 'leaf-2',
+                  label: 'Leaf 2'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+    await nextTick()
+
+    expect(wrapper.text()).toContain('Branch 2')
+    expect(wrapper.text()).not.toContain('Leaf 2')
+    expect(findTreeItemByText(wrapper, 'Branch 2').attributes('aria-expanded')).toBe('false')
+  })
+
+  it('支持通过 `defaultExpandedKeys` 初始化展开状态', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData(),
+        defaultExpandedKeys: ['root']
       }
     })
 
     await nextTick()
 
     const rootItem = findTreeItemByText(wrapper, 'Root')
-    const switcherButton = rootItem.get('.fl-tree__switcher-button')
+    const branchItem = findTreeItemByText(wrapper, 'Branch')
 
     expect(rootItem.attributes('aria-expanded')).toBe('true')
-    expect(rootItem.find('[role="group"]').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Leaf')
-    expect(wrapper.findComponent(CaretBottom).exists()).toBe(true)
-
-    await switcherButton.trigger('click')
-    await nextTick()
-
-    expect(rootItem.attributes('aria-expanded')).toBe('false')
-    expect(rootItem.find('[role="group"]').exists()).toBe(false)
+    expect(branchItem.attributes('aria-expanded')).toBe('false')
+    expect(wrapper.text()).toContain('Branch')
     expect(wrapper.text()).not.toContain('Leaf')
-    expect(wrapper.findComponent(CaretRight).exists()).toBe(true)
+  })
 
-    await switcherButton.trigger('click')
+  it('`defaultExpandParent` 为 true 时会自动展开祖先链路', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData(),
+        defaultExpandedKeys: ['leaf']
+      }
+    })
+
     await nextTick()
 
-    expect(rootItem.attributes('aria-expanded')).toBe('true')
-    expect(rootItem.find('[role="group"]').exists()).toBe(true)
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Branch').attributes('aria-expanded')).toBe('true')
     expect(wrapper.text()).toContain('Leaf')
     expect(wrapper.findComponent(CaretBottom).exists()).toBe(true)
   })
 
-  it('叶子节点不暴露展开属性并继续显示圆点', async () => {
+  it('`defaultExpandParent` 为 false 时不会自动补齐祖先展开', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData(),
+        defaultExpandedKeys: ['leaf'],
+        defaultExpandParent: false
+      }
+    })
+
+    await nextTick()
+
+    const rootItem = findTreeItemByText(wrapper, 'Root')
+
+    expect(rootItem.attributes('aria-expanded')).toBe('false')
+    expect(wrapper.text()).not.toContain('Branch')
+    expect(wrapper.text()).not.toContain('Leaf')
+    expect(wrapper.findComponent(CaretRight).exists()).toBe(true)
+  })
+
+  it('点击节点内容区时触发 `node-click`，且 `node` 不包含 expanded', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData()
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    const nodeClickEvents = wrapper.emitted('node-click')
+
+    expect(nodeClickEvents).toHaveLength(1)
+    expect(wrapper.emitted('node-expand')).toBeUndefined()
+    expect(wrapper.emitted('node-collapse')).toBeUndefined()
+
+    const [dataArg, nodeArg, componentArg, eventArg] = nodeClickEvents?.[0] as [
+      { key: string },
+      TreeNode,
+      Record<string, unknown>,
+      MouseEvent
+    ]
+
+    expect(dataArg.key).toBe('root')
+    expect(nodeArg.key).toBe('root')
+    expect(nodeArg.data.key).toBe('root')
+    expect(nodeArg.childNodes).toHaveLength(1)
+    expect(nodeArg.childNodes[0]?.key).toBe('leaf')
+    expect(nodeArg.parent).toBeNull()
+    expect('expanded' in nodeArg).toBe(false)
+    expect(componentArg).toBeTruthy()
+    expect(eventArg).toBeInstanceOf(MouseEvent)
+  })
+
+  it('点击收起态 switcher 时按顺序触发 `node-click`、`update:expandedKeys`、`node-expand`、`expand`', async () => {
+    const eventOrder: string[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        onNodeClick: () => eventOrder.push('node-click'),
+        'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
+        onNodeExpand: () => eventOrder.push('node-expand'),
+        onExpand: () => eventOrder.push('expand')
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(eventOrder).toEqual(['node-click', 'update:expandedKeys', 'node-expand', 'expand'])
+    expect(wrapper.emitted('update:expandedKeys')).toEqual([[['root']]])
+
+    const nodeExpandEvents = wrapper.emitted('node-expand')
+    const expandEvents = wrapper.emitted('expand')
+
+    expect(nodeExpandEvents).toHaveLength(1)
+    expect(expandEvents).toHaveLength(1)
+
+    const [dataArg, nodeArg, instanceArg] = nodeExpandEvents?.[0] as [
+      { key: string },
+      TreeNode & { expanded: boolean },
+      Record<string, unknown>
+    ]
+
+    expect(dataArg.key).toBe('root')
+    expect(nodeArg.key).toBe('root')
+    expect(nodeArg.expanded).toBe(true)
+    expect(nodeArg.parent).toBeNull()
+    expect(nodeArg.childNodes).toHaveLength(1)
+    expect(nodeArg.childNodes[0]?.key).toBe('leaf')
+    expect(instanceArg).toBeTruthy()
+    expect(expandEvents?.[0]?.[0] as TreeExpandPayload).toMatchObject({
+      expanded: true,
+      key: 'root',
+      expandedKeys: ['root']
+    })
+  })
+
+  it('点击展开态 switcher 时触发 `node-collapse`，且 `expanded` 为 false', async () => {
+    const eventOrder: string[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true,
+        onNodeClick: () => eventOrder.push('node-click'),
+        'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
+        onNodeCollapse: () => eventOrder.push('node-collapse'),
+        onExpand: () => eventOrder.push('expand')
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(eventOrder).toEqual(['node-click', 'update:expandedKeys', 'node-collapse', 'expand'])
+
+    const nodeCollapseEvents = wrapper.emitted('node-collapse')
+
+    expect(nodeCollapseEvents).toHaveLength(1)
+
+    const [dataArg, nodeArg] = nodeCollapseEvents?.[0] as [
+      { key: string },
+      TreeNode & { expanded: boolean }
+    ]
+
+    expect(dataArg.key).toBe('root')
+    expect(nodeArg.key).toBe('root')
+    expect(nodeArg.expanded).toBe(false)
+  })
+
+  it('受控 `expandedKeys` 点击 switcher 仍按请求状态触发 `node-expand`，且视图不自行变化', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        expandedKeys: []
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    const nodeExpandEvents = wrapper.emitted('node-expand')
+
+    expect(nodeExpandEvents).toHaveLength(1)
+    expect((nodeExpandEvents?.[0]?.[1] as TreeNode & { expanded: boolean }).expanded).toBe(true)
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('false')
+    expect(wrapper.text()).not.toContain('Leaf')
+  })
+
+  it('非用户驱动变化不会触发节点点击、展开与收起事件', async () => {
+    const mountWithListeners = (props: Record<string, unknown>) =>
+      mount(FlTree, {
+        props: {
+          data: createNestedTreeData(),
+          onNodeClick: vi.fn(),
+          onNodeExpand: vi.fn(),
+          onNodeCollapse: vi.fn(),
+          ...props
+        }
+      })
+
+    const wrapperWithExpandAll = mountWithListeners({
+      defaultExpandAll: true
+    })
+
+    await nextTick()
+
+    expect(wrapperWithExpandAll.emitted('node-click')).toBeUndefined()
+    expect(wrapperWithExpandAll.emitted('node-expand')).toBeUndefined()
+    expect(wrapperWithExpandAll.emitted('node-collapse')).toBeUndefined()
+
+    const wrapperWithDefaultExpandedKeys = mountWithListeners({
+      defaultExpandedKeys: ['root']
+    })
+
+    await nextTick()
+
+    expect(wrapperWithDefaultExpandedKeys.emitted('node-click')).toBeUndefined()
+    expect(wrapperWithDefaultExpandedKeys.emitted('node-expand')).toBeUndefined()
+    expect(wrapperWithDefaultExpandedKeys.emitted('node-collapse')).toBeUndefined()
+
+    const wrapperWithControlledProps = mountWithListeners({
+      expandedKeys: ['root']
+    })
+
+    await nextTick()
+    await wrapperWithControlledProps.setProps({
+      expandedKeys: ['root', 'branch']
+    })
+    await wrapperWithControlledProps.setProps({
+      data: [
+        {
+          key: 'root',
+          label: 'Root',
+          children: [
+            {
+              key: 'branch',
+              label: 'Branch',
+              children: [
+                {
+                  key: 'leaf',
+                  label: 'Leaf'
+                }
+              ]
+            },
+            {
+              key: 'branch-2',
+              label: 'Branch 2',
+              children: [
+                {
+                  key: 'leaf-2',
+                  label: 'Leaf 2'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+    await nextTick()
+
+    expect(wrapperWithControlledProps.emitted('node-click')).toBeUndefined()
+    expect(wrapperWithControlledProps.emitted('node-expand')).toBeUndefined()
+    expect(wrapperWithControlledProps.emitted('node-collapse')).toBeUndefined()
+  })
+
+  it('受控 `expandedKeys` 仅通过事件请求外部更新并严格跟随 prop', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        expandedKeys: []
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('false')
+    expect(wrapper.text()).not.toContain('Leaf')
+
+    await getSwitcherButton(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    const updateExpandedKeysEvents = wrapper.emitted('update:expandedKeys')
+    const expandEvents = wrapper.emitted('expand')
+
+    expect(updateExpandedKeysEvents).toEqual([[['root']]])
+    expect(expandEvents).toHaveLength(1)
+    expect(expandEvents?.[0]?.[0] as TreeExpandPayload).toMatchObject({
+      expanded: true,
+      key: 'root',
+      expandedKeys: ['root']
+    })
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('false')
+    expect(wrapper.text()).not.toContain('Leaf')
+
+    await wrapper.setProps({
+      expandedKeys: ['root']
+    })
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.text()).toContain('Leaf')
+  })
+
+  it('`autoExpandParent` 为 true 时受控子节点 key 会带动祖先展开', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData(),
+        expandedKeys: ['leaf'],
+        autoExpandParent: true
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Branch').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.text()).toContain('Leaf')
+  })
+
+  it('`autoExpandParent` 为 false 时仅按受控源 key 渲染展开状态', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData(),
+        expandedKeys: ['leaf'],
+        autoExpandParent: false
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('false')
+    expect(wrapper.text()).not.toContain('Branch')
+    expect(wrapper.text()).not.toContain('Leaf')
+  })
+
+  it('叶子节点点击整行只触发 `node-click`，且不暴露展开属性', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: [
-          {
-            key: 'root',
-            label: 'Root',
-            children: [
-              {
-                key: 'leaf',
-                label: 'Leaf'
-              }
-            ]
-          },
+          ...createSimpleTreeData(),
           {
             key: 'archive',
             label: 'Archive',
@@ -332,5 +701,12 @@ describe('FlTree 阶段 1-2 契约', () => {
     expect(archiveItem.attributes('aria-expanded')).toBeUndefined()
     expect(archiveItem.find('.fl-tree__switcher-dot').exists()).toBe(true)
     expect(archiveItem.find('.fl-tree__switcher-button').exists()).toBe(false)
+
+    await getItemContent(wrapper, 'Archive').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('node-click')).toHaveLength(1)
+    expect(wrapper.emitted('node-expand')).toBeUndefined()
+    expect(wrapper.emitted('node-collapse')).toBeUndefined()
   })
 })

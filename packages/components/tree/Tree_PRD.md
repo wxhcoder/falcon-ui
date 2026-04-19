@@ -14,7 +14,7 @@
   - Element Plus Tree 视觉变量继承
   - 最小可用导出链路
 - [x] 阶段 2：开发树节点展开 / 收起功能
-- [ ] 阶段 3：开发默认展开与受控展开功能
+- [x] 阶段 3：开发默认展开与受控展开功能
 - [ ] 阶段 4：开发树节点单选功能
 - [ ] 阶段 5：开发树节点多选功能
 - [ ] 阶段 6：开发树复选框渲染功能
@@ -228,8 +228,8 @@
   - `itemIcon`：节点图标区域
   - `itemTitle`：节点标题区域
 - 输入形式支持：
-  - `Partial<Record<FlTreeSemanticDOM, string | CSSProperties>>`
-  - `(info: { props }) => Partial<Record<FlTreeSemanticDOM, string | CSSProperties>>`
+  - `Partial<Record<TreeSemanticDOM, string | CSSProperties>>`
+  - `(info: { props }) => Partial<Record<TreeSemanticDOM, string | CSSProperties>>`
 - 该能力仅承担样式扩展，不负责标题内容替换、图标逻辑替换和交互行为控制。
 
 ### 4.8 筛选与高亮
@@ -320,11 +320,11 @@ scrollTo(options: {
 ### 5.1 类型草案
 
 ```ts
-type FlTreeKey = string | number
+type TreeKey = string | number
 
-type FlTreeSemanticDOM = 'root' | 'item' | 'itemIcon' | 'itemTitle'
+type TreeSemanticDOM = 'root' | 'item' | 'itemIcon' | 'itemTitle'
 
-interface FlTreeNodePropsConfig {
+interface TreeNodeProps {
   label?: string
   children?: string
   disabled?: string
@@ -332,10 +332,10 @@ interface FlTreeNodePropsConfig {
   class?: string
 }
 
-interface FlTreeNodeData {
-  key: FlTreeKey
+interface TreeData {
+  key: TreeKey
   label?: string
-  children?: FlTreeNodeData[]
+  children?: TreeData[]
   disabled?: boolean
   disableCheckbox?: boolean
   selectable?: boolean
@@ -345,11 +345,11 @@ interface FlTreeNodeData {
   [key: string]: unknown
 }
 
-type FlTreeCheckedKeys =
-  | FlTreeKey[]
+type TreeCheckedKeys =
+  | TreeKey[]
   | {
-      checked: FlTreeKey[]
-      halfChecked: FlTreeKey[]
+      checked: TreeKey[]
+      halfChecked: TreeKey[]
     }
 ```
 
@@ -408,6 +408,9 @@ type FlTreeCheckedKeys =
   - `update:loadedKeys`
 - 行为事件
   - `expand`
+  - `node-click`
+  - `node-expand`
+  - `node-collapse`
   - `select`
   - `check`
   - `load`
@@ -423,7 +426,7 @@ type FlTreeCheckedKeys =
 ### 5.4 Expose 草案
 
 ```ts
-interface FlTreeExpose {
+interface TreeExpose {
   scrollTo: (options: {
     key: string | number
     align?: 'top' | 'bottom' | 'auto'
@@ -446,6 +449,8 @@ interface FlTreeExpose {
   - 内部 `TreeNode` 组件，负责单节点递归渲染
 - `src/use-tree-state.ts`
   - 展开、选中、勾选、受控状态合并
+- `src/use-tree-expanded-state.ts`
+  - 展开状态合并、祖先自动展开、展开收起事件派发
 - `src/use-tree-normalize.ts`
   - 树数据标准化、索引建立、字段映射
 - `src/use-tree-flatten.ts`
@@ -513,7 +518,7 @@ interface FlTreeExpose {
 2. `props` 生效，非默认字段可映射渲染。
 3. 节点 `disabled`、`disableCheckbox`、`selectable = false` 表现正确。
 4. `data` 变化后，内部 `TreeNode` 递归结构可正确响应并重渲染。
-5. 叶子节点显示圆点，默认展开的非叶子节点显示 `CaretBottom`。
+5. 叶子节点显示圆点，默认收起的非叶子节点显示 `CaretRight`，展开后显示 `CaretBottom`。
 
 ### 9.2 展开与选择
 
@@ -571,6 +576,8 @@ interface FlTreeExpose {
   - `src/tree-types.ts`
   - `src/tree.vue`
   - `src/tree-node.vue`
+- 已完成阶段 3 状态层文件：
+  - `src/use-tree-expanded-state.ts`
 - 已接入导出链路：
   - `packages/components/tree/index.ts`
   - `packages/components/index.ts`
@@ -682,4 +689,64 @@ interface FlTreeExpose {
 ### 12.4 结果判定
 
 - 当前判定：阶段 2 已完成。
-- 下一阶段状态：继续阻塞，等待用户确认后进入阶段 3。
+- 下一阶段状态：阶段 2 已归档；阶段 3 结果见“阶段 3 测试文档”，阶段 4 继续阻塞。
+
+## 13. 阶段 3 测试文档
+
+### 13.1 测试范围
+
+阶段 3 只验证以下内容，不进入阶段 4 及以后：
+
+1. 未传展开属性时默认收起
+2. `defaultExpandAll` 仅初始化一次
+3. `defaultExpandedKeys` 初始化展开
+4. `defaultExpandParent` 祖先自动展开
+5. `expandedKeys` 受控展开与 `update:expandedKeys` / `expand` 事件
+6. `node-click` / `node-expand` / `node-collapse` 用户交互事件
+7. `TreeProps`、`TreeEmits`、`TreeNodeModel`、`TreeNode` 等无 `Fl` 前缀类型导出
+8. `autoExpandParent` 受控祖先自动展开
+9. 叶子节点圆点、`aria-expanded` 与 BEM 类名回归稳定
+
+### 13.2 测试内容
+
+| 编号 | 测试内容                  | 关注点                                                                | 预期结果                                                            |
+| ---- | ------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 1    | 默认收起                  | 未传展开相关 props 时的运行时默认行为                                 | 根节点可见，子节点不挂载，非叶子节点显示 `CaretRight`               |
+| 2    | `defaultExpandAll` 一次性 | 数据更新后是否重复自动展开新增分支                                    | 仅初始化时展开已有分支，新增分支保持收起                            |
+| 3    | `defaultExpandedKeys`     | 指定源展开键后分支是否按预期展开                                      | 命中分支展开，未命中的分支保持收起                                  |
+| 4    | `defaultExpandParent`     | 非受控初始化时是否自动补齐祖先展开                                    | `true` 时祖先展开，`false` 时不自动展开祖先                         |
+| 5    | 受控 `expandedKeys`       | 内部点击是否只发事件且视图严格跟随 prop                               | 点击后仅触发 `update:expandedKeys` / `expand`，外部不更新时视图不变 |
+| 6    | 节点交互事件              | `node-click` / `node-expand` / `node-collapse` 的参数、顺序与受控行为 | 仅用户交互触发；switcher 点击顺序固定；受控模式按请求的下一状态出参 |
+| 7    | 类型导出命名              | 树模块公开类型是否统一改为无 `Fl` 前缀                                | `TreeProps` / `TreeEmits` / `TreeNodeModel` / `TreeNode` 可正常导出 |
+| 8    | `autoExpandParent`        | 受控模式下子节点 key 是否带动祖先渲染展开                             | `true` 时祖先展开，`false` 时仅按源 key 渲染                        |
+| 9    | 回归稳定性                | 叶子圆点、`aria-expanded`、BEM 类名与语义化 DOM 挂点是否稳定          | 既有基础渲染契约不回退                                              |
+
+### 13.3 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 已执行命令：
+  - `pnpm exec prettier --write packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/src/use-tree-expanded-state.ts packages/components/tree/__test__/tree.test.ts packages/components/tree/index.ts packages/components/index.ts play/src/views/components-view.vue packages/components/tree/Tree_PRD.md`
+  - `pnpm exec eslint packages/components/tree/src/tree-types.ts packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/src/use-tree-expanded-state.ts packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue`
+  - `pnpm exec vitest run packages/components/__test__/install.test.ts packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 执行结果：
+  - `eslint`：通过
+  - 组合安装回归：`21 passed`
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+- 结论：
+  - 运行时默认行为已从阶段 2 的“临时默认全展开”切换为阶段 3 的“默认收起”
+  - `defaultExpandAll` / `defaultExpandedKeys` / `expandedKeys` / `defaultExpandParent` / `autoExpandParent` 已接入
+  - `update:expandedKeys` / `expand` / `node-click` / `node-expand` / `node-collapse` 已接入
+  - 树模块公开类型已统一改为 `Tree*` 命名，不再导出 `Fl*` Tree 类型
+  - 叶子节点圆点、无障碍属性与基础类名契约保持稳定
+  - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning，本阶段树组件改动未引入新的构建告警
+
+### 13.4 结果判定
+
+- 当前判定：阶段 3 已完成。
+- 下一阶段状态：继续阻塞，等待用户确认后进入阶段 4。

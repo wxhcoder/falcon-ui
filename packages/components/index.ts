@@ -65,17 +65,23 @@ export type {
 } from './select'
 export { FlTree } from './tree'
 export type {
-  FlTreeClassNames,
-  FlTreeClassValue,
-  FlTreeIndex,
-  FlTreeKey,
-  FlTreeNodePropsConfig,
-  FlTreeNormalizedNode,
-  FlTreeProps,
-  FlTreeRawNode,
-  FlTreeSemanticDOM,
-  FlTreeSemanticRecord,
-  FlTreeStyles
+  TreeClassNames,
+  TreeClassValue,
+  TreeData,
+  TreeEmits,
+  TreeExpandPayload,
+  TreeIndex,
+  TreeKey,
+  TreeNode,
+  TreeNodeClickArgs,
+  TreeNodeInstance,
+  TreeNodeModel,
+  TreeNodeProps,
+  TreeNodeToggleArgs,
+  TreeProps,
+  TreeSemanticDOM,
+  TreeSemanticRecord,
+  TreeStyles
 } from './tree'
 export { FlTable } from './table'
 export { FlTableEditor } from './table'

@@ -1,21 +1,22 @@
-﻿import type { ExtractPublicPropTypes, PropType } from 'vue'
+import type { ComponentPublicInstance, ExtractPublicPropTypes, PropType } from 'vue'
 import type {
-  FlTreeClassNames,
-  FlTreeClassValue,
-  FlTreeIndex,
-  FlTreeKey,
-  FlTreeNodePropsConfig,
-  FlTreeNormalizedNode,
-  FlTreeRawNode,
-  FlTreeSemanticDOM,
-  FlTreeSemanticRecord,
-  FlTreeStyles
+  TreeClassNames,
+  TreeClassValue,
+  TreeData,
+  TreeIndex,
+  TreeKey,
+  TreeNode,
+  TreeNodeModel,
+  TreeNodeProps,
+  TreeSemanticDOM,
+  TreeSemanticRecord,
+  TreeStyles
 } from './tree-types'
 
 /**
  * 首版使用稳定的默认字段映射，保证常规树数据可直接渲染。
  */
-export const flTreeNodePropsDefaults: Required<FlTreeNodePropsConfig> = {
+export const treeNodePropsDefaults: Required<TreeNodeProps> = {
   label: 'label',
   children: 'children',
   disabled: 'disabled',
@@ -24,46 +25,194 @@ export const flTreeNodePropsDefaults: Required<FlTreeNodePropsConfig> = {
 }
 
 /**
- * 阶段 2 公开属性仍然只覆盖基础数据、字段映射和语义化样式挂点。
+ * 阶段 3 在基础树结构之外，正式开放默认展开与受控展开相关契约。
  */
-export const flTreeProps = {
+export const treeProps = {
   data: {
-    type: Array as PropType<FlTreeRawNode[]>,
+    type: Array as PropType<TreeData[]>,
     default: () => []
   },
   props: {
-    type: Object as PropType<FlTreeNodePropsConfig>,
-    default: () => ({ ...flTreeNodePropsDefaults })
+    type: Object as PropType<TreeNodeProps>,
+    default: () => ({ ...treeNodePropsDefaults })
   },
   classNames: {
-    type: [Object, Function] as PropType<FlTreeClassNames>
+    type: [Object, Function] as PropType<TreeClassNames>
   },
   styles: {
-    type: [Object, Function] as PropType<FlTreeStyles>
+    type: [Object, Function] as PropType<TreeStyles>
+  },
+  defaultExpandAll: {
+    type: Boolean,
+    default: false
+  },
+  defaultExpandedKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
+    default: undefined
+  },
+  expandedKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
+    default: undefined
+  },
+  autoExpandParent: {
+    type: Boolean,
+    default: false
+  },
+  defaultExpandParent: {
+    type: Boolean,
+    default: true
   }
 } as const
 
-export type FlTreeProps = ExtractPublicPropTypes<typeof flTreeProps>
+export type TreeProps = ExtractPublicPropTypes<typeof treeProps>
+
+/**
+ * 树节点展开事件统一返回本次节点状态与当前源展开键集合。
+ */
+export interface TreeExpandPayload {
+  expanded: boolean
+  node: TreeData
+  key: TreeKey
+  expandedKeys: TreeKey[]
+}
+
+/**
+ * 节点组件实例通过 Vue public instance 向外暴露。
+ */
+export type TreeNodeInstance = ComponentPublicInstance | null
+
+/**
+ * `node-click` 事件固定采用 Element Plus 风格的多参数出参。
+ */
+export type TreeNodeClickArgs = [
+  data: TreeData,
+  node: TreeNode,
+  component: TreeNodeInstance,
+  event: MouseEvent
+]
+
+/**
+ * `node-expand` / `node-collapse` 事件固定采用 Element Plus 风格的多参数出参。
+ */
+export type TreeNodeToggleArgs = [
+  data: TreeData,
+  node: TreeNode & { expanded: boolean },
+  instance: TreeNodeInstance
+]
+
+/**
+ * 判断当前值是否为普通对象。
+ */
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object'
+
+/**
+ * 判断当前值是否为树组件允许使用的节点键类型。
+ */
+export const isTreeKey = (value: unknown): value is TreeKey =>
+  typeof value === 'string' || typeof value === 'number'
+
+/**
+ * 判断当前值是否为树节点组件实例。
+ */
+const isTreeNodeInstance = (value: unknown): value is TreeNodeInstance =>
+  value === null || isRecord(value)
+
+/**
+ * 判断当前值是否满足对外节点对象的最小结构。
+ */
+const isTreeNode = (value: unknown): value is TreeNode =>
+  isRecord(value) &&
+  isTreeKey(value.key) &&
+  typeof value.level === 'number' &&
+  typeof value.label === 'string' &&
+  typeof value.disabled === 'boolean' &&
+  typeof value.isLeaf === 'boolean' &&
+  Array.isArray(value.childNodes) &&
+  'data' in value
+
+/**
+ * 验证 `node-click` 事件的四元组参数。
+ */
+const isTreeNodeClickArgs = (
+  data: TreeData,
+  node: TreeNode,
+  component: TreeNodeInstance,
+  event: MouseEvent
+) =>
+  isRecord(data) &&
+  isTreeNode(node) &&
+  isTreeNodeInstance(component) &&
+  isRecord(event) &&
+  typeof event.type === 'string'
+
+/**
+ * 验证 `node-expand` / `node-collapse` 事件的三元组参数。
+ */
+const isTreeNodeToggleArgs = (
+  data: TreeData,
+  node: TreeNode & { expanded: boolean },
+  instance: TreeNodeInstance
+) =>
+  isRecord(data) &&
+  isTreeNode(node) &&
+  typeof node.expanded === 'boolean' &&
+  isTreeNodeInstance(instance)
+
+/**
+ * 阶段 3 正式开放展开状态双向同步与展开事件。
+ */
+export const treeEmits = {
+  /**
+   * 请求外部同步当前源展开键集合。
+   */
+  'update:expandedKeys': (value: TreeKey[]) =>
+    Array.isArray(value) && value.every((item) => isTreeKey(item)),
+  /**
+   * 节点展开状态切换后抛出当前节点的展开结果。
+   */
+  expand: (payload: TreeExpandPayload) =>
+    typeof payload.expanded === 'boolean' &&
+    isTreeKey(payload.key) &&
+    Array.isArray(payload.expandedKeys) &&
+    payload.expandedKeys.every((item) => isTreeKey(item)) &&
+    payload.node !== null &&
+    typeof payload.node === 'object',
+  /**
+   * 节点被点击时抛出节点数据、节点对象、组件实例与鼠标事件。
+   */
+  'node-click': (...args: TreeNodeClickArgs) => isTreeNodeClickArgs(...args),
+  /**
+   * 节点被用户展开时抛出切换后的节点对象与组件实例。
+   */
+  'node-expand': (...args: TreeNodeToggleArgs) => isTreeNodeToggleArgs(...args),
+  /**
+   * 节点被用户收起时抛出切换后的节点对象与组件实例。
+   */
+  'node-collapse': (...args: TreeNodeToggleArgs) => isTreeNodeToggleArgs(...args)
+} as const
+
+export type TreeEmits = typeof treeEmits
 
 /**
  * 将用户传入的部分映射与默认映射合并，统一生成内部字段配置。
  */
 export const resolveTreeNodePropsConfig = (
-  propsConfig?: FlTreeNodePropsConfig
-): Required<FlTreeNodePropsConfig> => ({
-  ...flTreeNodePropsDefaults,
+  propsConfig?: TreeNodeProps
+): Required<TreeNodeProps> => ({
+  ...treeNodePropsDefaults,
   ...propsConfig
 })
 
 /**
  * 按映射字段名读取原始节点字段，避免字段读取逻辑散落在各处。
  */
-const readTreeField = (node: FlTreeRawNode, fieldName: string): unknown => node[fieldName]
+const readTreeField = (node: TreeData, fieldName: string): unknown => node[fieldName]
 
 /**
  * 将任意合法 class 值归一化为 Vue 可直接绑定的形式。
  */
-const resolveNodeClassName = (value: unknown): FlTreeClassValue => {
+const resolveNodeClassName = (value: unknown): TreeClassValue => {
   if (Array.isArray(value)) {
     return value as string[]
   }
@@ -77,7 +226,7 @@ const resolveNodeClassName = (value: unknown): FlTreeClassValue => {
     value === undefined ||
     (value !== null && typeof value === 'object')
   ) {
-    return value as FlTreeClassValue
+    return value as TreeClassValue
   }
 
   return String(value)
@@ -87,13 +236,14 @@ const resolveNodeClassName = (value: unknown): FlTreeClassValue => {
  * 将单个原始节点转换为内部标准化节点。
  */
 export const normalizeTreeNode = (
-  rawNode: FlTreeRawNode,
+  rawNode: TreeData,
   level: number,
-  propsConfig?: FlTreeNodePropsConfig
-): FlTreeNormalizedNode => {
+  propsConfig?: TreeNodeProps,
+  parent: TreeNodeModel | null = null
+): TreeNodeModel => {
   const mappedProps = resolveTreeNodePropsConfig(propsConfig)
   const childrenValue = readTreeField(rawNode, mappedProps.children)
-  const childNodes = Array.isArray(childrenValue) ? (childrenValue as FlTreeRawNode[]) : []
+  const childNodes = Array.isArray(childrenValue) ? (childrenValue as TreeData[]) : []
 
   const labelValue = readTreeField(rawNode, mappedProps.label)
   const disabledValue = readTreeField(rawNode, mappedProps.disabled)
@@ -104,35 +254,39 @@ export const normalizeTreeNode = (
     throw new Error('[FlTree] Every node must provide a unique `key`.')
   }
 
-  return {
+  const treeNode: TreeNodeModel = {
     key: rawNode.key,
     level,
-    rawNode,
+    data: rawNode,
     label: labelValue == null ? '' : String(labelValue),
     disabled: Boolean(disabledValue),
     isLeaf: Boolean(isLeafValue),
     className: resolveNodeClassName(classValue),
-    children: childNodes.map((childNode) => normalizeTreeNode(childNode, level + 1, mappedProps))
+    parent,
+    childNodes: []
   }
+
+  treeNode.childNodes = childNodes.map((childNode) =>
+    normalizeTreeNode(childNode, level + 1, mappedProps, treeNode)
+  )
+
+  return treeNode
 }
 
 /**
  * 在递归树结构之外，同时建立扁平索引，供后续阶段复用。
  */
-export const buildTreeIndex = (
-  data: FlTreeRawNode[],
-  propsConfig?: FlTreeNodePropsConfig
-): FlTreeIndex => {
-  const keyNodeMap = new Map<FlTreeKey, FlTreeNormalizedNode>()
-  const parentKeyMap = new Map<FlTreeKey, FlTreeKey | null>()
-  const childrenKeyMap = new Map<FlTreeKey, FlTreeKey[]>()
-  const visibleNodeKeys: FlTreeKey[] = []
+export const buildTreeIndex = (data: TreeData[], propsConfig?: TreeNodeProps): TreeIndex => {
+  const keyNodeMap = new Map<TreeKey, TreeNodeModel>()
+  const parentKeyMap = new Map<TreeKey, TreeKey | null>()
+  const childrenKeyMap = new Map<TreeKey, TreeKey[]>()
+  const visibleNodeKeys: TreeKey[] = []
   const normalizedNodes = data.map((node) => normalizeTreeNode(node, 1, propsConfig))
 
   /**
    * 递归遍历标准化节点，并同步填充索引表。
    */
-  const visit = (nodes: FlTreeNormalizedNode[], parentKey: FlTreeKey | null) => {
+  const visit = (nodes: TreeNodeModel[], parentKey: TreeKey | null) => {
     for (const node of nodes) {
       if (keyNodeMap.has(node.key)) {
         throw new Error(`[FlTree] Duplicate node key detected: ${String(node.key)}`)
@@ -143,11 +297,11 @@ export const buildTreeIndex = (
       visibleNodeKeys.push(node.key)
       childrenKeyMap.set(
         node.key,
-        node.children.map((childNode) => childNode.key)
+        node.childNodes.map((childNode) => childNode.key)
       )
 
-      if (node.children.length > 0) {
-        visit(node.children, node.key)
+      if (node.childNodes.length > 0) {
+        visit(node.childNodes, node.key)
       }
     }
   }
@@ -164,22 +318,66 @@ export const buildTreeIndex = (
 }
 
 /**
- * 收集当前树中所有可展开节点的 key，供阶段 2 初始化默认展开状态使用。
+ * 过滤无效、重复或已从树结构中移除的展开键。
  */
-export const collectInitiallyExpandedKeys = (nodes: FlTreeNormalizedNode[]): Set<FlTreeKey> => {
-  const expandedKeys = new Set<FlTreeKey>()
+export const filterTreeExpandedKeys = (
+  keys: TreeKey[] | undefined,
+  keyNodeMap: Map<TreeKey, TreeNodeModel>
+): TreeKey[] => {
+  if (!Array.isArray(keys)) {
+    return []
+  }
+
+  const nextExpandedKeys: TreeKey[] = []
+  const visitedKeys = new Set<TreeKey>()
+
+  for (const key of keys) {
+    if (!isTreeKey(key) || visitedKeys.has(key) || !keyNodeMap.has(key)) {
+      continue
+    }
+
+    visitedKeys.add(key)
+    nextExpandedKeys.push(key)
+  }
+
+  return nextExpandedKeys
+}
+
+/**
+ * 清理集合中已经失效的节点键，供非受控状态在数据更新后裁剪缓存。
+ */
+export const pruneTreeKeySet = (
+  keys: Set<TreeKey>,
+  keyNodeMap: Map<TreeKey, TreeNodeModel>
+): Set<TreeKey> => {
+  const nextKeys = new Set<TreeKey>()
+
+  for (const key of keys) {
+    if (keyNodeMap.has(key)) {
+      nextKeys.add(key)
+    }
+  }
+
+  return nextKeys
+}
+
+/**
+ * 收集当前树中所有可展开节点的 key，供 `defaultExpandAll` 初始化使用。
+ */
+export const collectExpandableTreeKeys = (nodes: TreeNodeModel[]): TreeKey[] => {
+  const expandedKeys: TreeKey[] = []
 
   /**
    * 递归遍历存在子节点的分支节点，并记录其 key。
    */
-  const visit = (currentNodes: FlTreeNormalizedNode[]) => {
+  const visit = (currentNodes: TreeNodeModel[]) => {
     for (const node of currentNodes) {
-      if (node.children.length === 0) {
+      if (node.childNodes.length === 0) {
         continue
       }
 
-      expandedKeys.add(node.key)
-      visit(node.children)
+      expandedKeys.push(node.key)
+      visit(node.childNodes)
     }
   }
 
@@ -189,15 +387,110 @@ export const collectInitiallyExpandedKeys = (nodes: FlTreeNormalizedNode[]): Set
 }
 
 /**
+ * 基于父节点索引补齐源展开键的全部祖先节点键。
+ */
+export const collectAncestorExpandedKeys = (
+  sourceExpandedKeys: TreeKey[],
+  parentKeyMap: Map<TreeKey, TreeKey | null>
+): Set<TreeKey> => {
+  const ancestorKeys = new Set<TreeKey>()
+
+  for (const key of sourceExpandedKeys) {
+    let parentKey = parentKeyMap.get(key) ?? null
+
+    while (parentKey !== null) {
+      ancestorKeys.add(parentKey)
+      parentKey = parentKeyMap.get(parentKey) ?? null
+    }
+  }
+
+  return ancestorKeys
+}
+
+/**
+ * 根据源展开键生成最终用于渲染的展开集合，可按需补齐祖先节点。
+ */
+export const createEffectiveExpandedKeySet = ({
+  sourceExpandedKeys,
+  parentKeyMap,
+  includeAncestorKeys
+}: {
+  sourceExpandedKeys: TreeKey[]
+  parentKeyMap: Map<TreeKey, TreeKey | null>
+  includeAncestorKeys: boolean
+}): Set<TreeKey> => {
+  const effectiveExpandedKeys = new Set<TreeKey>(sourceExpandedKeys)
+
+  if (!includeAncestorKeys) {
+    return effectiveExpandedKeys
+  }
+
+  const ancestorKeys = collectAncestorExpandedKeys(sourceExpandedKeys, parentKeyMap)
+
+  for (const key of ancestorKeys) {
+    effectiveExpandedKeys.add(key)
+  }
+
+  return effectiveExpandedKeys
+}
+
+/**
+ * 根据内部节点模型构造对外事件节点对象，并按需附带展开状态。
+ */
+export const createTreeEventNode = ({
+  node,
+  resolveExpanded
+}: {
+  node: TreeNodeModel
+  resolveExpanded?: (nodeKey: TreeKey) => boolean
+}): TreeNode => {
+  const cachedNodes = new Map<TreeKey, TreeNode>()
+
+  /**
+   * 递归复制节点字段，并通过缓存避免父子链循环导致的无限递归。
+   */
+  const visit = (currentNode: TreeNodeModel): TreeNode => {
+    const cachedNode = cachedNodes.get(currentNode.key)
+
+    if (cachedNode) {
+      return cachedNode
+    }
+
+    const eventNode: TreeNode = {
+      key: currentNode.key,
+      level: currentNode.level,
+      data: currentNode.data,
+      label: currentNode.label,
+      disabled: currentNode.disabled,
+      isLeaf: currentNode.isLeaf,
+      parent: null,
+      childNodes: []
+    }
+
+    if (resolveExpanded) {
+      eventNode.expanded = resolveExpanded(currentNode.key)
+    }
+
+    cachedNodes.set(currentNode.key, eventNode)
+    eventNode.parent = currentNode.parent ? visit(currentNode.parent) : null
+    eventNode.childNodes = currentNode.childNodes.map((childNode) => visit(childNode))
+
+    return eventNode
+  }
+
+  return visit(node)
+}
+
+/**
  * 统一解析对象形式和工厂函数形式的语义化记录。
  */
 export const resolveTreeSemanticRecord = <T>(
   source:
-    | FlTreeSemanticRecord<T>
-    | ((info: { componentProps: unknown }) => FlTreeSemanticRecord<T>)
+    | TreeSemanticRecord<T>
+    | ((info: { componentProps: unknown }) => TreeSemanticRecord<T>)
     | undefined,
   info: { componentProps: unknown }
-): FlTreeSemanticRecord<T> => {
+): TreeSemanticRecord<T> => {
   if (typeof source === 'function') {
     return source(info) ?? {}
   }
@@ -206,14 +499,15 @@ export const resolveTreeSemanticRecord = <T>(
 }
 
 export type {
-  FlTreeClassNames,
-  FlTreeClassValue,
-  FlTreeIndex,
-  FlTreeKey,
-  FlTreeNodePropsConfig,
-  FlTreeNormalizedNode,
-  FlTreeRawNode,
-  FlTreeSemanticDOM,
-  FlTreeSemanticRecord,
-  FlTreeStyles
+  TreeClassNames,
+  TreeClassValue,
+  TreeData,
+  TreeIndex,
+  TreeKey,
+  TreeNode,
+  TreeNodeModel,
+  TreeNodeProps,
+  TreeSemanticDOM,
+  TreeSemanticRecord,
+  TreeStyles
 }

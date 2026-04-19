@@ -1,5 +1,5 @@
-﻿<template>
-  <!-- 根节点在阶段 2 开始承接展开状态，并把切换能力下发给递归节点。 -->
+<template>
+  <!-- 根节点在阶段 3 起仅负责接入展开状态层，并把渲染能力下发给递归节点。 -->
   <div
     v-bind="attrs"
     :class="[rootClassName, resolvedClassNames.root]"
@@ -9,6 +9,7 @@
       v-for="node in treeIndex.nodes"
       :key="node.key"
       :node="node"
+      :emit-node-click="emitNodeClick"
       :is-node-expanded="isNodeExpanded"
       :toggle-node-expansion="toggleNodeExpansion"
       :resolved-class-names="resolvedClassNames"
@@ -18,32 +19,36 @@
 
 <script setup lang="ts">
 import { useNamespace } from '@falcon-ui/utils'
-import { computed, shallowRef, useAttrs, watch, type CSSProperties } from 'vue'
+import { computed, useAttrs, type CSSProperties } from 'vue'
 import {
   buildTreeIndex,
-  collectInitiallyExpandedKeys,
-  flTreeProps,
-  resolveTreeSemanticRecord
+  createTreeEventNode,
+  resolveTreeSemanticRecord,
+  treeEmits,
+  treeProps,
+  type TreeClassValue,
+  type TreeNodeInstance,
+  type TreeNodeModel,
+  type TreeSemanticRecord
 } from './tree'
-import type { FlTreeClassValue, FlTreeKey, FlTreeSemanticRecord } from './tree-types'
 import FlTreeNode from './tree-node.vue'
+import { useTreeExpandedState, type TreeExpandedStateEmit } from './use-tree-expanded-state'
 
 defineOptions({
   name: 'FlTree',
   inheritAttrs: false
 })
 
-const props = defineProps(flTreeProps)
+const props = defineProps(treeProps)
+const emit = defineEmits(treeEmits)
 const attrs = useAttrs()
 const ns = useNamespace('tree')
 const rootClassName = ns.b()
-// 用于存储当前展开状态的节点键集合。
-const expandedKeySet = shallowRef(new Set<FlTreeKey>())
 
 /**
  * 构建当前渲染所需的标准化树索引。
  */
-const createTreeIndex = () => buildTreeIndex(props.data, props.props)
+const createCurrentTreeIndex = () => buildTreeIndex(props.data, props.props)
 
 /**
  * 解析组件级语义化 classNames 配置。
@@ -61,37 +66,28 @@ const createResolvedStyles = () =>
     componentProps: props
   })
 
-const treeIndex = computed(createTreeIndex)
-const resolvedClassNames =
-  computed<FlTreeSemanticRecord<FlTreeClassValue>>(createResolvedClassNames)
-const resolvedStyles = computed<FlTreeSemanticRecord<CSSProperties>>(createResolvedStyles)
+const treeIndex = computed(createCurrentTreeIndex)
+const resolvedClassNames = computed<TreeSemanticRecord<TreeClassValue>>(createResolvedClassNames)
+const resolvedStyles = computed<TreeSemanticRecord<CSSProperties>>(createResolvedStyles)
 
 /**
- * 根据当前树索引重建阶段 2 的默认展开状态。
+ * 统一派发节点点击事件。`node-click` 不暴露 `expanded` 字段。
  */
-const syncExpandedKeysFromTreeIndex = () => {
-  expandedKeySet.value = collectInitiallyExpandedKeys(treeIndex.value.nodes)
+const emitNodeClick = ({
+  node,
+  component,
+  event
+}: {
+  node: TreeNodeModel
+  component: TreeNodeInstance
+  event: MouseEvent
+}) => {
+  emit('node-click', node.data, createTreeEventNode({ node }), component, event)
 }
 
-/**
- * 判断指定节点当前是否处于展开状态。
- */
-const isNodeExpanded = (nodeKey: FlTreeKey) => expandedKeySet.value.has(nodeKey)
-
-/**
- * 切换指定节点的展开状态。
- */
-const toggleNodeExpansion = (nodeKey: FlTreeKey) => {
-  const nextExpandedKeys = new Set(expandedKeySet.value)
-
-  if (nextExpandedKeys.has(nodeKey)) {
-    nextExpandedKeys.delete(nodeKey)
-  } else {
-    nextExpandedKeys.add(nodeKey)
-  }
-
-  expandedKeySet.value = nextExpandedKeys
-}
-
-watch(treeIndex, syncExpandedKeysFromTreeIndex, { immediate: true })
+const { isNodeExpanded, toggleNodeExpansion } = useTreeExpandedState({
+  props,
+  treeIndex,
+  emit: emit as TreeExpandedStateEmit
+})
 </script>

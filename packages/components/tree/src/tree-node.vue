@@ -1,12 +1,12 @@
-﻿<template>
-  <!-- 阶段 2 在递归节点中引入展开状态切换，但仍不承接阶段 3 的默认展开和受控展开。 -->
+<template>
+  <!-- 递归节点消费主入口下发的展开状态与事件派发能力，不再自行维护树状态。 -->
   <div
     :class="[itemClassName, semanticClassNames.item, node.className]"
     :style="[semanticStyles.item, itemStyle]"
     role="treeitem"
     :aria-expanded="isExpandableNode ? isExpandedNode : undefined"
     :aria-level="node.level">
-    <div :class="itemContentClassName">
+    <div :class="itemContentClassName" @click="handleNodeContentClick">
       <span
         :class="[itemIconClassName, semanticClassNames.itemIcon]"
         :style="semanticStyles.itemIcon">
@@ -16,7 +16,7 @@
           type="button"
           :class="switcherButtonClassName"
           :aria-label="isExpandedNode ? '收起节点' : '展开节点'"
-          @click.stop="toggleCurrentNodeExpansion">
+          @click.stop="handleSwitcherClick">
           <ElIcon :class="switcherIconClassName" aria-hidden="true">
             <CaretBottom v-if="isExpandedNode" />
             <CaretRight v-else />
@@ -31,9 +31,10 @@
     </div>
     <div v-if="isExpandableNode && isExpandedNode" :class="childrenClassName" role="group">
       <FlTreeNode
-        v-for="childNode in node.children"
+        v-for="childNode in node.childNodes"
         :key="childNode.key"
         :node="childNode"
+        :emit-node-click="emitNodeClick"
         :is-node-expanded="isNodeExpanded"
         :toggle-node-expansion="toggleNodeExpansion"
         :resolved-class-names="resolvedClassNames"
@@ -46,13 +47,14 @@
 import { CaretBottom, CaretRight } from '@element-plus/icons-vue'
 import { ElIcon } from 'element-plus'
 import { useNamespace } from '@falcon-ui/utils'
-import { computed, type CSSProperties } from 'vue'
+import { computed, getCurrentInstance, type CSSProperties } from 'vue'
 import type {
-  FlTreeClassValue,
-  FlTreeKey,
-  FlTreeNormalizedNode,
-  FlTreeSemanticRecord
-} from './tree-types'
+  TreeClassValue,
+  TreeKey,
+  TreeNodeInstance,
+  TreeNodeModel,
+  TreeSemanticRecord
+} from './tree'
 
 defineOptions({
   name: 'FlTreeNode'
@@ -61,15 +63,21 @@ defineOptions({
 /**
  * 内部节点组件只接收标准化节点和主入口下发的展开状态能力。
  */
-interface TreeNodeProps {
-  node: FlTreeNormalizedNode
-  isNodeExpanded: (nodeKey: FlTreeKey) => boolean
-  toggleNodeExpansion: (nodeKey: FlTreeKey) => void
-  resolvedClassNames: FlTreeSemanticRecord<FlTreeClassValue>
-  resolvedStyles: FlTreeSemanticRecord<CSSProperties>
+interface TreeNodeComponentProps {
+  node: TreeNodeModel
+  emitNodeClick: (options: {
+    node: TreeNodeModel
+    component: TreeNodeInstance
+    event: MouseEvent
+  }) => void
+  isNodeExpanded: (nodeKey: TreeKey) => boolean
+  toggleNodeExpansion: (options: { node: TreeNodeModel; instance: TreeNodeInstance }) => void
+  resolvedClassNames: TreeSemanticRecord<TreeClassValue>
+  resolvedStyles: TreeSemanticRecord<CSSProperties>
 }
 
-const props = defineProps<TreeNodeProps>()
+const props = defineProps<TreeNodeComponentProps>()
+const currentInstance = getCurrentInstance()
 const ns = useNamespace('tree')
 const itemClassName = ns.e('item')
 const itemContentClassName = ns.e('item-content')
@@ -79,6 +87,11 @@ const switcherDotClassName = ns.e('switcher-dot')
 const switcherIconClassName = ns.e('switcher-icon')
 const itemTitleClassName = ns.e('item-title')
 const childrenClassName = ns.e('children')
+
+/**
+ * 返回当前递归节点组件的 public instance。
+ */
+const getNodeInstance = (): TreeNodeInstance => currentInstance?.proxy ?? null
 
 /**
  * 生成节点缩进所需的层级样式变量。
@@ -91,28 +104,51 @@ const createItemStyle = () =>
 /**
  * 判断当前节点是否具备展开能力。
  */
-const resolveExpandableNodeState = () => props.node.children.length > 0
+const resolveExpandableNodeState = () => props.node.childNodes.length > 0
 
 /**
  * 判断当前节点是否处于展开状态。
  */
 const resolveExpandedNodeState = () =>
-  props.node.children.length > 0 && props.isNodeExpanded(props.node.key)
+  props.node.childNodes.length > 0 && props.isNodeExpanded(props.node.key)
 
 /**
  * 判断当前节点是否按叶子节点视觉渲染。
  */
-const resolveLeafNodeState = () => props.node.isLeaf || props.node.children.length === 0
+const resolveLeafNodeState = () => props.node.isLeaf || props.node.childNodes.length === 0
 
 /**
- * 切换当前节点的展开状态。
+ * 触发当前节点的点击事件。
  */
-const toggleCurrentNodeExpansion = () => {
-  if (props.node.children.length === 0) {
+const emitCurrentNodeClick = (event: MouseEvent) => {
+  props.emitNodeClick({
+    node: props.node,
+    component: getNodeInstance(),
+    event
+  })
+}
+
+/**
+ * 处理节点内容区点击，统一派发 `node-click`。
+ */
+const handleNodeContentClick = (event: MouseEvent) => {
+  emitCurrentNodeClick(event)
+}
+
+/**
+ * 切换当前节点的展开状态，并保持 `node-click` 先于展开事件触发。
+ */
+const handleSwitcherClick = (event: MouseEvent) => {
+  emitCurrentNodeClick(event)
+
+  if (props.node.childNodes.length === 0) {
     return
   }
 
-  props.toggleNodeExpansion(props.node.key)
+  props.toggleNodeExpansion({
+    node: props.node,
+    instance: getNodeInstance()
+  })
 }
 
 /**

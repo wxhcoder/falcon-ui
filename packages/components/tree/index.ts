@@ -7,15 +7,21 @@ export const FlTree: SFCWithInstall<typeof Tree> = withInstall(Tree)
 export default FlTree
 
 export type {
-  FlTreeClassNames,
-  FlTreeClassValue,
-  FlTreeIndex,
-  FlTreeKey,
-  FlTreeNodePropsConfig,
-  FlTreeNormalizedNode,
-  FlTreeProps,
-  FlTreeRawNode,
-  FlTreeSemanticDOM,
-  FlTreeSemanticRecord,
-  FlTreeStyles
+  TreeClassNames,
+  TreeClassValue,
+  TreeData,
+  TreeEmits,
+  TreeExpandPayload,
+  TreeIndex,
+  TreeKey,
+  TreeNode,
+  TreeNodeClickArgs,
+  TreeNodeInstance,
+  TreeNodeModel,
+  TreeNodeProps,
+  TreeNodeToggleArgs,
+  TreeProps,
+  TreeSemanticDOM,
+  TreeSemanticRecord,
+  TreeStyles
 } from './src/tree'
