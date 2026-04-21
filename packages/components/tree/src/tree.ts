@@ -32,6 +32,10 @@ export const treeProps = {
     type: Array as PropType<TreeData[]>,
     default: () => []
   },
+  selectable: {
+    type: Boolean,
+    default: true
+  },
   props: {
     type: Object as PropType<TreeNodeProps>,
     default: () => ({ ...treeNodePropsDefaults })
@@ -61,6 +65,14 @@ export const treeProps = {
   defaultExpandParent: {
     type: Boolean,
     default: true
+  },
+  defaultSelectedKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
+    default: undefined
+  },
+  selectedKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
+    default: undefined
   }
 } as const
 
@@ -74,6 +86,17 @@ export interface TreeExpandPayload {
   node: TreeData
   key: TreeKey
   expandedKeys: TreeKey[]
+}
+
+/**
+ * 树节点选中事件统一返回当前节点结果与最新选中集合。
+ */
+export interface TreeSelectEvent {
+  selected: boolean
+  node: TreeNode
+  selectedNodes: TreeNode[]
+  key: TreeKey
+  event: MouseEvent
 }
 
 /**
@@ -99,6 +122,11 @@ export type TreeNodeToggleArgs = [
   node: TreeNode & { expanded: boolean },
   instance: TreeNodeInstance
 ]
+
+/**
+ * `select` 事件固定采用双参数出参。
+ */
+export type TreeSelectArgs = [selectedKeys: TreeKey[], event: TreeSelectEvent]
 
 /**
  * 判断当前值是否为普通对象。
@@ -127,6 +155,7 @@ const isTreeNode = (value: unknown): value is TreeNode =>
   typeof value.level === 'number' &&
   typeof value.label === 'string' &&
   typeof value.disabled === 'boolean' &&
+  typeof value.selectable === 'boolean' &&
   typeof value.isLeaf === 'boolean' &&
   Array.isArray(value.childNodes) &&
   'data' in value
@@ -160,6 +189,20 @@ const isTreeNodeToggleArgs = (
   isTreeNodeInstance(instance)
 
 /**
+ * 验证 `select` 事件的双元组参数。
+ */
+const isTreeSelectArgs = (selectedKeys: TreeKey[], event: TreeSelectEvent) =>
+  Array.isArray(selectedKeys) &&
+  selectedKeys.every((item) => isTreeKey(item)) &&
+  typeof event.selected === 'boolean' &&
+  isTreeKey(event.key) &&
+  isTreeNode(event.node) &&
+  Array.isArray(event.selectedNodes) &&
+  event.selectedNodes.every((item) => isTreeNode(item)) &&
+  isRecord(event.event) &&
+  typeof event.event.type === 'string'
+
+/**
  * 阶段 3 正式开放展开状态双向同步与展开事件。
  */
 export const treeEmits = {
@@ -167,6 +210,11 @@ export const treeEmits = {
    * 请求外部同步当前源展开键集合。
    */
   'update:expandedKeys': (value: TreeKey[]) =>
+    Array.isArray(value) && value.every((item) => isTreeKey(item)),
+  /**
+   * 请求外部同步当前源选中键集合。
+   */
+  'update:selectedKeys': (value: TreeKey[]) =>
     Array.isArray(value) && value.every((item) => isTreeKey(item)),
   /**
    * 节点展开状态切换后抛出当前节点的展开结果。
@@ -182,6 +230,10 @@ export const treeEmits = {
    * 节点被点击时抛出节点数据、节点对象、组件实例与鼠标事件。
    */
   'node-click': (...args: TreeNodeClickArgs) => isTreeNodeClickArgs(...args),
+  /**
+   * 节点被选中或取消选中时抛出最新选中结果。
+   */
+  select: (...args: TreeSelectArgs) => isTreeSelectArgs(...args),
   /**
    * 节点被用户展开时抛出切换后的节点对象与组件实例。
    */
@@ -260,6 +312,7 @@ export const normalizeTreeNode = (
     data: rawNode,
     label: labelValue == null ? '' : String(labelValue),
     disabled: Boolean(disabledValue),
+    selectable: rawNode.selectable !== false,
     isLeaf: Boolean(isLeafValue),
     className: resolveNodeClassName(classValue),
     parent,
@@ -341,6 +394,32 @@ export const filterTreeExpandedKeys = (
   }
 
   return nextExpandedKeys
+}
+
+/**
+ * 过滤无效、重复或已从树结构中移除的选中键。
+ */
+export const filterTreeSelectedKeys = (
+  keys: TreeKey[] | undefined,
+  keyNodeMap: Map<TreeKey, TreeNodeModel>
+): TreeKey[] => {
+  if (!Array.isArray(keys)) {
+    return []
+  }
+
+  const nextSelectedKeys: TreeKey[] = []
+  const visitedKeys = new Set<TreeKey>()
+
+  for (const key of keys) {
+    if (!isTreeKey(key) || visitedKeys.has(key) || !keyNodeMap.has(key)) {
+      continue
+    }
+
+    visitedKeys.add(key)
+    nextSelectedKeys.push(key)
+  }
+
+  return nextSelectedKeys
 }
 
 /**
@@ -462,6 +541,7 @@ export const createTreeEventNode = ({
       data: currentNode.data,
       label: currentNode.label,
       disabled: currentNode.disabled,
+      selectable: currentNode.selectable,
       isLeaf: currentNode.isLeaf,
       parent: null,
       childNodes: []

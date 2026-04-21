@@ -207,6 +207,17 @@
         <FlButton @click="expandAllTreeNodes">全部展开</FlButton>
         <FlButton @click="collapseAllTreeNodes">全部折叠</FlButton>
         <FlButton @click="restoreTreeDefaultExpandMode">恢复默认模式</FlButton>
+        <FlButton @click="enableControlledTreeSelection(['delivery-quality-unit-test'])">
+          受控选中 Unit Test
+        </FlButton>
+        <FlButton @click="enableControlledTreeSelection(['workspace-layout-grid'])">
+          受控选中 Grid
+        </FlButton>
+        <FlButton @click="clearControlledTreeSelection">受控清空</FlButton>
+        <FlButton @click="restoreDefaultTreeSelection">恢复默认选中</FlButton>
+        <FlButton @click="treeSelectable = !treeSelectable">
+          切换 selectable: {{ treeSelectable ? 'on' : 'off' }}
+        </FlButton>
         <FlButton @click="resetTreeEventRecords">Clear event log</FlButton>
       </div>
       <div class="demo-row tree-demo-row">
@@ -214,13 +225,18 @@
           :key="treeDemoVersion"
           class="tree-demo"
           :data="treeData"
+          :selectable="treeSelectable"
           :props="treeNodeProps"
           :default-expand-all="treeDefaultExpandAll"
           :default-expanded-keys="treeDefaultExpandedKeys"
           :default-expand-parent="treeDefaultExpandParent"
+          :default-selected-keys="treeDefaultSelectedKeys"
           :expanded-keys="treeUseControlledExpand ? treeControlledExpandedKeys : undefined"
+          :selected-keys="treeUseControlledSelect ? treeControlledSelectedKeys : undefined"
           @update:expanded-keys="handleTreeExpandedKeysChange"
+          @update:selected-keys="handleTreeSelectedKeysChange"
           @node-click="handleTreeNodeClick"
+          @select="handleTreeSelect"
           @node-expand="handleTreeNodeExpand"
           @node-collapse="handleTreeNodeCollapse" />
       </div>
@@ -231,15 +247,25 @@
         {{ treeUseControlledExpand ? '受控展开' : '默认展开' }}
       </p>
       <p class="demo-result">
+        选中模式: {{ treeUseControlledSelect ? '受控选中' : '默认选中' }}，selectable={{
+          treeSelectable
+        }}
+      </p>
+      <p class="demo-result">
         当前源展开 keys:
         {{ currentTreeExpandedKeys.length ? currentTreeExpandedKeys.join(', ') : '(empty)' }}
       </p>
       <p class="demo-result">
-        Event counts: click={{ treeNodeClickCount }}, expand={{ treeNodeExpandCount }}, collapse={{
-          treeNodeCollapseCount
-        }}
+        当前可见选中 keys:
+        {{ currentTreeSelectedKeys.length ? currentTreeSelectedKeys.join(', ') : '(empty)' }}
+      </p>
+      <p class="demo-result">
+        Event counts: click={{ treeNodeClickCount }}, select={{ treeSelectCount }}, expand={{
+          treeNodeExpandCount
+        }}, collapse={{ treeNodeCollapseCount }}
       </p>
       <p class="demo-result">Last node-click: {{ treeLastNodeClick }}</p>
+      <p class="demo-result">Last select: {{ treeLastSelect }}</p>
       <p class="demo-result">Last node-expand: {{ treeLastNodeExpand }}</p>
       <p class="demo-result">Last node-collapse: {{ treeLastNodeCollapse }}</p>
       <ul class="tree-event-list">
@@ -359,7 +385,14 @@
 import { computed, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
-import type { TreeData, TreeKey, TreeNode, TreeNodeInstance, TreeNodeProps } from 'falcon-ui'
+import type {
+  TreeData,
+  TreeKey,
+  TreeNode,
+  TreeNodeInstance,
+  TreeNodeProps,
+  TreeSelectEvent
+} from 'falcon-ui'
 
 const buttonClicks = ref(0)
 const qrCodeValue = ref('https://falcon-ui.dev')
@@ -507,7 +540,7 @@ interface TreeDefaultExpandConfig {
   sourceExpandedKeys: TreeKey[]
 }
 
-type TreeEventName = 'node-click' | 'node-expand' | 'node-collapse'
+type TreeEventName = 'node-click' | 'select' | 'node-expand' | 'node-collapse'
 
 interface TreeEventRecord {
   id: number
@@ -675,10 +708,17 @@ const treeDefaultExpandParent = ref(true)
 const treeUseControlledExpand = ref(false)
 const treeControlledExpandedKeys = ref<TreeKey[]>([])
 const treeObservedExpandedKeys = ref<TreeKey[]>([])
+const treeSelectable = ref(true)
+const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>(['design-system-components-tree'])
+const treeUseControlledSelect = ref(false)
+const treeControlledSelectedKeys = ref<TreeKey[]>([])
+const treeObservedSelectedKeys = ref<TreeKey[]>(treeDefaultSelectedKeys.value ?? [])
 const treeNodeClickCount = ref(0)
+const treeSelectCount = ref(0)
 const treeNodeExpandCount = ref(0)
 const treeNodeCollapseCount = ref(0)
 const treeLastNodeClick = ref('(none)')
+const treeLastSelect = ref('(none)')
 const treeLastNodeExpand = ref('(none)')
 const treeLastNodeCollapse = ref('(none)')
 const treeEventSequence = ref(0)
@@ -835,6 +875,31 @@ const restoreTreeDefaultExpandMode = () => {
 }
 
 /**
+ * 将树示例切换到受控单选模式，并写入指定选中键。
+ */
+const enableControlledTreeSelection = (selectedKeys: TreeKey[]) => {
+  treeUseControlledSelect.value = true
+  treeControlledSelectedKeys.value = selectedKeys
+  treeObservedSelectedKeys.value = selectedKeys
+}
+
+/**
+ * 在受控单选模式下清空当前选中项。
+ */
+const clearControlledTreeSelection = () => {
+  enableControlledTreeSelection([])
+}
+
+/**
+ * 恢复到默认选中示例，并通过 remount 重新触发 `defaultSelectedKeys`。
+ */
+const restoreDefaultTreeSelection = () => {
+  treeUseControlledSelect.value = false
+  treeObservedSelectedKeys.value = treeDefaultSelectedKeys.value ?? []
+  treeDemoVersion.value += 1
+}
+
+/**
  * 同步树示例抛出的源展开键，并在受控模式下回写到示例状态。
  */
 const handleTreeExpandedKeysChange = (expandedKeys: TreeKey[]) => {
@@ -846,6 +911,17 @@ const handleTreeExpandedKeysChange = (expandedKeys: TreeKey[]) => {
 }
 
 /**
+ * 同步树示例抛出的源选中键，并在受控模式下回写到示例状态。
+ */
+const handleTreeSelectedKeysChange = (selectedKeys: TreeKey[]) => {
+  treeObservedSelectedKeys.value = selectedKeys
+
+  if (treeUseControlledSelect.value) {
+    treeControlledSelectedKeys.value = selectedKeys
+  }
+}
+
+/**
  * 返回当前默认展开方式的中文标签，便于在示例说明中展示。
  */
 /**
@@ -853,9 +929,11 @@ const handleTreeExpandedKeysChange = (expandedKeys: TreeKey[]) => {
  */
 const resetTreeEventRecords = () => {
   treeNodeClickCount.value = 0
+  treeSelectCount.value = 0
   treeNodeExpandCount.value = 0
   treeNodeCollapseCount.value = 0
   treeLastNodeClick.value = '(none)'
+  treeLastSelect.value = '(none)'
   treeLastNodeExpand.value = '(none)'
   treeLastNodeCollapse.value = '(none)'
   treeEventSequence.value = 0
@@ -876,6 +954,18 @@ const handleTreeNodeClick = (
   treeNodeClickCount.value += 1
   treeLastNodeClick.value = summary
   appendTreeEventRecord('node-click', summary)
+}
+
+/**
+ * 演示 `select` 事件，展示最新选中结果与事件对象。
+ */
+const handleTreeSelect = (selectedKeys: TreeKey[], event: TreeSelectEvent) => {
+  const selectedKeysSummary = selectedKeys.length ? selectedKeys.join(', ') : '(empty)'
+  const summary = `selected=${event.selected}, key=${String(event.key)}, selectedKeys=${selectedKeysSummary}, event=${event.event.type}, node=${formatTreeNodeSummary(event.node)}`
+
+  treeSelectCount.value += 1
+  treeLastSelect.value = summary
+  appendTreeEventRecord('select', summary)
 }
 
 /**
@@ -911,6 +1001,17 @@ const currentTreeDefaultExpandLabel = computed(
  */
 const currentTreeExpandedKeys = computed(() =>
   treeUseControlledExpand.value ? treeControlledExpandedKeys.value : treeObservedExpandedKeys.value
+)
+
+/**
+ * 返回当前树示例可见的单选结果；关闭 selectable 时视图层选中态为空。
+ */
+const currentTreeSelectedKeys = computed(() =>
+  treeSelectable.value
+    ? treeUseControlledSelect.value
+      ? treeControlledSelectedKeys.value
+      : treeObservedSelectedKeys.value
+    : []
 )
 
 applyTreeDefaultExpandMode()

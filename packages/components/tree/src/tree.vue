@@ -1,5 +1,5 @@
 <template>
-  <!-- 根节点在阶段 3 起仅负责接入展开状态层，并把渲染能力下发给递归节点。 -->
+  <!-- 根节点在阶段 4 起同时接入展开与单选状态层，并把渲染能力下发给递归节点。 -->
   <div
     v-bind="attrs"
     :class="[rootClassName, resolvedClassNames.root]"
@@ -9,8 +9,10 @@
       v-for="node in treeIndex.nodes"
       :key="node.key"
       :node="node"
-      :emit-node-click="emitNodeClick"
+      :on-node-content-click="handleNodeContentClick"
       :is-node-expanded="isNodeExpanded"
+      :is-node-selected="isNodeSelected"
+      :tree-selectable="isTreeSelectable"
       :toggle-node-expansion="toggleNodeExpansion"
       :resolved-class-names="resolvedClassNames"
       :resolved-styles="resolvedStyles" />
@@ -33,6 +35,7 @@ import {
 } from './tree'
 import FlTreeNode from './tree-node.vue'
 import { useTreeExpandedState, type TreeExpandedStateEmit } from './use-tree-expanded-state'
+import { useTreeSelectedState, type TreeSelectedStateEmit } from './use-tree-selected-state'
 
 defineOptions({
   name: 'FlTree',
@@ -90,4 +93,33 @@ const { isNodeExpanded, toggleNodeExpansion } = useTreeExpandedState({
   treeIndex,
   emit: emit as TreeExpandedStateEmit
 })
+
+const { isNodeSelected, isTreeSelectable, selectNode } = useTreeSelectedState({
+  props,
+  treeIndex,
+  emit: emit as TreeSelectedStateEmit
+})
+
+/**
+ * 节点内容区点击时先派发 `node-click`，再进入阶段 4 的单选链路。
+ */
+const handleNodeContentClick = ({
+  node,
+  component,
+  event
+}: {
+  node: TreeNodeModel
+  component: TreeNodeInstance
+  event: MouseEvent
+}) => {
+  emitNodeClick({
+    node,
+    component,
+    event
+  })
+  selectNode({
+    node,
+    event
+  })
+}
 </script>

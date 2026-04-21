@@ -12,7 +12,8 @@ import FlTree, {
   type TreeKey,
   type TreeNode,
   type TreeNodeModel,
-  type TreeProps
+  type TreeProps,
+  type TreeSelectEvent
 } from '@falcon-ui/components/tree'
 import { FlTree as FlTreeFromComponents } from '@falcon-ui/components'
 import FalconUI, { install as installFalconUI } from '@falcon-ui/falcon-ui'
@@ -77,6 +78,12 @@ describe('FlTree 契约', () => {
     findTreeItemByText(wrapper, label).get('.fl-tree__item-content')
 
   /**
+   * 判断指定树节点是否处于选中态。
+   */
+  const isItemSelected = (wrapper: VueWrapper, label: string) =>
+    getItemContent(wrapper, label).classes().includes('is-selected')
+
+  /**
    * 读取指定树节点上的 switcher 按钮。
    */
   const getSwitcherButton = (wrapper: VueWrapper, label: string) =>
@@ -120,6 +127,32 @@ describe('FlTree 契约', () => {
     }
   ]
 
+  /**
+   * 提供包含 disabled / selectable=false 边界的树数据。
+   */
+  const createSelectionBoundaryTreeData = () => [
+    {
+      key: 'root',
+      label: 'Root',
+      children: [
+        {
+          key: 'disabled-node',
+          label: 'Disabled Node',
+          disabled: true
+        },
+        {
+          key: 'unselectable-node',
+          label: 'Unselectable Node',
+          selectable: false
+        },
+        {
+          key: 'active-node',
+          label: 'Active Node'
+        }
+      ]
+    }
+  ]
+
   it('在未传展开属性时默认收起树节点', async () => {
     const wrapper = mount(FlTree, {
       props: {
@@ -139,6 +172,8 @@ describe('FlTree 契约', () => {
     expect(wrapper.text()).not.toContain('Leaf')
     expect(rootItem.attributes('aria-level')).toBe('1')
     expect(rootItem.attributes('aria-expanded')).toBe('false')
+    expect(rootItem.attributes('aria-selected')).toBe('false')
+    expect(isItemSelected(wrapper, 'Root')).toBe(false)
     expect(wrapper.findComponent(CaretRight).exists()).toBe(true)
     expect(wrapper.findComponent(CaretBottom).exists()).toBe(false)
   })
@@ -209,6 +244,8 @@ describe('FlTree 契约', () => {
     expect(treeScss).toContain('--fl-tree-node-hover-bg-color: var(--el-tree-node-hover-bg-color);')
     expect(treeScss).toContain('--fl-tree-node-text-color: var(--el-tree-text-color);')
     expect(treeScss).toContain('--fl-tree-node-icon-color: var(--el-tree-expand-icon-color);')
+    expect(treeScss).toContain('--fl-tree-node-selected-bg-color: var(--el-color-primary-light-9);')
+    expect(treeScss).toContain('--fl-tree-node-selected-text-color: var(--el-color-primary);')
     expect(treeScss).toContain('--fl-tree-leaf-dot-color: var(--el-text-color-secondary);')
 
     const wrapper = mount(FlTree, {
@@ -265,18 +302,27 @@ describe('FlTree 契约', () => {
     expect(treePackageSource).toContain('"./tree": "./tree/index.ts"')
     expect(treeIndexSource).toContain('TreeEmits')
     expect(treeIndexSource).toContain('TreeExpandPayload')
+    expect(treeIndexSource).toContain('TreeSelectEvent')
     expect(treeIndexSource).toContain('TreeNodeModel')
     expect(treeIndexSource).toContain('TreeNode')
     expect(treeIndexSource).not.toContain('FlTreeEmits')
     expect(componentsIndexSource).toContain('TreeEmits')
     expect(componentsIndexSource).toContain('TreeExpandPayload')
+    expect(componentsIndexSource).toContain('TreeSelectEvent')
     expect(componentsIndexSource).toContain('TreeNodeModel')
     expect(componentsIndexSource).toContain('TreeNode')
     expect(componentsIndexSource).not.toContain('FlTreeEmits')
     expect(globalDts).toContain('FlTree: typeof FlTree')
     expect(themeIndex).toContain("@use './src/tree.scss';")
 
-    type TreeTypeSmoke = [TreeKey, TreeProps, TreeExpandPayload, TreeEmits, TreeNodeModel]
+    type TreeTypeSmoke = [
+      TreeKey,
+      TreeProps,
+      TreeExpandPayload,
+      TreeSelectEvent,
+      TreeEmits,
+      TreeNodeModel
+    ]
     const treeTypeSmoke: TreeTypeSmoke | null = null
     expect(treeTypeSmoke).toBeNull()
   })
@@ -400,6 +446,163 @@ describe('FlTree 契约', () => {
     expect(wrapper.findComponent(CaretRight).exists()).toBe(true)
   })
 
+  it('支持通过 `defaultSelectedKeys` 初始化单选状态，并过滤非法与不可选节点', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        defaultSelectedKeys: ['missing-node', 'disabled-node', 'active-node', 'root']
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-selected')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Disabled Node').attributes('aria-selected')).toBeUndefined()
+    expect(
+      findTreeItemByText(wrapper, 'Unselectable Node').attributes('aria-selected')
+    ).toBeUndefined()
+    expect(isItemSelected(wrapper, 'Active Node')).toBe(true)
+    expect(isItemSelected(wrapper, 'Root')).toBe(false)
+  })
+
+  it('点击节点内容区时按顺序触发 `node-click`、`update:selectedKeys`、`select`', async () => {
+    const eventOrder: string[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        onNodeClick: () => eventOrder.push('node-click'),
+        'onUpdate:selectedKeys': () => eventOrder.push('update:selectedKeys'),
+        onSelect: () => eventOrder.push('select')
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(eventOrder).toEqual(['node-click', 'update:selectedKeys', 'select'])
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([[['root']]])
+
+    const selectEvents = wrapper.emitted('select')
+
+    expect(selectEvents).toHaveLength(1)
+    expect(selectEvents?.[0]?.[0] as TreeKey[]).toEqual(['root'])
+    const selectEvent = selectEvents?.[0]?.[1] as TreeSelectEvent
+
+    expect(selectEvent.selected).toBe(true)
+    expect(selectEvent.key).toBe('root')
+    expect(selectEvent.selectedNodes).toHaveLength(1)
+    expect(selectEvent.selectedNodes[0]?.key).toBe('root')
+    expect(selectEvent.selectedNodes[0]?.label).toBe('Root')
+    expect(selectEvent.selectedNodes[0]?.childNodes[0]?.key).toBe('leaf')
+    expect(selectEvent.event).toBeInstanceOf(MouseEvent)
+    expect(isItemSelected(wrapper, 'Root')).toBe(true)
+  })
+
+  it('单选模式下再次点击已选中节点会取消选中', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData()
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([[['root']], [[]]])
+    expect((wrapper.emitted('select')?.[1]?.[1] as TreeSelectEvent).selected).toBe(false)
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('false')
+    expect(isItemSelected(wrapper, 'Root')).toBe(false)
+  })
+
+  it('单选模式下点击另一节点会替换当前选中项', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await getItemContent(wrapper, 'Active Node').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([[['root']], [['active-node']]])
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-selected')).toBe('true')
+    expect(isItemSelected(wrapper, 'Root')).toBe(false)
+    expect(isItemSelected(wrapper, 'Active Node')).toBe(true)
+  })
+
+  it('受控 `selectedKeys` 仅通过事件请求外部更新并严格跟随 prop', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        selectedKeys: []
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([[['root']]])
+    expect(isItemSelected(wrapper, 'Root')).toBe(false)
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('false')
+
+    await wrapper.setProps({
+      selectedKeys: ['root']
+    })
+    await nextTick()
+
+    expect(isItemSelected(wrapper, 'Root')).toBe(true)
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('true')
+  })
+
+  it('disabled 与 selectable=false 节点点击内容区只保留 `node-click` 观察能力', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Disabled Node').trigger('click')
+    await getItemContent(wrapper, 'Unselectable Node').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('node-click')).toHaveLength(2)
+    expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    expect(isItemSelected(wrapper, 'Disabled Node')).toBe(false)
+    expect(isItemSelected(wrapper, 'Unselectable Node')).toBe(false)
+  })
+
+  it('树级 `selectable` 为 false 时不会输出选中态与选中事件', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        selectable: false,
+        defaultSelectedKeys: ['root']
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBeUndefined()
+    expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    expect(isItemSelected(wrapper, 'Root')).toBe(false)
+  })
+
   it('点击节点内容区时触发 `node-click`，且 `node` 不包含 expanded', async () => {
     const wrapper = mount(FlTree, {
       props: {
@@ -435,15 +638,15 @@ describe('FlTree 契约', () => {
     expect(eventArg).toBeInstanceOf(MouseEvent)
   })
 
-  it('点击收起态 switcher 时按顺序触发 `node-click`、`update:expandedKeys`、`node-expand`、`expand`', async () => {
+  it('点击收起态 switcher 时只触发展开链路，不再触发 `node-click` 与 `select`', async () => {
     const eventOrder: string[] = []
     const wrapper = mount(FlTree, {
       props: {
         data: createSimpleTreeData(),
-        onNodeClick: () => eventOrder.push('node-click'),
         'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
         onNodeExpand: () => eventOrder.push('node-expand'),
-        onExpand: () => eventOrder.push('expand')
+        onExpand: () => eventOrder.push('expand'),
+        onSelect: () => eventOrder.push('select')
       }
     })
 
@@ -451,7 +654,9 @@ describe('FlTree 契约', () => {
     await getSwitcherButton(wrapper, 'Root').trigger('click')
     await nextTick()
 
-    expect(eventOrder).toEqual(['node-click', 'update:expandedKeys', 'node-expand', 'expand'])
+    expect(eventOrder).toEqual(['update:expandedKeys', 'node-expand', 'expand'])
+    expect(wrapper.emitted('node-click')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
     expect(wrapper.emitted('update:expandedKeys')).toEqual([[['root']]])
 
     const nodeExpandEvents = wrapper.emitted('node-expand')
@@ -480,13 +685,12 @@ describe('FlTree 契约', () => {
     })
   })
 
-  it('点击展开态 switcher 时触发 `node-collapse`，且 `expanded` 为 false', async () => {
+  it('点击展开态 switcher 时触发 `node-collapse`，且不再派发 `node-click`', async () => {
     const eventOrder: string[] = []
     const wrapper = mount(FlTree, {
       props: {
         data: createSimpleTreeData(),
         defaultExpandAll: true,
-        onNodeClick: () => eventOrder.push('node-click'),
         'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
         onNodeCollapse: () => eventOrder.push('node-collapse'),
         onExpand: () => eventOrder.push('expand')
@@ -497,7 +701,8 @@ describe('FlTree 契约', () => {
     await getSwitcherButton(wrapper, 'Root').trigger('click')
     await nextTick()
 
-    expect(eventOrder).toEqual(['node-click', 'update:expandedKeys', 'node-collapse', 'expand'])
+    expect(eventOrder).toEqual(['update:expandedKeys', 'node-collapse', 'expand'])
+    expect(wrapper.emitted('node-click')).toBeUndefined()
 
     const nodeCollapseEvents = wrapper.emitted('node-collapse')
 
@@ -533,12 +738,13 @@ describe('FlTree 契约', () => {
     expect(wrapper.text()).not.toContain('Leaf')
   })
 
-  it('非用户驱动变化不会触发节点点击、展开与收起事件', async () => {
+  it('非用户驱动变化不会触发节点点击、选中、展开与收起事件', async () => {
     const mountWithListeners = (props: Record<string, unknown>) =>
       mount(FlTree, {
         props: {
           data: createNestedTreeData(),
           onNodeClick: vi.fn(),
+          onSelect: vi.fn(),
           onNodeExpand: vi.fn(),
           onNodeCollapse: vi.fn(),
           ...props
@@ -552,6 +758,7 @@ describe('FlTree 契约', () => {
     await nextTick()
 
     expect(wrapperWithExpandAll.emitted('node-click')).toBeUndefined()
+    expect(wrapperWithExpandAll.emitted('select')).toBeUndefined()
     expect(wrapperWithExpandAll.emitted('node-expand')).toBeUndefined()
     expect(wrapperWithExpandAll.emitted('node-collapse')).toBeUndefined()
 
@@ -562,6 +769,7 @@ describe('FlTree 契约', () => {
     await nextTick()
 
     expect(wrapperWithDefaultExpandedKeys.emitted('node-click')).toBeUndefined()
+    expect(wrapperWithDefaultExpandedKeys.emitted('select')).toBeUndefined()
     expect(wrapperWithDefaultExpandedKeys.emitted('node-expand')).toBeUndefined()
     expect(wrapperWithDefaultExpandedKeys.emitted('node-collapse')).toBeUndefined()
 
@@ -606,6 +814,7 @@ describe('FlTree 契约', () => {
     await nextTick()
 
     expect(wrapperWithControlledProps.emitted('node-click')).toBeUndefined()
+    expect(wrapperWithControlledProps.emitted('select')).toBeUndefined()
     expect(wrapperWithControlledProps.emitted('node-expand')).toBeUndefined()
     expect(wrapperWithControlledProps.emitted('node-collapse')).toBeUndefined()
   })
@@ -680,7 +889,7 @@ describe('FlTree 契约', () => {
     expect(wrapper.text()).not.toContain('Leaf')
   })
 
-  it('叶子节点点击整行只触发 `node-click`，且不暴露展开属性', async () => {
+  it('叶子节点点击整行会进入单选态，且不暴露展开属性', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: [
@@ -706,7 +915,11 @@ describe('FlTree 契约', () => {
     await nextTick()
 
     expect(wrapper.emitted('node-click')).toHaveLength(1)
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([[['archive']]])
+    expect(wrapper.emitted('select')).toHaveLength(1)
     expect(wrapper.emitted('node-expand')).toBeUndefined()
     expect(wrapper.emitted('node-collapse')).toBeUndefined()
+    expect(findTreeItemByText(wrapper, 'Archive').attributes('aria-selected')).toBe('true')
+    expect(isItemSelected(wrapper, 'Archive')).toBe(true)
   })
 })

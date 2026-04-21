@@ -12,6 +12,8 @@
   --fl-tree-node-hover-bg-color: var(--el-tree-node-hover-bg-color);
   --fl-tree-node-text-color: var(--el-tree-text-color);
   --fl-tree-node-icon-color: var(--el-tree-expand-icon-color);
+  --fl-tree-node-selected-bg-color: var(--el-color-primary-light-9);
+  --fl-tree-node-selected-text-color: var(--el-color-primary);
   --fl-tree-leaf-dot-color: var(--el-text-color-secondary);
   --fl-tree-node-indent: 20px;
 
@@ -33,6 +35,14 @@
     padding: 0 8px;
     border-radius: var(--fl-radius-sm);
     transition: background-color var(--el-transition-duration);
+
+    &.is-selected {
+      background-color: var(--fl-tree-node-selected-bg-color);
+    }
+
+    &.is-selected #{bem.selector('tree', 'item-title')} {
+      color: var(--fl-tree-node-selected-text-color);
+    }
   }
 
   @include bem.e(item-icon) {

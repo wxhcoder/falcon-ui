@@ -15,7 +15,7 @@
   - 最小可用导出链路
 - [x] 阶段 2：开发树节点展开 / 收起功能
 - [x] 阶段 3：开发默认展开与受控展开功能
-- [ ] 阶段 4：开发树节点单选功能
+- [x] 阶段 4：开发树节点单选功能
 - [ ] 阶段 5：开发树节点多选功能
 - [ ] 阶段 6：开发树复选框渲染功能
 - [ ] 阶段 7：开发树父子联动勾选功能
@@ -749,4 +749,66 @@ interface TreeExpose {
 ### 13.4 结果判定
 
 - 当前判定：阶段 3 已完成。
-- 下一阶段状态：继续阻塞，等待用户确认后进入阶段 4。
+- 下一阶段状态：阶段 3 已归档；阶段 4 结果见“阶段 4 测试文档”。
+
+## 14. 阶段 4 测试文档
+
+### 14.1 测试范围
+
+阶段 4 只验证以下内容，不进入阶段 5 及以后：
+
+1. `selectable` 树级开关
+2. `defaultSelectedKeys` 默认单选
+3. `selectedKeys` 受控单选与 `update:selectedKeys` / `select` 事件
+4. 单选切换、替换与再次点击取消
+5. `disabled` / `selectable = false` 节点的单选边界
+6. `aria-selected` 与选中高亮样式
+7. switcher 点击不再触发 `node-click` / `select`
+8. Tree 类型导出补齐 `TreeSelectEvent`
+
+### 14.2 测试内容
+
+| 编号 | 测试内容                  | 关注点                                                       | 预期结果                                                              |
+| ---- | ------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
+| 1    | 默认无选中态              | 未传选中相关 props 时是否输出稳定初始状态                    | 可选节点输出 `aria-selected="false"`，内容区无选中高亮                |
+| 2    | `defaultSelectedKeys`     | 默认单选是否只保留第一个合法且可选的 key                     | 非法 key、重复 key、禁用节点与 `selectable = false` 节点被自动过滤    |
+| 3    | 单选事件顺序              | 点击内容区时事件链路是否稳定                                 | 顺序固定为 `node-click -> update:selectedKeys -> select`              |
+| 4    | 再次点击取消              | 点击已选中节点时是否清空单选                                 | 第二次点击后 `selectedKeys = []`，`select.selected = false`           |
+| 5    | 单选替换                  | 点击另一节点时是否替换旧选中项                               | 新节点成为唯一选中项，旧节点退出选中态                                |
+| 6    | 受控 `selectedKeys`       | 组件内部是否只请求外部更新且视图严格跟随 prop                | 外部不回写时视图不变，回写后视图同步                                  |
+| 7    | 节点级单选边界            | `disabled` / `selectable = false` 内容区点击是否错误进入选中 | 允许保留 `node-click` 观察能力，但不触发 `update:selectedKeys/select` |
+| 8    | 树级 `selectable = false` | 树级关闭单选能力时是否彻底禁用选中表现                       | 不输出 `aria-selected`，不渲染高亮，不触发单选事件                    |
+| 9    | switcher 交互边界         | switcher 点击是否仍误触发阶段 3 的点击链路                   | 仅触发展开 / 收起链路，不再触发 `node-click` / `select`               |
+| 10   | 类型与导出回归            | `TreeSelectEvent` 是否进入树模块与组件总入口导出             | `@falcon-ui/components/tree` 与 `@falcon-ui/components` 均可导出      |
+
+### 14.3 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 已执行命令：
+  - `pnpm exec eslint packages/components/tree/src/tree-types.ts packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/src/use-tree-selected-state.ts packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue`
+  - `pnpm exec vitest run packages/components/__test__/install.test.ts packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 执行结果：
+  - `eslint`：通过
+  - 组合安装回归：`28 passed`
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+- 结论：
+  - `selectable` / `defaultSelectedKeys` / `selectedKeys` 已接入
+  - `update:selectedKeys` / `select` 已接入，事件对象类型统一命名为 `TreeSelectEvent`
+  - 单选支持点击选中、点击其他节点替换、再次点击当前节点取消
+  - `disabled` / `selectable = false` 节点不会进入选中态
+  - 树级 `selectable = false` 时，不输出选中态与选中事件
+  - `aria-selected` 与选中高亮样式已接入
+  - switcher 点击已调整为只触发展开 / 收起，不再触发 `node-click` / `select`
+  - play 示例已补充默认选中、受控选中与 `select` 事件展示
+  - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning，本阶段树组件改动未引入新的构建告警
+
+### 14.4 结果判定
+
+- 当前判定：阶段 4 已完成。
+- 下一阶段状态：阶段 4 已归档；阶段 5 继续阻塞，等待用户确认后进入。

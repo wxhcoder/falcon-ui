@@ -19,6 +19,8 @@ export type {
   TreeNodeInstance,
   TreeNodeModel,
   TreeNodeProps,
+  TreeSelectArgs,
+  TreeSelectEvent,
   TreeNodeToggleArgs,
   TreeProps,
   TreeSemanticDOM,

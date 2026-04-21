@@ -1,12 +1,19 @@
 <template>
-  <!-- 递归节点消费主入口下发的展开状态与事件派发能力，不再自行维护树状态。 -->
+  <!-- 递归节点消费主入口下发的展开/选中状态与事件派发能力，不再自行维护树状态。 -->
   <div
     :class="[itemClassName, semanticClassNames.item, node.className]"
     :style="[semanticStyles.item, itemStyle]"
     role="treeitem"
     :aria-expanded="isExpandableNode ? isExpandedNode : undefined"
+    :aria-selected="isSelectableNode ? isSelectedNode : undefined"
     :aria-level="node.level">
-    <div :class="itemContentClassName" @click="handleNodeContentClick">
+    <div
+      :class="[
+        itemContentClassName,
+        ns.is('selected', isSelectedNode),
+        ns.is('disabled', node.disabled)
+      ]"
+      @click="handleNodeContentClick">
       <span
         :class="[itemIconClassName, semanticClassNames.itemIcon]"
         :style="semanticStyles.itemIcon">
@@ -34,8 +41,10 @@
         v-for="childNode in node.childNodes"
         :key="childNode.key"
         :node="childNode"
-        :emit-node-click="emitNodeClick"
+        :on-node-content-click="onNodeContentClick"
         :is-node-expanded="isNodeExpanded"
+        :is-node-selected="isNodeSelected"
+        :tree-selectable="treeSelectable"
         :toggle-node-expansion="toggleNodeExpansion"
         :resolved-class-names="resolvedClassNames"
         :resolved-styles="resolvedStyles" />
@@ -65,12 +74,14 @@ defineOptions({
  */
 interface TreeNodeComponentProps {
   node: TreeNodeModel
-  emitNodeClick: (options: {
+  onNodeContentClick: (options: {
     node: TreeNodeModel
     component: TreeNodeInstance
     event: MouseEvent
   }) => void
   isNodeExpanded: (nodeKey: TreeKey) => boolean
+  isNodeSelected: (nodeKey: TreeKey) => boolean
+  treeSelectable: boolean
   toggleNodeExpansion: (options: { node: TreeNodeModel; instance: TreeNodeInstance }) => void
   resolvedClassNames: TreeSemanticRecord<TreeClassValue>
   resolvedStyles: TreeSemanticRecord<CSSProperties>
@@ -118,10 +129,21 @@ const resolveExpandedNodeState = () =>
 const resolveLeafNodeState = () => props.node.isLeaf || props.node.childNodes.length === 0
 
 /**
- * 触发当前节点的点击事件。
+ * 判断当前节点是否允许输出选中态语义。
  */
-const emitCurrentNodeClick = (event: MouseEvent) => {
-  props.emitNodeClick({
+const resolveSelectableNodeState = () =>
+  props.treeSelectable && props.node.selectable && !props.node.disabled
+
+/**
+ * 判断当前节点是否处于选中态。
+ */
+const resolveSelectedNodeState = () => props.isNodeSelected(props.node.key)
+
+/**
+ * 处理节点内容区点击，统一派发 `node-click` 与单选事件。
+ */
+const handleNodeContentClick = (event: MouseEvent) => {
+  props.onNodeContentClick({
     node: props.node,
     component: getNodeInstance(),
     event
@@ -129,18 +151,9 @@ const emitCurrentNodeClick = (event: MouseEvent) => {
 }
 
 /**
- * 处理节点内容区点击，统一派发 `node-click`。
+ * 切换当前节点的展开状态；阶段 4 起 switcher 不再触发选中链路。
  */
-const handleNodeContentClick = (event: MouseEvent) => {
-  emitCurrentNodeClick(event)
-}
-
-/**
- * 切换当前节点的展开状态，并保持 `node-click` 先于展开事件触发。
- */
-const handleSwitcherClick = (event: MouseEvent) => {
-  emitCurrentNodeClick(event)
-
+const handleSwitcherClick = () => {
   if (props.node.childNodes.length === 0) {
     return
   }
@@ -165,6 +178,8 @@ const itemStyle = computed(createItemStyle)
 const isExpandableNode = computed(resolveExpandableNodeState)
 const isExpandedNode = computed(resolveExpandedNodeState)
 const isLeafNode = computed(resolveLeafNodeState)
+const isSelectableNode = computed(resolveSelectableNodeState)
+const isSelectedNode = computed(resolveSelectedNodeState)
 const semanticClassNames = computed(getResolvedClassNames)
 const semanticStyles = computed(getResolvedStyles)
 </script>
