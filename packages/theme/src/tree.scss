@@ -34,6 +34,7 @@
     min-height: var(--fl-tree-node-content-height);
     padding: 0 8px;
     border-radius: var(--fl-radius-sm);
+    cursor: pointer;
     transition: background-color var(--el-transition-duration);
 
     &.is-selected {

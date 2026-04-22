@@ -247,6 +247,7 @@ describe('FlTree 契约', () => {
     expect(treeScss).toContain('--fl-tree-node-selected-bg-color: var(--el-color-primary-light-9);')
     expect(treeScss).toContain('--fl-tree-node-selected-text-color: var(--el-color-primary);')
     expect(treeScss).toContain('--fl-tree-leaf-dot-color: var(--el-text-color-secondary);')
+    expect(treeScss).toContain('cursor: pointer;')
 
     const wrapper = mount(FlTree, {
       props: {
