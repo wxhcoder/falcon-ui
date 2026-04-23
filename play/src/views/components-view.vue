@@ -207,18 +207,30 @@
         <FlButton @click="expandAllTreeNodes">全部展开</FlButton>
         <FlButton @click="collapseAllTreeNodes">全部折叠</FlButton>
         <FlButton @click="restoreTreeDefaultExpandMode">恢复默认模式</FlButton>
-        <FlButton @click="enableControlledTreeSelection(['delivery-quality-unit-test'])">
-          受控选中 Unit Test
+        <FlButton @click="toggleTreeMultiple">
+          切换 multiple: {{ treeMultiple ? 'on' : 'off' }}
         </FlButton>
-        <FlButton @click="enableControlledTreeSelection(['workspace-layout-grid'])">
-          受控选中 Grid
+        <FlButton
+          @click="
+            enableControlledTreeSelection(['delivery-quality-unit-test', 'workspace-layout-grid'])
+          ">
+          受控选中 Unit Test + Grid
+        </FlButton>
+        <FlButton
+          @click="
+            enableControlledTreeSelection([
+              'design-system-components-tree',
+              'delivery-quality-playground'
+            ])
+          ">
+          受控选中 Tree + Playground
         </FlButton>
         <FlButton @click="clearControlledTreeSelection">受控清空</FlButton>
         <FlButton @click="restoreDefaultTreeSelection">恢复默认选中</FlButton>
         <FlButton @click="treeSelectable = !treeSelectable">
           切换 selectable: {{ treeSelectable ? 'on' : 'off' }}
         </FlButton>
-        <FlButton @click="resetTreeEventRecords">Clear event log</FlButton>
+        <FlButton @click="resetTreeEventRecords">清空事件日志</FlButton>
       </div>
       <div class="demo-row tree-demo-row">
         <FlTree
@@ -226,6 +238,7 @@
           class="tree-demo"
           :data="treeData"
           :selectable="treeSelectable"
+          :multiple="treeMultiple"
           :props="treeNodeProps"
           :default-expand-all="treeDefaultExpandAll"
           :default-expanded-keys="treeDefaultExpandedKeys"
@@ -243,13 +256,13 @@
       <p class="demo-result">Root nodes: {{ treeData.length }}</p>
       <p class="demo-result">Mapped label field: `name`, children field: `nodes`.</p>
       <p class="demo-result">
-        默认展开方式: {{ currentTreeDefaultExpandLabel }}，当前模式:
+        默认展开模式: {{ currentTreeDefaultExpandLabel }}，当前模式:
         {{ treeUseControlledExpand ? '受控展开' : '默认展开' }}
       </p>
       <p class="demo-result">
-        选中模式: {{ treeUseControlledSelect ? '受控选中' : '默认选中' }}，selectable={{
-          treeSelectable
-        }}
+        选中模式: {{ treeUseControlledSelect ? '受控选中' : '默认选中' }}，multiple={{
+          treeMultiple
+        }}，selectable={{ treeSelectable }}
       </p>
       <p class="demo-result">
         当前源展开 keys:
@@ -259,6 +272,7 @@
         当前可见选中 keys:
         {{ currentTreeSelectedKeys.length ? currentTreeSelectedKeys.join(', ') : '(empty)' }}
       </p>
+      <p class="demo-result">普通树多选使用普通点击增删；目录树快捷键多选不在本阶段。</p>
       <p class="demo-result">
         Event counts: click={{ treeNodeClickCount }}, select={{ treeSelectCount }}, expand={{
           treeNodeExpandCount
@@ -709,7 +723,11 @@ const treeUseControlledExpand = ref(false)
 const treeControlledExpandedKeys = ref<TreeKey[]>([])
 const treeObservedExpandedKeys = ref<TreeKey[]>([])
 const treeSelectable = ref(true)
-const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>(['design-system-components-tree'])
+const treeMultiple = ref(true)
+const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>([
+  'design-system-components-tree',
+  'delivery-quality-unit-test'
+])
 const treeUseControlledSelect = ref(false)
 const treeControlledSelectedKeys = ref<TreeKey[]>([])
 const treeObservedSelectedKeys = ref<TreeKey[]>(treeDefaultSelectedKeys.value ?? [])
@@ -742,6 +760,72 @@ const readTreeLabel = (node: TreeData): string => {
   const labelValue = node[labelFieldName]
 
   return labelValue == null ? '(empty)' : String(labelValue)
+}
+
+/**
+ * 读取树节点是否处于可选状态，保持 playground 展示与组件运行时一致。
+ */
+const isTreeNodeSelectable = (node: TreeData) => {
+  const disabledFieldName = treeNodeProps.disabled ?? 'disabled'
+
+  return node.selectable !== false && !node[disabledFieldName]
+}
+
+/**
+ * 构建当前示例数据的 key -> node 索引，供选中结果展示与控制按钮复用。
+ */
+const createTreeNodeLookup = (nodes: TreeData[]): Map<TreeKey, TreeData> => {
+  const keyNodeMap = new Map<TreeKey, TreeData>()
+
+  const visit = (currentNodes: TreeData[]) => {
+    for (const node of currentNodes) {
+      keyNodeMap.set(node.key, node)
+
+      const children = readTreeChildren(node)
+
+      if (children.length > 0) {
+        visit(children)
+      }
+    }
+  }
+
+  visit(nodes)
+
+  return keyNodeMap
+}
+
+/**
+ * 按当前 selectable / multiple 约束归一化树示例中的选中结果。
+ */
+const normalizeTreeSelectedKeys = (selectedKeys: TreeKey[]): TreeKey[] => {
+  if (!treeSelectable.value) {
+    return []
+  }
+
+  const keyNodeMap = createTreeNodeLookup(treeData)
+  const normalizedKeys: TreeKey[] = []
+  const visitedKeys = new Set<TreeKey>()
+
+  for (const key of selectedKeys) {
+    if (visitedKeys.has(key)) {
+      continue
+    }
+
+    const node = keyNodeMap.get(key)
+
+    if (!node || !isTreeNodeSelectable(node)) {
+      continue
+    }
+
+    visitedKeys.add(key)
+    normalizedKeys.push(key)
+
+    if (!treeMultiple.value) {
+      break
+    }
+  }
+
+  return normalizedKeys
 }
 
 /**
@@ -875,16 +959,18 @@ const restoreTreeDefaultExpandMode = () => {
 }
 
 /**
- * 将树示例切换到受控单选模式，并写入指定选中键。
+ * 将树示例切换到受控选中模式，并写入指定选中键。
  */
 const enableControlledTreeSelection = (selectedKeys: TreeKey[]) => {
+  const nextSelectedKeys = normalizeTreeSelectedKeys(selectedKeys)
+
   treeUseControlledSelect.value = true
-  treeControlledSelectedKeys.value = selectedKeys
-  treeObservedSelectedKeys.value = selectedKeys
+  treeControlledSelectedKeys.value = nextSelectedKeys
+  treeObservedSelectedKeys.value = nextSelectedKeys
 }
 
 /**
- * 在受控单选模式下清空当前选中项。
+ * 在受控选中模式下清空当前选中项。
  */
 const clearControlledTreeSelection = () => {
   enableControlledTreeSelection([])
@@ -895,8 +981,17 @@ const clearControlledTreeSelection = () => {
  */
 const restoreDefaultTreeSelection = () => {
   treeUseControlledSelect.value = false
-  treeObservedSelectedKeys.value = treeDefaultSelectedKeys.value ?? []
+  treeObservedSelectedKeys.value = normalizeTreeSelectedKeys(treeDefaultSelectedKeys.value ?? [])
   treeDemoVersion.value += 1
+}
+
+/**
+ * 切换普通树单选 / 多选模式，并同步规整 playground 侧的观察结果。
+ */
+const toggleTreeMultiple = () => {
+  treeMultiple.value = !treeMultiple.value
+  treeControlledSelectedKeys.value = normalizeTreeSelectedKeys(treeControlledSelectedKeys.value)
+  treeObservedSelectedKeys.value = normalizeTreeSelectedKeys(treeObservedSelectedKeys.value)
 }
 
 /**
@@ -914,10 +1009,12 @@ const handleTreeExpandedKeysChange = (expandedKeys: TreeKey[]) => {
  * 同步树示例抛出的源选中键，并在受控模式下回写到示例状态。
  */
 const handleTreeSelectedKeysChange = (selectedKeys: TreeKey[]) => {
-  treeObservedSelectedKeys.value = selectedKeys
+  const nextSelectedKeys = normalizeTreeSelectedKeys(selectedKeys)
+
+  treeObservedSelectedKeys.value = nextSelectedKeys
 
   if (treeUseControlledSelect.value) {
-    treeControlledSelectedKeys.value = selectedKeys
+    treeControlledSelectedKeys.value = nextSelectedKeys
   }
 }
 
@@ -961,7 +1058,10 @@ const handleTreeNodeClick = (
  */
 const handleTreeSelect = (selectedKeys: TreeKey[], event: TreeSelectEvent) => {
   const selectedKeysSummary = selectedKeys.length ? selectedKeys.join(', ') : '(empty)'
-  const summary = `selected=${event.selected}, key=${String(event.key)}, selectedKeys=${selectedKeysSummary}, event=${event.event.type}, node=${formatTreeNodeSummary(event.node)}`
+  const selectedNodeSummary = event.selectedNodes.length
+    ? event.selectedNodes.map((node) => String(node.key)).join(', ')
+    : '(empty)'
+  const summary = `selected=${event.selected}, key=${String(event.key)}, selectedKeys=${selectedKeysSummary}, selectedNodes=${selectedNodeSummary}, event=${event.event.type}, node=${formatTreeNodeSummary(event.node)}`
 
   treeSelectCount.value += 1
   treeLastSelect.value = summary
@@ -1004,13 +1104,13 @@ const currentTreeExpandedKeys = computed(() =>
 )
 
 /**
- * 返回当前树示例可见的单选结果；关闭 selectable 时视图层选中态为空。
+ * 返回当前树示例可见的选中结果；关闭 selectable 时视图层选中态为空。
  */
 const currentTreeSelectedKeys = computed(() =>
   treeSelectable.value
     ? treeUseControlledSelect.value
-      ? treeControlledSelectedKeys.value
-      : treeObservedSelectedKeys.value
+      ? normalizeTreeSelectedKeys(treeControlledSelectedKeys.value)
+      : normalizeTreeSelectedKeys(treeObservedSelectedKeys.value)
     : []
 )
 

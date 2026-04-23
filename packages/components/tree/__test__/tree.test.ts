@@ -468,6 +468,36 @@ describe('FlTree 契约', () => {
     expect(isItemSelected(wrapper, 'Root')).toBe(false)
   })
 
+  it('支持在 `multiple=true` 下通过 `defaultSelectedKeys` 初始化多选状态，并过滤非法与不可选节点', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        multiple: true,
+        defaultSelectedKeys: [
+          'missing-node',
+          'root',
+          'disabled-node',
+          'active-node',
+          'root',
+          'unselectable-node'
+        ]
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-selected')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Disabled Node').attributes('aria-selected')).toBeUndefined()
+    expect(
+      findTreeItemByText(wrapper, 'Unselectable Node').attributes('aria-selected')
+    ).toBeUndefined()
+    expect(isItemSelected(wrapper, 'Root')).toBe(true)
+    expect(isItemSelected(wrapper, 'Active Node')).toBe(true)
+    expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
+  })
+
   it('点击节点内容区时按顺序触发 `node-click`、`update:selectedKeys`、`select`', async () => {
     const eventOrder: string[] = []
     const wrapper = mount(FlTree, {
@@ -500,6 +530,47 @@ describe('FlTree 契约', () => {
     expect(selectEvent.selectedNodes[0]?.childNodes[0]?.key).toBe('leaf')
     expect(selectEvent.event).toBeInstanceOf(MouseEvent)
     expect(isItemSelected(wrapper, 'Root')).toBe(true)
+  })
+
+  it('`multiple=true` 时点击节点内容区仍保持事件顺序，并返回完整多选结果', async () => {
+    const eventOrder: string[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        multiple: true,
+        onNodeClick: () => eventOrder.push('node-click'),
+        'onUpdate:selectedKeys': () => eventOrder.push('update:selectedKeys'),
+        onSelect: () => eventOrder.push('select')
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await getItemContent(wrapper, 'Active Node').trigger('click')
+    await nextTick()
+
+    expect(eventOrder).toEqual([
+      'node-click',
+      'update:selectedKeys',
+      'select',
+      'node-click',
+      'update:selectedKeys',
+      'select'
+    ])
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([[['root']], [['root', 'active-node']]])
+
+    const selectEvents = wrapper.emitted('select')
+
+    expect(selectEvents).toHaveLength(2)
+    expect(selectEvents?.[1]?.[0] as TreeKey[]).toEqual(['root', 'active-node'])
+    const selectEvent = selectEvents?.[1]?.[1] as TreeSelectEvent
+
+    expect(selectEvent.selected).toBe(true)
+    expect(selectEvent.key).toBe('active-node')
+    expect(selectEvent.node.key).toBe('active-node')
+    expect(selectEvent.selectedNodes.map((node) => node.key)).toEqual(['root', 'active-node'])
+    expect(selectEvent.event).toBeInstanceOf(MouseEvent)
   })
 
   it('单选模式下再次点击已选中节点会取消选中', async () => {
@@ -540,6 +611,33 @@ describe('FlTree 契约', () => {
     expect(isItemSelected(wrapper, 'Active Node')).toBe(true)
   })
 
+  it('多选模式下点击未选中节点会追加，点击已选中节点时仅移除当前节点', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        multiple: true
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await getItemContent(wrapper, 'Active Node').trigger('click')
+    await getItemContent(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([
+      [['root']],
+      [['root', 'active-node']],
+      [['active-node']]
+    ])
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-selected')).toBe('true')
+    expect(isItemSelected(wrapper, 'Root')).toBe(false)
+    expect(isItemSelected(wrapper, 'Active Node')).toBe(true)
+    expect((wrapper.emitted('select')?.[2]?.[1] as TreeSelectEvent).selected).toBe(false)
+  })
+
   it('受控 `selectedKeys` 仅通过事件请求外部更新并严格跟随 prop', async () => {
     const wrapper = mount(FlTree, {
       props: {
@@ -565,6 +663,36 @@ describe('FlTree 契约', () => {
     expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('true')
   })
 
+  it('受控 `selectedKeys` 在多选模式下仅请求外部更新，并等待 prop 回写后更新视图', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        multiple: true,
+        selectedKeys: ['root']
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Active Node').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([[['root', 'active-node']]])
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-selected')).toBe('false')
+    expect(isItemSelected(wrapper, 'Active Node')).toBe(false)
+
+    await wrapper.setProps({
+      selectedKeys: ['root', 'active-node']
+    })
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-selected')).toBe('true')
+    expect(isItemSelected(wrapper, 'Root')).toBe(true)
+    expect(isItemSelected(wrapper, 'Active Node')).toBe(true)
+  })
+
   it('disabled 与 selectable=false 节点点击内容区只保留 `node-click` 观察能力', async () => {
     const wrapper = mount(FlTree, {
       props: {
@@ -585,11 +713,33 @@ describe('FlTree 契约', () => {
     expect(isItemSelected(wrapper, 'Unselectable Node')).toBe(false)
   })
 
+  it('多选模式下 disabled 与 selectable=false 节点仍不会触发选中状态变更', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        multiple: true
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Disabled Node').trigger('click')
+    await getItemContent(wrapper, 'Unselectable Node').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('node-click')).toHaveLength(2)
+    expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    expect(isItemSelected(wrapper, 'Disabled Node')).toBe(false)
+    expect(isItemSelected(wrapper, 'Unselectable Node')).toBe(false)
+  })
+
   it('树级 `selectable` 为 false 时不会输出选中态与选中事件', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: createSimpleTreeData(),
         selectable: false,
+        multiple: true,
         defaultSelectedKeys: ['root']
       }
     })
@@ -644,6 +794,7 @@ describe('FlTree 契约', () => {
     const wrapper = mount(FlTree, {
       props: {
         data: createSimpleTreeData(),
+        multiple: true,
         'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
         onNodeExpand: () => eventOrder.push('node-expand'),
         onExpand: () => eventOrder.push('expand'),

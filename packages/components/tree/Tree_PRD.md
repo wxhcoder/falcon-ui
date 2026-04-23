@@ -16,7 +16,7 @@
 - [x] 阶段 2：开发树节点展开 / 收起功能
 - [x] 阶段 3：开发默认展开与受控展开功能
 - [x] 阶段 4：开发树节点单选功能
-- [ ] 阶段 5：开发树节点多选功能
+- [x] 阶段 5：开发树节点多选功能
 - [ ] 阶段 6：开发树复选框渲染功能
 - [ ] 阶段 7：开发树父子联动勾选功能
 - [ ] 阶段 8：开发严格勾选与半选态功能
@@ -140,17 +140,44 @@
 ### 4.3 选择行为
 
 - 默认 `selectable = true`。
-- 支持：
-  - 单选
-  - `multiple = true` 时的多选
-  - `directory = true` 时的目录树交互模式
-- 目录树多选需兼容平台快捷键语义：
-  - Windows 使用 `ctrl`
-  - macOS 使用 `command`
+- 当前阶段已实现普通树单选与 `multiple = true` 的普通树多选；`directory = true` 的目录树快捷键多选仍留在后续阶段。
 - 提供：
   - `defaultSelectedKeys`
   - `selectedKeys`
+- 单选与多选共用同一套选中态合并模型：
+  - 受控模式只读取外部 `selectedKeys`
+  - 非受控模式只在初始化时消费 `defaultSelectedKeys`
+  - 后续数据变化只裁剪非法 key，不重新初始化默认选中结果
+- 选中 key 归一化规则固定为：
+  - 去重
+  - 过滤非法 key
+  - 过滤已不存在节点
+  - 过滤 `disabled` 节点
+  - 过滤 `selectable = false` 节点
+  - 保持剩余 key 的原始顺序
+- 单选运行时语义固定为：
+  - 点击未选中节点：切换为该节点唯一选中
+  - 点击已选中节点：取消选中，`selectedKeys` 变为 `[]`
+- 普通树多选运行时语义固定为：
+  - 点击未选中节点：将当前 key 追加到 `selectedKeys` 末尾
+  - 点击已选中节点：仅移除当前 key，保留其他已选中项
+  - 不引入 `ctrl` / `command` 组合键语义
+- 阶段 4 / 5 统一通过节点内容区触发选中链路；`switcher` 点击只负责展开 / 收起，不再触发 `node-click` / `select`。
 - 节点 `disabled` 或 `selectable = false` 时，不允许进入选中态。
+- 树级 `selectable = false` 时，整棵树不进入选中链路：
+  - 不同步 `defaultSelectedKeys` / `selectedKeys`
+  - 不输出 `aria-selected`
+  - 不渲染选中高亮
+- `select` 事件签名固定为 `select(selectedKeys, event)`；其中：
+  - `event.node` 返回当前交互节点的 `TreeNode`
+  - `event.selectedNodes` 返回当前选中节点列表 `TreeNode[]`
+  - `event.selected` 仅表示当前交互节点本次点击后是选中还是取消选中
+- 若业务侧需要原始数据，统一通过：
+  - `event.node.data`
+  - `event.selectedNodes.map((node) => node.data)`
+- 目录树多选后续需兼容平台快捷键语义：
+  - Windows 使用 `ctrl`
+  - macOS 使用 `command`
 
 ### 4.4 勾选行为
 
@@ -351,6 +378,14 @@ type TreeCheckedKeys =
       checked: TreeKey[]
       halfChecked: TreeKey[]
     }
+
+interface TreeSelectEvent {
+  selected: boolean
+  node: TreeNode
+  selectedNodes: TreeNode[]
+  key: TreeKey
+  event: MouseEvent
+}
 ```
 
 ### 5.2 Props 草案
@@ -422,6 +457,11 @@ type TreeCheckedKeys =
   - `drag-leave`
   - `drag-end`
   - `drop`
+- 阶段 5 当前已落地的 `select` 契约：
+  - `select(selectedKeys: TreeKey[], event: TreeSelectEvent)`
+  - 事件顺序为 `node-click -> update:selectedKeys -> select`
+  - `event.selectedNodes` 始终返回当前完整选中集对应的 `TreeNode[]`
+  - `event.selected` 始终表示当前点击节点在本次交互后的选中结果
 
 ### 5.4 Expose 草案
 
@@ -451,6 +491,8 @@ interface TreeExpose {
   - 展开、选中、勾选、受控状态合并
 - `src/use-tree-expanded-state.ts`
   - 展开状态合并、祖先自动展开、展开收起事件派发
+- `src/use-tree-selected-state.ts`
+  - 单选 / 多选状态合并、选中键归一化、`update:selectedKeys` / `select` 事件派发
 - `src/use-tree-normalize.ts`
   - 树数据标准化、索引建立、字段映射
 - `src/use-tree-flatten.ts`
@@ -578,6 +620,12 @@ interface TreeExpose {
   - `src/tree-node.vue`
 - 已完成阶段 3 状态层文件：
   - `src/use-tree-expanded-state.ts`
+- 已完成阶段 5 状态层文件：
+  - `src/use-tree-selected-state.ts`
+- 已完成阶段 5 选择能力接线：
+  - `src/tree.ts`
+  - `src/tree.vue`
+  - `src/tree-node.vue`
 - 已接入导出链路：
   - `packages/components/tree/index.ts`
   - `packages/components/index.ts`
@@ -800,15 +848,119 @@ interface TreeExpose {
 - 结论：
   - `selectable` / `defaultSelectedKeys` / `selectedKeys` 已接入
   - `update:selectedKeys` / `select` 已接入，事件对象类型统一命名为 `TreeSelectEvent`
+  - `TreeSelectEvent.node` 与 `TreeSelectEvent.selectedNodes` 均返回事件层 `TreeNode`，其中 `selectedNodes` 最终定稿为 `TreeNode[]`，不返回原始 `TreeData[]`
   - 单选支持点击选中、点击其他节点替换、再次点击当前节点取消
   - `disabled` / `selectable = false` 节点不会进入选中态
   - 树级 `selectable = false` 时，不输出选中态与选中事件
   - `aria-selected` 与选中高亮样式已接入
   - switcher 点击已调整为只触发展开 / 收起，不再触发 `node-click` / `select`
+  - 节点内容区 hover 已补充手型光标，保持单选交互提示一致
   - play 示例已补充默认选中、受控选中与 `select` 事件展示
   - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning，本阶段树组件改动未引入新的构建告警
 
-### 14.4 结果判定
+### 14.4 功能归档
+
+- 本阶段已完成的对外能力：
+  - `selectable`
+  - `defaultSelectedKeys`
+  - `selectedKeys`
+  - `update:selectedKeys`
+  - `select(selectedKeys, event: TreeSelectEvent)`
+- 本阶段已固定的运行时契约：
+  - 只实现单选，不实现多选、目录树快捷键多选与 `checkable`
+  - 点击内容区进入单选链路；点击当前已选中节点会取消选中
+  - switcher 点击只处理展开 / 收起，不再参与 `node-click` / `select`
+  - `selectedNodes` 返回 `TreeNode[]`，原始数据统一通过 `.data` 读取
+  - `disabled`、节点级 `selectable = false`、树级 `selectable = false` 均不会进入选中态
+- 本阶段已完成的渲染与无障碍能力：
+  - 可选节点输出 `aria-selected`
+  - 选中态高亮作用于节点内容区
+  - 节点 hover 使用手型光标强化可点击反馈
+- 明确未进入本阶段的能力：
+  - `multiple = true`
+  - `directory = true` 的快捷键多选
+  - `checkable`、父子勾选联动、`checkStrictly`
+  - 键盘选中与焦点管理增强
+
+### 14.5 结果判定
 
 - 当前判定：阶段 4 已完成。
-- 下一阶段状态：阶段 4 已归档；阶段 5 继续阻塞，等待用户确认后进入。
+- 下一阶段状态：阶段 4 已归档；阶段 5 结果见“阶段 5 测试文档”。
+
+## 15. 阶段 5 测试文档
+
+### 15.1 测试范围
+
+阶段 5 只验证以下内容，不进入阶段 6 及以后：
+
+1. `multiple = true` 的普通树多选能力
+2. `defaultSelectedKeys` / `selectedKeys` 在多选模式下的受控与非受控行为
+3. 多选模式下 `update:selectedKeys` / `select` 事件语义与顺序
+4. `disabled` / `selectable = false` / 树级 `selectable = false` 的多选边界
+5. `switcher` 点击与多选链路的职责隔离
+6. Playground 多选示例与事件展示
+
+### 15.2 测试内容
+
+| 编号 | 测试内容             | 关注点                                                               | 预期结果                                                               |
+| ---- | -------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 1    | 默认多选归一化       | `multiple=true + defaultSelectedKeys` 是否保留全部合法可选 key       | 去重、过滤非法 key、过滤 `disabled` / `selectable = false`，并保持顺序 |
+| 2    | 非受控多选追加与取消 | 普通点击未选中节点是否追加；再次点击已选中节点是否只移除当前项       | 未选中节点追加到末尾；已选中节点仅移除自身，不清空其余选中项           |
+| 3    | 受控多选请求更新     | 内部交互是否只发出下一组 `selectedKeys` 请求                         | 外部不回写时视图不变；回写后视图与外部值同步                           |
+| 4    | 多选事件对象         | `select` 事件中的 `selectedKeys`、`event.key`、`event.selectedNodes` | 返回点击后的完整多选结果，顺序稳定                                     |
+| 5    | 多选事件布尔语义     | `event.selected` 是否只表达当前点击节点最终是选中还是取消选中        | 选中时为 `true`，取消时为 `false`                                      |
+| 6    | 多选边界             | 树级 `selectable=false`、节点 `disabled`、节点 `selectable=false`    | 不触发选中状态变更，不输出错误的多选事件                               |
+| 7    | switcher 交互边界    | switcher 点击是否误入多选链路                                        | 仅触发展开 / 收起链路，不触发 `select`                                 |
+| 8    | 单选回归稳定         | `multiple` 未传或为 `false` 时阶段 4 单选语义是否回退                | 单选替换、再次点击取消、事件顺序保持不变                               |
+| 9    | Playground 多选示例  | 默认多选、受控多选、清空 / 切换选中集合与事件日志是否可见            | 示例可直接演示多选追加 / 取消；明确说明目录树快捷键多选不在本阶段      |
+
+### 15.3 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 已执行命令：
+  - `pnpm exec eslint packages/components/tree/src/tree.ts packages/components/tree/src/use-tree-selected-state.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue`
+  - `pnpm exec vitest run packages/components/__test__/install.test.ts packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 执行结果：
+  - `eslint`：通过
+  - 组合安装回归：`33 passed`
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+- 结论：
+  - `multiple` 已进入树公开契约，默认值为 `false`
+  - 普通树多选已接入统一选中态模型，单选与多选共享同一套受控 / 非受控语义
+  - 多选模式下默认选中、点击追加、再次点击移除当前项、受控请求更新均已通过验证
+  - `select` 事件在多选模式下返回完整 `selectedKeys` 与 `selectedNodes`，`event.selected` 仅表示当前点击节点的最终状态
+  - 树级 `selectable = false`、节点 `disabled`、节点 `selectable = false` 在多选模式下仍不会进入选中态
+  - switcher 点击继续只负责展开 / 收起，不参与多选链路
+  - Playground 已补充默认多选、受控多选、清空 / 切换选中集合与事件日志示例，并明确目录树快捷键多选不在本阶段
+  - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning；`play build` 仍存在既有的 chunk size warning，本阶段树组件改动未引入新的构建失败
+
+### 15.4 功能归档
+
+- 本阶段已完成的对外能力：
+  - `multiple`
+  - `defaultSelectedKeys`
+  - `selectedKeys`
+  - `update:selectedKeys`
+  - `select(selectedKeys, event: TreeSelectEvent)`
+- 本阶段已固定的运行时契约：
+  - 普通树默认单选；`multiple = true` 时启用普通树多选
+  - 普通树多选通过内容区普通点击做增删，不引入 `ctrl` / `command` 组合键
+  - 新选中 key 追加到末尾；点击已选中 key 时仅移除当前 key
+  - 受控模式只读外部 `selectedKeys`；非受控模式只初始化一次 `defaultSelectedKeys`
+  - `selectedNodes` 返回 `TreeNode[]`，原始数据统一通过 `.data` 读取
+  - `disabled`、节点级 `selectable = false`、树级 `selectable = false` 均不会进入选中态
+- 明确未进入本阶段的能力：
+  - `directory = true` 的快捷键多选
+  - `checkable`、父子勾选联动、`checkStrictly`
+  - 键盘多选与目录树模式增强
+
+### 15.5 结果判定
+
+- 当前判定：阶段 5 已完成。
+- 下一阶段状态：阶段 5 已归档；阶段 6 继续阻塞，等待用户确认后进入。

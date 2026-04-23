@@ -36,6 +36,10 @@ export const treeProps = {
     type: Boolean,
     default: true
   },
+  multiple: {
+    type: Boolean,
+    default: false
+  },
   props: {
     type: Object as PropType<TreeNodeProps>,
     default: () => ({ ...treeNodePropsDefaults })
