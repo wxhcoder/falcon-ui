@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import FlTree, {
   FlTree as FlTreeFromTreePackage,
+  type TreeCheckEvent,
   type TreeEmits,
   type TreeExpandPayload,
   type TreeKey,
@@ -84,6 +85,24 @@ describe('FlTree 契约', () => {
     getItemContent(wrapper, label).classes().includes('is-selected')
 
   /**
+   * 读取指定树节点上的复选框容器。
+   */
+  const getItemCheckbox = (wrapper: VueWrapper, label: string) =>
+    findTreeItemByText(wrapper, label).get('.fl-tree__item-checkbox')
+
+  /**
+   * 判断指定树节点复选框当前是否处于勾选态。
+   */
+  const isItemChecked = (wrapper: VueWrapper, label: string) =>
+    getItemCheckbox(wrapper, label).find('.el-checkbox').classes().includes('is-checked')
+
+  /**
+   * 判断指定树节点复选框当前是否处于禁用态。
+   */
+  const isItemCheckboxDisabled = (wrapper: VueWrapper, label: string) =>
+    getItemCheckbox(wrapper, label).find('.el-checkbox').classes().includes('is-disabled')
+
+  /**
    * 读取指定树节点上的 switcher 按钮。
    */
   const getSwitcherButton = (wrapper: VueWrapper, label: string) =>
@@ -141,9 +160,19 @@ describe('FlTree 契约', () => {
           disabled: true
         },
         {
+          key: 'checkbox-disabled-node',
+          label: 'Checkbox Disabled Node',
+          disableCheckbox: true
+        },
+        {
           key: 'unselectable-node',
           label: 'Unselectable Node',
           selectable: false
+        },
+        {
+          key: 'legacy-checkable-node',
+          label: 'Legacy Checkable False Node',
+          checkable: false
         },
         {
           key: 'active-node',
@@ -239,6 +268,7 @@ describe('FlTree 契约', () => {
   it('继承 Element Plus 视觉变量契约', async () => {
     const treeScss = readProjectFile('packages/theme/src/tree.scss')
 
+    expect(treeScss).toContain("@use 'element-plus/theme-chalk/src/checkbox.scss';")
     expect(treeScss).toContain("@use 'element-plus/theme-chalk/src/tree.scss';")
     expect(treeScss).toContain('--fl-tree-node-content-height: var(--el-tree-node-content-height);')
     expect(treeScss).toContain('--fl-tree-node-hover-bg-color: var(--el-tree-node-hover-bg-color);')
@@ -247,6 +277,7 @@ describe('FlTree 契约', () => {
     expect(treeScss).toContain('--fl-tree-node-selected-bg-color: var(--el-color-primary-light-9);')
     expect(treeScss).toContain('--fl-tree-node-selected-text-color: var(--el-color-primary);')
     expect(treeScss).toContain('--fl-tree-leaf-dot-color: var(--el-text-color-secondary);')
+    expect(treeScss).toContain('@include bem.e(item-checkbox)')
     expect(treeScss).toContain('cursor: pointer;')
 
     const wrapper = mount(FlTree, {
@@ -302,12 +333,16 @@ describe('FlTree 契约', () => {
 
     expect(treePackageSource).toContain('"./tree": "./tree/index.ts"')
     expect(treeIndexSource).toContain('TreeEmits')
+    expect(treeIndexSource).toContain('TreeCheckArgs')
+    expect(treeIndexSource).toContain('TreeCheckEvent')
     expect(treeIndexSource).toContain('TreeExpandPayload')
     expect(treeIndexSource).toContain('TreeSelectEvent')
     expect(treeIndexSource).toContain('TreeNodeModel')
     expect(treeIndexSource).toContain('TreeNode')
     expect(treeIndexSource).not.toContain('FlTreeEmits')
     expect(componentsIndexSource).toContain('TreeEmits')
+    expect(componentsIndexSource).toContain('TreeCheckArgs')
+    expect(componentsIndexSource).toContain('TreeCheckEvent')
     expect(componentsIndexSource).toContain('TreeExpandPayload')
     expect(componentsIndexSource).toContain('TreeSelectEvent')
     expect(componentsIndexSource).toContain('TreeNodeModel')
@@ -319,6 +354,7 @@ describe('FlTree 契约', () => {
     type TreeTypeSmoke = [
       TreeKey,
       TreeProps,
+      TreeCheckEvent,
       TreeExpandPayload,
       TreeSelectEvent,
       TreeEmits,
@@ -752,6 +788,247 @@ describe('FlTree 契约', () => {
     expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
     expect(wrapper.emitted('select')).toBeUndefined()
     expect(isItemSelected(wrapper, 'Root')).toBe(false)
+  })
+
+  it('`checkable=true` 时渲染复选框并输出 `aria-checked`，关闭时完全不渲染', async () => {
+    const uncheckedWrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData()
+      }
+    })
+
+    await nextTick()
+
+    expect(uncheckedWrapper.find('.fl-tree__item-checkbox').exists()).toBe(false)
+    expect(findTreeItemByText(uncheckedWrapper, 'Root').attributes('aria-checked')).toBeUndefined()
+
+    const checkedWrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        checkable: true,
+        defaultCheckedKeys: ['root']
+      }
+    })
+
+    await nextTick()
+
+    expect(checkedWrapper.findAll('.fl-tree__item-checkbox')).toHaveLength(1)
+    expect(findTreeItemByText(checkedWrapper, 'Root').attributes('aria-checked')).toBe('true')
+    expect(isItemChecked(checkedWrapper, 'Root')).toBe(true)
+  })
+
+  it('通过 `defaultCheckedKeys` / `checkedKeys` 驱动勾选显示，并过滤非法或不存在节点', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        checkable: true,
+        checkStrictly: true,
+        defaultCheckedKeys: [
+          'missing-node',
+          'root',
+          'disabled-node',
+          'checkbox-disabled-node',
+          'root'
+        ]
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-checked')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Disabled Node').attributes('aria-checked')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Checkbox Disabled Node').attributes('aria-checked')).toBe(
+      'true'
+    )
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-checked')).toBe('false')
+    expect(isItemChecked(wrapper, 'Root')).toBe(true)
+    expect(isItemChecked(wrapper, 'Disabled Node')).toBe(true)
+    expect(isItemChecked(wrapper, 'Checkbox Disabled Node')).toBe(true)
+
+    await wrapper.setProps({
+      checkedKeys: ['active-node', 'missing-node', 'active-node']
+    })
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-checked')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-checked')).toBe('true')
+    expect(isItemChecked(wrapper, 'Active Node')).toBe(true)
+    expect(isItemChecked(wrapper, 'Disabled Node')).toBe(false)
+  })
+
+  it('`checkStrictly=true` 时点击复选框按顺序触发 `update:checkedKeys`、`check` 并返回完整勾选结果', async () => {
+    const eventOrder: string[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        checkable: true,
+        checkStrictly: true,
+        'onUpdate:checkedKeys': () => eventOrder.push('update:checkedKeys'),
+        onCheck: () => eventOrder.push('check')
+      }
+    })
+
+    await nextTick()
+    await getItemCheckbox(wrapper, 'Root').trigger('click')
+    await getItemCheckbox(wrapper, 'Active Node').trigger('click')
+    await getItemCheckbox(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(eventOrder).toEqual([
+      'update:checkedKeys',
+      'check',
+      'update:checkedKeys',
+      'check',
+      'update:checkedKeys',
+      'check'
+    ])
+    expect(wrapper.emitted('update:checkedKeys')).toEqual([
+      [['root']],
+      [['root', 'active-node']],
+      [['active-node']]
+    ])
+
+    const checkEvents = wrapper.emitted('check')
+
+    expect(checkEvents).toHaveLength(3)
+    expect(checkEvents?.[1]?.[0] as TreeKey[]).toEqual(['root', 'active-node'])
+    const secondCheckEvent = checkEvents?.[1]?.[1] as TreeCheckEvent
+    const thirdCheckEvent = checkEvents?.[2]?.[1] as TreeCheckEvent
+
+    expect(secondCheckEvent.checked).toBe(true)
+    expect(secondCheckEvent.key).toBe('active-node')
+    expect(secondCheckEvent.node.key).toBe('active-node')
+    expect(secondCheckEvent.checkedNodes.map((node) => node.key)).toEqual(['root', 'active-node'])
+    expect(secondCheckEvent.event).toBeInstanceOf(MouseEvent)
+    expect(thirdCheckEvent.checked).toBe(false)
+    expect(thirdCheckEvent.checkedNodes.map((node) => node.key)).toEqual(['active-node'])
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-checked')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-checked')).toBe('true')
+  })
+
+  it('受控 `checkedKeys` 在严格勾选模式下只请求外部更新，并等待 prop 回写后更新视图', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        checkable: true,
+        checkStrictly: true,
+        checkedKeys: ['root']
+      }
+    })
+
+    await nextTick()
+    await getItemCheckbox(wrapper, 'Active Node').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:checkedKeys')).toEqual([[['root', 'active-node']]])
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-checked')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-checked')).toBe('false')
+    expect(isItemChecked(wrapper, 'Active Node')).toBe(false)
+
+    await wrapper.setProps({
+      checkedKeys: ['root', 'active-node']
+    })
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-checked')).toBe('true')
+    expect(isItemChecked(wrapper, 'Active Node')).toBe(true)
+  })
+
+  it('未开启 `checkStrictly` 时复选框仅渲染当前勾选态，点击不会触发勾选更新', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        checkable: true,
+        defaultCheckedKeys: ['root']
+      }
+    })
+
+    await nextTick()
+    await getItemCheckbox(wrapper, 'Active Node').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:checkedKeys')).toBeUndefined()
+    expect(wrapper.emitted('check')).toBeUndefined()
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-checked')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Active Node').attributes('aria-checked')).toBe('false')
+  })
+
+  it('disabled 与 `disableCheckbox` 复选框会禁用，但保留已勾选视觉并阻止交互', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        checkable: true,
+        checkStrictly: true,
+        checkedKeys: ['disabled-node', 'checkbox-disabled-node']
+      }
+    })
+
+    await nextTick()
+    await getItemCheckbox(wrapper, 'Disabled Node').trigger('click')
+    await getItemCheckbox(wrapper, 'Checkbox Disabled Node').trigger('click')
+    await nextTick()
+
+    expect(isItemCheckboxDisabled(wrapper, 'Disabled Node')).toBe(true)
+    expect(isItemCheckboxDisabled(wrapper, 'Checkbox Disabled Node')).toBe(true)
+    expect(findTreeItemByText(wrapper, 'Disabled Node').attributes('aria-checked')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Checkbox Disabled Node').attributes('aria-checked')).toBe(
+      'true'
+    )
+    expect(wrapper.emitted('update:checkedKeys')).toBeUndefined()
+    expect(wrapper.emitted('check')).toBeUndefined()
+  })
+
+  it('点击复选框不会触发 `node-click`、`select`、`node-expand` 或 `node-collapse`', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        checkable: true,
+        checkStrictly: true
+      }
+    })
+
+    await nextTick()
+    await getItemCheckbox(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('node-click')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    expect(wrapper.emitted('node-expand')).toBeUndefined()
+    expect(wrapper.emitted('node-collapse')).toBeUndefined()
+    expect(wrapper.emitted('update:checkedKeys')).toEqual([[['root']]])
+  })
+
+  it('树级 `selectable=false` 与勾选能力可共存，节点级 `checkable=false` 在本阶段被忽略', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        selectable: false,
+        checkable: true,
+        checkStrictly: true
+      }
+    })
+
+    await nextTick()
+    await getItemCheckbox(wrapper, 'Legacy Checkable False Node').trigger('click')
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBeUndefined()
+    expect(
+      findTreeItemByText(wrapper, 'Legacy Checkable False Node').attributes('aria-selected')
+    ).toBeUndefined()
+    expect(
+      findTreeItemByText(wrapper, 'Legacy Checkable False Node').attributes('aria-checked')
+    ).toBe('true')
+    expect(isItemChecked(wrapper, 'Legacy Checkable False Node')).toBe(true)
+    expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    expect(wrapper.emitted('update:checkedKeys')).toEqual([[['legacy-checkable-node']]])
   })
 
   it('点击节点内容区时触发 `node-click`，且 `node` 不包含 expanded', async () => {

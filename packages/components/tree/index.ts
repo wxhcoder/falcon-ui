@@ -9,6 +9,8 @@ export default FlTree
 export type {
   TreeClassNames,
   TreeClassValue,
+  TreeCheckArgs,
+  TreeCheckEvent,
   TreeData,
   TreeEmits,
   TreeExpandPayload,

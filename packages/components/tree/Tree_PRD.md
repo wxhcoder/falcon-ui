@@ -17,7 +17,7 @@
 - [x] 阶段 3：开发默认展开与受控展开功能
 - [x] 阶段 4：开发树节点单选功能
 - [x] 阶段 5：开发树节点多选功能
-- [ ] 阶段 6：开发树复选框渲染功能
+- [x] 阶段 6：开发树复选框渲染功能
 - [ ] 阶段 7：开发树父子联动勾选功能
 - [ ] 阶段 8：开发严格勾选与半选态功能
 - [ ] 阶段 9：开发禁用节点联动边界功能
@@ -963,4 +963,86 @@ interface TreeExpose {
 ### 15.5 结果判定
 
 - 当前判定：阶段 5 已完成。
-- 下一阶段状态：阶段 5 已归档；阶段 6 继续阻塞，等待用户确认后进入。
+- 下一阶段状态：阶段 5 已归档；阶段 6 结果见“阶段 6 测试文档”。
+
+## 16. 阶段 6 测试文档
+
+### 16.1 测试范围
+
+阶段 6 只验证以下内容，不进入阶段 7 及以后：
+
+1. `checkable = true` 的复选框渲染与 `ElCheckbox` 接线
+2. `defaultCheckedKeys` / `checkedKeys` 的受控与非受控显示
+3. `checkStrictly = true` 下的严格独立勾选与 `update:checkedKeys` / `check` 事件
+4. `checkStrictly !== true` 下的只渲染不交互分支
+5. `disabled` / `disableCheckbox` / 树级 `selectable = false` / 节点级 `checkable = false` 的阶段 6 边界
+6. Playground 复选框示例与事件日志展示
+
+### 16.2 测试内容
+
+| 编号 | 测试内容            | 关注点                                                           | 预期结果                                                               |
+| ---- | ------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 1    | 复选框渲染          | `checkable=true` / `false` 下是否正确渲染 `ElCheckbox`           | 开启时渲染复选框并输出 `aria-checked`；关闭时完全不渲染                |
+| 2    | 默认勾选归一化      | `defaultCheckedKeys` 是否去重、过滤非法 key 与已不存在节点       | 合法 key 保留显示；`disabled` / `disableCheckbox` 节点可保持已勾选视觉 |
+| 3    | 严格独立勾选        | `checkStrictly=true` 时点击是否只增删当前节点                    | 未勾选节点追加到末尾；已勾选节点仅移除自身                             |
+| 4    | 严格勾选事件语义    | `update:checkedKeys -> check` 顺序与 `TreeCheckEvent` 载荷       | 事件顺序稳定；`checkedKeys` / `checkedNodes` 返回完整结果              |
+| 5    | 受控勾选            | 受控 `checkedKeys` 是否只请求外部更新                            | 外部未回写前视图不变；回写后视图与外部值同步                           |
+| 6    | 非严格渲染分支      | `checkStrictly !== true` 时用户点击是否被拦截                    | 复选框可见且显示勾选态，但不会触发 `update:checkedKeys` / `check`      |
+| 7    | 禁用勾选边界        | `disabled` / `disableCheckbox` 是否禁用复选框且阻止交互          | 复选框禁用；若 key 已在 `checkedKeys` 中则保留已勾选视觉               |
+| 8    | 事件链路隔离        | 复选框点击是否误触发 `node-click` / `select` / 展开收起事件      | 只进入勾选链路，不进入选择与展开链路                                   |
+| 9    | 选择与勾选独立      | 树级 `selectable=false` 与节点级 `checkable=false` 的阶段 6 表现 | 内容区不进入选中态；勾选链路仍可工作；节点级 `checkable=false` 被忽略  |
+| 10   | Playground 阶段说明 | 默认示例、严格勾选、边界示例与日志展示是否可见                   | 示例可演示 render-only / strict / boundary，明确父子联动留在下一阶段   |
+
+### 16.3 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+  - `packages/components/__test__/install.test.ts`
+- 执行命令：
+  - `pnpm exec eslint`
+  - `pnpm exec vitest run packages/components/__test__/install.test.ts packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 执行结果：
+  - `eslint`：通过
+  - 组合安装与树组件回归：通过
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+- 结论：
+  - `checkable`、`checkStrictly`、`defaultCheckedKeys`、`checkedKeys` 已进入树公开契约
+  - 树节点复选框固定使用 `ElCheckbox` 渲染，并已接入主题样式导入
+  - `checkStrictly = true` 已实现严格独立勾选；`checkStrictly !== true` 当前仅渲染复选框，不允许用户修改状态
+  - `check` 事件返回完整 `checkedKeys` 与 `checkedNodes`，`event.checked` 仅表示当前点击节点在本次交互后的最终勾选状态
+  - `disabled`、`disableCheckbox` 节点会禁用复选框，但若外部传入勾选 key 仍会保持已勾选视觉
+  - 复选框点击不会误触发 `node-click`、`select`、`node-expand` 或 `node-collapse`
+  - Playground 已补充 render-only / strict / boundary 示例、受控勾选按钮与 `check` 日志展示
+  - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning；`play build` 仍存在既有的 chunk size warning，本阶段树组件改动未引入新的构建失败
+
+### 16.4 功能归档
+
+- 本阶段已完成的对外能力：
+  - `checkable`
+  - `checkStrictly`
+  - `defaultCheckedKeys`
+  - `checkedKeys`
+  - `update:checkedKeys`
+  - `check(checkedKeys, event: TreeCheckEvent)`
+- 本阶段已固定的运行时契约：
+  - `checkable = true` 时渲染 `ElCheckbox`；`checkable = false` 时不渲染复选框，也不输出 `aria-checked`
+  - `checkStrictly = true` 时启用严格独立勾选：勾选未选中节点会追加到末尾；取消已勾选节点仅移除当前 key
+  - `checkStrictly !== true` 时仅渲染复选框和勾选态，不允许用户点击修改状态
+  - 受控模式只读外部 `checkedKeys`；非受控模式只初始化一次 `defaultCheckedKeys`，后续数据变化仅裁剪失效 key
+  - `checkedKeys` 当前仅支持 `TreeKey[]`；不接收 `{ checked, halfChecked }` 对象形态
+  - `disabled`、`disableCheckbox` 节点会禁用复选框，但不会从勾选结果中自动移除
+  - 复选框点击只进入勾选链路；节点内容区仍保持阶段 4 / 5 的选择语义
+- 明确未进入本阶段的能力：
+  - `checkStrictly = false` 下的父子联动勾选
+  - 半选态与 `{ checked, halfChecked }` 对象形态
+  - 目录树模式下的快捷键多选与键盘勾选增强
+
+### 16.5 结果判定
+
+- 当前判定：阶段 6 已完成。
+- 下一阶段状态：阶段 6 已归档；阶段 7 继续阻塞，等待用户确认后进入。

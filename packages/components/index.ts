@@ -67,6 +67,8 @@ export { FlTree } from './tree'
 export type {
   TreeClassNames,
   TreeClassValue,
+  TreeCheckArgs,
+  TreeCheckEvent,
   TreeData,
   TreeEmits,
   TreeExpandPayload,

@@ -5,6 +5,7 @@
     :style="[semanticStyles.item, itemStyle]"
     role="treeitem"
     :aria-expanded="isExpandableNode ? isExpandedNode : undefined"
+    :aria-checked="treeCheckable ? isCheckedNode : undefined"
     :aria-selected="isSelectableNode ? isSelectedNode : undefined"
     :aria-level="node.level">
     <div
@@ -31,6 +32,16 @@
         </button>
       </span>
       <span
+        v-if="treeCheckable"
+        :class="[itemCheckboxClassName, semanticClassNames.itemCheckbox]"
+        :style="semanticStyles.itemCheckbox"
+        @click.stop="handleCheckboxClick">
+        <ElCheckbox
+          :model-value="isCheckedNode"
+          :disabled="isCurrentCheckboxDisabled"
+          aria-label="Select tree node" />
+      </span>
+      <span
         :class="[itemTitleClassName, semanticClassNames.itemTitle]"
         :style="semanticStyles.itemTitle">
         {{ node.label }}
@@ -43,8 +54,13 @@
         :node="childNode"
         :on-node-content-click="onNodeContentClick"
         :is-node-expanded="isNodeExpanded"
+        :is-node-checked="isNodeChecked"
         :is-node-selected="isNodeSelected"
+        :tree-checkable="treeCheckable"
+        :strictly-checkable="strictlyCheckable"
         :tree-selectable="treeSelectable"
+        :is-checkbox-disabled="isCheckboxDisabled"
+        :toggle-node-checked="toggleNodeChecked"
         :toggle-node-expansion="toggleNodeExpansion"
         :resolved-class-names="resolvedClassNames"
         :resolved-styles="resolvedStyles" />
@@ -54,7 +70,7 @@
 
 <script setup lang="ts">
 import { CaretBottom, CaretRight } from '@element-plus/icons-vue'
-import { ElIcon } from 'element-plus'
+import { ElCheckbox, ElIcon } from 'element-plus'
 import { useNamespace } from '@falcon-ui/utils'
 import { computed, getCurrentInstance, type CSSProperties } from 'vue'
 import type {
@@ -80,8 +96,13 @@ interface TreeNodeComponentProps {
     event: MouseEvent
   }) => void
   isNodeExpanded: (nodeKey: TreeKey) => boolean
+  isNodeChecked: (nodeKey: TreeKey) => boolean
   isNodeSelected: (nodeKey: TreeKey) => boolean
+  treeCheckable: boolean
+  strictlyCheckable: boolean
   treeSelectable: boolean
+  isCheckboxDisabled: (node: TreeNodeModel) => boolean
+  toggleNodeChecked: (options: { node: TreeNodeModel; event: MouseEvent }) => void
   toggleNodeExpansion: (options: { node: TreeNodeModel; instance: TreeNodeInstance }) => void
   resolvedClassNames: TreeSemanticRecord<TreeClassValue>
   resolvedStyles: TreeSemanticRecord<CSSProperties>
@@ -93,6 +114,7 @@ const ns = useNamespace('tree')
 const itemClassName = ns.e('item')
 const itemContentClassName = ns.e('item-content')
 const itemIconClassName = ns.e('item-icon')
+const itemCheckboxClassName = ns.e('item-checkbox')
 const switcherButtonClassName = ns.e('switcher-button')
 const switcherDotClassName = ns.e('switcher-dot')
 const switcherIconClassName = ns.e('switcher-icon')
@@ -140,12 +162,36 @@ const resolveSelectableNodeState = () =>
 const resolveSelectedNodeState = () => props.isNodeSelected(props.node.key)
 
 /**
+ * 判断当前节点是否处于勾选态。
+ */
+const resolveCheckedNodeState = () => props.isNodeChecked(props.node.key)
+
+/**
+ * 判断当前节点复选框是否应表现为禁用。
+ */
+const resolveCheckboxDisabledState = () => props.isCheckboxDisabled(props.node)
+
+/**
  * 处理节点内容区点击，统一派发 `node-click` 与单选事件。
  */
 const handleNodeContentClick = (event: MouseEvent) => {
   props.onNodeContentClick({
     node: props.node,
     component: getNodeInstance(),
+    event
+  })
+}
+
+/**
+ * 点击复选框只走勾选链路，不触发展开或选择事件。
+ */
+const handleCheckboxClick = (event: MouseEvent) => {
+  if (!props.strictlyCheckable || props.isCheckboxDisabled(props.node)) {
+    return
+  }
+
+  props.toggleNodeChecked({
+    node: props.node,
     event
   })
 }
@@ -178,6 +224,8 @@ const itemStyle = computed(createItemStyle)
 const isExpandableNode = computed(resolveExpandableNodeState)
 const isExpandedNode = computed(resolveExpandedNodeState)
 const isLeafNode = computed(resolveLeafNodeState)
+const isCheckedNode = computed(resolveCheckedNodeState)
+const isCurrentCheckboxDisabled = computed(resolveCheckboxDisabledState)
 const isSelectableNode = computed(resolveSelectableNodeState)
 const isSelectedNode = computed(resolveSelectedNodeState)
 const semanticClassNames = computed(getResolvedClassNames)

@@ -13,6 +13,8 @@ export interface TreeData {
   children?: TreeData[]
   class?: TreeClassValue
   selectable?: boolean
+  disableCheckbox?: boolean
+  checkable?: boolean
   [key: string]: unknown
 }
 
@@ -30,7 +32,7 @@ export interface TreeNodeProps {
 /**
  * 语义化 DOM 名称在后续阶段继续作为稳定挂点使用。
  */
-export type TreeSemanticDOM = 'root' | 'item' | 'itemIcon' | 'itemTitle'
+export type TreeSemanticDOM = 'root' | 'item' | 'itemIcon' | 'itemCheckbox' | 'itemTitle'
 
 /**
  * 语义化记录同时服务于 `classNames` 与 `styles`。
@@ -66,6 +68,7 @@ export interface TreeNodeModel {
   label: string
   disabled: boolean
   selectable: boolean
+  disableCheckbox: boolean
   isLeaf: boolean
   className: TreeClassValue
   parent: TreeNodeModel | null
@@ -82,6 +85,7 @@ export interface TreeNode {
   label: string
   disabled: boolean
   selectable: boolean
+  disableCheckbox: boolean
   isLeaf: boolean
   parent: TreeNode | null
   childNodes: TreeNode[]

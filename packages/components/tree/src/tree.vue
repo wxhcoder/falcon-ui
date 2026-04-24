@@ -11,8 +11,13 @@
       :node="node"
       :on-node-content-click="handleNodeContentClick"
       :is-node-expanded="isNodeExpanded"
+      :is-node-checked="isNodeChecked"
       :is-node-selected="isNodeSelected"
+      :tree-checkable="isTreeCheckable"
+      :strictly-checkable="isStrictlyCheckable"
       :tree-selectable="isTreeSelectable"
+      :is-checkbox-disabled="isCheckboxDisabled"
+      :toggle-node-checked="toggleCheckedNode"
       :toggle-node-expansion="toggleNodeExpansion"
       :resolved-class-names="resolvedClassNames"
       :resolved-styles="resolvedStyles" />
@@ -34,6 +39,7 @@ import {
   type TreeSemanticRecord
 } from './tree'
 import FlTreeNode from './tree-node.vue'
+import { useTreeCheckedState, type TreeCheckedStateEmit } from './use-tree-checked-state'
 import { useTreeExpandedState, type TreeExpandedStateEmit } from './use-tree-expanded-state'
 import { useTreeSelectedState, type TreeSelectedStateEmit } from './use-tree-selected-state'
 
@@ -98,6 +104,18 @@ const { isNodeSelected, isTreeSelectable, selectNode } = useTreeSelectedState({
   props,
   treeIndex,
   emit: emit as TreeSelectedStateEmit
+})
+
+const {
+  isCheckboxDisabled,
+  isNodeChecked,
+  isStrictlyCheckable,
+  isTreeCheckable,
+  toggleCheckedNode
+} = useTreeCheckedState({
+  props,
+  treeIndex,
+  emit: emit as TreeCheckedStateEmit
 })
 
 /**

@@ -227,6 +227,20 @@
         </FlButton>
         <FlButton @click="clearControlledTreeSelection">受控清空</FlButton>
         <FlButton @click="restoreDefaultTreeSelection">恢复默认选中</FlButton>
+        <FlButton @click="applyRenderOnlyCheckScenario">Check render-only</FlButton>
+        <FlButton @click="applyStrictCheckScenario">Check strict</FlButton>
+        <FlButton @click="applyCheckBoundaryScenario">Check boundary</FlButton>
+        <FlButton
+          @click="
+            enableControlledTreeCheck([
+              'design-system-components-tree',
+              'delivery-quality-playground'
+            ])
+          ">
+          Controlled check: Tree + Playground
+        </FlButton>
+        <FlButton @click="clearControlledTreeCheck">Controlled check clear</FlButton>
+        <FlButton @click="restoreDefaultTreeCheck">Restore default checked</FlButton>
         <FlButton @click="treeSelectable = !treeSelectable">
           切换 selectable: {{ treeSelectable ? 'on' : 'off' }}
         </FlButton>
@@ -239,17 +253,23 @@
           :data="treeData"
           :selectable="treeSelectable"
           :multiple="treeMultiple"
+          :checkable="treeCheckable"
+          :check-strictly="treeCheckStrictly"
           :props="treeNodeProps"
           :default-expand-all="treeDefaultExpandAll"
           :default-expanded-keys="treeDefaultExpandedKeys"
           :default-expand-parent="treeDefaultExpandParent"
           :default-selected-keys="treeDefaultSelectedKeys"
+          :default-checked-keys="treeDefaultCheckedKeys"
           :expanded-keys="treeUseControlledExpand ? treeControlledExpandedKeys : undefined"
           :selected-keys="treeUseControlledSelect ? treeControlledSelectedKeys : undefined"
+          :checked-keys="treeUseControlledCheck ? treeControlledCheckedKeys : undefined"
           @update:expanded-keys="handleTreeExpandedKeysChange"
           @update:selected-keys="handleTreeSelectedKeysChange"
+          @update:checked-keys="handleTreeCheckedKeysChange"
           @node-click="handleTreeNodeClick"
           @select="handleTreeSelect"
+          @check="handleTreeCheck"
           @node-expand="handleTreeNodeExpand"
           @node-collapse="handleTreeNodeCollapse" />
       </div>
@@ -274,12 +294,28 @@
       </p>
       <p class="demo-result">普通树多选使用普通点击增删；目录树快捷键多选不在本阶段。</p>
       <p class="demo-result">
-        Event counts: click={{ treeNodeClickCount }}, select={{ treeSelectCount }}, expand={{
-          treeNodeExpandCount
-        }}, collapse={{ treeNodeCollapseCount }}
+        Check mode:
+        {{ treeCheckable ? (treeUseControlledCheck ? 'controlled' : 'default') : 'off' }}, strict={{
+          treeCheckStrictly
+        }}
+      </p>
+      <p class="demo-result">
+        Current checked keys:
+        {{ currentTreeCheckedKeys.length ? currentTreeCheckedKeys.join(', ') : '(empty)' }}
+      </p>
+      <p class="demo-result">
+        Phase 6 note: `checkStrictly=false` only renders checkboxes; parent-child conduct waits for
+        the next stage.
+      </p>
+      <p class="demo-result">Phase 6 keeps directory-tree shortcut selection out of scope.</p>
+      <p class="demo-result">
+        Event counts: click={{ treeNodeClickCount }}, select={{ treeSelectCount }}, check={{
+          treeCheckCount
+        }}, expand={{ treeNodeExpandCount }}, collapse={{ treeNodeCollapseCount }}
       </p>
       <p class="demo-result">Last node-click: {{ treeLastNodeClick }}</p>
       <p class="demo-result">Last select: {{ treeLastSelect }}</p>
+      <p class="demo-result">Last check: {{ treeLastCheck }}</p>
       <p class="demo-result">Last node-expand: {{ treeLastNodeExpand }}</p>
       <p class="demo-result">Last node-collapse: {{ treeLastNodeCollapse }}</p>
       <ul class="tree-event-list">
@@ -401,6 +437,7 @@ import { Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
 import type {
   TreeData,
+  TreeCheckEvent,
   TreeKey,
   TreeNode,
   TreeNodeInstance,
@@ -554,7 +591,7 @@ interface TreeDefaultExpandConfig {
   sourceExpandedKeys: TreeKey[]
 }
 
-type TreeEventName = 'node-click' | 'select' | 'node-expand' | 'node-collapse'
+type TreeEventName = 'node-click' | 'select' | 'check' | 'node-expand' | 'node-collapse'
 
 interface TreeEventRecord {
   id: number
@@ -695,6 +732,18 @@ const treeData: TreeData[] = [
             key: 'delivery-quality-playground',
             name: 'Playground',
             leaf: true
+          },
+          {
+            key: 'delivery-quality-checkbox-disabled',
+            name: 'Checkbox Disabled',
+            disableCheckbox: true,
+            leaf: true
+          },
+          {
+            key: 'delivery-quality-legacy-checkable',
+            name: 'Legacy checkable=false',
+            checkable: false,
+            leaf: true
           }
         ]
       }
@@ -724,19 +773,27 @@ const treeControlledExpandedKeys = ref<TreeKey[]>([])
 const treeObservedExpandedKeys = ref<TreeKey[]>([])
 const treeSelectable = ref(true)
 const treeMultiple = ref(true)
+const treeCheckable = ref(false)
+const treeCheckStrictly = ref(false)
 const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>([
   'design-system-components-tree',
   'delivery-quality-unit-test'
 ])
+const treeDefaultCheckedKeys = ref<TreeKey[] | undefined>(undefined)
 const treeUseControlledSelect = ref(false)
 const treeControlledSelectedKeys = ref<TreeKey[]>([])
 const treeObservedSelectedKeys = ref<TreeKey[]>(treeDefaultSelectedKeys.value ?? [])
+const treeUseControlledCheck = ref(false)
+const treeControlledCheckedKeys = ref<TreeKey[]>([])
+const treeObservedCheckedKeys = ref<TreeKey[]>(treeDefaultCheckedKeys.value ?? [])
 const treeNodeClickCount = ref(0)
 const treeSelectCount = ref(0)
+const treeCheckCount = ref(0)
 const treeNodeExpandCount = ref(0)
 const treeNodeCollapseCount = ref(0)
 const treeLastNodeClick = ref('(none)')
 const treeLastSelect = ref('(none)')
+const treeLastCheck = ref('(none)')
 const treeLastNodeExpand = ref('(none)')
 const treeLastNodeCollapse = ref('(none)')
 const treeEventSequence = ref(0)
@@ -823,6 +880,29 @@ const normalizeTreeSelectedKeys = (selectedKeys: TreeKey[]): TreeKey[] => {
     if (!treeMultiple.value) {
       break
     }
+  }
+
+  return normalizedKeys
+}
+
+/**
+ * 归一化树示例中的勾选结果：
+ * 1. 去重
+ * 2. 过滤非法或已不存在的 key
+ * 3. 保留 disabled / disableCheckbox 的已勾选显示
+ */
+const normalizeTreeCheckedKeys = (checkedKeys: TreeKey[]): TreeKey[] => {
+  const keyNodeMap = createTreeNodeLookup(treeData)
+  const normalizedKeys: TreeKey[] = []
+  const visitedKeys = new Set<TreeKey>()
+
+  for (const key of checkedKeys) {
+    if (visitedKeys.has(key) || !keyNodeMap.has(key)) {
+      continue
+    }
+
+    visitedKeys.add(key)
+    normalizedKeys.push(key)
   }
 
   return normalizedKeys
@@ -986,6 +1066,74 @@ const restoreDefaultTreeSelection = () => {
 }
 
 /**
+ * 将树示例切换到受控勾选模式，并写入指定勾选键。
+ */
+const enableControlledTreeCheck = (checkedKeys: TreeKey[]) => {
+  const nextCheckedKeys = normalizeTreeCheckedKeys(checkedKeys)
+
+  treeCheckable.value = true
+  treeUseControlledCheck.value = true
+  treeControlledCheckedKeys.value = nextCheckedKeys
+  treeObservedCheckedKeys.value = nextCheckedKeys
+}
+
+/**
+ * 在受控勾选模式下清空当前勾选项。
+ */
+const clearControlledTreeCheck = () => {
+  enableControlledTreeCheck([])
+}
+
+/**
+ * 恢复到默认勾选示例，并通过 remount 重新触发 `defaultCheckedKeys`。
+ */
+const restoreDefaultTreeCheck = () => {
+  treeUseControlledCheck.value = false
+  treeObservedCheckedKeys.value = normalizeTreeCheckedKeys(treeDefaultCheckedKeys.value ?? [])
+  treeDemoVersion.value += 1
+}
+
+/**
+ * 应用阶段 6 的只渲染复选框示例。
+ */
+const applyRenderOnlyCheckScenario = () => {
+  treeCheckable.value = true
+  treeCheckStrictly.value = false
+  treeUseControlledCheck.value = false
+  treeDefaultCheckedKeys.value = ['design-system-components-tree']
+  treeObservedCheckedKeys.value = normalizeTreeCheckedKeys(treeDefaultCheckedKeys.value ?? [])
+  treeDemoVersion.value += 1
+}
+
+/**
+ * 应用阶段 6 的严格独立勾选示例。
+ */
+const applyStrictCheckScenario = () => {
+  treeCheckable.value = true
+  treeCheckStrictly.value = true
+  treeUseControlledCheck.value = false
+  treeDefaultCheckedKeys.value = ['design-system-components-tree', 'delivery-quality-unit-test']
+  treeObservedCheckedKeys.value = normalizeTreeCheckedKeys(treeDefaultCheckedKeys.value ?? [])
+  treeDemoVersion.value += 1
+}
+
+/**
+ * 应用阶段 6 的勾选边界示例。
+ */
+const applyCheckBoundaryScenario = () => {
+  treeCheckable.value = true
+  treeCheckStrictly.value = true
+  treeUseControlledCheck.value = false
+  treeDefaultCheckedKeys.value = [
+    'archive',
+    'delivery-quality-checkbox-disabled',
+    'delivery-quality-legacy-checkable'
+  ]
+  treeObservedCheckedKeys.value = normalizeTreeCheckedKeys(treeDefaultCheckedKeys.value ?? [])
+  treeDemoVersion.value += 1
+}
+
+/**
  * 切换普通树单选 / 多选模式，并同步规整 playground 侧的观察结果。
  */
 const toggleTreeMultiple = () => {
@@ -1019,6 +1167,19 @@ const handleTreeSelectedKeysChange = (selectedKeys: TreeKey[]) => {
 }
 
 /**
+ * 同步树示例抛出的源勾选键，并在受控模式下回写到示例状态。
+ */
+const handleTreeCheckedKeysChange = (checkedKeys: TreeKey[]) => {
+  const nextCheckedKeys = normalizeTreeCheckedKeys(checkedKeys)
+
+  treeObservedCheckedKeys.value = nextCheckedKeys
+
+  if (treeUseControlledCheck.value) {
+    treeControlledCheckedKeys.value = nextCheckedKeys
+  }
+}
+
+/**
  * 返回当前默认展开方式的中文标签，便于在示例说明中展示。
  */
 /**
@@ -1027,10 +1188,12 @@ const handleTreeSelectedKeysChange = (selectedKeys: TreeKey[]) => {
 const resetTreeEventRecords = () => {
   treeNodeClickCount.value = 0
   treeSelectCount.value = 0
+  treeCheckCount.value = 0
   treeNodeExpandCount.value = 0
   treeNodeCollapseCount.value = 0
   treeLastNodeClick.value = '(none)'
   treeLastSelect.value = '(none)'
+  treeLastCheck.value = '(none)'
   treeLastNodeExpand.value = '(none)'
   treeLastNodeCollapse.value = '(none)'
   treeEventSequence.value = 0
@@ -1066,6 +1229,21 @@ const handleTreeSelect = (selectedKeys: TreeKey[], event: TreeSelectEvent) => {
   treeSelectCount.value += 1
   treeLastSelect.value = summary
   appendTreeEventRecord('select', summary)
+}
+
+/**
+ * 演示 `check` 事件，展示最新勾选结果与事件对象。
+ */
+const handleTreeCheck = (checkedKeys: TreeKey[], event: TreeCheckEvent) => {
+  const checkedKeysSummary = checkedKeys.length ? checkedKeys.join(', ') : '(empty)'
+  const checkedNodeSummary = event.checkedNodes.length
+    ? event.checkedNodes.map((node) => String(node.key)).join(', ')
+    : '(empty)'
+  const summary = `checked=${event.checked}, key=${String(event.key)}, checkedKeys=${checkedKeysSummary}, checkedNodes=${checkedNodeSummary}, event=${event.event.type}, node=${formatTreeNodeSummary(event.node)}`
+
+  treeCheckCount.value += 1
+  treeLastCheck.value = summary
+  appendTreeEventRecord('check', summary)
 }
 
 /**
@@ -1111,6 +1289,17 @@ const currentTreeSelectedKeys = computed(() =>
     ? treeUseControlledSelect.value
       ? normalizeTreeSelectedKeys(treeControlledSelectedKeys.value)
       : normalizeTreeSelectedKeys(treeObservedSelectedKeys.value)
+    : []
+)
+
+/**
+ * 返回当前树示例可见的勾选结果；关闭 checkable 时视图层勾选态为空。
+ */
+const currentTreeCheckedKeys = computed(() =>
+  treeCheckable.value
+    ? treeUseControlledCheck.value
+      ? normalizeTreeCheckedKeys(treeControlledCheckedKeys.value)
+      : normalizeTreeCheckedKeys(treeObservedCheckedKeys.value)
     : []
 )
 

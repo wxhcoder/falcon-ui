@@ -1,4 +1,5 @@
-﻿@use './mixins/bem.scss' as bem;
+@use './mixins/bem.scss' as bem;
+@use 'element-plus/theme-chalk/src/checkbox.scss';
 @use 'element-plus/theme-chalk/src/tree.scss';
 
 /**
@@ -55,6 +56,20 @@
     min-width: 16px;
     height: 16px;
     color: var(--fl-tree-node-icon-color);
+  }
+
+  @include bem.e(item-checkbox) {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+
+    .el-checkbox {
+      margin-right: 0;
+    }
+
+    .el-checkbox__label {
+      display: none;
+    }
   }
 
   @include bem.e(switcher-button) {
