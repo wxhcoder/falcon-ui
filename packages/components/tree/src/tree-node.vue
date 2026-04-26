@@ -5,7 +5,7 @@
     :style="[semanticStyles.item, itemStyle]"
     role="treeitem"
     :aria-expanded="isExpandableNode ? isExpandedNode : undefined"
-    :aria-checked="treeCheckable ? isCheckedNode : undefined"
+    :aria-checked="nodeAriaChecked"
     :aria-selected="isSelectableNode ? isSelectedNode : undefined"
     :aria-level="node.level">
     <div
@@ -32,12 +32,13 @@
         </button>
       </span>
       <span
-        v-if="treeCheckable"
+        v-if="shouldShowCheckbox"
         :class="[itemCheckboxClassName, semanticClassNames.itemCheckbox]"
         :style="semanticStyles.itemCheckbox"
         @click.stop="handleCheckboxClick">
         <ElCheckbox
           :model-value="isCheckedNode"
+          :indeterminate="isHalfCheckedNode"
           :disabled="isCurrentCheckboxDisabled"
           aria-label="Select tree node" />
       </span>
@@ -55,11 +56,12 @@
         :on-node-content-click="onNodeContentClick"
         :is-node-expanded="isNodeExpanded"
         :is-node-checked="isNodeChecked"
+        :is-node-half-checked="isNodeHalfChecked"
         :is-node-selected="isNodeSelected"
         :tree-checkable="treeCheckable"
-        :strictly-checkable="strictlyCheckable"
         :tree-selectable="treeSelectable"
         :is-checkbox-disabled="isCheckboxDisabled"
+        :should-render-checkbox="shouldRenderCheckbox"
         :toggle-node-checked="toggleNodeChecked"
         :toggle-node-expansion="toggleNodeExpansion"
         :resolved-class-names="resolvedClassNames"
@@ -97,11 +99,12 @@ interface TreeNodeComponentProps {
   }) => void
   isNodeExpanded: (nodeKey: TreeKey) => boolean
   isNodeChecked: (nodeKey: TreeKey) => boolean
+  isNodeHalfChecked: (nodeKey: TreeKey) => boolean
   isNodeSelected: (nodeKey: TreeKey) => boolean
   treeCheckable: boolean
-  strictlyCheckable: boolean
   treeSelectable: boolean
   isCheckboxDisabled: (node: TreeNodeModel) => boolean
+  shouldRenderCheckbox: (node: TreeNodeModel) => boolean
   toggleNodeChecked: (options: { node: TreeNodeModel; event: MouseEvent }) => void
   toggleNodeExpansion: (options: { node: TreeNodeModel; instance: TreeNodeInstance }) => void
   resolvedClassNames: TreeSemanticRecord<TreeClassValue>
@@ -167,9 +170,35 @@ const resolveSelectedNodeState = () => props.isNodeSelected(props.node.key)
 const resolveCheckedNodeState = () => props.isNodeChecked(props.node.key)
 
 /**
+ * 判断当前节点是否处于 half-checked 状态。
+ */
+const resolveHalfCheckedNodeState = () => props.isNodeHalfChecked(props.node.key)
+
+/**
  * 判断当前节点复选框是否应表现为禁用。
  */
 const resolveCheckboxDisabledState = () => props.isCheckboxDisabled(props.node)
+
+/**
+ * 判断当前节点是否应渲染复选框。
+ */
+const resolveCheckboxVisibleState = () =>
+  props.treeCheckable && props.shouldRenderCheckbox(props.node)
+
+/**
+ * 根据 checked / half-checked 结果生成节点级 `aria-checked`。
+ */
+const resolveAriaCheckedState = () => {
+  if (!resolveCheckboxVisibleState()) {
+    return undefined
+  }
+
+  if (resolveHalfCheckedNodeState()) {
+    return 'mixed'
+  }
+
+  return resolveCheckedNodeState() ? 'true' : 'false'
+}
 
 /**
  * 处理节点内容区点击，统一派发 `node-click` 与单选事件。
@@ -186,7 +215,7 @@ const handleNodeContentClick = (event: MouseEvent) => {
  * 点击复选框只走勾选链路，不触发展开或选择事件。
  */
 const handleCheckboxClick = (event: MouseEvent) => {
-  if (!props.strictlyCheckable || props.isCheckboxDisabled(props.node)) {
+  if (!resolveCheckboxVisibleState() || props.isCheckboxDisabled(props.node)) {
     return
   }
 
@@ -225,9 +254,12 @@ const isExpandableNode = computed(resolveExpandableNodeState)
 const isExpandedNode = computed(resolveExpandedNodeState)
 const isLeafNode = computed(resolveLeafNodeState)
 const isCheckedNode = computed(resolveCheckedNodeState)
+const isHalfCheckedNode = computed(resolveHalfCheckedNodeState)
 const isCurrentCheckboxDisabled = computed(resolveCheckboxDisabledState)
+const shouldShowCheckbox = computed(resolveCheckboxVisibleState)
 const isSelectableNode = computed(resolveSelectableNodeState)
 const isSelectedNode = computed(resolveSelectedNodeState)
+const nodeAriaChecked = computed(resolveAriaCheckedState)
 const semanticClassNames = computed(getResolvedClassNames)
 const semanticStyles = computed(getResolvedStyles)
 </script>

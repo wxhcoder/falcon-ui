@@ -12,11 +12,12 @@
       :on-node-content-click="handleNodeContentClick"
       :is-node-expanded="isNodeExpanded"
       :is-node-checked="isNodeChecked"
+      :is-node-half-checked="isNodeHalfChecked"
       :is-node-selected="isNodeSelected"
       :tree-checkable="isTreeCheckable"
-      :strictly-checkable="isStrictlyCheckable"
       :tree-selectable="isTreeSelectable"
       :is-checkbox-disabled="isCheckboxDisabled"
+      :should-render-checkbox="shouldRenderCheckbox"
       :toggle-node-checked="toggleCheckedNode"
       :toggle-node-expansion="toggleNodeExpansion"
       :resolved-class-names="resolvedClassNames"
@@ -109,8 +110,9 @@ const { isNodeSelected, isTreeSelectable, selectNode } = useTreeSelectedState({
 const {
   isCheckboxDisabled,
   isNodeChecked,
-  isStrictlyCheckable,
+  isNodeHalfChecked,
   isTreeCheckable,
+  shouldRenderCheckbox,
   toggleCheckedNode
 } = useTreeCheckedState({
   props,

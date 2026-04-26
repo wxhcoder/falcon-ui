@@ -1,13 +1,19 @@
 import { computed, ref, shallowRef, watch, type ComputedRef } from 'vue'
 import {
   createTreeEventNode,
-  filterTreeCheckedKeys,
   type TreeCheckEvent,
+  type TreeCheckedKeys,
   type TreeIndex,
   type TreeKey,
   type TreeNodeModel,
   type TreeProps
 } from './tree'
+import {
+  createTreeCheckedKeysValue,
+  normalizeTreeCheckedState,
+  type TreeCheckedState,
+  toggleConductedTreeCheckedState
+} from './use-tree-check-conduct'
 
 interface UseTreeCheckedStateOptions {
   props: TreeProps
@@ -16,8 +22,8 @@ interface UseTreeCheckedStateOptions {
 }
 
 export interface TreeCheckedStateEmit {
-  (event: 'update:checkedKeys', value: TreeKey[]): void
-  (event: 'check', checkedKeys: TreeKey[], checkEvent: TreeCheckEvent): void
+  (event: 'update:checkedKeys', value: TreeCheckedKeys): void
+  (event: 'check', checkedKeys: TreeCheckedKeys, checkEvent: TreeCheckEvent): void
 }
 
 interface ToggleCheckedNodeOptions {
@@ -26,148 +32,200 @@ interface ToggleCheckedNodeOptions {
 }
 
 /**
- * 过滤非法、重复或已不存在的 checked key。
- * 本阶段保留 disabled / disableCheckbox 节点的已勾选显示，不在此处裁剪。
- */
-const normalizeTreeCheckedKeys = (keys: TreeKey[] | undefined, treeIndex: TreeIndex) =>
-  filterTreeCheckedKeys(keys, treeIndex.keyNodeMap)
-
-/**
- * FlTree 阶段 6 的勾选状态层负责：
- * 1. 对齐 checkedKeys 的受控 / 非受控语义
- * 2. 在 checkStrictly=true 时提供独立勾选增删
- * 3. 在数据变更后仅裁剪失效 key，不重置默认值
+ * FlTree 阶段 7-9 的勾选状态层统一负责：
+ * 1. 默认联动模式的父子传导与半选态
+ * 2. strict 模式的 `{ checked, halfChecked }` 对象态
+ * 3. `disabled` / `disableCheckbox` / `checkable=false` 的交互边界
  */
 export const useTreeCheckedState = ({ props, treeIndex, emit }: UseTreeCheckedStateOptions) => {
-  const uncontrolledCheckedKeys = shallowRef<TreeKey[]>([])
+  const uncontrolledCheckedState = shallowRef<TreeCheckedState>({
+    checkedKeys: [],
+    halfCheckedKeys: []
+  })
   const hasInitializedUncontrolledState = ref(false)
 
   /**
-   * 显式传入 checkedKeys 时，组件进入受控勾选模式。
+   * 显式传入 `checkedKeys` 时，组件进入受控勾选模式。
    */
   const isControlled = computed(() => props.checkedKeys !== undefined)
 
   /**
-   * tree 级别开启 checkable 时才渲染勾选能力。
+   * 树级 `checkable` 仅负责复选框的渲染与交互开关。
    */
   const isTreeCheckable = computed(() => props.checkable === true)
 
   /**
-   * 本阶段只有 checkStrictly=true 才允许用户独立切换勾选。
+   * `checkStrictly` 决定当前对外值形态与勾选计算模式。
    */
-  const isStrictlyCheckable = computed(
-    () => props.checkable === true && props.checkStrictly === true
+  const isStrictMode = computed(() => props.checkStrictly === true)
+
+  /**
+   * 受控模式下始终按当前模式归一化外部勾选结果。
+   */
+  const controlledCheckedState = computed(() =>
+    normalizeTreeCheckedState({
+      checkedKeys: props.checkedKeys,
+      treeIndex: treeIndex.value,
+      strict: isStrictMode.value
+    })
   )
 
   /**
-   * 受控模式下直接从外部 prop 归一化当前勾选结果。
+   * 返回当前模式下对外可观察的勾选状态。
    */
-  const controlledCheckedKeys = computed(() =>
-    normalizeTreeCheckedKeys(props.checkedKeys, treeIndex.value)
-  )
+  const getCurrentCheckedState = () =>
+    isControlled.value ? controlledCheckedState.value : uncontrolledCheckedState.value
 
   /**
-   * 返回当前模式下对外可观察的勾选 key 集合。
+   * 统一返回当前 checked 集合。
    */
-  const getCurrentCheckedKeys = () =>
-    isControlled.value ? controlledCheckedKeys.value : uncontrolledCheckedKeys.value
+  const getCurrentCheckedKeys = () => getCurrentCheckedState().checkedKeys
 
   /**
-   * 初始化或裁剪非受控勾选状态。
+   * 统一返回当前 half-checked 集合。
+   */
+  const getCurrentHalfCheckedKeys = () => getCurrentCheckedState().halfCheckedKeys
+
+  /**
+   * 初始化或裁剪非受控勾选状态：
+   * 1. 首次只消费 `defaultCheckedKeys`
+   * 2. 后续数据变更只裁剪失效 key
+   * 3. 模式切换时复用当前可见状态重新归一化
    */
   const syncUncontrolledCheckedState = () => {
     if (!hasInitializedUncontrolledState.value) {
-      uncontrolledCheckedKeys.value = normalizeTreeCheckedKeys(
-        props.defaultCheckedKeys,
-        treeIndex.value
-      )
+      uncontrolledCheckedState.value = normalizeTreeCheckedState({
+        checkedKeys: props.defaultCheckedKeys,
+        treeIndex: treeIndex.value,
+        strict: isStrictMode.value
+      })
       hasInitializedUncontrolledState.value = true
       return
     }
 
-    uncontrolledCheckedKeys.value = normalizeTreeCheckedKeys(
-      uncontrolledCheckedKeys.value,
-      treeIndex.value
-    )
+    uncontrolledCheckedState.value = normalizeTreeCheckedState({
+      checkedKeys: createTreeCheckedKeysValue({
+        strict: isStrictMode.value,
+        checkedKeys: uncontrolledCheckedState.value.checkedKeys,
+        halfCheckedKeys: uncontrolledCheckedState.value.halfCheckedKeys
+      }),
+      treeIndex: treeIndex.value,
+      strict: isStrictMode.value
+    })
   }
 
   /**
-   * 判断指定节点当前是否处于勾选态。
+   * 判断指定节点当前是否处于 checked 状态。
    */
   const isNodeChecked = (nodeKey: TreeKey) => getCurrentCheckedKeys().includes(nodeKey)
 
   /**
-   * disabled 与 disableCheckbox 都应在复选框上表现为禁用。
+   * 判断指定节点当前是否处于 half-checked 状态。
+   */
+  const isNodeHalfChecked = (nodeKey: TreeKey) => getCurrentHalfCheckedKeys().includes(nodeKey)
+
+  /**
+   * 节点级 `checkable=false` 只隐藏自身复选框，不阻断后代勾选。
+   */
+  const shouldRenderCheckbox = (node: TreeNodeModel) => node.checkable
+
+  /**
+   * `disabled` 与 `disableCheckbox` 都会使当前节点复选框不可交互。
+   * 其中 `disableCheckbox` 只影响交互，不阻断父子联动。
    */
   const isCheckboxDisabled = (node: TreeNodeModel) => node.disabled || node.disableCheckbox
 
   /**
-   * 本阶段只有严格独立勾选分支允许切换，且禁用节点不可交互。
+   * 判断当前节点是否允许响应复选框点击。
    */
   const canToggleNode = (node: TreeNodeModel) =>
-    isStrictlyCheckable.value && !isCheckboxDisabled(node)
+    isTreeCheckable.value && shouldRenderCheckbox(node) && !isCheckboxDisabled(node)
 
   /**
-   * 勾选未选中节点时追加到末尾；取消时只移除当前节点。
+   * strict 模式下只增删 `checked`，`halfChecked` 仅由外部回写控制。
    */
-  const createNextCheckedKeys = (nodeKey: TreeKey): TreeKey[] => {
-    const currentCheckedKeys = getCurrentCheckedKeys()
+  const createNextStrictCheckedState = (nodeKey: TreeKey): TreeCheckedState => {
+    const currentCheckedState = getCurrentCheckedState()
+    const nextCheckedKeys = currentCheckedState.checkedKeys.includes(nodeKey)
+      ? currentCheckedState.checkedKeys.filter((key) => key !== nodeKey)
+      : [...currentCheckedState.checkedKeys, nodeKey]
+    const nextCheckedKeySet = new Set<TreeKey>(nextCheckedKeys)
 
-    if (currentCheckedKeys.includes(nodeKey)) {
-      return currentCheckedKeys.filter((key) => key !== nodeKey)
+    return {
+      checkedKeys: nextCheckedKeys,
+      halfCheckedKeys: currentCheckedState.halfCheckedKeys.filter(
+        (key) => key !== nodeKey && !nextCheckedKeySet.has(key)
+      )
     }
-
-    return [...currentCheckedKeys, nodeKey]
   }
 
   /**
-   * 统一抛出勾选变更事件。
+   * 根据当前模式生成下一次勾选结果。
+   */
+  const createNextCheckedState = (node: TreeNodeModel) =>
+    isStrictMode.value
+      ? createNextStrictCheckedState(node.key)
+      : toggleConductedTreeCheckedState({
+          node,
+          checkedKeys: getCurrentCheckedKeys(),
+          treeIndex: treeIndex.value
+        })
+
+  /**
+   * 统一抛出勾选状态变更事件，并补齐 half-checked 信息。
    */
   const emitCheckedStateChange = ({
     node,
     event,
-    nextCheckedKeys
+    nextCheckedState
   }: {
     node: TreeNodeModel
     event: MouseEvent
-    nextCheckedKeys: TreeKey[]
+    nextCheckedState: TreeCheckedState
   }) => {
-    emit('update:checkedKeys', nextCheckedKeys)
-    emit('check', nextCheckedKeys, {
-      checked: nextCheckedKeys.includes(node.key),
+    const nextCheckedKeysValue = createTreeCheckedKeysValue({
+      strict: isStrictMode.value,
+      checkedKeys: nextCheckedState.checkedKeys,
+      halfCheckedKeys: nextCheckedState.halfCheckedKeys
+    })
+
+    emit('update:checkedKeys', nextCheckedKeysValue)
+    emit('check', nextCheckedKeysValue, {
+      checked: nextCheckedState.checkedKeys.includes(node.key),
       node: createTreeEventNode({ node }),
-      checkedNodes: nextCheckedKeys
+      checkedNodes: nextCheckedState.checkedKeys
         .map((key) => treeIndex.value.keyNodeMap.get(key))
         .filter((item): item is TreeNodeModel => item !== undefined)
         .map((checkedNode) => createTreeEventNode({ node: checkedNode })),
+      halfCheckedKeys: nextCheckedState.halfCheckedKeys,
       key: node.key,
       event
     })
   }
 
   /**
-   * 在严格独立勾选分支中切换当前节点的勾选状态。
+   * 切换当前节点勾选状态。
    */
   const toggleCheckedNode = ({ node, event }: ToggleCheckedNodeOptions) => {
     if (!canToggleNode(node)) {
       return
     }
 
-    const nextCheckedKeys = createNextCheckedKeys(node.key)
+    const nextCheckedState = createNextCheckedState(node)
 
     if (!isControlled.value) {
-      uncontrolledCheckedKeys.value = nextCheckedKeys
+      uncontrolledCheckedState.value = nextCheckedState
     }
 
     emitCheckedStateChange({
       node,
       event,
-      nextCheckedKeys
+      nextCheckedState
     })
   }
 
   watch(
-    [treeIndex, isControlled],
+    [treeIndex, isControlled, isStrictMode],
     () => {
       if (!isControlled.value) {
         syncUncontrolledCheckedState()
@@ -178,11 +236,14 @@ export const useTreeCheckedState = ({ props, treeIndex, emit }: UseTreeCheckedSt
 
   return {
     checkedKeys: computed(getCurrentCheckedKeys),
+    halfCheckedKeys: computed(getCurrentHalfCheckedKeys),
     isCheckboxDisabled,
     isControlled,
     isNodeChecked,
-    isStrictlyCheckable,
+    isNodeHalfChecked,
+    isStrictMode,
     isTreeCheckable,
+    shouldRenderCheckbox,
     toggleCheckedNode
   }
 }

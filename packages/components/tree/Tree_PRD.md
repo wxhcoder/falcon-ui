@@ -18,9 +18,9 @@
 - [x] 阶段 4：开发树节点单选功能
 - [x] 阶段 5：开发树节点多选功能
 - [x] 阶段 6：开发树复选框渲染功能
-- [ ] 阶段 7：开发树父子联动勾选功能
-- [ ] 阶段 8：开发严格勾选与半选态功能
-- [ ] 阶段 9：开发禁用节点联动边界功能
+- [x] 阶段 7：开发树父子联动勾选功能
+- [x] 阶段 8：开发严格勾选与半选态功能
+- [x] 阶段 9：开发禁用节点联动边界功能
 - [ ] 阶段 10：开发树节点视觉渲染功能
 - [ ] 阶段 11：开发 Tree 语义化 DOM 样式定制功能
 - [ ] 阶段 12：开发树节点异步加载功能
@@ -1045,4 +1045,77 @@ interface TreeExpose {
 ### 16.5 结果判定
 
 - 当前判定：阶段 6 已完成。
-- 下一阶段状态：阶段 6 已归档；阶段 7 继续阻塞，等待用户确认后进入。
+- 下一阶段状态：阶段 6 已归档；阶段 7-9 结果见“阶段 7-9 测试文档”。
+
+## 17. 阶段 7-9 测试文档
+
+### 17.1 测试范围
+
+阶段 7-9 合并验证以下内容：
+
+1. `checkStrictly = false` 的默认父子联动勾选
+2. half-check 运行时计算、`aria-checked="mixed"` 与 `ElCheckbox.indeterminate`
+3. `checkStrictly = true` 的 `{ checked, halfChecked }` 对象态
+4. `update:checkedKeys` / `check` 在默认模式与 strict 模式下的值形态与事件语义
+5. `disabled` / `disableCheckbox` / 节点级 `checkable = false` 的联动边界
+6. Playground 三组示例与事件日志同步
+
+### 17.2 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+  - `packages/components/__test__/install.test.ts`
+- 执行命令：
+  - `pnpm exec eslint`
+  - `pnpm exec vitest run packages/components/__test__/install.test.ts packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 执行结果：
+  - `eslint`：通过
+  - 组合安装与树组件回归：通过
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+
+### 17.3 结论
+
+- 阶段 7 已完成：
+  - `checkStrictly = false` 现在按默认联动模式工作
+  - 点击父节点会向下传导；点击叶子节点会向上聚合
+  - half-check 已进入运行时状态与事件结果
+- 阶段 8 已完成：
+  - `checkStrictly = true` 现在对齐 Ant Design / rc-tree 对象态契约
+  - `checkedKeys` / `update:checkedKeys` / `check` 首参均支持 `{ checked, halfChecked }`
+  - `defaultCheckedKeys` 仍只初始化 `checked`
+- 阶段 9 已完成：
+  - `disabled` 成为勾选传导硬边界
+  - `disableCheckbox` 仅禁用交互，不阻断联动
+  - 节点级 `checkable = false` 会隐藏自身复选框，不进入勾选结果，但不阻断对子孙的联动
+- 渲染与无障碍同步更新：
+  - half-check 使用 `ElCheckbox` 的 `indeterminate`
+  - 节点级 `aria-checked` 在 half-check 下输出 `mixed`
+- Playground 已补充：
+  - 默认联动勾选示例
+  - strict 对象态示例
+  - 禁用 / 隐藏复选框边界示例
+- 既有构建告警维持不变：
+  - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning
+  - `play build` 仍存在既有的 chunk size warning
+
+### 17.4 功能归档
+
+- 当前固定的勾选契约：
+  - `checkStrictly = false`：`checkedKeys` 使用数组，组件内部负责父子联动与 half-check
+  - `checkStrictly = true`：`checkedKeys` 支持 `{ checked, halfChecked }`
+  - `check` 事件统一返回 `TreeCheckEvent`，并新增 `halfCheckedKeys`
+  - `disabled` / `disableCheckbox` / `checkable = false` 的边界已按阶段 9 收口
+- 明确未进入本阶段的能力：
+  - 目录树快捷键勾选
+  - 键盘勾选增强
+  - 异步加载场景下的专项勾选优化
+
+### 17.5 结果判定
+
+- 当前判定：阶段 7、阶段 8、阶段 9 已完成。
+- 下一阶段状态：阶段 7-9 已归档；阶段 10 继续阻塞，等待用户确认后进入。

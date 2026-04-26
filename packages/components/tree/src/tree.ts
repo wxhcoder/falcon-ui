@@ -13,6 +13,13 @@ import type {
   TreeStyles
 } from './tree-types'
 
+export interface TreeCheckedKeysObject {
+  checked: TreeKey[]
+  halfChecked: TreeKey[]
+}
+
+export type TreeCheckedKeys = TreeKey[] | TreeCheckedKeysObject
+
 /**
  * 首版使用稳定的默认字段映射，保证常规树数据可直接渲染。
  */
@@ -91,7 +98,7 @@ export const treeProps = {
     default: undefined
   },
   checkedKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
+    type: [Array, Object] as PropType<TreeCheckedKeys | undefined>,
     default: undefined
   }
 } as const
@@ -126,6 +133,7 @@ export interface TreeCheckEvent {
   checked: boolean
   node: TreeNode
   checkedNodes: TreeNode[]
+  halfCheckedKeys: TreeKey[]
   key: TreeKey
   event: MouseEvent
 }
@@ -162,7 +170,7 @@ export type TreeSelectArgs = [selectedKeys: TreeKey[], event: TreeSelectEvent]
 /**
  * `check` 事件固定采用双参数出参。
  */
-export type TreeCheckArgs = [checkedKeys: TreeKey[], event: TreeCheckEvent]
+export type TreeCheckArgs = [checkedKeys: TreeCheckedKeys, event: TreeCheckEvent]
 
 /**
  * 判断当前值是否为普通对象。
@@ -175,6 +183,22 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
  */
 export const isTreeKey = (value: unknown): value is TreeKey =>
   typeof value === 'string' || typeof value === 'number'
+
+/**
+ * 判断当前值是否为 `{ checked, halfChecked }` 形态的勾选结果对象。
+ */
+export const isTreeCheckedKeysObject = (value: unknown): value is TreeCheckedKeysObject =>
+  isRecord(value) &&
+  Array.isArray(value.checked) &&
+  value.checked.every((item) => isTreeKey(item)) &&
+  Array.isArray(value.halfChecked) &&
+  value.halfChecked.every((item) => isTreeKey(item))
+
+/**
+ * 判断当前值是否满足树组件允许的勾选结果输入形态。
+ */
+export const isTreeCheckedKeys = (value: unknown): value is TreeCheckedKeys =>
+  (Array.isArray(value) && value.every((item) => isTreeKey(item))) || isTreeCheckedKeysObject(value)
 
 /**
  * 判断当前值是否为树节点组件实例。
@@ -192,6 +216,7 @@ const isTreeNode = (value: unknown): value is TreeNode =>
   typeof value.label === 'string' &&
   typeof value.disabled === 'boolean' &&
   typeof value.disableCheckbox === 'boolean' &&
+  typeof value.checkable === 'boolean' &&
   typeof value.selectable === 'boolean' &&
   typeof value.isLeaf === 'boolean' &&
   Array.isArray(value.childNodes) &&
@@ -242,14 +267,15 @@ const isTreeSelectArgs = (selectedKeys: TreeKey[], event: TreeSelectEvent) =>
 /**
  * 验证 `check` 事件的双元组参数。
  */
-const isTreeCheckArgs = (checkedKeys: TreeKey[], event: TreeCheckEvent) =>
-  Array.isArray(checkedKeys) &&
-  checkedKeys.every((item) => isTreeKey(item)) &&
+const isTreeCheckArgs = (checkedKeys: TreeCheckedKeys, event: TreeCheckEvent) =>
+  isTreeCheckedKeys(checkedKeys) &&
   typeof event.checked === 'boolean' &&
   isTreeKey(event.key) &&
   isTreeNode(event.node) &&
   Array.isArray(event.checkedNodes) &&
   event.checkedNodes.every((item) => isTreeNode(item)) &&
+  Array.isArray(event.halfCheckedKeys) &&
+  event.halfCheckedKeys.every((item) => isTreeKey(item)) &&
   isRecord(event.event) &&
   typeof event.event.type === 'string'
 
@@ -270,8 +296,7 @@ export const treeEmits = {
   /**
    * 请求外部同步当前源勾选键集合。
    */
-  'update:checkedKeys': (value: TreeKey[]) =>
-    Array.isArray(value) && value.every((item) => isTreeKey(item)),
+  'update:checkedKeys': (value: TreeCheckedKeys) => isTreeCheckedKeys(value),
   /**
    * 节点展开状态切换后抛出当前节点的展开结果。
    */
@@ -373,6 +398,7 @@ export const normalizeTreeNode = (
     label: labelValue == null ? '' : String(labelValue),
     disabled: Boolean(disabledValue),
     disableCheckbox: Boolean(rawNode.disableCheckbox),
+    checkable: rawNode.checkable !== false,
     selectable: rawNode.selectable !== false,
     isLeaf: Boolean(isLeafValue),
     className: resolveNodeClassName(classValue),
@@ -629,6 +655,7 @@ export const createTreeEventNode = ({
       label: currentNode.label,
       disabled: currentNode.disabled,
       disableCheckbox: currentNode.disableCheckbox,
+      checkable: currentNode.checkable,
       selectable: currentNode.selectable,
       isLeaf: currentNode.isLeaf,
       parent: null,

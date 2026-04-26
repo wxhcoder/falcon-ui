@@ -227,17 +227,21 @@
         </FlButton>
         <FlButton @click="clearControlledTreeSelection">受控清空</FlButton>
         <FlButton @click="restoreDefaultTreeSelection">恢复默认选中</FlButton>
-        <FlButton @click="applyRenderOnlyCheckScenario">Check render-only</FlButton>
-        <FlButton @click="applyStrictCheckScenario">Check strict</FlButton>
+        <FlButton @click="applyConductCheckScenario">Check conduct</FlButton>
+        <FlButton @click="applyStrictCheckScenario">Check strict object</FlButton>
         <FlButton @click="applyCheckBoundaryScenario">Check boundary</FlButton>
         <FlButton
           @click="
-            enableControlledTreeCheck([
-              'design-system-components-tree',
-              'delivery-quality-playground'
-            ])
+            enableControlledTreeCheck(
+              treeCheckStrictly
+                ? {
+                    checked: ['design-system-components-tree', 'delivery-quality-playground'],
+                    halfChecked: ['design-system-components', 'delivery-quality']
+                  }
+                : ['design-system-components-tree', 'delivery-quality-playground']
+            )
           ">
-          Controlled check: Tree + Playground
+          Controlled check example
         </FlButton>
         <FlButton @click="clearControlledTreeCheck">Controlled check clear</FlButton>
         <FlButton @click="restoreDefaultTreeCheck">Restore default checked</FlButton>
@@ -297,17 +301,21 @@
         Check mode:
         {{ treeCheckable ? (treeUseControlledCheck ? 'controlled' : 'default') : 'off' }}, strict={{
           treeCheckStrictly
-        }}
+        }}, valueShape={{ treeCheckStrictly ? 'object' : 'array' }}
       </p>
       <p class="demo-result">
         Current checked keys:
         {{ currentTreeCheckedKeys.length ? currentTreeCheckedKeys.join(', ') : '(empty)' }}
       </p>
       <p class="demo-result">
-        Phase 6 note: `checkStrictly=false` only renders checkboxes; parent-child conduct waits for
-        the next stage.
+        Current half-checked keys:
+        {{ currentTreeHalfCheckedKeys.length ? currentTreeHalfCheckedKeys.join(', ') : '(empty)' }}
       </p>
-      <p class="demo-result">Phase 6 keeps directory-tree shortcut selection out of scope.</p>
+      <p class="demo-result">
+        Stage 7-9 note: default mode now conducts parent / child checks, strict mode uses `{
+        checked, halfChecked }`, and `disabled` / `checkable=false` boundaries are active.
+      </p>
+      <p class="demo-result">Directory-tree shortcut selection is still out of scope.</p>
       <p class="demo-result">
         Event counts: click={{ treeNodeClickCount }}, select={{ treeSelectCount }}, check={{
           treeCheckCount
@@ -438,6 +446,7 @@ import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
 import type {
   TreeData,
   TreeCheckEvent,
+  TreeCheckedKeys,
   TreeKey,
   TreeNode,
   TreeNodeInstance,
@@ -784,8 +793,9 @@ const treeUseControlledSelect = ref(false)
 const treeControlledSelectedKeys = ref<TreeKey[]>([])
 const treeObservedSelectedKeys = ref<TreeKey[]>(treeDefaultSelectedKeys.value ?? [])
 const treeUseControlledCheck = ref(false)
-const treeControlledCheckedKeys = ref<TreeKey[]>([])
-const treeObservedCheckedKeys = ref<TreeKey[]>(treeDefaultCheckedKeys.value ?? [])
+const treeControlledCheckedKeys = ref<TreeCheckedKeys>([])
+const treeObservedCheckedKeys = ref<TreeCheckedKeys>(treeDefaultCheckedKeys.value ?? [])
+const treeObservedHalfCheckedKeys = ref<TreeKey[]>([])
 const treeNodeClickCount = ref(0)
 const treeSelectCount = ref(0)
 const treeCheckCount = ref(0)
@@ -886,18 +896,29 @@ const normalizeTreeSelectedKeys = (selectedKeys: TreeKey[]): TreeKey[] => {
 }
 
 /**
- * 归一化树示例中的勾选结果：
+ * 判断当前勾选值是否为 `{ checked, halfChecked }` 形态。
+ */
+const isTreeCheckedKeysObject = (
+  checkedKeys: TreeCheckedKeys
+): checkedKeys is Extract<TreeCheckedKeys, { checked: TreeKey[]; halfChecked: TreeKey[] }> =>
+  !Array.isArray(checkedKeys)
+
+/**
+ * 归一化树示例中的单组勾选 key：
  * 1. 去重
  * 2. 过滤非法或已不存在的 key
- * 3. 保留 disabled / disableCheckbox 的已勾选显示
+ * 3. 过滤节点级 `checkable=false`
+ * 4. 保留 disabled / disableCheckbox 的已勾选显示
  */
-const normalizeTreeCheckedKeys = (checkedKeys: TreeKey[]): TreeKey[] => {
+const normalizeTreeCheckedKeyList = (checkedKeys: TreeKey[]): TreeKey[] => {
   const keyNodeMap = createTreeNodeLookup(treeData)
   const normalizedKeys: TreeKey[] = []
   const visitedKeys = new Set<TreeKey>()
 
   for (const key of checkedKeys) {
-    if (visitedKeys.has(key) || !keyNodeMap.has(key)) {
+    const node = keyNodeMap.get(key)
+
+    if (visitedKeys.has(key) || !node || node.checkable === false) {
       continue
     }
 
@@ -907,6 +928,57 @@ const normalizeTreeCheckedKeys = (checkedKeys: TreeKey[]): TreeKey[] => {
 
   return normalizedKeys
 }
+
+/**
+ * 统一归一化 playground 里的勾选值形态。
+ */
+const normalizeTreeCheckedValue = (checkedKeys: TreeCheckedKeys): TreeCheckedKeys => {
+  if (!isTreeCheckedKeysObject(checkedKeys)) {
+    return normalizeTreeCheckedKeyList(checkedKeys)
+  }
+
+  const normalizedCheckedKeys = normalizeTreeCheckedKeyList(checkedKeys.checked)
+  const normalizedCheckedKeySet = new Set<TreeKey>(normalizedCheckedKeys)
+
+  return {
+    checked: normalizedCheckedKeys,
+    halfChecked: normalizeTreeCheckedKeyList(checkedKeys.halfChecked).filter(
+      (key) => !normalizedCheckedKeySet.has(key)
+    )
+  }
+}
+
+/**
+ * 读取勾选值里的 checked 集合。
+ */
+const readTreeCheckedKeys = (checkedKeys: TreeCheckedKeys): TreeKey[] =>
+  isTreeCheckedKeysObject(checkedKeys)
+    ? normalizeTreeCheckedKeyList(checkedKeys.checked)
+    : normalizeTreeCheckedKeyList(checkedKeys)
+
+/**
+ * 读取勾选值里的 half-checked 集合。
+ */
+const readTreeHalfCheckedKeys = (checkedKeys: TreeCheckedKeys): TreeKey[] =>
+  isTreeCheckedKeysObject(checkedKeys)
+    ? (
+        normalizeTreeCheckedValue(checkedKeys) as Extract<
+          TreeCheckedKeys,
+          { checked: TreeKey[]; halfChecked: TreeKey[] }
+        >
+      ).halfChecked
+    : []
+
+/**
+ * 根据当前模式创建一个空的勾选值。
+ */
+const createEmptyTreeCheckedValue = (): TreeCheckedKeys =>
+  treeCheckStrictly.value
+    ? {
+        checked: [],
+        halfChecked: []
+      }
+    : []
 
 /**
  * 格式化事件返回的树节点对象，便于在 play 中直接观察关键字段。
@@ -1068,20 +1140,21 @@ const restoreDefaultTreeSelection = () => {
 /**
  * 将树示例切换到受控勾选模式，并写入指定勾选键。
  */
-const enableControlledTreeCheck = (checkedKeys: TreeKey[]) => {
-  const nextCheckedKeys = normalizeTreeCheckedKeys(checkedKeys)
+const enableControlledTreeCheck = (checkedKeys: TreeCheckedKeys) => {
+  const nextCheckedKeys = normalizeTreeCheckedValue(checkedKeys)
 
   treeCheckable.value = true
   treeUseControlledCheck.value = true
   treeControlledCheckedKeys.value = nextCheckedKeys
   treeObservedCheckedKeys.value = nextCheckedKeys
+  treeObservedHalfCheckedKeys.value = readTreeHalfCheckedKeys(nextCheckedKeys)
 }
 
 /**
  * 在受控勾选模式下清空当前勾选项。
  */
 const clearControlledTreeCheck = () => {
-  enableControlledTreeCheck([])
+  enableControlledTreeCheck(createEmptyTreeCheckedValue())
 }
 
 /**
@@ -1089,47 +1162,60 @@ const clearControlledTreeCheck = () => {
  */
 const restoreDefaultTreeCheck = () => {
   treeUseControlledCheck.value = false
-  treeObservedCheckedKeys.value = normalizeTreeCheckedKeys(treeDefaultCheckedKeys.value ?? [])
+  treeControlledCheckedKeys.value = createEmptyTreeCheckedValue()
+  treeObservedCheckedKeys.value = normalizeTreeCheckedValue(treeDefaultCheckedKeys.value ?? [])
+  treeObservedHalfCheckedKeys.value = treeCheckStrictly.value
+    ? readTreeHalfCheckedKeys(treeObservedCheckedKeys.value)
+    : []
   treeDemoVersion.value += 1
 }
 
 /**
- * 应用阶段 6 的只渲染复选框示例。
+ * 应用阶段 7 的默认联动勾选示例。
  */
-const applyRenderOnlyCheckScenario = () => {
+const applyConductCheckScenario = () => {
   treeCheckable.value = true
   treeCheckStrictly.value = false
   treeUseControlledCheck.value = false
   treeDefaultCheckedKeys.value = ['design-system-components-tree']
-  treeObservedCheckedKeys.value = normalizeTreeCheckedKeys(treeDefaultCheckedKeys.value ?? [])
+  treeControlledCheckedKeys.value = createEmptyTreeCheckedValue()
+  treeObservedCheckedKeys.value = normalizeTreeCheckedValue(treeDefaultCheckedKeys.value ?? [])
+  treeObservedHalfCheckedKeys.value = ['design-system', 'design-system-components']
   treeDemoVersion.value += 1
 }
 
 /**
- * 应用阶段 6 的严格独立勾选示例。
+ * 应用阶段 8 的 strict 对象态示例。
  */
 const applyStrictCheckScenario = () => {
   treeCheckable.value = true
   treeCheckStrictly.value = true
-  treeUseControlledCheck.value = false
-  treeDefaultCheckedKeys.value = ['design-system-components-tree', 'delivery-quality-unit-test']
-  treeObservedCheckedKeys.value = normalizeTreeCheckedKeys(treeDefaultCheckedKeys.value ?? [])
+  treeUseControlledCheck.value = true
+  treeDefaultCheckedKeys.value = undefined
+  treeControlledCheckedKeys.value = normalizeTreeCheckedValue({
+    checked: ['design-system-components-tree', 'delivery-quality-playground'],
+    halfChecked: ['design-system-components', 'delivery-quality']
+  })
+  treeObservedCheckedKeys.value = treeControlledCheckedKeys.value
+  treeObservedHalfCheckedKeys.value = readTreeHalfCheckedKeys(treeControlledCheckedKeys.value)
   treeDemoVersion.value += 1
 }
 
 /**
- * 应用阶段 6 的勾选边界示例。
+ * 应用阶段 9 的禁用 / 隐藏复选框边界示例。
  */
 const applyCheckBoundaryScenario = () => {
   treeCheckable.value = true
-  treeCheckStrictly.value = true
+  treeCheckStrictly.value = false
   treeUseControlledCheck.value = false
   treeDefaultCheckedKeys.value = [
     'archive',
-    'delivery-quality-checkbox-disabled',
+    'delivery-quality',
     'delivery-quality-legacy-checkable'
   ]
-  treeObservedCheckedKeys.value = normalizeTreeCheckedKeys(treeDefaultCheckedKeys.value ?? [])
+  treeControlledCheckedKeys.value = createEmptyTreeCheckedValue()
+  treeObservedCheckedKeys.value = normalizeTreeCheckedValue(treeDefaultCheckedKeys.value ?? [])
+  treeObservedHalfCheckedKeys.value = ['delivery']
   treeDemoVersion.value += 1
 }
 
@@ -1169,8 +1255,8 @@ const handleTreeSelectedKeysChange = (selectedKeys: TreeKey[]) => {
 /**
  * 同步树示例抛出的源勾选键，并在受控模式下回写到示例状态。
  */
-const handleTreeCheckedKeysChange = (checkedKeys: TreeKey[]) => {
-  const nextCheckedKeys = normalizeTreeCheckedKeys(checkedKeys)
+const handleTreeCheckedKeysChange = (checkedKeys: TreeCheckedKeys) => {
+  const nextCheckedKeys = normalizeTreeCheckedValue(checkedKeys)
 
   treeObservedCheckedKeys.value = nextCheckedKeys
 
@@ -1234,13 +1320,21 @@ const handleTreeSelect = (selectedKeys: TreeKey[], event: TreeSelectEvent) => {
 /**
  * 演示 `check` 事件，展示最新勾选结果与事件对象。
  */
-const handleTreeCheck = (checkedKeys: TreeKey[], event: TreeCheckEvent) => {
-  const checkedKeysSummary = checkedKeys.length ? checkedKeys.join(', ') : '(empty)'
+const handleTreeCheck = (checkedKeys: TreeCheckedKeys, event: TreeCheckEvent) => {
+  const normalizedCheckedKeys = readTreeCheckedKeys(checkedKeys)
+  const halfCheckedKeys = isTreeCheckedKeysObject(checkedKeys)
+    ? readTreeHalfCheckedKeys(checkedKeys)
+    : event.halfCheckedKeys
+  const checkedKeysSummary = normalizedCheckedKeys.length
+    ? normalizedCheckedKeys.join(', ')
+    : '(empty)'
+  const halfCheckedKeysSummary = halfCheckedKeys.length ? halfCheckedKeys.join(', ') : '(empty)'
   const checkedNodeSummary = event.checkedNodes.length
     ? event.checkedNodes.map((node) => String(node.key)).join(', ')
     : '(empty)'
-  const summary = `checked=${event.checked}, key=${String(event.key)}, checkedKeys=${checkedKeysSummary}, checkedNodes=${checkedNodeSummary}, event=${event.event.type}, node=${formatTreeNodeSummary(event.node)}`
+  const summary = `checked=${event.checked}, key=${String(event.key)}, checkedKeys=${checkedKeysSummary}, halfCheckedKeys=${halfCheckedKeysSummary}, checkedNodes=${checkedNodeSummary}, event=${event.event.type}, node=${formatTreeNodeSummary(event.node)}`
 
+  treeObservedHalfCheckedKeys.value = event.halfCheckedKeys
   treeCheckCount.value += 1
   treeLastCheck.value = summary
   appendTreeEventRecord('check', summary)
@@ -1298,8 +1392,21 @@ const currentTreeSelectedKeys = computed(() =>
 const currentTreeCheckedKeys = computed(() =>
   treeCheckable.value
     ? treeUseControlledCheck.value
-      ? normalizeTreeCheckedKeys(treeControlledCheckedKeys.value)
-      : normalizeTreeCheckedKeys(treeObservedCheckedKeys.value)
+      ? readTreeCheckedKeys(normalizeTreeCheckedValue(treeControlledCheckedKeys.value))
+      : readTreeCheckedKeys(normalizeTreeCheckedValue(treeObservedCheckedKeys.value))
+    : []
+)
+
+/**
+ * 返回当前树示例可见的 half-checked 结果。
+ */
+const currentTreeHalfCheckedKeys = computed(() =>
+  treeCheckable.value
+    ? treeCheckStrictly.value
+      ? treeUseControlledCheck.value
+        ? readTreeHalfCheckedKeys(normalizeTreeCheckedValue(treeControlledCheckedKeys.value))
+        : readTreeHalfCheckedKeys(normalizeTreeCheckedValue(treeObservedCheckedKeys.value))
+      : treeObservedHalfCheckedKeys.value
     : []
 )
 

@@ -11,6 +11,8 @@ export type {
   TreeClassValue,
   TreeCheckArgs,
   TreeCheckEvent,
+  TreeCheckedKeys,
+  TreeCheckedKeysObject,
   TreeData,
   TreeEmits,
   TreeExpandPayload,
