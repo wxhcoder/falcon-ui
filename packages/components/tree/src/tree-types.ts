@@ -74,6 +74,8 @@ export interface TreeNodeModel {
   checkable: boolean
   isLeaf: boolean
   className: TreeClassValue
+  isLastSibling: boolean
+  lineTrackEnds: boolean[]
   parent: TreeNodeModel | null
   childNodes: TreeNodeModel[]
 }

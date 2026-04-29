@@ -245,6 +245,9 @@
         </FlButton>
         <FlButton @click="clearControlledTreeCheck">Controlled check clear</FlButton>
         <FlButton @click="restoreDefaultTreeCheck">Restore default checked</FlButton>
+        <FlButton @click="treeShowLine = !treeShowLine">
+          Toggle showLine: {{ treeShowLine ? 'on' : 'off' }}
+        </FlButton>
         <FlButton @click="treeSelectable = !treeSelectable">
           切换 selectable: {{ treeSelectable ? 'on' : 'off' }}
         </FlButton>
@@ -255,6 +258,7 @@
           :key="treeDemoVersion"
           class="tree-demo"
           :data="treeData"
+          :show-line="treeShowLine"
           :selectable="treeSelectable"
           :multiple="treeMultiple"
           :checkable="treeCheckable"
@@ -279,6 +283,9 @@
       </div>
       <p class="demo-result">Root nodes: {{ treeData.length }}</p>
       <p class="demo-result">Mapped label field: `name`, children field: `nodes`.</p>
+      <p class="demo-result">
+        Line mode: {{ treeShowLine ? 'on' : 'off' }}. This stage shows hierarchy tracks only.
+      </p>
       <p class="demo-result">
         默认展开模式: {{ currentTreeDefaultExpandLabel }}，当前模式:
         {{ treeUseControlledExpand ? '受控展开' : '默认展开' }}
@@ -639,6 +646,44 @@ const treeData: TreeData[] = [
             key: 'workspace-layout-splitter',
             name: 'Splitter',
             leaf: true
+          },
+          {
+            key: 'workspace-layout-responsive',
+            name: 'Responsive',
+            nodes: [
+              {
+                key: 'workspace-layout-responsive-desktop',
+                name: 'Desktop',
+                nodes: [
+                  {
+                    key: 'workspace-layout-responsive-desktop-12',
+                    name: '12 Columns',
+                    leaf: true
+                  },
+                  {
+                    key: 'workspace-layout-responsive-desktop-sidebar',
+                    name: 'Sidebar Layout',
+                    leaf: true
+                  }
+                ]
+              },
+              {
+                key: 'workspace-layout-responsive-mobile',
+                name: 'Mobile',
+                nodes: [
+                  {
+                    key: 'workspace-layout-responsive-mobile-safe-area',
+                    name: 'Safe Area',
+                    leaf: true
+                  },
+                  {
+                    key: 'workspace-layout-responsive-mobile-bottom-sheet',
+                    name: 'Bottom Sheet',
+                    leaf: true
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -655,6 +700,22 @@ const treeData: TreeData[] = [
             key: 'workspace-feedback-notification',
             name: 'Notification',
             leaf: true
+          },
+          {
+            key: 'workspace-feedback-toast',
+            name: 'Toast',
+            nodes: [
+              {
+                key: 'workspace-feedback-toast-success',
+                name: 'Success',
+                leaf: true
+              },
+              {
+                key: 'workspace-feedback-toast-warning',
+                name: 'Warning',
+                leaf: true
+              }
+            ]
           }
         ]
       }
@@ -677,6 +738,22 @@ const treeData: TreeData[] = [
             key: 'design-system-tokens-typography',
             name: 'Typography',
             leaf: true
+          },
+          {
+            key: 'design-system-tokens-motion',
+            name: 'Motion',
+            nodes: [
+              {
+                key: 'design-system-tokens-motion-duration',
+                name: 'Duration',
+                leaf: true
+              },
+              {
+                key: 'design-system-tokens-motion-easing',
+                name: 'Easing',
+                leaf: true
+              }
+            ]
           }
         ]
       },
@@ -698,6 +775,33 @@ const treeData: TreeData[] = [
             key: 'design-system-components-tree',
             name: 'Tree',
             leaf: true
+          },
+          {
+            key: 'design-system-components-navigation',
+            name: 'Navigation',
+            nodes: [
+              {
+                key: 'design-system-components-navigation-tabs',
+                name: 'Tabs',
+                leaf: true
+              },
+              {
+                key: 'design-system-components-navigation-menu',
+                name: 'Menu',
+                nodes: [
+                  {
+                    key: 'design-system-components-navigation-menu-horizontal',
+                    name: 'Horizontal',
+                    leaf: true
+                  },
+                  {
+                    key: 'design-system-components-navigation-menu-vertical',
+                    name: 'Vertical',
+                    leaf: true
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -753,6 +857,44 @@ const treeData: TreeData[] = [
             name: 'Legacy checkable=false',
             checkable: false,
             leaf: true
+          },
+          {
+            key: 'delivery-quality-coverage',
+            name: 'Coverage',
+            nodes: [
+              {
+                key: 'delivery-quality-coverage-unit',
+                name: 'Unit',
+                nodes: [
+                  {
+                    key: 'delivery-quality-coverage-unit-components',
+                    name: 'Components',
+                    leaf: true
+                  },
+                  {
+                    key: 'delivery-quality-coverage-unit-hooks',
+                    name: 'Hooks',
+                    leaf: true
+                  }
+                ]
+              },
+              {
+                key: 'delivery-quality-coverage-e2e',
+                name: 'E2E',
+                nodes: [
+                  {
+                    key: 'delivery-quality-coverage-e2e-chromium',
+                    name: 'Chromium',
+                    leaf: true
+                  },
+                  {
+                    key: 'delivery-quality-coverage-e2e-webkit',
+                    name: 'WebKit',
+                    leaf: true
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -772,7 +914,7 @@ const treeDefaultExpandOptions: TreeDefaultExpandOption[] = [
   { label: '默认展开关键路径', value: 'focus-path' },
   { label: '默认全部展开', value: 'all' }
 ]
-const treeDefaultExpandMode = ref<TreeDefaultExpandMode>('roots')
+const treeDefaultExpandMode = ref<TreeDefaultExpandMode>('all')
 const treeDemoVersion = ref(0)
 const treeDefaultExpandAll = ref(false)
 const treeDefaultExpandedKeys = ref<TreeKey[] | undefined>(undefined)
@@ -784,6 +926,7 @@ const treeSelectable = ref(true)
 const treeMultiple = ref(true)
 const treeCheckable = ref(false)
 const treeCheckStrictly = ref(false)
+const treeShowLine = ref(true)
 const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>([
   'design-system-components-tree',
   'delivery-quality-unit-test'

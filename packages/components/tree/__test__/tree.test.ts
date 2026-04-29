@@ -147,6 +147,40 @@ describe('FlTree 契约', () => {
   ]
 
   /**
+   * 提供覆盖祖先轨道、末端连线与最后兄弟节点状态的树数据。
+   */
+  const createLineTreeData = () => [
+    {
+      key: 'root-a',
+      label: 'Root A',
+      children: [
+        {
+          key: 'branch-a',
+          label: 'Branch A',
+          children: [
+            {
+              key: 'leaf-a1',
+              label: 'Leaf A1'
+            },
+            {
+              key: 'leaf-a2',
+              label: 'Leaf A2'
+            }
+          ]
+        },
+        {
+          key: 'branch-b',
+          label: 'Branch B'
+        }
+      ]
+    },
+    {
+      key: 'root-b',
+      label: 'Root B'
+    }
+  ]
+
+  /**
    * 提供根节点带叶子节点的最小展开树。
    */
   const createSimpleTreeData = () => [
@@ -347,13 +381,24 @@ describe('FlTree 契约', () => {
 
     expect(treeScss).toContain("@use 'element-plus/theme-chalk/src/checkbox.scss';")
     expect(treeScss).toContain("@use 'element-plus/theme-chalk/src/tree.scss';")
-    expect(treeScss).toContain('--fl-tree-node-content-height: var(--el-tree-node-content-height);')
-    expect(treeScss).toContain('--fl-tree-node-hover-bg-color: var(--el-tree-node-hover-bg-color);')
-    expect(treeScss).toContain('--fl-tree-node-text-color: var(--el-tree-text-color);')
-    expect(treeScss).toContain('--fl-tree-node-icon-color: var(--el-tree-expand-icon-color);')
+    expect(treeScss).toContain(
+      '--fl-tree-node-content-height: var(--el-tree-node-content-height, 26px);'
+    )
+    expect(treeScss).toContain('--fl-tree-node-hover-bg-color: var(')
+    expect(treeScss).toContain('--el-tree-node-hover-bg-color,')
+    expect(treeScss).toContain('var(--el-fill-color-light)')
+    expect(treeScss).toContain(
+      '--fl-tree-node-text-color: var(--el-tree-text-color, var(--el-text-color-regular));'
+    )
+    expect(treeScss).toContain('--fl-tree-node-icon-color: var(')
+    expect(treeScss).toContain('--el-tree-expand-icon-color,')
+    expect(treeScss).toContain('var(--el-text-color-placeholder)')
     expect(treeScss).toContain('--fl-tree-node-selected-bg-color: var(--el-color-primary-light-9);')
     expect(treeScss).toContain('--fl-tree-node-selected-text-color: var(--el-color-primary);')
     expect(treeScss).toContain('--fl-tree-leaf-dot-color: var(--el-text-color-secondary);')
+    expect(treeScss).toContain('--fl-tree-line-color: var(--el-border-color-light, #dcdfe6);')
+    expect(treeScss).toContain('@include bem.e(indent-unit)')
+    expect(treeScss).toContain('@include bem.e(switcher-leaf-line)')
     expect(treeScss).toContain('@include bem.e(item-checkbox)')
     expect(treeScss).toContain('cursor: pointer;')
 
@@ -379,6 +424,31 @@ describe('FlTree 契约', () => {
     expect(content.classes()).toContain('fl-tree__item-content')
     expect(icon.classes()).toContain('fl-tree__item-icon')
     expect(title.classes()).toContain('fl-tree__item-title')
+  })
+
+  it('`showLine` 开启后按层级渲染轨道与叶子末端连线', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createLineTreeData(),
+        showLine: true,
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+
+    const tree = wrapper.get('[role="tree"]')
+    const branchAItem = findTreeItemByText(wrapper, 'Branch A')
+    const leafA1Item = findTreeItemByText(wrapper, 'Leaf A1')
+    const leafA2Item = findTreeItemByText(wrapper, 'Leaf A2')
+
+    expect(tree.classes()).toContain('is-show-line')
+    expect(branchAItem.get('.fl-tree__indent').findAll('.fl-tree__indent-unit')).toHaveLength(1)
+    expect(leafA1Item.get('.fl-tree__indent').findAll('.fl-tree__indent-unit')).toHaveLength(2)
+    expect(leafA1Item.find('.fl-tree__switcher-leaf-line').exists()).toBe(true)
+    expect(leafA1Item.find('.fl-tree__switcher-dot').exists()).toBe(false)
+    expect(leafA1Item.classes()).not.toContain('is-last')
+    expect(leafA2Item.classes()).toContain('is-last')
   })
 
   it('暴露最小可用导出链路与最新 Tree 类型导出', async () => {

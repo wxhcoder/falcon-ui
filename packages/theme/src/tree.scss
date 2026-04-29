@@ -9,19 +9,21 @@
   color: var(--el-tree-text-color);
   font-size: var(--el-font-size-base);
   line-height: 1.5;
-  --fl-tree-node-content-height: var(--el-tree-node-content-height);
-  --fl-tree-node-hover-bg-color: var(--el-tree-node-hover-bg-color);
-  --fl-tree-node-text-color: var(--el-tree-text-color);
-  --fl-tree-node-icon-color: var(--el-tree-expand-icon-color);
+  --fl-tree-node-content-height: var(--el-tree-node-content-height, 26px);
+  --fl-tree-node-hover-bg-color: var(--el-tree-node-hover-bg-color, var(--el-fill-color-light));
+  --fl-tree-node-text-color: var(--el-tree-text-color, var(--el-text-color-regular));
+  --fl-tree-node-icon-color: var(--el-tree-expand-icon-color, var(--el-text-color-placeholder));
   --fl-tree-node-selected-bg-color: var(--el-color-primary-light-9);
   --fl-tree-node-selected-text-color: var(--el-color-primary);
   --fl-tree-leaf-dot-color: var(--el-text-color-secondary);
+  --fl-tree-line-color: var(--el-border-color-light, #dcdfe6);
+  --fl-tree-line-width: 1px;
   --fl-tree-node-indent: 20px;
+  --fl-tree-switcher-size: var(--fl-tree-node-indent);
 
   @include bem.e(item) {
     position: relative;
     box-sizing: border-box;
-    padding-inline-start: calc((var(--fl-tree-level, 1) - 1) * var(--fl-tree-node-indent));
 
     &:hover > #{bem.selector('tree', 'item-content')} {
       background-color: var(--fl-tree-node-hover-bg-color);
@@ -30,8 +32,7 @@
 
   @include bem.e(item-content) {
     display: flex;
-    align-items: center;
-    gap: 4px;
+    align-items: flex-start;
     min-height: var(--fl-tree-node-content-height);
     padding: 0 8px;
     border-radius: var(--fl-radius-sm);
@@ -47,6 +48,23 @@
     }
   }
 
+  @include bem.e(indent) {
+    display: inline-flex;
+    align-self: stretch;
+    flex: 0 0 auto;
+    min-height: var(--fl-tree-node-content-height);
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  @include bem.e(indent-unit) {
+    position: relative;
+    display: inline-block;
+    flex: 0 0 var(--fl-tree-node-indent);
+    width: var(--fl-tree-node-indent);
+    min-height: var(--fl-tree-node-content-height);
+  }
+
   @include bem.e(item-icon) {
     display: inline-flex;
     align-items: center;
@@ -54,7 +72,8 @@
     flex: 0 0 16px;
     width: 16px;
     min-width: 16px;
-    height: 16px;
+    min-height: var(--fl-tree-node-content-height);
+    margin-inline-end: 4px;
     color: var(--fl-tree-node-icon-color);
   }
 
@@ -62,6 +81,8 @@
     display: inline-flex;
     align-items: center;
     flex: 0 0 auto;
+    min-height: var(--fl-tree-node-content-height);
+    margin-inline-end: 4px;
 
     .el-checkbox {
       margin-right: 0;
@@ -69,6 +90,18 @@
 
     .el-checkbox__label {
       display: none;
+    }
+  }
+
+  @include bem.e(switcher) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--fl-tree-node-content-height);
+
+    &--noop {
+      cursor: default;
     }
   }
 
@@ -97,6 +130,14 @@
     background-color: var(--fl-tree-leaf-dot-color);
   }
 
+  @include bem.e(switcher-leaf-line) {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    width: 100%;
+    min-height: var(--fl-tree-node-content-height);
+  }
+
   @include bem.e(item-title) {
     min-width: 0;
     color: var(--fl-tree-node-text-color);
@@ -108,5 +149,57 @@
   @include bem.e(children) {
     display: flex;
     flex-direction: column;
+  }
+
+  &.is-show-line {
+    #{bem.selector('tree', 'item-icon')} {
+      flex: 0 0 var(--fl-tree-switcher-size);
+      width: var(--fl-tree-switcher-size);
+      min-width: var(--fl-tree-switcher-size);
+    }
+
+    #{bem.selector('tree', 'indent-unit')} {
+      &::before {
+        position: absolute;
+        top: 0;
+        inset-inline-end: calc(var(--fl-tree-node-indent) / 2);
+        bottom: 0;
+        margin-inline-end: calc(var(--fl-tree-line-width) * -0.5);
+        border-inline-end: var(--fl-tree-line-width) solid var(--fl-tree-line-color);
+        content: '';
+      }
+
+      &.is-end::before {
+        display: none;
+      }
+    }
+
+    #{bem.selector('tree', 'switcher-leaf-line')} {
+      width: var(--fl-tree-switcher-size);
+
+      &::before {
+        position: absolute;
+        top: 0;
+        inset-inline-end: calc(50% - (var(--fl-tree-line-width) / 2));
+        height: var(--fl-tree-node-content-height);
+        border-inline-end: var(--fl-tree-line-width) solid var(--fl-tree-line-color);
+        content: '';
+      }
+
+      &::after {
+        position: absolute;
+        inset-inline-start: 50%;
+        top: calc(var(--fl-tree-node-content-height) / 2);
+        width: 50%;
+        border-bottom: var(--fl-tree-line-width) solid var(--fl-tree-line-color);
+        transform: translateY(-50%);
+        content: '';
+      }
+    }
+
+    #{bem.selector('tree', 'item')}.is-leaf.is-last
+      #{bem.selector('tree', 'switcher-leaf-line')}::before {
+      height: calc(var(--fl-tree-node-content-height) / 2);
+    }
   }
 }

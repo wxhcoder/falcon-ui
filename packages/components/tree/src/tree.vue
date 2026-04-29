@@ -2,7 +2,7 @@
   <!-- 根节点在阶段 4 起同时接入展开与单选状态层，并把渲染能力下发给递归节点。 -->
   <div
     v-bind="attrs"
-    :class="[rootClassName, resolvedClassNames.root]"
+    :class="[rootClassName, resolvedClassNames.root, ns.is('show-line', props.showLine)]"
     :style="resolvedStyles.root"
     role="tree">
     <FlTreeNode
@@ -16,6 +16,7 @@
       :is-node-selected="isNodeSelected"
       :tree-checkable="isTreeCheckable"
       :tree-selectable="isTreeSelectable"
+      :show-line="props.showLine"
       :is-checkbox-disabled="isCheckboxDisabled"
       :should-render-checkbox="shouldRenderCheckbox"
       :toggle-node-checked="toggleCheckedNode"

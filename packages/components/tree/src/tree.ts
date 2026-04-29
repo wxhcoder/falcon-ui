@@ -39,6 +39,10 @@ export const treeProps = {
     type: Array as PropType<TreeData[]>,
     default: () => []
   },
+  showLine: {
+    type: Boolean,
+    default: false
+  },
   selectable: {
     type: Boolean,
     default: true
@@ -376,7 +380,9 @@ export const normalizeTreeNode = (
   rawNode: TreeData,
   level: number,
   propsConfig?: TreeNodeProps,
-  parent: TreeNodeModel | null = null
+  parent: TreeNodeModel | null = null,
+  isLastSibling = true,
+  lineTrackEnds: boolean[] = []
 ): TreeNodeModel => {
   const mappedProps = resolveTreeNodePropsConfig(propsConfig)
   const childrenValue = readTreeField(rawNode, mappedProps.children)
@@ -402,12 +408,21 @@ export const normalizeTreeNode = (
     selectable: rawNode.selectable !== false,
     isLeaf: Boolean(isLeafValue),
     className: resolveNodeClassName(classValue),
+    isLastSibling,
+    lineTrackEnds,
     parent,
     childNodes: []
   }
 
-  treeNode.childNodes = childNodes.map((childNode) =>
-    normalizeTreeNode(childNode, level + 1, mappedProps, treeNode)
+  treeNode.childNodes = childNodes.map((childNode, index) =>
+    normalizeTreeNode(
+      childNode,
+      level + 1,
+      mappedProps,
+      treeNode,
+      index === childNodes.length - 1,
+      [...lineTrackEnds, isLastSibling]
+    )
   )
 
   return treeNode
@@ -421,7 +436,9 @@ export const buildTreeIndex = (data: TreeData[], propsConfig?: TreeNodeProps): T
   const parentKeyMap = new Map<TreeKey, TreeKey | null>()
   const childrenKeyMap = new Map<TreeKey, TreeKey[]>()
   const visibleNodeKeys: TreeKey[] = []
-  const normalizedNodes = data.map((node) => normalizeTreeNode(node, 1, propsConfig))
+  const normalizedNodes = data.map((node, index) =>
+    normalizeTreeNode(node, 1, propsConfig, null, index === data.length - 1)
+  )
 
   /**
    * 递归遍历标准化节点，并同步填充索引表。

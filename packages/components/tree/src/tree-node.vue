@@ -1,7 +1,14 @@
 <template>
-  <!-- 递归节点消费主入口下发的展开/选中状态与事件派发能力，不再自行维护树状态。 -->
+  <!-- 递归节点消费主入口下发的树状态与交互能力，连线模式仅补充渲染结构，不改动事件链路。 -->
   <div
-    :class="[itemClassName, semanticClassNames.item, node.className]"
+    :class="[
+      itemClassName,
+      semanticClassNames.item,
+      node.className,
+      ns.is('line-mode', showLine),
+      ns.is('leaf', isLeafNode),
+      ns.is('last', isLastSiblingNode)
+    ]"
     :style="[semanticStyles.item, itemStyle]"
     role="treeitem"
     :aria-expanded="isExpandableNode ? isExpandedNode : undefined"
@@ -12,24 +19,38 @@
       :class="[
         itemContentClassName,
         ns.is('selected', isSelectedNode),
-        ns.is('disabled', node.disabled)
+        ns.is('disabled', node.disabled),
+        ns.is('line-mode', showLine)
       ]"
       @click="handleNodeContentClick">
+      <span v-if="lineTrackEnds.length > 0" :class="indentClassName" aria-hidden="true">
+        <span
+          v-for="(isTrackEnd, index) in lineTrackEnds"
+          :key="`${String(node.key)}-${index}`"
+          :class="[indentUnitClassName, ns.is('end', isTrackEnd)]" />
+      </span>
       <span
-        :class="[itemIconClassName, semanticClassNames.itemIcon]"
+        :class="[itemIconClassName, semanticClassNames.itemIcon, ns.is('leaf', isLeafNode)]"
         :style="semanticStyles.itemIcon">
-        <span v-if="isLeafNode" :class="switcherDotClassName" aria-hidden="true" />
-        <button
-          v-else
-          type="button"
-          :class="switcherButtonClassName"
-          :aria-label="isExpandedNode ? '收起节点' : '展开节点'"
-          @click.stop="handleSwitcherClick">
-          <ElIcon :class="switcherIconClassName" aria-hidden="true">
-            <CaretBottom v-if="isExpandedNode" />
-            <CaretRight v-else />
-          </ElIcon>
-        </button>
+        <span
+          v-if="isLeafNode && showLine"
+          :class="[switcherClassName, switcherNoopClassName]"
+          aria-hidden="true">
+          <span :class="switcherLeafLineClassName" />
+        </span>
+        <span v-else-if="isLeafNode" :class="switcherDotClassName" aria-hidden="true" />
+        <span v-else :class="switcherClassName">
+          <button
+            type="button"
+            :class="switcherButtonClassName"
+            :aria-label="isExpandedNode ? '收起节点' : '展开节点'"
+            @click.stop="handleSwitcherClick">
+            <ElIcon :class="switcherIconClassName" aria-hidden="true">
+              <CaretBottom v-if="isExpandedNode" />
+              <CaretRight v-else />
+            </ElIcon>
+          </button>
+        </span>
       </span>
       <span
         v-if="shouldShowCheckbox"
@@ -60,6 +81,7 @@
         :is-node-selected="isNodeSelected"
         :tree-checkable="treeCheckable"
         :tree-selectable="treeSelectable"
+        :show-line="showLine"
         :is-checkbox-disabled="isCheckboxDisabled"
         :should-render-checkbox="shouldRenderCheckbox"
         :toggle-node-checked="toggleNodeChecked"
@@ -88,7 +110,7 @@ defineOptions({
 })
 
 /**
- * 内部节点组件只接收标准化节点和主入口下发的展开状态能力。
+ * 内部节点组件只接收标准化节点和主入口下发的树状态能力。
  */
 interface TreeNodeComponentProps {
   node: TreeNodeModel
@@ -103,6 +125,7 @@ interface TreeNodeComponentProps {
   isNodeSelected: (nodeKey: TreeKey) => boolean
   treeCheckable: boolean
   treeSelectable: boolean
+  showLine: boolean
   isCheckboxDisabled: (node: TreeNodeModel) => boolean
   shouldRenderCheckbox: (node: TreeNodeModel) => boolean
   toggleNodeChecked: (options: { node: TreeNodeModel; event: MouseEvent }) => void
@@ -116,11 +139,16 @@ const currentInstance = getCurrentInstance()
 const ns = useNamespace('tree')
 const itemClassName = ns.e('item')
 const itemContentClassName = ns.e('item-content')
+const indentClassName = ns.e('indent')
+const indentUnitClassName = ns.e('indent-unit')
 const itemIconClassName = ns.e('item-icon')
 const itemCheckboxClassName = ns.e('item-checkbox')
+const switcherClassName = ns.e('switcher')
+const switcherNoopClassName = ns.em('switcher', 'noop')
 const switcherButtonClassName = ns.e('switcher-button')
 const switcherDotClassName = ns.e('switcher-dot')
 const switcherIconClassName = ns.e('switcher-icon')
+const switcherLeafLineClassName = ns.e('switcher-leaf-line')
 const itemTitleClassName = ns.e('item-title')
 const childrenClassName = ns.e('children')
 
@@ -130,7 +158,7 @@ const childrenClassName = ns.e('children')
 const getNodeInstance = (): TreeNodeInstance => currentInstance?.proxy ?? null
 
 /**
- * 生成节点缩进所需的层级样式变量。
+ * 生成节点基础样式变量，保留层级信息供样式调试与后续扩展使用。
  */
 const createItemStyle = () =>
   ({
@@ -152,6 +180,16 @@ const resolveExpandedNodeState = () =>
  * 判断当前节点是否按叶子节点视觉渲染。
  */
 const resolveLeafNodeState = () => props.node.isLeaf || props.node.childNodes.length === 0
+
+/**
+ * 返回当前节点祖先轨道的终止状态列表，用于逐层渲染连线轨道。
+ */
+const resolveLineTrackEnds = () => props.node.lineTrackEnds
+
+/**
+ * 判断当前节点是否为所在层级的最后一个兄弟节点。
+ */
+const resolveLastSiblingNodeState = () => props.node.isLastSibling
 
 /**
  * 判断当前节点是否允许输出选中态语义。
@@ -201,7 +239,7 @@ const resolveAriaCheckedState = () => {
 }
 
 /**
- * 处理节点内容区点击，统一派发 `node-click` 与单选事件。
+ * 处理节点内容区点击，统一派发 `node-click` 与选择事件。
  */
 const handleNodeContentClick = (event: MouseEvent) => {
   props.onNodeContentClick({
@@ -226,7 +264,7 @@ const handleCheckboxClick = (event: MouseEvent) => {
 }
 
 /**
- * 切换当前节点的展开状态；阶段 4 起 switcher 不再触发选中链路。
+ * 切换当前节点的展开状态；阶段 4 起 switcher 不再触发选择链路。
  */
 const handleSwitcherClick = () => {
   if (props.node.childNodes.length === 0) {
@@ -253,6 +291,8 @@ const itemStyle = computed(createItemStyle)
 const isExpandableNode = computed(resolveExpandableNodeState)
 const isExpandedNode = computed(resolveExpandedNodeState)
 const isLeafNode = computed(resolveLeafNodeState)
+const lineTrackEnds = computed(resolveLineTrackEnds)
+const isLastSiblingNode = computed(resolveLastSiblingNodeState)
 const isCheckedNode = computed(resolveCheckedNodeState)
 const isHalfCheckedNode = computed(resolveHalfCheckedNodeState)
 const isCurrentCheckboxDisabled = computed(resolveCheckboxDisabledState)
