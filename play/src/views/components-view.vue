@@ -3,9 +3,54 @@
     <h2 class="page-title">Components</h2>
     <p class="page-desc">
       Element Plus passthrough wrappers plus code display components: FlButton, FlInput,
-      FlDatePicker, FlQrCode, FlBarcode, FlSelect, FlInputSearch, FlInputNumber, FlTable and
-      FlDialog.
+      FlDatePicker, FlQrCode, FlBarcode, FlSelect, FlInputSearch, FlInputNumber, FlTable, FlDialog
+      and shared icon exports.
     </p>
+    <article class="card demo-card">
+      <h3>Icons</h3>
+      <div class="demo-row">
+        <div class="icon-demo-grid">
+          <div class="icon-demo-card">
+            <span class="icon-demo-label">Direct component</span>
+            <PlusSquareOutlined
+              class="icon-demo-plain"
+              :style="{
+                width: `${iconPreviewSize}px`,
+                height: `${iconPreviewSize}px`,
+                color: iconPreviewColor
+              }" />
+          </div>
+          <div class="icon-demo-card">
+            <span class="icon-demo-label">Wrapped with ElIcon</span>
+            <ElIcon :size="iconPreviewSize" :color="iconPreviewColor">
+              <MinusSquareOutlined />
+            </ElIcon>
+          </div>
+        </div>
+        <div class="demo-column">
+          <FlButton @click="iconPreviewSize = iconPreviewSize === 22 ? 30 : 22">
+            Toggle size: {{ iconPreviewSize }}
+          </FlButton>
+          <FlButton
+            @click="iconPreviewColor = iconPreviewColor === '#409eff' ? '#67c23a' : '#409eff'">
+            Toggle color: {{ iconPreviewColor }}
+          </FlButton>
+        </div>
+      </div>
+      <div class="demo-row">
+        <ElIcon :size="iconPreviewSize" :color="iconPreviewColor">
+          <PlusSquareOutlined />
+        </ElIcon>
+        <ElIcon :size="iconPreviewSize" :color="iconPreviewColor">
+          <MinusSquareOutlined />
+        </ElIcon>
+      </div>
+      <p class="demo-result">size / color: {{ iconPreviewSize }} / {{ iconPreviewColor }}</p>
+      <p class="demo-result">
+        These icons are imported from `falcon-ui`, so internal components can reuse the same assets
+        without global registration.
+      </p>
+    </article>
     <article class="card demo-card">
       <h3>FlButton</h3>
       <div class="demo-row">
@@ -450,6 +495,7 @@
 import { computed, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
+import { MinusSquareOutlined, PlusSquareOutlined } from 'falcon-ui'
 import type {
   TreeData,
   TreeCheckEvent,
@@ -461,6 +507,8 @@ import type {
   TreeSelectEvent
 } from 'falcon-ui'
 
+const iconPreviewSize = ref(22)
+const iconPreviewColor = ref('#409eff')
 const buttonClicks = ref(0)
 const qrCodeValue = ref('https://falcon-ui.dev')
 const qrCodeType = ref<'canvas' | 'svg'>('canvas')
@@ -1594,5 +1642,30 @@ applyTreeDefaultExpandMode()
 .tree-event-item {
   margin-top: 4px;
   word-break: break-all;
+}
+
+.icon-demo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.icon-demo-card {
+  display: flex;
+  min-width: 160px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.icon-demo-label {
+  color: #606266;
+  font-size: 13px;
+}
+
+.icon-demo-plain {
+  flex: none;
 }
 </style>

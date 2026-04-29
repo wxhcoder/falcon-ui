@@ -10,6 +10,8 @@ import FalconUI, {
   FlSelect,
   FlTable,
   FlTableEditor,
+  MinusSquareOutlined,
+  PlusSquareOutlined,
   install
 } from '..'
 
@@ -45,6 +47,8 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
     expect(app.component).toHaveBeenCalledWith('FlTableEditor', FlTableEditor)
+    expect(app.component).not.toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
+    expect(app.component).not.toHaveBeenCalledWith('MinusSquareOutlined', MinusSquareOutlined)
   })
 
   it('registers all components via default plugin', () => {
@@ -61,5 +65,12 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
     expect(app.component).toHaveBeenCalledWith('FlTableEditor', FlTableEditor)
+    expect(app.component).not.toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
+    expect(app.component).not.toHaveBeenCalledWith('MinusSquareOutlined', MinusSquareOutlined)
+  })
+
+  it('still re-exports icon components from the root entry', () => {
+    expect(PlusSquareOutlined).toBeDefined()
+    expect(MinusSquareOutlined).toBeDefined()
   })
 })
