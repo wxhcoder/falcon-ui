@@ -46,8 +46,18 @@
             :aria-label="isExpandedNode ? '收起节点' : '展开节点'"
             @click.stop="handleSwitcherClick">
             <ElIcon :class="switcherIconClassName" aria-hidden="true">
-              <CaretBottom v-if="isExpandedNode" />
-              <CaretRight v-else />
+              <template v-if="switcherIcon === 'plus-minus'">
+                <MinusSquareOutlined v-if="isExpandedNode" />
+                <PlusSquareOutlined v-else />
+              </template>
+              <template v-else-if="switcherIcon === 'folder'">
+                <FolderOpened v-if="isExpandedNode" />
+                <Folder v-else />
+              </template>
+              <template v-else>
+                <CaretBottom v-if="isExpandedNode" />
+                <CaretRight v-else />
+              </template>
             </ElIcon>
           </button>
         </span>
@@ -66,7 +76,8 @@
       <span
         :class="[itemTitleClassName, semanticClassNames.itemTitle]"
         :style="semanticStyles.itemTitle">
-        {{ node.label }}
+        <slot v-if="hasDefaultSlot" :node="slotNode" :data="node.data" />
+        <template v-else>{{ node.label }}</template>
       </span>
     </div>
     <div v-if="isExpandableNode && isExpandedNode" :class="childrenClassName" role="group">
@@ -82,27 +93,38 @@
         :tree-checkable="treeCheckable"
         :tree-selectable="treeSelectable"
         :show-line="showLine"
+        :switcher-icon="switcherIcon"
+        :switcher-loading-icon="switcherLoadingIcon"
         :is-checkbox-disabled="isCheckboxDisabled"
         :should-render-checkbox="shouldRenderCheckbox"
         :toggle-node-checked="toggleNodeChecked"
         :toggle-node-expansion="toggleNodeExpansion"
         :resolved-class-names="resolvedClassNames"
-        :resolved-styles="resolvedStyles" />
+        :resolved-styles="resolvedStyles">
+        <template v-if="hasDefaultSlot" #default="slotProps">
+          <slot v-bind="slotProps" />
+        </template>
+      </FlTreeNode>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { CaretBottom, CaretRight } from '@element-plus/icons-vue'
+import { MinusSquareOutlined, PlusSquareOutlined } from '@falcon-ui/icons'
+import { CaretBottom, CaretRight, Folder, FolderOpened } from '@element-plus/icons-vue'
 import { ElCheckbox, ElIcon } from 'element-plus'
 import { useNamespace } from '@falcon-ui/utils'
 import { computed, getCurrentInstance, type CSSProperties } from 'vue'
-import type {
-  TreeClassValue,
-  TreeKey,
-  TreeNodeInstance,
-  TreeNodeModel,
-  TreeSemanticRecord
+import {
+  createTreeEventNode,
+  type TreeData,
+  type TreeClassValue,
+  type TreeKey,
+  type TreeNode,
+  type TreeNodeInstance,
+  type TreeNodeModel,
+  type TreeSemanticRecord,
+  type TreeSwitcherIconMode
 } from './tree'
 
 defineOptions({
@@ -126,6 +148,8 @@ interface TreeNodeComponentProps {
   treeCheckable: boolean
   treeSelectable: boolean
   showLine: boolean
+  switcherIcon: TreeSwitcherIconMode
+  switcherLoadingIcon?: unknown
   isCheckboxDisabled: (node: TreeNodeModel) => boolean
   shouldRenderCheckbox: (node: TreeNodeModel) => boolean
   toggleNodeChecked: (options: { node: TreeNodeModel; event: MouseEvent }) => void
@@ -135,6 +159,9 @@ interface TreeNodeComponentProps {
 }
 
 const props = defineProps<TreeNodeComponentProps>()
+const slots = defineSlots<{
+  default?: (props: { node: TreeNode; data: TreeData }) => unknown
+}>()
 const currentInstance = getCurrentInstance()
 const ns = useNamespace('tree')
 const itemClassName = ns.e('item')
@@ -288,6 +315,7 @@ const getResolvedClassNames = () => props.resolvedClassNames
 const getResolvedStyles = () => props.resolvedStyles
 
 const itemStyle = computed(createItemStyle)
+const hasDefaultSlot = computed(() => Boolean(slots.default))
 const isExpandableNode = computed(resolveExpandableNodeState)
 const isExpandedNode = computed(resolveExpandedNodeState)
 const isLeafNode = computed(resolveLeafNodeState)
@@ -300,6 +328,7 @@ const shouldShowCheckbox = computed(resolveCheckboxVisibleState)
 const isSelectableNode = computed(resolveSelectableNodeState)
 const isSelectedNode = computed(resolveSelectedNodeState)
 const nodeAriaChecked = computed(resolveAriaCheckedState)
+const slotNode = computed(() => createTreeEventNode({ node: props.node }))
 const semanticClassNames = computed(getResolvedClassNames)
 const semanticStyles = computed(getResolvedStyles)
 </script>

@@ -6,6 +6,11 @@ import type { CSSProperties } from 'vue'
 export type TreeKey = string | number
 
 /**
+ * 展开器视觉模式在阶段 11 固定为三档枚举，后续异步加载阶段可复用同一模式定义。
+ */
+export type TreeSwitcherIconMode = 'arrow' | 'plus-minus' | 'folder'
+
+/**
  * 原始树节点允许保留业务字段，但 `key` 始终是必填字段。
  */
 export interface TreeData {

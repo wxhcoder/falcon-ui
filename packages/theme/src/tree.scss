@@ -120,6 +120,11 @@
   }
 
   @include bem.e(switcher-icon) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     font-size: 14px;
   }
 
@@ -139,7 +144,11 @@
   }
 
   @include bem.e(item-title) {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
     min-width: 0;
+    min-height: var(--fl-tree-node-content-height);
     color: var(--fl-tree-node-text-color);
     font-size: inherit;
     line-height: 1.5;

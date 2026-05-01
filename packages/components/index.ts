@@ -83,6 +83,7 @@ export type {
   TreeNodeProps,
   TreeSelectArgs,
   TreeSelectEvent,
+  TreeSwitcherIconMode,
   TreeNodeToggleArgs,
   TreeProps,
   TreeSemanticDOM,

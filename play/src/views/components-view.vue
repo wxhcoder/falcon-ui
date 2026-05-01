@@ -248,10 +248,20 @@
             :label="item.label"
             :value="item.value" />
         </FlSelect>
+        <FlSelect v-model="treeSwitcherIcon" placeholder="展开图标" style="width: 180px">
+          <ElOption
+            v-for="item in treeSwitcherIconOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value" />
+        </FlSelect>
         <FlButton @click="applyTreeDefaultExpandMode">应用默认展开</FlButton>
         <FlButton @click="expandAllTreeNodes">全部展开</FlButton>
         <FlButton @click="collapseAllTreeNodes">全部折叠</FlButton>
         <FlButton @click="restoreTreeDefaultExpandMode">恢复默认模式</FlButton>
+        <FlButton @click="treeUseCustomContent = !treeUseCustomContent">
+          切换 default 插槽: {{ treeUseCustomContent ? 'on' : 'off' }}
+        </FlButton>
         <FlButton @click="toggleTreeMultiple">
           切换 multiple: {{ treeMultiple ? 'on' : 'off' }}
         </FlButton>
@@ -308,6 +318,7 @@
           :multiple="treeMultiple"
           :checkable="treeCheckable"
           :check-strictly="treeCheckStrictly"
+          :switcher-icon="treeSwitcherIcon"
           :props="treeNodeProps"
           :default-expand-all="treeDefaultExpandAll"
           :default-expanded-keys="treeDefaultExpandedKeys"
@@ -324,12 +335,22 @@
           @select="handleTreeSelect"
           @check="handleTreeCheck"
           @node-expand="handleTreeNodeExpand"
-          @node-collapse="handleTreeNodeCollapse" />
+          @node-collapse="handleTreeNodeCollapse">
+          <template v-if="treeUseCustomContent" #default="{ node, data }">
+            <span class="tree-slot-content">
+              <span class="tree-slot-primary">{{ node.label }}</span>
+              <span class="tree-slot-meta">{{ String(data.key) }}</span>
+            </span>
+          </template>
+        </FlTree>
       </div>
       <p class="demo-result">Root nodes: {{ treeData.length }}</p>
       <p class="demo-result">Mapped label field: `name`, children field: `nodes`.</p>
       <p class="demo-result">
-        Line mode: {{ treeShowLine ? 'on' : 'off' }}. This stage shows hierarchy tracks only.
+        连线模式: {{ treeShowLine ? 'on' : 'off' }}，switcher={{ treeSwitcherIcon }}。
+      </p>
+      <p class="demo-result">
+        节点内容: {{ treeUseCustomContent ? '自定义 default 插槽' : '内建 label-only' }}。
       </p>
       <p class="demo-result">
         默认展开模式: {{ currentTreeDefaultExpandLabel }}，当前模式:
@@ -362,6 +383,9 @@
       <p class="demo-result">
         Current half-checked keys:
         {{ currentTreeHalfCheckedKeys.length ? currentTreeHalfCheckedKeys.join(', ') : '(empty)' }}
+      </p>
+      <p class="demo-result">
+        Stage 11 note: 内建内容仅渲染 label，default 插槽只替换 switcher / checkbox 右侧区域。
       </p>
       <p class="demo-result">
         Stage 7-9 note: default mode now conducts parent / child checks, strict mode uses `{
@@ -504,7 +528,8 @@ import type {
   TreeNode,
   TreeNodeInstance,
   TreeNodeProps,
-  TreeSelectEvent
+  TreeSelectEvent,
+  TreeSwitcherIconMode
 } from 'falcon-ui'
 
 const iconPreviewSize = ref(22)
@@ -646,6 +671,11 @@ type TreeDefaultExpandMode = 'collapsed' | 'roots' | 'focus-path' | 'all'
 interface TreeDefaultExpandOption {
   label: string
   value: TreeDefaultExpandMode
+}
+
+interface TreeSwitcherIconOption {
+  label: string
+  value: TreeSwitcherIconMode
 }
 
 interface TreeDefaultExpandConfig {
@@ -962,6 +992,11 @@ const treeDefaultExpandOptions: TreeDefaultExpandOption[] = [
   { label: '默认展开关键路径', value: 'focus-path' },
   { label: '默认全部展开', value: 'all' }
 ]
+const treeSwitcherIconOptions: TreeSwitcherIconOption[] = [
+  { label: '箭头', value: 'arrow' },
+  { label: '加减号', value: 'plus-minus' },
+  { label: '文件夹', value: 'folder' }
+]
 const treeDefaultExpandMode = ref<TreeDefaultExpandMode>('all')
 const treeDemoVersion = ref(0)
 const treeDefaultExpandAll = ref(false)
@@ -975,6 +1010,8 @@ const treeMultiple = ref(true)
 const treeCheckable = ref(false)
 const treeCheckStrictly = ref(false)
 const treeShowLine = ref(true)
+const treeSwitcherIcon = ref<TreeSwitcherIconMode>('arrow')
+const treeUseCustomContent = ref(false)
 const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>([
   'design-system-components-tree',
   'delivery-quality-unit-test'
@@ -1632,6 +1669,23 @@ applyTreeDefaultExpandMode()
 
 .tree-demo {
   min-width: 280px;
+}
+
+.tree-slot-content {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.tree-slot-primary {
+  min-width: 0;
+}
+
+.tree-slot-meta {
+  flex: none;
+  color: #909399;
+  font-size: 12px;
 }
 
 .tree-event-list {

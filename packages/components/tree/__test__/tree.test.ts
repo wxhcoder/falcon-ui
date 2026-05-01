@@ -1,21 +1,24 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
-import { CaretBottom, CaretRight } from '@element-plus/icons-vue'
+import { MinusSquareOutlined, PlusSquareOutlined } from '@falcon-ui/icons'
+import { CaretBottom, CaretRight, Folder, FolderOpened } from '@element-plus/icons-vue'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { h, nextTick } from 'vue'
 import FlTree, {
   FlTree as FlTreeFromTreePackage,
   type TreeCheckEvent,
   type TreeCheckedKeys,
+  type TreeData,
   type TreeEmits,
   type TreeExpandPayload,
   type TreeKey,
   type TreeNode,
   type TreeNodeModel,
   type TreeProps,
-  type TreeSelectEvent
+  type TreeSelectEvent,
+  type TreeSwitcherIconMode
 } from '@falcon-ui/components/tree'
 import { FlTree as FlTreeFromComponents } from '@falcon-ui/components'
 import FalconUI, { install as installFalconUI } from '@falcon-ui/falcon-ui'
@@ -486,6 +489,7 @@ describe('FlTree 契约', () => {
     expect(treeIndexSource).toContain('TreeSelectEvent')
     expect(treeIndexSource).toContain('TreeNodeModel')
     expect(treeIndexSource).toContain('TreeNode')
+    expect(treeIndexSource).toContain('TreeSwitcherIconMode')
     expect(treeIndexSource).not.toContain('FlTreeEmits')
     expect(componentsIndexSource).toContain('TreeEmits')
     expect(componentsIndexSource).toContain('TreeCheckArgs')
@@ -494,6 +498,7 @@ describe('FlTree 契约', () => {
     expect(componentsIndexSource).toContain('TreeSelectEvent')
     expect(componentsIndexSource).toContain('TreeNodeModel')
     expect(componentsIndexSource).toContain('TreeNode')
+    expect(componentsIndexSource).toContain('TreeSwitcherIconMode')
     expect(componentsIndexSource).not.toContain('FlTreeEmits')
     expect(globalDts).toContain('FlTree: typeof FlTree')
     expect(themeIndex).toContain("@use './src/tree.scss';")
@@ -504,6 +509,7 @@ describe('FlTree 契约', () => {
       TreeCheckEvent,
       TreeExpandPayload,
       TreeSelectEvent,
+      TreeSwitcherIconMode,
       TreeEmits,
       TreeNodeModel
     ]
@@ -1607,5 +1613,199 @@ describe('FlTree 契约', () => {
     expect(wrapper.emitted('node-collapse')).toBeUndefined()
     expect(findTreeItemByText(wrapper, 'Archive').attributes('aria-selected')).toBe('true')
     expect(isItemSelected(wrapper, 'Archive')).toBe(true)
+  })
+
+  it('renders label-only content when no default slot is provided', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: [
+          {
+            key: 'root',
+            label: 'Root',
+            description: 'Ignored Description'
+          }
+        ]
+      }
+    })
+
+    await nextTick()
+
+    expect(wrapper.get('.fl-tree__item-title').text()).toBe('Root')
+    expect(wrapper.text()).not.toContain('Ignored Description')
+    expect(wrapper.find('.tree-slot-node').exists()).toBe(false)
+  })
+
+  it('fully replaces the default content area through the default slot', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: [
+          {
+            key: 'root',
+            title: 'Mapped Root',
+            nodes: [
+              {
+                key: 'leaf',
+                title: 'Mapped Leaf'
+              }
+            ]
+          }
+        ],
+        props: {
+          label: 'title',
+          children: 'nodes'
+        },
+        defaultExpandAll: true
+      },
+      slots: {
+        default: ({ node, data }: { node: TreeNode; data: TreeData }) =>
+          h(
+            'span',
+            {
+              class: 'tree-slot-node'
+            },
+            `${node.label}:${String(data.title)}:${String(data.key)}`
+          )
+      }
+    })
+
+    await nextTick()
+
+    const slotNodes = wrapper.findAll('.tree-slot-node')
+
+    expect(slotNodes).toHaveLength(2)
+    expect(slotNodes[0]?.text()).toBe('Mapped Root:Mapped Root:root')
+    expect(slotNodes[1]?.text()).toBe('Mapped Leaf:Mapped Leaf:leaf')
+    expect(wrapper.text()).not.toContain('{{ node.label }}')
+  })
+
+  it('keeps click, expand, and checkbox event ordering stable with a default slot', async () => {
+    const eventOrder: string[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        checkable: true,
+        onNodeClick: () => eventOrder.push('node-click'),
+        'onUpdate:selectedKeys': () => eventOrder.push('update:selectedKeys'),
+        onSelect: () => eventOrder.push('select'),
+        'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
+        onNodeExpand: () => eventOrder.push('node-expand'),
+        onExpand: () => eventOrder.push('expand'),
+        'onUpdate:checkedKeys': () => eventOrder.push('update:checkedKeys'),
+        onCheck: () => eventOrder.push('check')
+      },
+      slots: {
+        default: ({ node }: { node: TreeNode }) =>
+          h(
+            'span',
+            {
+              class: 'tree-slot-node'
+            },
+            `slot-${String(node.key)}`
+          )
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'slot-root').trigger('click')
+    await nextTick()
+    await getSwitcherButton(wrapper, 'slot-root').trigger('click')
+    await nextTick()
+    await getItemCheckbox(wrapper, 'slot-root').trigger('click')
+    await nextTick()
+
+    expect(eventOrder).toEqual([
+      'node-click',
+      'update:selectedKeys',
+      'select',
+      'update:expandedKeys',
+      'node-expand',
+      'expand',
+      'update:checkedKeys',
+      'check'
+    ])
+    expect(isItemSelected(wrapper, 'slot-root')).toBe(true)
+    expect(wrapper.emitted('update:checkedKeys')).toEqual([[['root', 'leaf']]])
+  })
+
+  it('supports arrow, plus-minus, and folder switcherIcon modes', async () => {
+    const modes: TreeSwitcherIconMode[] = ['arrow', 'plus-minus', 'folder']
+
+    for (const mode of modes) {
+      const wrapper = mount(FlTree, {
+        props: {
+          data: createSimpleTreeData(),
+          switcherIcon: mode
+        }
+      })
+
+      await nextTick()
+
+      if (mode === 'arrow') {
+        expect(wrapper.findComponent(CaretRight).exists()).toBe(true)
+      }
+
+      if (mode === 'plus-minus') {
+        expect(wrapper.findComponent(PlusSquareOutlined).exists()).toBe(true)
+      }
+
+      if (mode === 'folder') {
+        expect(wrapper.findComponent(Folder).exists()).toBe(true)
+      }
+
+      await getSwitcherButton(wrapper, 'Root').trigger('click')
+      await nextTick()
+
+      if (mode === 'arrow') {
+        expect(wrapper.findComponent(CaretBottom).exists()).toBe(true)
+      }
+
+      if (mode === 'plus-minus') {
+        expect(wrapper.findComponent(MinusSquareOutlined).exists()).toBe(true)
+      }
+
+      if (mode === 'folder') {
+        expect(wrapper.findComponent(FolderOpened).exists()).toBe(true)
+      }
+
+      expect(findTreeItemByText(wrapper, 'Leaf').find('.fl-tree__switcher-dot').exists()).toBe(true)
+    }
+  })
+
+  it('keeps line-mode leaf placeholders stable across switcherIcon modes', async () => {
+    const modes: TreeSwitcherIconMode[] = ['arrow', 'plus-minus', 'folder']
+
+    for (const mode of modes) {
+      const wrapper = mount(FlTree, {
+        props: {
+          data: createLineTreeData(),
+          showLine: true,
+          defaultExpandAll: true,
+          switcherIcon: mode
+        }
+      })
+
+      await nextTick()
+
+      const tree = wrapper.get('[role="tree"]')
+      const branchAItem = findTreeItemByText(wrapper, 'Branch A')
+      const leafA1Item = findTreeItemByText(wrapper, 'Leaf A1')
+
+      expect(tree.classes()).toContain('is-show-line')
+      expect(branchAItem.get('.fl-tree__item-content').classes()).toContain('is-line-mode')
+      expect(leafA1Item.find('.fl-tree__switcher-leaf-line').exists()).toBe(true)
+      expect(leafA1Item.find('.fl-tree__switcher-button').exists()).toBe(false)
+
+      if (mode === 'arrow') {
+        expect(wrapper.findComponent(CaretBottom).exists()).toBe(true)
+      }
+
+      if (mode === 'plus-minus') {
+        expect(wrapper.findComponent(MinusSquareOutlined).exists()).toBe(true)
+      }
+
+      if (mode === 'folder') {
+        expect(wrapper.findComponent(FolderOpened).exists()).toBe(true)
+      }
+    }
   })
 })

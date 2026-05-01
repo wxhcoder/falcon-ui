@@ -10,6 +10,7 @@ import type {
   TreeNodeProps,
   TreeSemanticDOM,
   TreeSemanticRecord,
+  TreeSwitcherIconMode,
   TreeStyles
 } from './tree-types'
 
@@ -42,6 +43,14 @@ export const treeProps = {
   showLine: {
     type: Boolean,
     default: false
+  },
+  switcherIcon: {
+    type: String as PropType<TreeSwitcherIconMode>,
+    default: 'arrow'
+  },
+  switcherLoadingIcon: {
+    type: null as unknown as PropType<unknown>,
+    default: undefined
   },
   selectable: {
     type: Boolean,
@@ -721,5 +730,6 @@ export type {
   TreeNodeProps,
   TreeSemanticDOM,
   TreeSemanticRecord,
+  TreeSwitcherIconMode,
   TreeStyles
 }

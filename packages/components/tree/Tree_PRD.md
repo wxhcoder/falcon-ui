@@ -22,7 +22,7 @@
 - [x] 阶段 8：开发严格勾选与半选态功能
 - [x] 阶段 9：开发禁用节点联动边界功能
 - [x] 阶段 10：开发 `showLine` 配置与样式功能
-- [ ] 阶段 11：开发树节点其余视觉渲染功能
+- [ ] 阶段 11：开发树节点默认内容渲染与 switcher 视觉模式
 - [ ] 阶段 12：开发 Tree 语义化 DOM 样式定制功能
 - [ ] 阶段 13：开发树节点异步加载功能
 - [ ] 阶段 14：开发树节点拖拽功能
@@ -206,15 +206,20 @@
 
 - 阶段拆分约束：
   - 下一阶段固定为阶段 10，仅开发 `showLine` 的配置能力与对应样式表现。
-  - `showIcon`、`blockNode`、`icon`、`switcherIcon`、`switcherLoadingIcon`、`titleRender`
-    统一顺延到阶段 11。
+  - 阶段 11 固定承接默认节点内容渲染、`default` 插槽扩展、整行热区、
+    `switcherIcon` 三档模式与 `switcherLoadingIcon`。
 - 支持以下视觉控制：
   - `showLine`
-  - `showIcon`
-  - `blockNode`
   - `icon`
   - `switcherIcon`
   - `switcherLoadingIcon`
+- 不再提供以下视觉入口：
+  - `showIcon`
+  - `blockNode`
+  - `titleRender`
+  - `#title`
+  - `#icon`
+  - `#switcher-icon`
 - `showLine` 需要支持：
   - `boolean`
   - `{ showLeafIcon }`
@@ -223,14 +228,20 @@
   - 叶子节点连线末端样式
   - `showLeafIcon` 配置对叶子节点视觉的影响
   - 连线模式下展开器、缩进与节点内容区的对齐稳定性
-- 标题渲染建议同时支持：
-  - `titleRender(node)`
-  - `#title="{ node }"`
-- 图标渲染建议支持 props 与 slots 双通道：
-  - `icon`
-  - `switcherIcon`
-  - `#icon`
-  - `#switcher-icon`
+- 阶段 11 默认节点内容渲染约定：
+  - 节点内容区默认铺满整行；hover、selected 与点击热区统一按整行处理
+  - 未传 `default` 插槽时，组件仅渲染内建 `label`
+  - 传入 `default="{ node, data }"` 后，节点内容区完全交由用户控制
+  - `default` 插槽仅接管 `switcher / checkbox` 右侧的节点内容区；缩进、连线、
+    `switcher` 与勾选框仍由组件内部控制
+- `switcherIcon` 改为枚举型 prop，默认值为 `arrow`：
+  - `arrow`：收起态显示 `CaretRight`，展开态显示 `CaretBottom`
+  - `plus-minus`：收起态显示 Falcon UI `+` 图标，展开态显示 Falcon UI `-` 图标
+  - `folder`：仅非叶子节点生效，收起态显示 Element Plus `Folder`，展开态显示
+    Element Plus `FolderOpened`
+- `switcherLoadingIcon` 保留：
+  - 节点处于异步加载中时，临时覆盖当前 `switcherIcon` 模式
+  - 仅作用于加载态，不改变非加载态下的 `switcherIcon` 模式选择
 - 视觉变量约定：
   - 优先复用 Element Plus Tree 组件变量与全局颜色变量
   - 首版样式优先围绕以下变量建立：
@@ -246,8 +257,9 @@
     - `--el-transition-duration`
 - 图标约定：
   - 叶子节点显示圆点
-  - 默认展开的非叶子节点显示 `CaretBottom`
-  - 后续收起态使用 `CaretRight`
+  - `switcherIcon = 'arrow'` 时，收起态显示 `CaretRight`，展开态显示 `CaretBottom`
+  - `switcherIcon = 'plus-minus'` 时，仅非叶子节点切换 Falcon UI `+ / -` 图标
+  - `switcherIcon = 'folder'` 时，仅非叶子节点切换 `Folder / FolderOpened`
 
 ### 4.7 语义化 DOM 样式定制
 
@@ -287,7 +299,7 @@
   - 当前节点尚未加载
   - 当前节点被展开
 - 提供 `loadedKeys` 受控能力，并同步支持 `update:loadedKeys`。
-- `switcherLoadingIcon` 在异步加载中展示。
+- 节点处于异步加载中时，`switcherLoadingIcon` 覆盖当前 `switcherIcon` 模式展示。
 - 遵守 Ant Design FAQ 边界：`defaultExpandAll` 仅初始化生效。
 
 ### 4.10 拖拽能力
@@ -359,6 +371,8 @@ scrollTo(options: {
 ```ts
 type TreeKey = string | number
 
+type TreeSwitcherIconMode = 'arrow' | 'plus-minus' | 'folder'
+
 type TreeSemanticDOM = 'root' | 'item' | 'itemIcon' | 'itemTitle'
 
 interface TreeNodeProps {
@@ -378,7 +392,6 @@ interface TreeData {
   selectable?: boolean
   checkable?: boolean
   isLeaf?: boolean
-  icon?: unknown
   [key: string]: unknown
 }
 
@@ -424,13 +437,10 @@ interface TreeSelectEvent {
   - `loadedKeys`
 - 视觉相关
   - `disabled`
-  - `blockNode`
   - `showLine`
-  - `showIcon`
-  - `icon`
   - `switcherIcon`
+    - `'arrow' | 'plus-minus' | 'folder'`
   - `switcherLoadingIcon`
-  - `titleRender`
   - `classNames`
   - `styles`
 - 拖拽相关
@@ -444,7 +454,15 @@ interface TreeSelectEvent {
   - `directory`
   - `expandAction`
 
-### 5.3 Emits 草案
+### 5.3 Slots 草案
+
+- `default="{ node, data }"`
+- 槽位参数语义对齐 Element Plus Tree 默认插槽。
+- 未传 `default` 插槽时，组件仅渲染内建 `label`。
+- 传入 `default` 插槽时，节点内容区完全由用户控制；`switcherIcon`、
+  `switcherLoadingIcon`、checkbox、indent、showLine 仍由组件内部控制。
+
+### 5.4 Emits 草案
 
 - 状态同步
   - `update:expandedKeys`
@@ -473,7 +491,7 @@ interface TreeSelectEvent {
   - `event.selectedNodes` 始终返回当前完整选中集对应的 `TreeNode[]`
   - `event.selected` 始终表示当前点击节点在本次交互后的选中结果
 
-### 5.4 Expose 草案
+### 5.5 Expose 草案
 
 ```ts
 interface TreeExpose {
@@ -543,7 +561,7 @@ interface TreeExpose {
   `FlDirectoryTree`。
 - 拖拽排序是否只做事件回传，还是允许组件内部直接重排 `data` 视图。
 - 异步加载与受控 `expandedKeys`、`loadedKeys` 同时存在时，状态优先级需要固定。
-- 标题插槽与虚拟滚动同时开启时，是否存在高度测量抖动。
+- `default` 插槽与虚拟滚动同时开启时，是否存在高度测量抖动。
 - 普通渲染与虚拟渲染下，`item / itemIcon / itemTitle` 的语义挂点是否能保持一致。
 
 ## 8. 验收标准（首版）
@@ -558,6 +576,12 @@ interface TreeExpose {
 - `height` 开启后可使用虚拟滚动，并支持 `scrollTo({ key })`。
 - `filterTreeNode` 只负责高亮，不主动篡改展开状态。
 - `directory` 模式支持 `expandAction` 与快捷键多选。
+- `switcherIcon` 支持 `arrow / plus-minus / folder` 三种模式，且 `folder`
+  仅作用于非叶子节点。
+- `switcherLoadingIcon` 可在异步加载中覆盖当前 `switcherIcon` 模式。
+- 未传 `default` 插槽时默认仅渲染 `label`；传入
+  `default="{ node, data }"` 后，节点内容区完全由业务侧接管。
+- 节点内容区 hover、selected 与点击热区默认铺满整行，不依赖 `blockNode`。
 - `classNames` 与 `styles` 可稳定作用于
   `root / item / itemIcon / itemTitle` 四类语义化结构。
 - 默认视觉样式可跟随 Element Plus Tree / 全局色板变量变化。
@@ -570,7 +594,8 @@ interface TreeExpose {
 2. `props` 生效，非默认字段可映射渲染。
 3. 节点 `disabled`、`disableCheckbox`、`selectable = false` 表现正确。
 4. `data` 变化后，内部 `TreeNode` 递归结构可正确响应并重渲染。
-5. 叶子节点显示圆点，默认收起的非叶子节点显示 `CaretRight`，展开后显示 `CaretBottom`。
+5. 默认 `switcherIcon = 'arrow'` 时，叶子节点显示圆点，默认收起的非叶子节点
+   显示 `CaretRight`，展开后显示 `CaretBottom`。
 
 ### 9.2 展开与选择
 
@@ -589,6 +614,7 @@ interface TreeExpose {
 1. 展开未加载节点时触发 `loadData`。
 2. 已加载节点重复展开不重复请求。
 3. 异步追加节点后，`defaultExpandAll` 不会再次自动执行。
+4. 异步加载中 `switcherLoadingIcon` 会覆盖当前 `switcherIcon` 模式。
 
 ### 9.5 语义化 DOM 样式定制
 
@@ -599,7 +625,22 @@ interface TreeExpose {
 5. 传入函数形式时，可基于 `componentProps` 返回语义化结构映射。
 6. 普通渲染与虚拟渲染模式下，四类语义化结构挂点语义保持一致。
 
-### 9.6 `showLine` 配置与样式
+### 9.6 阶段 11 默认内容与 `switcherIcon`
+
+1. 未传 `default` 插槽时，节点内容区仅渲染 `label`。
+2. 传入 `default="{ node, data }"` 时，节点内容区完全由业务侧控制，且可拿到
+   标准化 `node` 与原始 `data`。
+3. 传入 `default` 插槽后，内建默认内容渲染失效，但 `switcher`、checkbox、
+   indent、showLine 仍正常工作。
+4. `switcherIcon = 'arrow'` 时，收起显示 `CaretRight`，展开显示 `CaretBottom`。
+5. `switcherIcon = 'plus-minus'` 时，收起 / 展开分别显示 Falcon UI `+ / -` 图标。
+6. `switcherIcon = 'folder'` 时，仅非叶子节点显示 `Folder / FolderOpened`；
+   叶子节点继续保留圆点或连线末端语义。
+7. 默认 hover、selected 与点击热区铺满整行，不依赖 `blockNode`。
+8. `showLine` 开启后，整行热区与三种 `switcherIcon` 模式不出现对齐抖动或
+   点击热区偏移。
+
+### 9.7 `showLine` 配置与样式
 
 1. `showLine = false` 时，不渲染树连线与连线末端装饰。
 2. `showLine = true` 时，父子节点纵向 / 横向连线完整且层级关系清晰。
@@ -607,19 +648,19 @@ interface TreeExpose {
 4. `showLine` 开启后，展开器、叶子节点占位与标题内容区的横向对齐保持一致。
 5. 展开 / 收起、选中 / 勾选等既有交互在连线模式下不出现布局抖动或点击热区偏移。
 
-### 9.7 视觉变量继承
+### 9.8 视觉变量继承
 
 1. 默认文本色、hover 背景、展开图标色可跟随 Element Plus 对应变量变化。
 2. 节点高度、字号、过渡时长等基础视觉参数优先取自 Element Plus 变量。
 3. 叶子圆点颜色优先复用 Element Plus 次级文本色变量。
 
-### 9.8 拖拽
+### 9.9 拖拽
 
 1. 不可拖拽节点不会进入拖拽态。
 2. `allowDrop` 返回 `false` 时禁止落点。
 3. `drop` 事件可拿到 `dragNode`、`dropNode`、`dropPosition`、`dropToGap`。
 
-### 9.9 虚拟滚动
+### 9.10 虚拟滚动
 
 1. `height` 开启后，仅渲染可见区域节点。
 2. `scrollTo({ key })` 可滚动到指定节点。

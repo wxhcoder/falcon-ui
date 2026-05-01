@@ -17,12 +17,18 @@
       :tree-checkable="isTreeCheckable"
       :tree-selectable="isTreeSelectable"
       :show-line="props.showLine"
+      :switcher-icon="props.switcherIcon"
+      :switcher-loading-icon="props.switcherLoadingIcon"
       :is-checkbox-disabled="isCheckboxDisabled"
       :should-render-checkbox="shouldRenderCheckbox"
       :toggle-node-checked="toggleCheckedNode"
       :toggle-node-expansion="toggleNodeExpansion"
       :resolved-class-names="resolvedClassNames"
-      :resolved-styles="resolvedStyles" />
+      :resolved-styles="resolvedStyles">
+      <template v-if="hasDefaultSlot" #default="slotProps">
+        <slot v-bind="slotProps" />
+      </template>
+    </FlTreeNode>
   </div>
 </template>
 
@@ -36,7 +42,9 @@ import {
   treeEmits,
   treeProps,
   type TreeClassValue,
+  type TreeData,
   type TreeNodeInstance,
+  type TreeNode,
   type TreeNodeModel,
   type TreeSemanticRecord
 } from './tree'
@@ -52,6 +60,9 @@ defineOptions({
 
 const props = defineProps(treeProps)
 const emit = defineEmits(treeEmits)
+const slots = defineSlots<{
+  default?: (props: { node: TreeNode; data: TreeData }) => unknown
+}>()
 const attrs = useAttrs()
 const ns = useNamespace('tree')
 const rootClassName = ns.b()
@@ -78,6 +89,7 @@ const createResolvedStyles = () =>
   })
 
 const treeIndex = computed(createCurrentTreeIndex)
+const hasDefaultSlot = computed(() => Boolean(slots.default))
 const resolvedClassNames = computed<TreeSemanticRecord<TreeClassValue>>(createResolvedClassNames)
 const resolvedStyles = computed<TreeSemanticRecord<CSSProperties>>(createResolvedStyles)
 
