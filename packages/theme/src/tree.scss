@@ -32,7 +32,7 @@
 
   @include bem.e(item-content) {
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     min-height: var(--fl-tree-node-content-height);
     padding: 0 8px;
     border-radius: var(--fl-radius-sm);
@@ -95,6 +95,7 @@
 
   @include bem.e(switcher) {
     display: inline-flex;
+    align-self: stretch;
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -138,7 +139,8 @@
   @include bem.e(switcher-leaf-line) {
     position: relative;
     z-index: 1;
-    display: inline-block;
+    display: block;
+    align-self: stretch;
     width: 100%;
     min-height: var(--fl-tree-node-content-height);
   }
@@ -190,7 +192,7 @@
         position: absolute;
         top: 0;
         inset-inline-end: calc(50% - (var(--fl-tree-line-width) / 2));
-        height: var(--fl-tree-node-content-height);
+        bottom: 0;
         border-inline-end: var(--fl-tree-line-width) solid var(--fl-tree-line-color);
         content: '';
       }
@@ -198,7 +200,7 @@
       &::after {
         position: absolute;
         inset-inline-start: 50%;
-        top: calc(var(--fl-tree-node-content-height) / 2);
+        top: 50%;
         width: 50%;
         border-bottom: var(--fl-tree-line-width) solid var(--fl-tree-line-color);
         transform: translateY(-50%);
@@ -208,7 +210,8 @@
 
     #{bem.selector('tree', 'item')}.is-leaf.is-last
       #{bem.selector('tree', 'switcher-leaf-line')}::before {
-      height: calc(var(--fl-tree-node-content-height) / 2);
+      height: 50%;
+      bottom: auto;
     }
   }
 }

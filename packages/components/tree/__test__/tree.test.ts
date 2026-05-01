@@ -404,6 +404,14 @@ describe('FlTree 契约', () => {
     expect(treeScss).toContain('@include bem.e(switcher-leaf-line)')
     expect(treeScss).toContain('@include bem.e(item-checkbox)')
     expect(treeScss).toContain('cursor: pointer;')
+    expect(treeScss).toContain('align-items: stretch;')
+    expect(treeScss).toContain('align-self: stretch;')
+    expect(treeScss).toContain('top: 50%;')
+    expect(treeScss).toContain('height: 50%;')
+    expect(treeScss).toContain('bottom: auto;')
+    expect(treeScss).not.toMatch(/^\s+height: var\(--fl-tree-node-content-height\);/m)
+    expect(treeScss).not.toContain('top: calc(var(--fl-tree-node-content-height) / 2);')
+    expect(treeScss).not.toContain('height: calc(var(--fl-tree-node-content-height) / 2);')
 
     const wrapper = mount(FlTree, {
       props: {
@@ -452,6 +460,45 @@ describe('FlTree 契约', () => {
     expect(leafA1Item.find('.fl-tree__switcher-dot').exists()).toBe(false)
     expect(leafA1Item.classes()).not.toContain('is-last')
     expect(leafA2Item.classes()).toContain('is-last')
+  })
+
+  it('keeps showLine and checkable layout hooks stable without leaking checkbox clicks', async () => {
+    const eventOrder: string[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createLineTreeData(),
+        showLine: true,
+        checkable: true,
+        defaultExpandAll: true,
+        onNodeClick: () => eventOrder.push('node-click'),
+        'onUpdate:selectedKeys': () => eventOrder.push('update:selectedKeys'),
+        onSelect: () => eventOrder.push('select'),
+        'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
+        onNodeExpand: () => eventOrder.push('node-expand'),
+        'onUpdate:checkedKeys': () => eventOrder.push('update:checkedKeys'),
+        onCheck: () => eventOrder.push('check')
+      }
+    })
+
+    await nextTick()
+
+    const branchAContent = getItemContent(wrapper, 'Branch A')
+    const leafA1Content = getItemContent(wrapper, 'Leaf A1')
+
+    expect(branchAContent.classes()).toContain('is-line-mode')
+    expect(branchAContent.find('.fl-tree__switcher-button').exists()).toBe(true)
+    expect(branchAContent.find('.fl-tree__item-checkbox').exists()).toBe(true)
+    expect(leafA1Content.find('.fl-tree__switcher-leaf-line').exists()).toBe(true)
+    expect(leafA1Content.find('.fl-tree__switcher-button').exists()).toBe(false)
+    expect(leafA1Content.find('.fl-tree__item-checkbox').exists()).toBe(true)
+
+    await getItemCheckbox(wrapper, 'Leaf A1').trigger('click')
+    await nextTick()
+
+    expect(eventOrder).toEqual(['update:checkedKeys', 'check'])
+    expect(wrapper.emitted('node-click')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    expect(wrapper.emitted('node-expand')).toBeUndefined()
   })
 
   it('暴露最小可用导出链路与最新 Tree 类型导出', async () => {
