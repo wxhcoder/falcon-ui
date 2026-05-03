@@ -161,3 +161,32 @@
   - `build:lib`: passed with the existing `dialog.vue` dynamic-import warning
   - `play build`: passed with the existing chunk-size warning
 - Stages 7, 8, and 9 are now complete in one verified pass.
+
+## 2026-05-01
+
+- Re-read `packages/components/tree/Tree_PRD.md` and current `FlTree` source for phase 12.
+- Confirmed `FlTree` is standalone and not an Element Plus `ElTree` wrapper, so the Element Plus
+  wrapper playbook does not apply to this phase.
+- Scoped stage 12 semantic DOM styling to Tree-owned shell structures only:
+  - `root`
+  - `item`
+- Removed `itemIcon`, `itemCheckbox`, and `itemTitle` from the public `TreeSemanticDOM` contract.
+- Changed semantic record factory input from `{ componentProps }` to `{ props }`.
+- Updated `tree-node.vue` so only the item shell consumes semantic class / style records; internal
+  BEM nodes remain for layout and interaction only.
+- Added stage 12 tests for object form, function form, props-driven recomputation, unsupported
+  internal semantic keys, and event-order stability.
+- Added a playground toggle that demonstrates only root / item shell styling.
+- Updated `packages/components/tree/Tree_PRD.md` with the phase 12 test document and completion
+  status.
+- Ran:
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec eslint packages/components/tree/src/tree-types.ts packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm --dir play build`
+- Results:
+  - `vitest`: 52 passed
+  - target `eslint`: passed
+  - `vue-tsc`: passed
+  - `play build`: passed with the existing chunk-size warning
+- Stage 12 is now complete.

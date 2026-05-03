@@ -5,7 +5,7 @@ import { CaretBottom, CaretRight, Folder, FolderOpened } from '@element-plus/ico
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { h, nextTick } from 'vue'
+import { h, nextTick, type CSSProperties } from 'vue'
 import FlTree, {
   FlTree as FlTreeFromTreePackage,
   type TreeCheckEvent,
@@ -17,6 +17,7 @@ import FlTree, {
   type TreeNode,
   type TreeNodeModel,
   type TreeProps,
+  type TreeSemanticDOM,
   type TreeSelectEvent,
   type TreeSwitcherIconMode
 } from '@falcon-ui/components/tree'
@@ -435,6 +436,124 @@ describe('FlTree 契约', () => {
     expect(content.classes()).toContain('fl-tree__item-content')
     expect(icon.classes()).toContain('fl-tree__item-icon')
     expect(title.classes()).toContain('fl-tree__item-title')
+  })
+
+  it('只把语义化 classNames 与 styles 挂到 root 和 item 外壳', async () => {
+    const itemStyle = {
+      paddingLeft: '4px',
+      '--fl-tree-level': '99'
+    } as CSSProperties & Record<string, string>
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true,
+        checkable: true,
+        classNames: {
+          root: 'semantic-root',
+          item: 'semantic-item'
+        },
+        styles: {
+          root: {
+            borderColor: 'rgb(1, 2, 3)'
+          },
+          item: itemStyle
+        }
+      }
+    })
+
+    await nextTick()
+
+    const tree = wrapper.get('[role="tree"]')
+    const items = wrapper.findAll('.fl-tree__item')
+    const rootStyle = tree.attributes('style') ?? ''
+    const firstItemStyle = items[0]?.attributes('style') ?? ''
+
+    expect(tree.classes()).toContain('semantic-root')
+    expect(rootStyle).toContain('border-color: rgb(1, 2, 3)')
+    expect(items).toHaveLength(2)
+    expect(items.every((item) => item.classes().includes('semantic-item'))).toBe(true)
+    expect(firstItemStyle).toContain('padding-left: 4px')
+    expect(firstItemStyle).toContain('--fl-tree-level: 1')
+    expect(firstItemStyle).not.toContain('--fl-tree-level: 99')
+  })
+
+  it('支持通过 info.props 生成语义化外壳样式并随 props 更新', async () => {
+    const observedCheckableValues: boolean[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        showLine: false,
+        checkable: false,
+        classNames: (({ props }: { props: TreeProps }) => {
+          observedCheckableValues.push(props.checkable ?? false)
+
+          return {
+            root: props.checkable ? 'semantic-checkable-root' : 'semantic-plain-root',
+            item: props.showLine ? 'semantic-line-item' : 'semantic-flat-item'
+          }
+        }) as TreeProps['classNames'],
+        styles: (({ props }: { props: TreeProps }) => ({
+          root: {
+            outlineStyle: props.checkable ? 'dashed' : 'solid'
+          },
+          item: {
+            paddingRight: props.showLine ? '8px' : '2px'
+          }
+        })) as TreeProps['styles']
+      }
+    })
+
+    await nextTick()
+
+    expect(wrapper.get('[role="tree"]').classes()).toContain('semantic-plain-root')
+    expect(wrapper.get('.fl-tree__item').classes()).toContain('semantic-flat-item')
+    expect(wrapper.get('[role="tree"]').attributes('style')).toContain('outline-style: solid')
+    expect(wrapper.get('.fl-tree__item').attributes('style')).toContain('padding-right: 2px')
+
+    await wrapper.setProps({
+      checkable: true,
+      showLine: true
+    })
+    await nextTick()
+
+    expect(wrapper.get('[role="tree"]').classes()).toContain('semantic-checkable-root')
+    expect(wrapper.get('.fl-tree__item').classes()).toContain('semantic-line-item')
+    expect(wrapper.get('[role="tree"]').attributes('style')).toContain('outline-style: dashed')
+    expect(wrapper.get('.fl-tree__item').attributes('style')).toContain('padding-right: 8px')
+    expect(observedCheckableValues).toContain(false)
+    expect(observedCheckableValues).toContain(true)
+  })
+
+  it('不再把 itemIcon、itemCheckbox、itemTitle 作为公开语义化挂点消费', async () => {
+    const semanticDomKeys: TreeSemanticDOM[] = ['root', 'item']
+    const treeTypesSource = readProjectFile('packages/components/tree/src/tree-types.ts')
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        checkable: true,
+        defaultExpandAll: true,
+        classNames: {
+          root: 'semantic-root',
+          item: 'semantic-item',
+          itemIcon: 'semantic-icon',
+          itemCheckbox: 'semantic-checkbox',
+          itemTitle: 'semantic-title'
+        } as unknown as TreeProps['classNames']
+      }
+    })
+
+    await nextTick()
+
+    expect(semanticDomKeys).toEqual(['root', 'item'])
+    expect(treeTypesSource).toContain("export type TreeSemanticDOM = 'root' | 'item'")
+    expect(treeTypesSource).not.toContain("'itemIcon'")
+    expect(treeTypesSource).not.toContain("'itemCheckbox'")
+    expect(treeTypesSource).not.toContain("'itemTitle'")
+    expect(wrapper.get('[role="tree"]').classes()).toContain('semantic-root')
+    expect(wrapper.get('.fl-tree__item').classes()).toContain('semantic-item')
+    expect(wrapper.get('.fl-tree__item-icon').classes()).not.toContain('semantic-icon')
+    expect(wrapper.get('.fl-tree__item-checkbox').classes()).not.toContain('semantic-checkbox')
+    expect(wrapper.get('.fl-tree__item-title').classes()).not.toContain('semantic-title')
   })
 
   it('`showLine` 开启后按层级渲染轨道与叶子末端连线', async () => {
@@ -1731,6 +1850,18 @@ describe('FlTree 契约', () => {
       props: {
         data: createSimpleTreeData(),
         checkable: true,
+        classNames: {
+          root: 'semantic-event-root',
+          item: 'semantic-event-item'
+        },
+        styles: {
+          root: {
+            borderColor: 'rgb(7, 8, 9)'
+          },
+          item: {
+            marginTop: '1px'
+          }
+        },
         onNodeClick: () => eventOrder.push('node-click'),
         'onUpdate:selectedKeys': () => eventOrder.push('update:selectedKeys'),
         onSelect: () => eventOrder.push('select'),

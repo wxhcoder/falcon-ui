@@ -262,6 +262,9 @@
         <FlButton @click="treeUseCustomContent = !treeUseCustomContent">
           切换 default 插槽: {{ treeUseCustomContent ? 'on' : 'off' }}
         </FlButton>
+        <FlButton @click="treeUseSemanticStyles = !treeUseSemanticStyles">
+          Toggle semantic styles: {{ treeUseSemanticStyles ? 'on' : 'off' }}
+        </FlButton>
         <FlButton @click="toggleTreeMultiple">
           切换 multiple: {{ treeMultiple ? 'on' : 'off' }}
         </FlButton>
@@ -328,6 +331,8 @@
           :expanded-keys="treeUseControlledExpand ? treeControlledExpandedKeys : undefined"
           :selected-keys="treeUseControlledSelect ? treeControlledSelectedKeys : undefined"
           :checked-keys="treeUseControlledCheck ? treeControlledCheckedKeys : undefined"
+          :class-names="treeSemanticClassNames"
+          :styles="treeSemanticStyles"
           @update:expanded-keys="handleTreeExpandedKeysChange"
           @update:selected-keys="handleTreeSelectedKeysChange"
           @update:checked-keys="handleTreeCheckedKeysChange"
@@ -386,6 +391,9 @@
       </p>
       <p class="demo-result">
         Stage 11 note: 内建内容仅渲染 label，default 插槽只替换 switcher / checkbox 右侧区域。
+      </p>
+      <p class="demo-result">
+        Stage 12 semantic styles: {{ treeUseSemanticStyles ? 'root/item enabled' : 'off' }}.
       </p>
       <p class="demo-result">
         Stage 7-9 note: default mode now conducts parent / child checks, strict mode uses `{
@@ -521,6 +529,8 @@ import { Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
 import { MinusSquareOutlined, PlusSquareOutlined } from 'falcon-ui'
 import type {
+  RowOrderChangeEvent,
+  TreeClassNames,
   TreeData,
   TreeCheckEvent,
   TreeCheckedKeys,
@@ -529,6 +539,7 @@ import type {
   TreeNodeInstance,
   TreeNodeProps,
   TreeSelectEvent,
+  TreeStyles,
   TreeSwitcherIconMode
 } from 'falcon-ui'
 
@@ -652,8 +663,8 @@ const handleTableCellChange = (payload: {
   tableCellChangeLog.value = `[row:${payload.rowIndex}] ${payload.path} (${payload.columnKey}) ${String(payload.prevValue)} -> ${String(payload.nextValue)}`
 }
 
-const handleTableRowOrderChange = (payload: { data: TableRow[] }) => {
-  tableRowOrder.value = payload.data.map((item) => item.id).join(' -> ')
+const handleTableRowOrderChange = (payload: RowOrderChangeEvent) => {
+  tableRowOrder.value = payload.data.map((item) => String(item.id)).join(' -> ')
 }
 
 const handleTableColumnOrderChange = (payload: { order: number[] }) => {
@@ -1012,6 +1023,7 @@ const treeCheckStrictly = ref(false)
 const treeShowLine = ref(true)
 const treeSwitcherIcon = ref<TreeSwitcherIconMode>('arrow')
 const treeUseCustomContent = ref(false)
+const treeUseSemanticStyles = ref(false)
 const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>([
   'design-system-components-tree',
   'delivery-quality-unit-test'
@@ -1638,6 +1650,40 @@ const currentTreeHalfCheckedKeys = computed(() =>
     : []
 )
 
+/**
+ * 演示阶段 12 的 root / item 外壳语义化样式，不触碰节点内部内容区结构。
+ */
+const createTreeSemanticClassNames: TreeClassNames = ({ props }) => ({
+  root: {
+    'tree-semantic-root': true,
+    'is-line': Boolean(props.showLine)
+  },
+  item: {
+    'tree-semantic-item': true,
+    'is-checkable': Boolean(props.checkable)
+  }
+})
+
+const treeSemanticClassNames = computed<TreeClassNames | undefined>(() =>
+  treeUseSemanticStyles.value ? createTreeSemanticClassNames : undefined
+)
+
+/**
+ * 通过函数形式展示 `info.props` 可读取当前 Tree props。
+ */
+const createTreeSemanticStyles: TreeStyles = ({ props }) => ({
+  root: {
+    borderColor: props.showLine ? '#79bbff' : '#95d475'
+  },
+  item: {
+    backgroundColor: props.checkable ? 'rgba(64, 158, 255, 0.08)' : 'rgba(103, 194, 58, 0.08)'
+  }
+})
+
+const treeSemanticStyles = computed<TreeStyles | undefined>(() =>
+  treeUseSemanticStyles.value ? createTreeSemanticStyles : undefined
+)
+
 applyTreeDefaultExpandMode()
 </script>
 
@@ -1669,6 +1715,26 @@ applyTreeDefaultExpandMode()
 
 .tree-demo {
   min-width: 280px;
+}
+
+:deep(.tree-semantic-root) {
+  border: 1px solid #79bbff;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+:deep(.tree-semantic-root.is-line) {
+  box-shadow: inset 3px 0 0 #409eff;
+}
+
+:deep(.tree-semantic-item) {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+:deep(.tree-semantic-item.is-checkable) {
+  border-color: rgba(64, 158, 255, 0.22);
 }
 
 .tree-slot-content {

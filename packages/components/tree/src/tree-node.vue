@@ -29,9 +29,7 @@
           :key="`${String(node.key)}-${index}`"
           :class="[indentUnitClassName, ns.is('end', isTrackEnd)]" />
       </span>
-      <span
-        :class="[itemIconClassName, semanticClassNames.itemIcon, ns.is('leaf', isLeafNode)]"
-        :style="semanticStyles.itemIcon">
+      <span :class="[itemIconClassName, ns.is('leaf', isLeafNode)]">
         <span
           v-if="isLeafNode && showLine"
           :class="[switcherClassName, switcherNoopClassName]"
@@ -64,8 +62,7 @@
       </span>
       <span
         v-if="shouldShowCheckbox"
-        :class="[itemCheckboxClassName, semanticClassNames.itemCheckbox]"
-        :style="semanticStyles.itemCheckbox"
+        :class="itemCheckboxClassName"
         @click.stop="handleCheckboxClick">
         <ElCheckbox
           :model-value="isCheckedNode"
@@ -73,9 +70,7 @@
           :disabled="isCurrentCheckboxDisabled"
           aria-label="Select tree node" />
       </span>
-      <span
-        :class="[itemTitleClassName, semanticClassNames.itemTitle]"
-        :style="semanticStyles.itemTitle">
+      <span :class="itemTitleClassName">
         <slot v-if="hasDefaultSlot" :node="slotNode" :data="node.data" />
         <template v-else>{{ node.label }}</template>
       </span>

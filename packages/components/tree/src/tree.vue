@@ -77,7 +77,7 @@ const createCurrentTreeIndex = () => buildTreeIndex(props.data, props.props)
  */
 const createResolvedClassNames = () =>
   resolveTreeSemanticRecord(props.classNames, {
-    componentProps: props
+    props
   })
 
 /**
@@ -85,7 +85,7 @@ const createResolvedClassNames = () =>
  */
 const createResolvedStyles = () =>
   resolveTreeSemanticRecord(props.styles, {
-    componentProps: props
+    props
   })
 
 const treeIndex = computed(createCurrentTreeIndex)

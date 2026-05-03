@@ -37,9 +37,9 @@ export interface TreeNodeProps {
 }
 
 /**
- * 语义化 DOM 名称在后续阶段继续作为稳定挂点使用。
+ * 语义化 DOM 名称仅覆盖 Tree 自身长期稳定持有的外壳结构。
  */
-export type TreeSemanticDOM = 'root' | 'item' | 'itemIcon' | 'itemCheckbox' | 'itemTitle'
+export type TreeSemanticDOM = 'root' | 'item'
 
 /**
  * 语义化记录同时服务于 `classNames` 与 `styles`。
@@ -52,18 +52,33 @@ export type TreeSemanticRecord<T> = Partial<Record<TreeSemanticDOM, T>>
 export type TreeClassValue = string | string[] | Record<string, boolean> | undefined
 
 /**
+ * 语义化样式工厂函数接收当前组件公开 props 快照。
+ */
+export interface TreeSemanticInfo<Props = unknown> {
+  props: Props
+}
+
+/**
+ * 语义化配置回调由组件主动调用，实际传入的 props 由组件保证。
+ * 使用双变参数让导出的 TreeProps 专用回调能兼容 Vue SFC 生成的默认泛型 prop。
+ */
+type TreeSemanticResolver<T, Props = unknown> = {
+  bivarianceHack(info: TreeSemanticInfo<Props>): TreeSemanticRecord<T>
+}['bivarianceHack']
+
+/**
  * `classNames` 支持对象形式和工厂函数形式。
  */
-export type TreeClassNames =
+export type TreeClassNames<Props = unknown> =
   | TreeSemanticRecord<TreeClassValue>
-  | ((info: { componentProps: unknown }) => TreeSemanticRecord<TreeClassValue>)
+  | TreeSemanticResolver<TreeClassValue, Props>
 
 /**
  * `styles` 与 `classNames` 形式一致，但值类型为内联样式对象。
  */
-export type TreeStyles =
+export type TreeStyles<Props = unknown> =
   | TreeSemanticRecord<CSSProperties>
-  | ((info: { componentProps: unknown }) => TreeSemanticRecord<CSSProperties>)
+  | TreeSemanticResolver<CSSProperties, Props>
 
 /**
  * 标准化节点是内部递归渲染骨架使用的统一结构。

@@ -122,6 +122,18 @@
   - strict object values
   - disabled / disableCheckbox / `checkable=false` boundaries
 
+## Stage 12 Planning Findings
+
+- `FlTree` semantic DOM styling is now intentionally limited to shell structures:
+  - `root` for the `role="tree"` root
+  - `item` for each `role="treeitem"` node shell
+- `itemIcon`, `itemCheckbox`, and `itemTitle` remain internal BEM/layout structures where needed,
+  but they are no longer public semantic DOM keys for `classNames` / `styles`.
+- The resolver factory argument is now shaped as `{ props }`, matching the public PRD contract.
+- `styles.item` is merged before the internal item style, so `--fl-tree-level` remains owned by the
+  component even when users pass item-level styles.
+- The playground now demonstrates only root / item shell styling for stage 12.
+
 ## Applicability Notes
 
 - `vue-best-practices` applies because this is a Vue 3 component task.

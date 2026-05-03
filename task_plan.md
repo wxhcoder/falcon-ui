@@ -2,8 +2,8 @@
 
 ## Goal
 
-Implement `FlTree` strictly by PRD phases. The current completed milestone is `阶段 9`, which now
-covers:
+Implement `FlTree` strictly by PRD phases. The current completed milestone is `阶段 12` in the PRD.
+The closed runtime milestones cover:
 
 - default collapsed behavior when no expand props are provided
 - `defaultExpandAll`
@@ -25,6 +25,10 @@ covers:
 - `disabled` conduct boundaries
 - `disableCheckbox` interaction boundaries
 - node-level `checkable=false` checkbox hiding and checked-key pruning
+- `showLine` line rendering and line + checkbox alignment fixes
+- default label-only content, default slot takeover, full-row content hit area
+- `switcherIcon = 'arrow' | 'plus-minus' | 'folder'`
+- semantic DOM shell styling through `classNames` / `styles` on `root` and `item`
 
 ## Phase Status
 
@@ -40,6 +44,9 @@ covers:
 | Phase 7     | complete | Default conducted checking and half-check state shipped             |
 | Phase 8     | complete | Strict-mode object contract and controlled half-check shipped       |
 | Phase 9     | complete | Disabled / disableCheckbox / node-level checkable boundaries closed |
+| Phase 10    | complete | `showLine` rendering and line + checkbox alignment closed           |
+| Phase 11    | complete | Default node content and switcher visual modes marked complete      |
+| Phase 12    | complete | Semantic DOM shell styling scoped to `root` / `item`                |
 
 ## Work Split
 
@@ -56,7 +63,7 @@ covers:
 
 ## Open Questions
 
-- None for phases 7-9. The remaining work is outside the current PRD slice.
+- None for phase 12. Phase 13 async loading remains the next PRD slice.
 
 ## Errors Encountered
 

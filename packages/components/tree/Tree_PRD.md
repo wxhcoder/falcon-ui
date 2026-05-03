@@ -22,8 +22,8 @@
 - [x] 阶段 8：开发严格勾选与半选态功能
 - [x] 阶段 9：开发禁用节点联动边界功能
 - [x] 阶段 10：开发 `showLine` 配置与样式功能
-- [ ] 阶段 11：开发树节点默认内容渲染与 switcher 视觉模式
-- [ ] 阶段 12：开发 Tree 语义化 DOM 样式定制功能
+- [x] 阶段 11：开发树节点默认内容渲染与 switcher 视觉模式
+- [x] 阶段 12：开发 Tree 语义化 DOM 样式定制功能
 - [ ] 阶段 13：开发树节点异步加载功能
 - [ ] 阶段 14：开发树节点拖拽功能
 - [ ] 阶段 15：开发树键盘导航与无障碍功能
@@ -269,17 +269,16 @@
 - 首版固定以下语义化结构名：
   - `root`
   - `item`
-  - `itemIcon`
-  - `itemTitle`
 - 语义化结构含义：
   - `root`：树根容器
   - `item`：单个树节点条目容器
-  - `itemIcon`：节点图标区域
-  - `itemTitle`：节点标题区域
 - 输入形式支持：
   - `Partial<Record<TreeSemanticDOM, string | CSSProperties>>`
   - `(info: { props }) => Partial<Record<TreeSemanticDOM, string | CSSProperties>>`
+- 函数形式中的 `info.props` 固定为当前 `FlTree` 公开 props 快照。
 - 该能力仅承担样式扩展，不负责标题内容替换、图标逻辑替换和交互行为控制。
+- 节点内部内容区由 `default` 插槽接管；`itemIcon`、`itemCheckbox`、`itemTitle` 不作为
+  `classNames` / `styles` 的公开语义化 DOM 挂点。
 
 ### 4.8 筛选与高亮
 
@@ -373,7 +372,7 @@ type TreeKey = string | number
 
 type TreeSwitcherIconMode = 'arrow' | 'plus-minus' | 'folder'
 
-type TreeSemanticDOM = 'root' | 'item' | 'itemIcon' | 'itemTitle'
+type TreeSemanticDOM = 'root' | 'item'
 
 interface TreeNodeProps {
   label?: string
@@ -551,7 +550,7 @@ interface TreeExpose {
 - 事件 payload 必须回传原始节点对象与标准化 keys，减少业务侧二次查询。
 - 勾选、展开、选中、拖拽四类核心能力都应具备可单测的纯逻辑层。
 - `classNames` / `styles` 的挂点必须稳定映射到
-  `root / item / itemIcon / itemTitle`。
+  `root / item`。
 - 样式文件优先消费 Element Plus Tree 相关 CSS 变量。
 
 ## 7. 风险与待确认项
@@ -562,7 +561,7 @@ interface TreeExpose {
 - 拖拽排序是否只做事件回传，还是允许组件内部直接重排 `data` 视图。
 - 异步加载与受控 `expandedKeys`、`loadedKeys` 同时存在时，状态优先级需要固定。
 - `default` 插槽与虚拟滚动同时开启时，是否存在高度测量抖动。
-- 普通渲染与虚拟渲染下，`item / itemIcon / itemTitle` 的语义挂点是否能保持一致。
+- 普通渲染与虚拟渲染下，`root / item` 的语义挂点是否能保持一致。
 
 ## 8. 验收标准（首版）
 
@@ -582,8 +581,7 @@ interface TreeExpose {
 - 未传 `default` 插槽时默认仅渲染 `label`；传入
   `default="{ node, data }"` 后，节点内容区完全由业务侧接管。
 - 节点内容区 hover、selected 与点击热区默认铺满整行，不依赖 `blockNode`。
-- `classNames` 与 `styles` 可稳定作用于
-  `root / item / itemIcon / itemTitle` 四类语义化结构。
+- `classNames` 与 `styles` 可稳定作用于 `root / item` 两类语义化结构。
 - 默认视觉样式可跟随 Element Plus Tree / 全局色板变量变化。
 
 ## 9. 测试矩阵（建议）
@@ -620,10 +618,9 @@ interface TreeExpose {
 
 1. `classNames.root` 可稳定挂载到树根容器。
 2. `classNames.item` / `styles.item` 可稳定挂载到节点条目容器。
-3. `classNames.itemIcon` / `styles.itemIcon` 仅影响图标区域。
-4. `classNames.itemTitle` / `styles.itemTitle` 仅影响标题区域。
-5. 传入函数形式时，可基于 `componentProps` 返回语义化结构映射。
-6. 普通渲染与虚拟渲染模式下，四类语义化结构挂点语义保持一致。
+3. 传入函数形式时，可基于 `props` 返回语义化结构映射。
+4. 节点内部 icon / checkbox / title DOM 不作为公开语义化挂点消费。
+5. 普通渲染与虚拟渲染模式下，两类语义化结构挂点语义保持一致。
 
 ### 9.6 阶段 11 默认内容与 `switcherIcon`
 
@@ -647,6 +644,10 @@ interface TreeExpose {
 3. `showLine = { showLeafIcon: false }` 时，叶子节点不额外渲染叶子图标，但连线结构保持稳定。
 4. `showLine` 开启后，展开器、叶子节点占位与标题内容区的横向对齐保持一致。
 5. 展开 / 收起、选中 / 勾选等既有交互在连线模式下不出现布局抖动或点击热区偏移。
+6. `showLine + checkable` 同时开启时，展开器、复选框与标题文本必须按真实节点行高垂直居中。
+7. `--fl-tree-node-content-height` 仅作为最小行高 token，不作为连线实际高度上限。
+8. 叶子节点末端连线必须跟随真实行高拉伸；不得使用固定 `26px` 或固定
+   `--fl-tree-node-content-height` 计算竖线高度与横线中心点。
 
 ### 9.8 视觉变量继承
 
@@ -1178,3 +1179,119 @@ interface TreeExpose {
 
 - 当前判定：阶段 7、阶段 8、阶段 9、阶段 10 已完成。
 - 下一阶段状态：阶段 7-10 已归档；阶段 11 为下一阶段开发内容。
+
+## 18. 阶段 10 回归修复文档：连线模式 + 复选框对齐
+
+### 18.1 问题范围
+
+本次回归只修复 `showLine = true` 且 `checkable = true` 时的视觉问题：
+
+1. 展开 / 收缩图标、复选框与标题文本在同一节点行内垂直不对齐。
+2. 叶子节点连线按固定节点高度绘制，遇到复选框或自定义内容撑高节点后出现断层。
+
+### 18.2 根因
+
+- `packages/theme/src/tree.scss` 中 `--fl-tree-node-content-height` 被同时用作最小行高与连线实际高度。
+- `.fl-tree__item-content` 旧实现使用 `align-items: flex-start`，子元素只按自身高度对齐。
+- `.fl-tree__switcher-leaf-line::before / ::after` 旧实现依赖固定
+  `var(--fl-tree-node-content-height)` 计算竖线高度与横线中心点。
+- 当 `ElCheckbox` 或节点内容让真实行高超过默认高度时，连线仍停留在固定高度，产生视觉断层。
+
+### 18.3 实现方案
+
+- 保留 `--fl-tree-node-content-height: var(--el-tree-node-content-height, 26px)`，
+  但只将其作为节点最小行高 token。
+- 将 `.fl-tree__item-content` 调整为 `align-items: stretch`，让 switcher、checkbox、
+  title 共享真实节点行高。
+- 让 `.fl-tree__switcher` 与 `.fl-tree__switcher-leaf-line` 使用 `align-self: stretch`，
+  叶子连线占位跟随当前节点行高拉伸。
+- 将叶子连线竖线从固定 `height: var(--fl-tree-node-content-height)` 改为
+  `top: 0; bottom: 0`，横线中心从固定高度的一半改为 `top: 50%`。
+- 最后一个叶子节点的竖线只绘制到当前真实行高的中线：`height: 50%; bottom: auto`。
+- 本次不修改 `tree.vue` 状态逻辑，不扩展 `showLine` 对象形态，不进入后续阶段能力。
+
+### 18.4 回归测试
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 新增覆盖：
+  - 样式源码回归：确认连线使用拉伸 / 百分比策略，且不再使用固定
+    `--fl-tree-node-content-height` 作为实际连线高度。
+  - 结构回归：`showLine + checkable` 同时开启时，branch 节点保留 switcher 与 checkbox，
+    leaf 节点保留 `switcher-leaf-line` 与 checkbox，且 checkbox 点击不误触发
+    `node-click` / `select` / `node-expand`。
+- 已执行命令：
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm build:lib:style`
+  - `pnpm exec eslint packages/components/tree/src/tree-node.vue packages/components/tree/__test__/tree.test.ts`
+- 执行结果：
+  - 树组件单测：`49 passed`
+  - `build:lib:style`：通过
+  - 目标 ESLint：通过
+
+### 18.5 视觉验收
+
+- Playground 验证地址：`http://localhost:5173/components`
+- 验证配置：
+  - `showLine = true`
+  - `checkable = true`
+  - 默认展开树节点
+- 验收结论：
+  - 展开 / 收缩图标、复选框与文本在节点行内垂直居中。
+  - 父子纵向连线与叶子末端横线连续，未观察到因复选框撑高导致的断层。
+
+## 19. 阶段 12 测试文档：语义化 DOM 外壳样式定制
+
+### 19.1 测试范围
+
+阶段 12 只验证 `classNames` / `styles` 对 Tree 外壳结构的样式扩展能力：
+
+1. `root` 挂点稳定作用于树根容器。
+2. `item` 挂点稳定作用于节点条目外层。
+3. 函数形式统一通过 `info.props` 读取当前 Tree props。
+4. `itemIcon`、`itemCheckbox`、`itemTitle` 不再作为公开语义化 DOM 挂点。
+5. 语义化样式不改变展开、选择、勾选和 default 插槽事件链路。
+
+### 19.2 当前固定契约
+
+- `TreeSemanticDOM = 'root' | 'item'`
+- `root`：树根容器，对应 `role="tree"`。
+- `item`：单个节点外层容器，对应 `role="treeitem"`。
+- `classNames` 与 `styles` 支持对象形式和函数形式。
+- 函数形式入参固定为 `{ props }`，不再使用 `componentProps` 作为公开契约。
+- checkbox 仍由 Tree 内部控制交互，但不作为 `classNames` / `styles` 的公开语义化挂点。
+- 节点内容区继续由 `default` 插槽接管。
+
+### 19.3 测试内容
+
+| 编号 | 测试内容             | 关注点                                     | 预期结果                                      |
+| ---- | -------------------- | ------------------------------------------ | --------------------------------------------- |
+| 1    | 对象形式 root / item | class 与 style 是否挂到正确外壳 DOM        | 根容器和节点外层分别拿到语义化 class / style  |
+| 2    | item 内部样式变量    | `styles.item` 是否破坏 `--fl-tree-level`   | 内部层级变量仍以组件计算值为准                |
+| 3    | 函数形式 props 入参  | 是否能通过 `info.props` 读取当前 props     | props 变化后语义化 class / style 重新计算     |
+| 4    | 内部挂点移除         | `itemIcon/itemCheckbox/itemTitle` 是否失效 | 类型与运行时都不把三者作为公开语义化挂点消费  |
+| 5    | 事件链路回归         | 语义化样式是否影响交互事件顺序             | `node-click/select/expand/check` 顺序保持不变 |
+| 6    | Playground 可视化    | root / item 外壳样式是否可观察             | 示例可切换语义化样式且事件日志继续工作        |
+
+### 19.4 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- Playground 验证入口：
+  - `play/src/views/components-view.vue`
+- 已执行命令：
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec eslint packages/components/tree/src/tree-types.ts packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm --dir play build`
+- 执行结果：
+  - 树组件单测：`52 passed`
+  - 目标 ESLint：通过
+  - `vue-tsc`：通过
+  - `play build`：通过
+  - `play build` 仍存在既有 chunk size warning，本阶段未引入构建失败
+
+### 19.5 当前判定
+
+- 当前判定：阶段 12 已完成。
+- 下一阶段状态：阶段 12 已归档；阶段 13 为树节点异步加载功能。

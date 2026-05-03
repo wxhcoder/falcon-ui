@@ -1,6 +1,6 @@
 import type { ComponentPublicInstance, ExtractPublicPropTypes, PropType } from 'vue'
 import type {
-  TreeClassNames,
+  TreeClassNames as TreeClassNamesSource,
   TreeClassValue,
   TreeData,
   TreeIndex,
@@ -9,9 +9,10 @@ import type {
   TreeNodeModel,
   TreeNodeProps,
   TreeSemanticDOM,
+  TreeSemanticInfo,
   TreeSemanticRecord,
   TreeSwitcherIconMode,
-  TreeStyles
+  TreeStyles as TreeStylesSource
 } from './tree-types'
 
 export interface TreeCheckedKeysObject {
@@ -73,10 +74,10 @@ export const treeProps = {
     default: () => ({ ...treeNodePropsDefaults })
   },
   classNames: {
-    type: [Object, Function] as PropType<TreeClassNames>
+    type: [Object, Function] as PropType<TreeClassNamesSource>
   },
   styles: {
-    type: [Object, Function] as PropType<TreeStyles>
+    type: [Object, Function] as PropType<TreeStylesSource>
   },
   defaultExpandAll: {
     type: Boolean,
@@ -117,6 +118,10 @@ export const treeProps = {
 } as const
 
 export type TreeProps = ExtractPublicPropTypes<typeof treeProps>
+
+export type TreeClassNames = TreeClassNamesSource<TreeProps>
+
+export type TreeStyles = TreeStylesSource<TreeProps>
 
 /**
  * 树节点展开事件统一返回本次节点状态与当前源展开键集合。
@@ -708,9 +713,9 @@ export const createTreeEventNode = ({
 export const resolveTreeSemanticRecord = <T>(
   source:
     | TreeSemanticRecord<T>
-    | ((info: { componentProps: unknown }) => TreeSemanticRecord<T>)
+    | ((info: TreeSemanticInfo<TreeProps>) => TreeSemanticRecord<T>)
     | undefined,
-  info: { componentProps: unknown }
+  info: TreeSemanticInfo<TreeProps>
 ): TreeSemanticRecord<T> => {
   if (typeof source === 'function') {
     return source(info) ?? {}
@@ -720,7 +725,6 @@ export const resolveTreeSemanticRecord = <T>(
 }
 
 export type {
-  TreeClassNames,
   TreeClassValue,
   TreeData,
   TreeIndex,
@@ -729,7 +733,7 @@ export type {
   TreeNodeModel,
   TreeNodeProps,
   TreeSemanticDOM,
+  TreeSemanticInfo,
   TreeSemanticRecord,
-  TreeSwitcherIconMode,
-  TreeStyles
+  TreeSwitcherIconMode
 }
