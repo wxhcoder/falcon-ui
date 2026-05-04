@@ -1,11 +1,11 @@
 import type { VueWrapper } from '@vue/test-utils'
-import { enableAutoUnmount, mount } from '@vue/test-utils'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { MinusSquareOutlined, PlusSquareOutlined } from '@falcon-ui/icons'
-import { CaretBottom, CaretRight, Folder, FolderOpened } from '@element-plus/icons-vue'
+import { CaretBottom, CaretRight, Folder, FolderOpened, Loading } from '@element-plus/icons-vue'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { h, nextTick, type CSSProperties } from 'vue'
+import { defineComponent, h, nextTick, type CSSProperties } from 'vue'
 import FlTree, {
   FlTree as FlTreeFromTreePackage,
   type TreeCheckEvent,
@@ -14,11 +14,13 @@ import FlTree, {
   type TreeEmits,
   type TreeExpandPayload,
   type TreeKey,
+  type TreeLoadEvent,
   type TreeNode,
   type TreeNodeModel,
   type TreeProps,
   type TreeSemanticDOM,
   type TreeSelectEvent,
+  type TreeSwitcherLoadingIcon,
   type TreeSwitcherIconMode
 } from '@falcon-ui/components/tree'
 import { FlTree as FlTreeFromComponents } from '@falcon-ui/components'
@@ -199,6 +201,39 @@ describe('FlTree 契约', () => {
       ]
     }
   ]
+
+  /**
+   * 提供一个无子节点但可通过 loadData 加载的异步树节点。
+   */
+  const createAsyncTreeData = () => [
+    {
+      key: 'async-root',
+      label: 'Async Root'
+    },
+    {
+      key: 'forced-leaf',
+      label: 'Forced Leaf',
+      isLeaf: true
+    }
+  ]
+
+  /**
+   * 构造可手动 resolve / reject 的 Promise，便于验证 loading 中间态。
+   */
+  const createDeferred = <T = unknown>() => {
+    let resolve!: (value: T | PromiseLike<T>) => void
+    let reject!: (reason?: unknown) => void
+    const promise = new Promise<T>((promiseResolve, promiseReject) => {
+      resolve = promiseResolve
+      reject = promiseReject
+    })
+
+    return {
+      promise,
+      reject,
+      resolve
+    }
+  }
 
   /**
    * 提供包含 disabled / selectable=false 边界的树数据。
@@ -404,6 +439,9 @@ describe('FlTree 契约', () => {
     expect(treeScss).toContain('@include bem.e(indent-unit)')
     expect(treeScss).toContain('@include bem.e(switcher-leaf-line)')
     expect(treeScss).toContain('@include bem.e(item-checkbox)')
+    expect(treeScss).toContain('&.is-loading')
+    expect(treeScss).toContain('animation: rotating 2s linear infinite;')
+    expect(treeScss).toContain('@keyframes rotating')
     expect(treeScss).toContain('cursor: pointer;')
     expect(treeScss).toContain('align-items: stretch;')
     expect(treeScss).toContain('align-self: stretch;')
@@ -652,18 +690,26 @@ describe('FlTree 契约', () => {
     expect(treeIndexSource).toContain('TreeCheckArgs')
     expect(treeIndexSource).toContain('TreeCheckEvent')
     expect(treeIndexSource).toContain('TreeExpandPayload')
+    expect(treeIndexSource).toContain('TreeLoadArgs')
+    expect(treeIndexSource).toContain('TreeLoadData')
+    expect(treeIndexSource).toContain('TreeLoadEvent')
     expect(treeIndexSource).toContain('TreeSelectEvent')
     expect(treeIndexSource).toContain('TreeNodeModel')
     expect(treeIndexSource).toContain('TreeNode')
+    expect(treeIndexSource).toContain('TreeSwitcherLoadingIcon')
     expect(treeIndexSource).toContain('TreeSwitcherIconMode')
     expect(treeIndexSource).not.toContain('FlTreeEmits')
     expect(componentsIndexSource).toContain('TreeEmits')
     expect(componentsIndexSource).toContain('TreeCheckArgs')
     expect(componentsIndexSource).toContain('TreeCheckEvent')
     expect(componentsIndexSource).toContain('TreeExpandPayload')
+    expect(componentsIndexSource).toContain('TreeLoadArgs')
+    expect(componentsIndexSource).toContain('TreeLoadData')
+    expect(componentsIndexSource).toContain('TreeLoadEvent')
     expect(componentsIndexSource).toContain('TreeSelectEvent')
     expect(componentsIndexSource).toContain('TreeNodeModel')
     expect(componentsIndexSource).toContain('TreeNode')
+    expect(componentsIndexSource).toContain('TreeSwitcherLoadingIcon')
     expect(componentsIndexSource).toContain('TreeSwitcherIconMode')
     expect(componentsIndexSource).not.toContain('FlTreeEmits')
     expect(globalDts).toContain('FlTree: typeof FlTree')
@@ -674,7 +720,9 @@ describe('FlTree 契约', () => {
       TreeProps,
       TreeCheckEvent,
       TreeExpandPayload,
+      TreeLoadEvent,
       TreeSelectEvent,
+      TreeSwitcherLoadingIcon,
       TreeSwitcherIconMode,
       TreeEmits,
       TreeNodeModel
@@ -1903,6 +1951,313 @@ describe('FlTree 契约', () => {
     ])
     expect(isItemSelected(wrapper, 'slot-root')).toBe(true)
     expect(wrapper.emitted('update:checkedKeys')).toEqual([[['root', 'leaf']]])
+  })
+
+  it('用户展开无 children 的异步节点时触发 loadData，并在成功后同步 loadedKeys', async () => {
+    const deferred = createDeferred<TreeData[]>()
+    const eventOrder: string[] = []
+    const loadData = vi.fn((_node: TreeNode) => deferred.promise)
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        loadData,
+        'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
+        onNodeExpand: () => eventOrder.push('node-expand'),
+        onExpand: () => eventOrder.push('expand'),
+        'onUpdate:loadedKeys': () => eventOrder.push('update:loadedKeys'),
+        onLoad: () => eventOrder.push('load')
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Async Root').attributes('aria-expanded')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Forced Leaf').attributes('aria-expanded')).toBeUndefined()
+    expect(
+      findTreeItemByText(wrapper, 'Async Root').find('.fl-tree__switcher-button').exists()
+    ).toBe(true)
+    expect(
+      findTreeItemByText(wrapper, 'Forced Leaf').find('.fl-tree__switcher-button').exists()
+    ).toBe(false)
+
+    await getSwitcherButton(wrapper, 'Async Root').trigger('click')
+    await nextTick()
+
+    expect(loadData).toHaveBeenCalledTimes(1)
+    expect(loadData.mock.calls[0]?.[0]).toMatchObject({
+      key: 'async-root',
+      label: 'Async Root',
+      childNodes: []
+    })
+    expect(wrapper.findComponent(Loading).exists()).toBe(true)
+    expect(eventOrder).toEqual(['update:expandedKeys', 'node-expand', 'expand'])
+
+    await getSwitcherButton(wrapper, 'Async Root').trigger('click')
+    await nextTick()
+
+    expect(loadData).toHaveBeenCalledTimes(1)
+
+    deferred.resolve([
+      {
+        key: 'async-child',
+        label: 'Async Child'
+      }
+    ])
+    await flushPromises()
+    await nextTick()
+
+    expect(eventOrder).toEqual([
+      'update:expandedKeys',
+      'node-expand',
+      'expand',
+      'update:loadedKeys',
+      'load'
+    ])
+    expect(wrapper.emitted('update:loadedKeys')).toEqual([[['async-root']]])
+
+    const loadEvents = wrapper.emitted('load')
+    const [loadedKeys, loadEvent] = loadEvents?.[0] as [TreeKey[], TreeLoadEvent]
+
+    expect(loadedKeys).toEqual(['async-root'])
+    expect(loadEvent).toMatchObject({
+      key: 'async-root',
+      loadedKeys: ['async-root'],
+      node: {
+        key: 'async-root'
+      }
+    })
+    expect(wrapper.findComponent(Loading).exists()).toBe(false)
+  })
+
+  it('加载中默认使用 Element Plus Loading，并支持 switcherLoadingIcon 覆盖', async () => {
+    const treePropSource = readProjectFile('packages/components/tree/src/tree.ts')
+    const defaultDeferred = createDeferred()
+    const customDeferred = createDeferred()
+    const CustomLoadingIcon: TreeSwitcherLoadingIcon = defineComponent({
+      name: 'CustomTreeLoadingIcon',
+      setup: () => () => h('span', { class: 'custom-tree-loading-icon' })
+    })
+
+    expect(treePropSource).toContain("import { Loading } from '@element-plus/icons-vue'")
+    expect(treePropSource).toContain('default: Loading')
+
+    const defaultWrapper = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        loadData: () => defaultDeferred.promise
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(defaultWrapper, 'Async Root').trigger('click')
+    await nextTick()
+
+    expect(defaultWrapper.findComponent(Loading).exists()).toBe(true)
+    expect(defaultWrapper.find('.custom-tree-loading-icon').exists()).toBe(false)
+
+    const customWrapper = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        loadData: () => customDeferred.promise,
+        switcherLoadingIcon: CustomLoadingIcon
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(customWrapper, 'Async Root').trigger('click')
+    await nextTick()
+
+    expect(customWrapper.find('.custom-tree-loading-icon').exists()).toBe(true)
+    expect(customWrapper.findComponent(Loading).exists()).toBe(false)
+  })
+
+  it('初始展开与受控 expandedKeys 外部变更不会自动触发 loadData', async () => {
+    const loadData = vi.fn(() => Promise.resolve())
+    const wrapperWithDefaultExpandAll = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        defaultExpandAll: true,
+        loadData
+      }
+    })
+
+    await nextTick()
+
+    expect(wrapperWithDefaultExpandAll.emitted('update:expandedKeys')).toBeUndefined()
+    expect(loadData).not.toHaveBeenCalled()
+
+    const wrapperWithDefaultExpandedKeys = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        defaultExpandedKeys: ['async-root'],
+        loadData
+      }
+    })
+
+    await nextTick()
+
+    expect(
+      findTreeItemByText(wrapperWithDefaultExpandedKeys, 'Async Root').attributes('aria-expanded')
+    ).toBe('true')
+    expect(loadData).not.toHaveBeenCalled()
+
+    const wrapperWithControlledExpandedKeys = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        expandedKeys: [],
+        loadData
+      }
+    })
+
+    await nextTick()
+    await wrapperWithControlledExpandedKeys.setProps({
+      expandedKeys: ['async-root']
+    })
+    await nextTick()
+
+    expect(
+      findTreeItemByText(wrapperWithControlledExpandedKeys, 'Async Root').attributes(
+        'aria-expanded'
+      )
+    ).toBe('true')
+    expect(loadData).not.toHaveBeenCalled()
+  })
+
+  it('受控 loadedKeys 只请求外部更新，外部回写后不再重复加载', async () => {
+    const loadData = vi.fn(() => Promise.resolve())
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        loadedKeys: [],
+        loadData
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Async Root').trigger('click')
+    await flushPromises()
+    await nextTick()
+
+    expect(loadData).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('update:loadedKeys')).toEqual([[['async-root']]])
+    expect(wrapper.emitted('load')).toHaveLength(1)
+    expect(
+      findTreeItemByText(wrapper, 'Async Root').find('.fl-tree__switcher-button').exists()
+    ).toBe(true)
+
+    await wrapper.setProps({
+      loadedKeys: ['async-root']
+    })
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Async Root').attributes('aria-expanded')).toBeUndefined()
+    expect(
+      findTreeItemByText(wrapper, 'Async Root').find('.fl-tree__switcher-button').exists()
+    ).toBe(false)
+  })
+
+  it('loadData 失败时清理 loading 且不写入 loadedKeys，后续可重试', async () => {
+    const firstDeferred = createDeferred()
+    const secondDeferred = createDeferred()
+    const loadData = vi.fn(() =>
+      loadData.mock.calls.length === 1 ? firstDeferred.promise : secondDeferred.promise
+    )
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        loadData
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Async Root').trigger('click')
+    await nextTick()
+
+    expect(wrapper.findComponent(Loading).exists()).toBe(true)
+
+    firstDeferred.reject(new Error('load failed'))
+    await flushPromises()
+    await nextTick()
+
+    expect(wrapper.findComponent(Loading).exists()).toBe(false)
+    expect(wrapper.emitted('update:loadedKeys')).toBeUndefined()
+    expect(wrapper.emitted('load')).toBeUndefined()
+
+    await getSwitcherButton(wrapper, 'Async Root').trigger('click')
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Async Root').trigger('click')
+    await nextTick()
+
+    expect(loadData).toHaveBeenCalledTimes(2)
+
+    secondDeferred.resolve(undefined)
+    await flushPromises()
+    await nextTick()
+
+    expect(wrapper.emitted('update:loadedKeys')).toEqual([[['async-root']]])
+    expect(wrapper.emitted('load')).toHaveLength(1)
+  })
+
+  it('外部更新 data 后异步子节点进入既有交互、插槽、连线与语义化结构', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        showLine: true,
+        checkable: true,
+        loadData: () => Promise.resolve(),
+        classNames: {
+          root: 'async-semantic-root',
+          item: 'async-semantic-item'
+        }
+      },
+      slots: {
+        default: ({ node }: { node: TreeNode }) =>
+          h(
+            'span',
+            {
+              class: 'async-slot-node'
+            },
+            `async-${String(node.key)}`
+          )
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(wrapper, 'async-async-root').trigger('click')
+    await flushPromises()
+    await wrapper.setProps({
+      data: [
+        {
+          key: 'async-root',
+          label: 'Async Root',
+          children: [
+            {
+              key: 'async-child',
+              label: 'Async Child',
+              isLeaf: true
+            }
+          ]
+        }
+      ]
+    })
+    await nextTick()
+
+    expect(wrapper.get('[role="tree"]').classes()).toContain('async-semantic-root')
+    expect(findTreeItemByText(wrapper, 'async-async-child').classes()).toContain(
+      'async-semantic-item'
+    )
+    expect(
+      findTreeItemByText(wrapper, 'async-async-child').find('.fl-tree__switcher-leaf-line').exists()
+    ).toBe(true)
+
+    await getItemContent(wrapper, 'async-async-child').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:selectedKeys')).toEqual([[['async-child']]])
+    expect(hasItemCheckbox(wrapper, 'async-async-child')).toBe(true)
+    expect(findTreeItemByText(wrapper, 'async-async-child').attributes('aria-checked')).toBe(
+      'false'
+    )
   })
 
   it('supports arrow, plus-minus, and folder switcherIcon modes', async () => {

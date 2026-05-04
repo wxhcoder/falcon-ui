@@ -118,6 +118,10 @@
     color: inherit;
     cursor: pointer;
     appearance: none;
+
+    &:disabled {
+      cursor: default;
+    }
   }
 
   @include bem.e(switcher-icon) {
@@ -127,6 +131,10 @@
     width: 100%;
     height: 100%;
     font-size: 14px;
+
+    &.is-loading {
+      animation: rotating 2s linear infinite;
+    }
   }
 
   @include bem.e(switcher-dot) {
@@ -213,5 +221,15 @@
       height: 50%;
       bottom: auto;
     }
+  }
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }

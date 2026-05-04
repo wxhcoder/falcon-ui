@@ -1,4 +1,5 @@
-import type { ComponentPublicInstance, ExtractPublicPropTypes, PropType } from 'vue'
+import { Loading } from '@element-plus/icons-vue'
+import type { Component, ComponentPublicInstance, ExtractPublicPropTypes, PropType } from 'vue'
 import type {
   TreeClassNames as TreeClassNamesSource,
   TreeClassValue,
@@ -21,6 +22,10 @@ export interface TreeCheckedKeysObject {
 }
 
 export type TreeCheckedKeys = TreeKey[] | TreeCheckedKeysObject
+
+export type TreeLoadData = (node: TreeNode) => Promise<unknown>
+
+export type TreeSwitcherLoadingIcon = Component
 
 /**
  * 首版使用稳定的默认字段映射，保证常规树数据可直接渲染。
@@ -50,8 +55,8 @@ export const treeProps = {
     default: 'arrow'
   },
   switcherLoadingIcon: {
-    type: null as unknown as PropType<unknown>,
-    default: undefined
+    type: [Object, Function] as PropType<TreeSwitcherLoadingIcon>,
+    default: Loading
   },
   selectable: {
     type: Boolean,
@@ -114,6 +119,14 @@ export const treeProps = {
   checkedKeys: {
     type: [Array, Object] as PropType<TreeCheckedKeys | undefined>,
     default: undefined
+  },
+  loadData: {
+    type: Function as PropType<TreeLoadData | undefined>,
+    default: undefined
+  },
+  loadedKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
+    default: undefined
   }
 } as const
 
@@ -157,6 +170,15 @@ export interface TreeCheckEvent {
 }
 
 /**
+ * 树节点异步加载完成事件统一返回当前节点与最新已加载键集合。
+ */
+export interface TreeLoadEvent {
+  node: TreeNode
+  key: TreeKey
+  loadedKeys: TreeKey[]
+}
+
+/**
  * 节点组件实例通过 Vue public instance 向外暴露。
  */
 export type TreeNodeInstance = ComponentPublicInstance | null
@@ -189,6 +211,11 @@ export type TreeSelectArgs = [selectedKeys: TreeKey[], event: TreeSelectEvent]
  * `check` 事件固定采用双参数出参。
  */
 export type TreeCheckArgs = [checkedKeys: TreeCheckedKeys, event: TreeCheckEvent]
+
+/**
+ * `load` 事件固定采用双参数出参。
+ */
+export type TreeLoadArgs = [loadedKeys: TreeKey[], event: TreeLoadEvent]
 
 /**
  * 判断当前值是否为普通对象。
@@ -298,6 +325,17 @@ const isTreeCheckArgs = (checkedKeys: TreeCheckedKeys, event: TreeCheckEvent) =>
   typeof event.event.type === 'string'
 
 /**
+ * 验证 `load` 事件的双元组参数。
+ */
+const isTreeLoadArgs = (loadedKeys: TreeKey[], event: TreeLoadEvent) =>
+  Array.isArray(loadedKeys) &&
+  loadedKeys.every((item) => isTreeKey(item)) &&
+  isTreeKey(event.key) &&
+  isTreeNode(event.node) &&
+  Array.isArray(event.loadedKeys) &&
+  event.loadedKeys.every((item) => isTreeKey(item))
+
+/**
  * 阶段 3 正式开放展开状态双向同步与展开事件。
  */
 export const treeEmits = {
@@ -315,6 +353,11 @@ export const treeEmits = {
    * 请求外部同步当前源勾选键集合。
    */
   'update:checkedKeys': (value: TreeCheckedKeys) => isTreeCheckedKeys(value),
+  /**
+   * 请求外部同步当前已完成异步加载的节点键集合。
+   */
+  'update:loadedKeys': (value: TreeKey[]) =>
+    Array.isArray(value) && value.every((item) => isTreeKey(item)),
   /**
    * 节点展开状态切换后抛出当前节点的展开结果。
    */
@@ -337,6 +380,10 @@ export const treeEmits = {
    * 节点复选框勾选状态切换后抛出当前勾选结果。
    */
   check: (...args: TreeCheckArgs) => isTreeCheckArgs(...args),
+  /**
+   * 节点异步加载完成后抛出最新已加载结果。
+   */
+  load: (...args: TreeLoadArgs) => isTreeLoadArgs(...args),
   /**
    * 节点被用户展开时抛出切换后的节点对象与组件实例。
    */
@@ -564,6 +611,32 @@ export const filterTreeCheckedKeys = (
   }
 
   return nextCheckedKeys
+}
+
+/**
+ * 过滤无效、重复或已从树结构中移除的异步加载完成键。
+ */
+export const filterTreeLoadedKeys = (
+  keys: TreeKey[] | undefined,
+  keyNodeMap: Map<TreeKey, TreeNodeModel>
+): TreeKey[] => {
+  if (!Array.isArray(keys)) {
+    return []
+  }
+
+  const nextLoadedKeys: TreeKey[] = []
+  const visitedKeys = new Set<TreeKey>()
+
+  for (const key of keys) {
+    if (!isTreeKey(key) || visitedKeys.has(key) || !keyNodeMap.has(key)) {
+      continue
+    }
+
+    visitedKeys.add(key)
+    nextLoadedKeys.push(key)
+  }
+
+  return nextLoadedKeys
 }
 
 /**

@@ -24,7 +24,7 @@
 - [x] 阶段 10：开发 `showLine` 配置与样式功能
 - [x] 阶段 11：开发树节点默认内容渲染与 switcher 视觉模式
 - [x] 阶段 12：开发 Tree 语义化 DOM 样式定制功能
-- [ ] 阶段 13：开发树节点异步加载功能
+- [x] 阶段 13：开发树节点异步加载功能
 - [ ] 阶段 14：开发树节点拖拽功能
 - [ ] 阶段 15：开发树键盘导航与无障碍功能
 - [ ] 阶段 16：开发目录树模式
@@ -298,7 +298,10 @@
   - 当前节点尚未加载
   - 当前节点被展开
 - 提供 `loadedKeys` 受控能力，并同步支持 `update:loadedKeys`。
-- 节点处于异步加载中时，`switcherLoadingIcon` 覆盖当前 `switcherIcon` 模式展示。
+- 节点处于异步加载中时，默认使用 Element Plus `Loading` 图标覆盖当前
+  `switcherIcon` 模式展示；传入 `switcherLoadingIcon` 时使用自定义加载图标。
+  `switcherLoadingIcon` 类型固定为可选 `TreeSwitcherLoadingIcon` 组件类型，prop
+  默认值为 Element Plus `Loading`；可不传，但不接受 `null` 空值。
 - 遵守 Ant Design FAQ 边界：`defaultExpandAll` 仅初始化生效。
 
 ### 4.10 拖拽能力
@@ -1294,4 +1297,71 @@ interface TreeExpose {
 ### 19.5 当前判定
 
 - 当前判定：阶段 12 已完成。
-- 下一阶段状态：阶段 12 已归档；阶段 13 为树节点异步加载功能。
+- 下一阶段状态：阶段 12 已归档；阶段 13 结果见“阶段 13 测试文档”。
+
+## 20. 阶段 13 测试文档：树节点异步加载
+
+### 20.1 测试范围
+
+阶段 13 只验证异步加载链路，不进入拖拽、键盘导航、目录树和虚拟树能力：
+
+1. `loadData(node)` 用户展开触发。
+2. `loadedKeys` 受控 / 非受控状态合并。
+3. `update:loadedKeys` / `load` 事件契约。
+4. 加载中 switcher icon 覆盖与重复请求保护。
+5. 加载失败后的 loading 清理与可重试边界。
+6. Playground 外部更新 `data` 的异步树示例。
+
+### 20.2 当前固定契约
+
+- `loadData?: (node: TreeNode) => Promise<unknown>`。
+- `Promise<unknown>` 的 resolve 值不被组件消费；子节点必须由父组件更新 `data`。
+- `loadedKeys` 为受控已加载 key 集合；非受控模式下组件内部维护加载完成结果。
+- `load(loadedKeys, event)` 在加载成功后触发，`event.node` 返回当前加载节点。
+- 用户点击展开时才触发异步加载；`defaultExpandAll`、`defaultExpandedKeys` 与外部
+  `expandedKeys` 初始化 / 变更不自动调用 `loadData`。
+- `isLeaf = true` 的节点永远不进入异步加载入口。
+- 加载态默认渲染 Element Plus `Loading` 图标，传入 `switcherLoadingIcon` 时渲染自定义
+  图标；`switcherLoadingIcon` 默认值为 Element Plus `Loading`，可省略但不接受
+  `null`；加载态动画为 `rotating 2s linear infinite`。
+- 加载失败时不写入 `loadedKeys`，不触发 `load`，节点保持可重试。
+
+### 20.3 测试内容
+
+| 编号 | 测试内容        | 关注点                                    | 预期结果                                         |
+| ---- | --------------- | ----------------------------------------- | ------------------------------------------------ |
+| 1    | 异步节点入口    | 无 children、非叶子、存在 `loadData`      | 渲染 switcher；用户展开时调用 `loadData`         |
+| 2    | 叶子边界        | `isLeaf=true`                             | 不渲染异步 switcher，不调用 `loadData`           |
+| 3    | 初始展开边界    | default / controlled 展开                 | 初始或外部展开变更不自动加载                     |
+| 4    | 加载中状态      | pending Promise 与重复点击                | 显示 loading icon；不重复请求                    |
+| 5    | 成功路径        | resolve 后事件和状态                      | `update:loadedKeys -> load`，loadedKeys 顺序稳定 |
+| 6    | 受控路径        | 外部传入 `loadedKeys`                     | 只请求外部更新；外部回写后不再进入异步加载入口   |
+| 7    | 失败路径        | rejected Promise                          | 清理 loading，不写入 loadedKeys，不触发 load     |
+| 8    | 数据更新回归    | 父组件更新 `data` 后的新子节点            | 继续参与展开、选择、勾选、插槽、showLine 与样式  |
+| 9    | Playground 示例 | 外部更新数据、loadedKeys 展示和 load 日志 | 可直接观察异步加载、受控 loadedKeys 与事件结果   |
+
+### 20.4 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- Playground 验证入口：
+  - `play/src/views/components-view.vue`
+- 已执行命令：
+  - `pnpm exec eslint packages/components/tree/src/tree.ts packages/components/tree/src/use-tree-load.ts packages/components/tree/src/use-tree-expanded-state.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue --max-warnings=0`
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 执行结果：
+  - 目标 ESLint：通过
+  - 树组件单测：`57 passed`
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+  - `build:lib` 仍存在既有 `dialog.vue` dynamic import warning
+  - `play build` 仍存在既有 chunk size warning，本阶段未引入构建失败
+
+### 20.5 当前判定
+
+- 当前判定：阶段 13 已完成。
+- 下一阶段状态：阶段 13 已归档；阶段 14 为树节点拖拽功能。

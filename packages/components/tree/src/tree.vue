@@ -14,6 +14,8 @@
       :is-node-checked="isNodeChecked"
       :is-node-half-checked="isNodeHalfChecked"
       :is-node-selected="isNodeSelected"
+      :is-node-loading="isNodeLoading"
+      :is-node-expandable="isNodeExpandable"
       :tree-checkable="isTreeCheckable"
       :tree-selectable="isTreeSelectable"
       :show-line="props.showLine"
@@ -51,6 +53,7 @@ import {
 import FlTreeNode from './tree-node.vue'
 import { useTreeCheckedState, type TreeCheckedStateEmit } from './use-tree-checked-state'
 import { useTreeExpandedState, type TreeExpandedStateEmit } from './use-tree-expanded-state'
+import { useTreeLoadState, type TreeLoadStateEmit } from './use-tree-load'
 import { useTreeSelectedState, type TreeSelectedStateEmit } from './use-tree-selected-state'
 
 defineOptions({
@@ -108,10 +111,26 @@ const emitNodeClick = ({
   emit('node-click', node.data, createTreeEventNode({ node }), component, event)
 }
 
-const { isNodeExpanded, toggleNodeExpansion } = useTreeExpandedState({
+const { isNodeLoaded, isNodeLoading, loadNode } = useTreeLoadState({
   props,
   treeIndex,
-  emit: emit as TreeExpandedStateEmit
+  emit: emit as TreeLoadStateEmit
+})
+
+/**
+ * 异步加载开启时，无 children 且未加载的非叶子节点也需要展示 switcher。
+ */
+const isNodeExpandable = (node: TreeNodeModel) =>
+  !node.isLeaf &&
+  (node.childNodes.length > 0 ||
+    isNodeLoading(node.key) ||
+    (Boolean(props.loadData) && !isNodeLoaded(node.key)))
+
+const { isNodeExpanded, toggleNodeExpansion: toggleExpandedNode } = useTreeExpandedState({
+  props,
+  treeIndex,
+  emit: emit as TreeExpandedStateEmit,
+  isNodeExpandable
 })
 
 const { isNodeSelected, isTreeSelectable, selectNode } = useTreeSelectedState({
@@ -132,6 +151,19 @@ const {
   treeIndex,
   emit: emit as TreeCheckedStateEmit
 })
+
+/**
+ * 用户请求展开时先保持原展开事件顺序，再进入异步加载链路。
+ */
+const toggleNodeExpansion = (options: { node: TreeNodeModel; instance: TreeNodeInstance }) => {
+  const wasExpanded = isNodeExpanded(options.node.key)
+
+  toggleExpandedNode(options)
+
+  if (!wasExpanded) {
+    void loadNode(options.node)
+  }
+}
 
 /**
  * 节点内容区点击时先派发 `node-click`，再进入阶段 4 的单选链路。

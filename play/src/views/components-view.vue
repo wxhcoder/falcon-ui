@@ -309,6 +309,10 @@
         <FlButton @click="treeSelectable = !treeSelectable">
           切换 selectable: {{ treeSelectable ? 'on' : 'off' }}
         </FlButton>
+        <FlButton @click="resetAsyncTreeData">Reset async tree</FlButton>
+        <FlButton @click="toggleAsyncTreeControlledLoaded">
+          LoadedKeys controlled: {{ asyncTreeUseControlledLoaded ? 'on' : 'off' }}
+        </FlButton>
         <FlButton @click="resetTreeEventRecords">清空事件日志</FlButton>
       </div>
       <div class="demo-row tree-demo-row">
@@ -348,6 +352,19 @@
             </span>
           </template>
         </FlTree>
+      </div>
+      <div class="demo-row tree-demo-row">
+        <FlTree
+          class="tree-demo async-tree-demo"
+          :data="asyncTreeData"
+          :props="treeNodeProps"
+          :show-line="treeShowLine"
+          :switcher-icon="treeSwitcherIcon"
+          :switcher-loading-icon="Eleme"
+          :load-data="loadAsyncTreeNode"
+          :loaded-keys="asyncTreeUseControlledLoaded ? asyncTreeControlledLoadedKeys : undefined"
+          @update:loaded-keys="handleAsyncTreeLoadedKeysChange"
+          @load="handleTreeLoad" />
       </div>
       <p class="demo-result">Root nodes: {{ treeData.length }}</p>
       <p class="demo-result">Mapped label field: `name`, children field: `nodes`.</p>
@@ -396,6 +413,10 @@
         Stage 12 semantic styles: {{ treeUseSemanticStyles ? 'root/item enabled' : 'off' }}.
       </p>
       <p class="demo-result">
+        Stage 13 async loaded keys:
+        {{ currentAsyncTreeLoadedKeys.length ? currentAsyncTreeLoadedKeys.join(', ') : '(empty)' }}.
+      </p>
+      <p class="demo-result">
         Stage 7-9 note: default mode now conducts parent / child checks, strict mode uses `{
         checked, halfChecked }`, and `disabled` / `checkable=false` boundaries are active.
       </p>
@@ -403,13 +424,16 @@
       <p class="demo-result">
         Event counts: click={{ treeNodeClickCount }}, select={{ treeSelectCount }}, check={{
           treeCheckCount
-        }}, expand={{ treeNodeExpandCount }}, collapse={{ treeNodeCollapseCount }}
+        }}, expand={{ treeNodeExpandCount }}, collapse={{ treeNodeCollapseCount }}, load={{
+          treeLoadCount
+        }}
       </p>
       <p class="demo-result">Last node-click: {{ treeLastNodeClick }}</p>
       <p class="demo-result">Last select: {{ treeLastSelect }}</p>
       <p class="demo-result">Last check: {{ treeLastCheck }}</p>
       <p class="demo-result">Last node-expand: {{ treeLastNodeExpand }}</p>
       <p class="demo-result">Last node-collapse: {{ treeLastNodeCollapse }}</p>
+      <p class="demo-result">Last load: {{ treeLastLoad }}</p>
       <ul class="tree-event-list">
         <li v-for="item in treeEventRecords" :key="item.id" class="tree-event-item">
           {{ item.message }}
@@ -525,7 +549,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { Eleme, Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
 import { MinusSquareOutlined, PlusSquareOutlined } from 'falcon-ui'
 import type {
@@ -535,6 +559,7 @@ import type {
   TreeCheckEvent,
   TreeCheckedKeys,
   TreeKey,
+  TreeLoadEvent,
   TreeNode,
   TreeNodeInstance,
   TreeNodeProps,
@@ -696,7 +721,7 @@ interface TreeDefaultExpandConfig {
   sourceExpandedKeys: TreeKey[]
 }
 
-type TreeEventName = 'node-click' | 'select' | 'check' | 'node-expand' | 'node-collapse'
+type TreeEventName = 'node-click' | 'select' | 'check' | 'node-expand' | 'node-collapse' | 'load'
 
 interface TreeEventRecord {
   id: number
@@ -997,6 +1022,60 @@ const treeData: TreeData[] = [
   }
 ]
 
+const createAsyncTreeData = (): TreeData[] => [
+  {
+    key: 'async-api',
+    name: 'Async API'
+  },
+  {
+    key: 'async-guides',
+    name: 'Async Guides'
+  },
+  {
+    key: 'async-static-leaf',
+    name: 'Static Leaf',
+    leaf: true
+  }
+]
+
+const createAsyncTreeChildren = (node: TreeNode): TreeData[] => [
+  {
+    key: `${String(node.key)}-overview`,
+    name: `${node.label} Overview`,
+    leaf: true
+  },
+  {
+    key: `${String(node.key)}-details`,
+    name: `${node.label} Details`,
+    leaf: true
+  }
+]
+
+const replaceTreeNodeChildren = (
+  nodes: TreeData[],
+  targetKey: TreeKey,
+  children: TreeData[]
+): TreeData[] =>
+  nodes.map((node) => {
+    const currentChildren = readTreeChildren(node)
+
+    if (node.key === targetKey) {
+      return {
+        ...node,
+        nodes: children
+      }
+    }
+
+    if (currentChildren.length === 0) {
+      return node
+    }
+
+    return {
+      ...node,
+      nodes: replaceTreeNodeChildren(currentChildren, targetKey, children)
+    }
+  })
+
 const treeDefaultExpandOptions: TreeDefaultExpandOption[] = [
   { label: '默认收起', value: 'collapsed' },
   { label: '默认展开一级分组', value: 'roots' },
@@ -1036,16 +1115,22 @@ const treeUseControlledCheck = ref(false)
 const treeControlledCheckedKeys = ref<TreeCheckedKeys>([])
 const treeObservedCheckedKeys = ref<TreeCheckedKeys>(treeDefaultCheckedKeys.value ?? [])
 const treeObservedHalfCheckedKeys = ref<TreeKey[]>([])
+const asyncTreeData = ref<TreeData[]>(createAsyncTreeData())
+const asyncTreeUseControlledLoaded = ref(false)
+const asyncTreeControlledLoadedKeys = ref<TreeKey[]>([])
+const asyncTreeObservedLoadedKeys = ref<TreeKey[]>([])
 const treeNodeClickCount = ref(0)
 const treeSelectCount = ref(0)
 const treeCheckCount = ref(0)
 const treeNodeExpandCount = ref(0)
 const treeNodeCollapseCount = ref(0)
+const treeLoadCount = ref(0)
 const treeLastNodeClick = ref('(none)')
 const treeLastSelect = ref('(none)')
 const treeLastCheck = ref('(none)')
 const treeLastNodeExpand = ref('(none)')
 const treeLastNodeCollapse = ref('(none)')
+const treeLastLoad = ref('(none)')
 const treeEventSequence = ref(0)
 const treeEventRecords = ref<TreeEventRecord[]>([])
 
@@ -1351,6 +1436,39 @@ const restoreTreeDefaultExpandMode = () => {
 }
 
 /**
+ * 重置异步树数据与 loadedKeys，便于重复观察阶段 13 的加载链路。
+ */
+const resetAsyncTreeData = () => {
+  asyncTreeData.value = createAsyncTreeData()
+  asyncTreeControlledLoadedKeys.value = []
+  asyncTreeObservedLoadedKeys.value = []
+}
+
+/**
+ * 切换异步树 loadedKeys 受控模式，并保持当前可见 loadedKeys。
+ */
+const toggleAsyncTreeControlledLoaded = () => {
+  asyncTreeUseControlledLoaded.value = !asyncTreeUseControlledLoaded.value
+
+  if (asyncTreeUseControlledLoaded.value) {
+    asyncTreeControlledLoadedKeys.value = asyncTreeObservedLoadedKeys.value
+  }
+}
+
+/**
+ * 模拟业务侧异步请求，并由父组件负责把子节点写回 data。
+ */
+const loadAsyncTreeNode = async (node: TreeNode): Promise<unknown> => {
+  await new Promise((resolve) => window.setTimeout(resolve, 1060))
+
+  const children = createAsyncTreeChildren(node)
+
+  asyncTreeData.value = replaceTreeNodeChildren(asyncTreeData.value, node.key, children)
+
+  return children
+}
+
+/**
  * 将树示例切换到受控选中模式，并写入指定选中键。
  */
 const enableControlledTreeSelection = (selectedKeys: TreeKey[]) => {
@@ -1506,6 +1624,17 @@ const handleTreeCheckedKeysChange = (checkedKeys: TreeCheckedKeys) => {
 }
 
 /**
+ * 同步异步树 loadedKeys，并在受控模式下回写到示例状态。
+ */
+const handleAsyncTreeLoadedKeysChange = (loadedKeys: TreeKey[]) => {
+  asyncTreeObservedLoadedKeys.value = loadedKeys
+
+  if (asyncTreeUseControlledLoaded.value) {
+    asyncTreeControlledLoadedKeys.value = loadedKeys
+  }
+}
+
+/**
  * 返回当前默认展开方式的中文标签，便于在示例说明中展示。
  */
 /**
@@ -1517,11 +1646,13 @@ const resetTreeEventRecords = () => {
   treeCheckCount.value = 0
   treeNodeExpandCount.value = 0
   treeNodeCollapseCount.value = 0
+  treeLoadCount.value = 0
   treeLastNodeClick.value = '(none)'
   treeLastSelect.value = '(none)'
   treeLastCheck.value = '(none)'
   treeLastNodeExpand.value = '(none)'
   treeLastNodeCollapse.value = '(none)'
+  treeLastLoad.value = '(none)'
   treeEventSequence.value = 0
   treeEventRecords.value = []
 }
@@ -1602,6 +1733,18 @@ const handleTreeNodeCollapse = (data: TreeData, node: TreeNode, instance: TreeNo
   appendTreeEventRecord('node-collapse', summary)
 }
 
+/**
+ * 演示 `load` 事件，展示异步加载完成后的 loadedKeys 与节点信息。
+ */
+const handleTreeLoad = (loadedKeys: TreeKey[], event: TreeLoadEvent) => {
+  const loadedKeysSummary = loadedKeys.length ? loadedKeys.join(', ') : '(empty)'
+  const summary = `key=${String(event.key)}, loadedKeys=${loadedKeysSummary}, node=${formatTreeNodeSummary(event.node)}`
+
+  treeLoadCount.value += 1
+  treeLastLoad.value = summary
+  appendTreeEventRecord('load', summary)
+}
+
 const currentTreeDefaultExpandLabel = computed(
   () =>
     treeDefaultExpandOptions.find((item) => item.value === treeDefaultExpandMode.value)?.label ??
@@ -1648,6 +1791,15 @@ const currentTreeHalfCheckedKeys = computed(() =>
         : readTreeHalfCheckedKeys(normalizeTreeCheckedValue(treeObservedCheckedKeys.value))
       : treeObservedHalfCheckedKeys.value
     : []
+)
+
+/**
+ * 返回异步树示例当前可见的 loadedKeys。
+ */
+const currentAsyncTreeLoadedKeys = computed(() =>
+  asyncTreeUseControlledLoaded.value
+    ? asyncTreeControlledLoadedKeys.value
+    : asyncTreeObservedLoadedKeys.value
 )
 
 /**

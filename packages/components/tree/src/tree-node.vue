@@ -42,9 +42,13 @@
             type="button"
             :class="switcherButtonClassName"
             :aria-label="isExpandedNode ? '收起节点' : '展开节点'"
+            :disabled="isLoadingNode"
             @click.stop="handleSwitcherClick">
-            <ElIcon :class="switcherIconClassName" aria-hidden="true">
-              <template v-if="switcherIcon === 'plus-minus'">
+            <ElIcon
+              :class="[switcherIconClassName, ns.is('loading', isLoadingNode)]"
+              aria-hidden="true">
+              <component :is="switcherLoadingIcon" v-if="isLoadingNode" />
+              <template v-else-if="switcherIcon === 'plus-minus'">
                 <MinusSquareOutlined v-if="isExpandedNode" />
                 <PlusSquareOutlined v-else />
               </template>
@@ -75,7 +79,7 @@
         <template v-else>{{ node.label }}</template>
       </span>
     </div>
-    <div v-if="isExpandableNode && isExpandedNode" :class="childrenClassName" role="group">
+    <div v-if="hasChildNodes && isExpandedNode" :class="childrenClassName" role="group">
       <FlTreeNode
         v-for="childNode in node.childNodes"
         :key="childNode.key"
@@ -85,6 +89,8 @@
         :is-node-checked="isNodeChecked"
         :is-node-half-checked="isNodeHalfChecked"
         :is-node-selected="isNodeSelected"
+        :is-node-loading="isNodeLoading"
+        :is-node-expandable="isNodeExpandable"
         :tree-checkable="treeCheckable"
         :tree-selectable="treeSelectable"
         :show-line="showLine"
@@ -119,6 +125,7 @@ import {
   type TreeNodeInstance,
   type TreeNodeModel,
   type TreeSemanticRecord,
+  type TreeSwitcherLoadingIcon,
   type TreeSwitcherIconMode
 } from './tree'
 
@@ -140,11 +147,13 @@ interface TreeNodeComponentProps {
   isNodeChecked: (nodeKey: TreeKey) => boolean
   isNodeHalfChecked: (nodeKey: TreeKey) => boolean
   isNodeSelected: (nodeKey: TreeKey) => boolean
+  isNodeLoading: (nodeKey: TreeKey) => boolean
+  isNodeExpandable: (node: TreeNodeModel) => boolean
   treeCheckable: boolean
   treeSelectable: boolean
   showLine: boolean
   switcherIcon: TreeSwitcherIconMode
-  switcherLoadingIcon?: unknown
+  switcherLoadingIcon: TreeSwitcherLoadingIcon
   isCheckboxDisabled: (node: TreeNodeModel) => boolean
   shouldRenderCheckbox: (node: TreeNodeModel) => boolean
   toggleNodeChecked: (options: { node: TreeNodeModel; event: MouseEvent }) => void
@@ -190,18 +199,28 @@ const createItemStyle = () =>
 /**
  * 判断当前节点是否具备展开能力。
  */
-const resolveExpandableNodeState = () => props.node.childNodes.length > 0
+const resolveExpandableNodeState = () => props.isNodeExpandable(props.node)
+
+/**
+ * 判断当前节点是否存在已经渲染到数据树中的子节点。
+ */
+const resolveHasChildNodesState = () => props.node.childNodes.length > 0
 
 /**
  * 判断当前节点是否处于展开状态。
  */
 const resolveExpandedNodeState = () =>
-  props.node.childNodes.length > 0 && props.isNodeExpanded(props.node.key)
+  resolveExpandableNodeState() && props.isNodeExpanded(props.node.key)
 
 /**
  * 判断当前节点是否按叶子节点视觉渲染。
  */
-const resolveLeafNodeState = () => props.node.isLeaf || props.node.childNodes.length === 0
+const resolveLeafNodeState = () => !resolveExpandableNodeState()
+
+/**
+ * 判断当前节点是否处于异步加载中。
+ */
+const resolveLoadingNodeState = () => props.isNodeLoading(props.node.key)
 
 /**
  * 返回当前节点祖先轨道的终止状态列表，用于逐层渲染连线轨道。
@@ -289,7 +308,7 @@ const handleCheckboxClick = (event: MouseEvent) => {
  * 切换当前节点的展开状态；阶段 4 起 switcher 不再触发选择链路。
  */
 const handleSwitcherClick = () => {
-  if (props.node.childNodes.length === 0) {
+  if (!resolveExpandableNodeState() || resolveLoadingNodeState()) {
     return
   }
 
@@ -312,8 +331,10 @@ const getResolvedStyles = () => props.resolvedStyles
 const itemStyle = computed(createItemStyle)
 const hasDefaultSlot = computed(() => Boolean(slots.default))
 const isExpandableNode = computed(resolveExpandableNodeState)
+const hasChildNodes = computed(resolveHasChildNodesState)
 const isExpandedNode = computed(resolveExpandedNodeState)
 const isLeafNode = computed(resolveLeafNodeState)
+const isLoadingNode = computed(resolveLoadingNodeState)
 const lineTrackEnds = computed(resolveLineTrackEnds)
 const isLastSiblingNode = computed(resolveLastSiblingNodeState)
 const isCheckedNode = computed(resolveCheckedNodeState)

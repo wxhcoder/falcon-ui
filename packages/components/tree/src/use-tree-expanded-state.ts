@@ -22,6 +22,7 @@ interface UseTreeExpandedStateOptions {
   props: TreeProps
   treeIndex: ComputedRef<TreeIndex>
   emit: TreeExpandedStateEmit
+  isNodeExpandable?: (node: TreeNodeModel) => boolean
 }
 
 /**
@@ -131,11 +132,18 @@ const createUncontrolledEffectiveExpandedKeySet = ({
  * 2. 区分源展开键与最终渲染展开集合
  * 3. 统一收口 switcher 展开/收起事件
  */
-export const useTreeExpandedState = ({ props, treeIndex, emit }: UseTreeExpandedStateOptions) => {
+export const useTreeExpandedState = ({
+  props,
+  treeIndex,
+  emit,
+  isNodeExpandable
+}: UseTreeExpandedStateOptions) => {
   const uncontrolledSourceExpandedKeys = shallowRef<TreeKey[]>([])
   const inheritedExpandedKeySet = shallowRef(new Set<TreeKey>())
   const collapsedInheritedKeySet = shallowRef(new Set<TreeKey>())
   const hasInitializedUncontrolledState = ref(false)
+  const canToggleNodeExpansion =
+    isNodeExpandable ?? ((node: TreeNodeModel) => node.childNodes.length > 0)
 
   /**
    * 只要外部显式传入 `expandedKeys`，组件即进入受控模式。
@@ -280,7 +288,7 @@ export const useTreeExpandedState = ({ props, treeIndex, emit }: UseTreeExpanded
    * 2. 非受控模式更新本地源展开键，并保留后代展开缓存
    */
   const toggleNodeExpansion = ({ node, instance }: ToggleNodeExpansionOptions) => {
-    if (node.childNodes.length === 0) {
+    if (!canToggleNodeExpansion(node)) {
       return
     }
 
