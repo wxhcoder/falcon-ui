@@ -27,6 +27,18 @@ export type TreeLoadData = (node: TreeNode) => Promise<unknown>
 
 export type TreeSwitcherLoadingIcon = Component
 
+export type TreeAllowDropType = 'prev' | 'inner' | 'next'
+
+export type TreeNodeDropType = 'before' | 'after' | 'inner' | 'none'
+
+export type TreeAllowDrag = (node: TreeNode) => boolean
+
+export type TreeAllowDrop = (
+  draggingNode: TreeNode,
+  dropNode: TreeNode,
+  type: TreeAllowDropType
+) => boolean
+
 /**
  * 首版使用稳定的默认字段映射，保证常规树数据可直接渲染。
  */
@@ -127,6 +139,18 @@ export const treeProps = {
   loadedKeys: {
     type: Array as PropType<TreeKey[] | undefined>,
     default: undefined
+  },
+  draggable: {
+    type: Boolean,
+    default: false
+  },
+  allowDrag: {
+    type: Function as PropType<TreeAllowDrag | undefined>,
+    default: undefined
+  },
+  allowDrop: {
+    type: Function as PropType<TreeAllowDrop | undefined>,
+    default: undefined
   }
 } as const
 
@@ -216,6 +240,36 @@ export type TreeCheckArgs = [checkedKeys: TreeCheckedKeys, event: TreeCheckEvent
  * `load` 事件固定采用双参数出参。
  */
 export type TreeLoadArgs = [loadedKeys: TreeKey[], event: TreeLoadEvent]
+
+/**
+ * `node-drag-start` 事件对齐 Element Plus 多参数出参。
+ */
+export type TreeNodeDragStartArgs = [node: TreeNode, event: DragEvent]
+
+/**
+ * `node-drag-enter` / `node-drag-over` / `node-drag-leave` 事件对齐 Element Plus。
+ */
+export type TreeNodeDragTargetArgs = [draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]
+
+/**
+ * `node-drag-end` 事件对齐 Element Plus。
+ */
+export type TreeNodeDragEndArgs = [
+  draggingNode: TreeNode,
+  dropNode: TreeNode | null,
+  dropType: TreeNodeDropType,
+  event: DragEvent
+]
+
+/**
+ * `node-drop` 仅在非 none 落点触发。
+ */
+export type TreeNodeDropArgs = [
+  draggingNode: TreeNode,
+  dropNode: TreeNode,
+  dropType: Exclude<TreeNodeDropType, 'none'>,
+  event: DragEvent
+]
 
 /**
  * 判断当前值是否为普通对象。
@@ -335,6 +389,44 @@ const isTreeLoadArgs = (loadedKeys: TreeKey[], event: TreeLoadEvent) =>
   Array.isArray(event.loadedKeys) &&
   event.loadedKeys.every((item) => isTreeKey(item))
 
+const isDragEventLike = (event: DragEvent) => isRecord(event) && typeof event.type === 'string'
+
+const isTreeNodeDropType = (dropType: unknown): dropType is TreeNodeDropType =>
+  dropType === 'before' || dropType === 'after' || dropType === 'inner' || dropType === 'none'
+
+const isTreeNodeNonNoneDropType = (
+  dropType: unknown
+): dropType is Exclude<TreeNodeDropType, 'none'> =>
+  dropType === 'before' || dropType === 'after' || dropType === 'inner'
+
+const isTreeNodeDragStartArgs = (node: TreeNode, event: DragEvent) =>
+  isTreeNode(node) && isDragEventLike(event)
+
+const isTreeNodeDragTargetArgs = (draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent) =>
+  isTreeNode(draggingNode) && isTreeNode(dropNode) && isDragEventLike(event)
+
+const isTreeNodeDragEndArgs = (
+  draggingNode: TreeNode,
+  dropNode: TreeNode | null,
+  dropType: TreeNodeDropType,
+  event: DragEvent
+) =>
+  isTreeNode(draggingNode) &&
+  (dropNode === null || isTreeNode(dropNode)) &&
+  isTreeNodeDropType(dropType) &&
+  isDragEventLike(event)
+
+const isTreeNodeDropArgs = (
+  draggingNode: TreeNode,
+  dropNode: TreeNode,
+  dropType: Exclude<TreeNodeDropType, 'none'>,
+  event: DragEvent
+) =>
+  isTreeNode(draggingNode) &&
+  isTreeNode(dropNode) &&
+  isTreeNodeNonNoneDropType(dropType) &&
+  isDragEventLike(event)
+
 /**
  * 阶段 3 正式开放展开状态双向同步与展开事件。
  */
@@ -391,7 +483,31 @@ export const treeEmits = {
   /**
    * 节点被用户收起时抛出切换后的节点对象与组件实例。
    */
-  'node-collapse': (...args: TreeNodeToggleArgs) => isTreeNodeToggleArgs(...args)
+  'node-collapse': (...args: TreeNodeToggleArgs) => isTreeNodeToggleArgs(...args),
+  /**
+   * 节点开始拖拽时抛出拖拽源节点。
+   */
+  'node-drag-start': (...args: TreeNodeDragStartArgs) => isTreeNodeDragStartArgs(...args),
+  /**
+   * 拖拽进入节点落点区域时抛出当前拖拽源和目标节点。
+   */
+  'node-drag-enter': (...args: TreeNodeDragTargetArgs) => isTreeNodeDragTargetArgs(...args),
+  /**
+   * 拖拽悬停在节点落点区域时抛出当前拖拽源和目标节点。
+   */
+  'node-drag-over': (...args: TreeNodeDragTargetArgs) => isTreeNodeDragTargetArgs(...args),
+  /**
+   * 拖拽离开节点落点区域时抛出当前拖拽源和目标节点。
+   */
+  'node-drag-leave': (...args: TreeNodeDragTargetArgs) => isTreeNodeDragTargetArgs(...args),
+  /**
+   * 节点拖拽结束时抛出拖拽源、目标和投放类型。
+   */
+  'node-drag-end': (...args: TreeNodeDragEndArgs) => isTreeNodeDragEndArgs(...args),
+  /**
+   * 节点成功投放时抛出拖拽源、目标和投放类型。
+   */
+  'node-drop': (...args: TreeNodeDropArgs) => isTreeNodeDropArgs(...args)
 } as const
 
 export type TreeEmits = typeof treeEmits

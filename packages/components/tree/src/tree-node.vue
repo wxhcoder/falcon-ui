@@ -20,9 +20,24 @@
         itemContentClassName,
         ns.is('selected', isSelectedNode),
         ns.is('disabled', node.disabled),
-        ns.is('line-mode', showLine)
+        ns.is('line-mode', showLine),
+        ns.is('draggable', isDraggableNode),
+        ns.is('dragging', isDraggingNode),
+        ns.is('drop-target', isDropTargetNode),
+        ns.is('drop-allowed', isDropAllowedNode),
+        ns.is('drop-forbidden', isDropForbiddenNode),
+        ns.is('drop-before', isDropBeforeNode),
+        ns.is('drop-inside', isDropInsideNode),
+        ns.is('drop-after', isDropAfterNode)
       ]"
-      @click="handleNodeContentClick">
+      :draggable="isDraggableNode ? true : undefined"
+      @click="handleNodeContentClick"
+      @dragstart.stop="handleDragStart"
+      @dragenter.stop="handleDragEnter"
+      @dragover.stop="handleDragOver"
+      @dragleave.stop="handleDragLeave"
+      @drop.stop="handleDrop"
+      @dragend.stop="handleDragEnd">
       <span v-if="lineTrackEnds.length > 0" :class="indentClassName" aria-hidden="true">
         <span
           v-for="(isTrackEnd, index) in lineTrackEnds"
@@ -91,6 +106,11 @@
         :is-node-selected="isNodeSelected"
         :is-node-loading="isNodeLoading"
         :is-node-expandable="isNodeExpandable"
+        :is-node-draggable="isNodeDraggable"
+        :is-node-dragging="isNodeDragging"
+        :is-node-drop-target="isNodeDropTarget"
+        :is-node-drop-allowed="isNodeDropAllowed"
+        :get-node-drop-type="getNodeDropType"
         :tree-checkable="treeCheckable"
         :tree-selectable="treeSelectable"
         :show-line="showLine"
@@ -100,6 +120,12 @@
         :should-render-checkbox="shouldRenderCheckbox"
         :toggle-node-checked="toggleNodeChecked"
         :toggle-node-expansion="toggleNodeExpansion"
+        :handle-node-drag-start="handleNodeDragStart"
+        :handle-node-drag-enter="handleNodeDragEnter"
+        :handle-node-drag-over="handleNodeDragOver"
+        :handle-node-drag-leave="handleNodeDragLeave"
+        :handle-node-drop="handleNodeDrop"
+        :handle-node-drag-end="handleNodeDragEnd"
         :resolved-class-names="resolvedClassNames"
         :resolved-styles="resolvedStyles">
         <template v-if="hasDefaultSlot" #default="slotProps">
@@ -122,6 +148,7 @@ import {
   type TreeClassValue,
   type TreeKey,
   type TreeNode,
+  type TreeNodeDropType,
   type TreeNodeInstance,
   type TreeNodeModel,
   type TreeSemanticRecord,
@@ -132,6 +159,17 @@ import {
 defineOptions({
   name: 'FlTreeNode'
 })
+
+interface TreeNodeDragTargetHandlerOptions {
+  node: TreeNodeModel
+  event: DragEvent
+  element: HTMLElement
+}
+
+interface TreeNodeDragHandlerOptions {
+  node: TreeNodeModel
+  event: DragEvent
+}
 
 /**
  * 内部节点组件只接收标准化节点和主入口下发的树状态能力。
@@ -149,6 +187,11 @@ interface TreeNodeComponentProps {
   isNodeSelected: (nodeKey: TreeKey) => boolean
   isNodeLoading: (nodeKey: TreeKey) => boolean
   isNodeExpandable: (node: TreeNodeModel) => boolean
+  isNodeDraggable: (node: TreeNodeModel) => boolean
+  isNodeDragging: (nodeKey: TreeKey) => boolean
+  isNodeDropTarget: (nodeKey: TreeKey) => boolean
+  isNodeDropAllowed: (nodeKey: TreeKey) => boolean
+  getNodeDropType: (nodeKey: TreeKey) => TreeNodeDropType | undefined
   treeCheckable: boolean
   treeSelectable: boolean
   showLine: boolean
@@ -158,6 +201,12 @@ interface TreeNodeComponentProps {
   shouldRenderCheckbox: (node: TreeNodeModel) => boolean
   toggleNodeChecked: (options: { node: TreeNodeModel; event: MouseEvent }) => void
   toggleNodeExpansion: (options: { node: TreeNodeModel; instance: TreeNodeInstance }) => void
+  handleNodeDragStart: (options: TreeNodeDragHandlerOptions) => void
+  handleNodeDragEnter: (options: TreeNodeDragTargetHandlerOptions) => void
+  handleNodeDragOver: (options: TreeNodeDragTargetHandlerOptions) => void
+  handleNodeDragLeave: (options: TreeNodeDragTargetHandlerOptions) => void
+  handleNodeDrop: (options: TreeNodeDragTargetHandlerOptions) => void
+  handleNodeDragEnd: (options: TreeNodeDragHandlerOptions) => void
   resolvedClassNames: TreeSemanticRecord<TreeClassValue>
   resolvedStyles: TreeSemanticRecord<CSSProperties>
 }
@@ -231,6 +280,31 @@ const resolveLineTrackEnds = () => props.node.lineTrackEnds
  * 判断当前节点是否为所在层级的最后一个兄弟节点。
  */
 const resolveLastSiblingNodeState = () => props.node.isLastSibling
+
+/**
+ * 判断当前节点是否允许作为原生拖拽源。
+ */
+const resolveDraggableNodeState = () => props.isNodeDraggable(props.node)
+
+/**
+ * 判断当前节点是否正在作为拖拽源。
+ */
+const resolveDraggingNodeState = () => props.isNodeDragging(props.node.key)
+
+/**
+ * 判断当前节点是否为当前拖拽悬停目标。
+ */
+const resolveDropTargetNodeState = () => props.isNodeDropTarget(props.node.key)
+
+/**
+ * 判断当前拖拽悬停目标是否允许投放。
+ */
+const resolveDropAllowedNodeState = () => props.isNodeDropAllowed(props.node.key)
+
+/**
+ * 返回当前节点落点类型。
+ */
+const resolveNodeDropType = () => props.getNodeDropType(props.node.key)
 
 /**
  * 判断当前节点是否允许输出选中态语义。
@@ -319,6 +393,75 @@ const handleSwitcherClick = () => {
 }
 
 /**
+ * 返回拖拽事件当前绑定的内容区元素。
+ */
+const getDragEventElement = (event: DragEvent) => event.currentTarget as HTMLElement
+
+/**
+ * 处理原生 dragstart。
+ */
+const handleDragStart = (event: DragEvent) => {
+  props.handleNodeDragStart({
+    node: props.node,
+    event
+  })
+}
+
+/**
+ * 处理原生 dragenter。
+ */
+const handleDragEnter = (event: DragEvent) => {
+  props.handleNodeDragEnter({
+    node: props.node,
+    event,
+    element: getDragEventElement(event)
+  })
+}
+
+/**
+ * 处理原生 dragover。
+ */
+const handleDragOver = (event: DragEvent) => {
+  props.handleNodeDragOver({
+    node: props.node,
+    event,
+    element: getDragEventElement(event)
+  })
+}
+
+/**
+ * 处理原生 dragleave。
+ */
+const handleDragLeave = (event: DragEvent) => {
+  props.handleNodeDragLeave({
+    node: props.node,
+    event,
+    element: getDragEventElement(event)
+  })
+}
+
+/**
+ * 处理原生 drop。
+ */
+const handleDrop = (event: DragEvent) => {
+  props.handleNodeDrop({
+    node: props.node,
+    event,
+    element: getDragEventElement(event)
+  })
+}
+
+/**
+ * 处理原生 dragend。
+ */
+const handleDragEnd = (event: DragEvent) => {
+  props.handleNodeDragEnd({
+    node: props.node,
+    event
+  })
+}
+
+/**
  * 返回已经解析完成的语义化 classNames。
  */
 const getResolvedClassNames = () => props.resolvedClassNames
@@ -337,6 +480,15 @@ const isLeafNode = computed(resolveLeafNodeState)
 const isLoadingNode = computed(resolveLoadingNodeState)
 const lineTrackEnds = computed(resolveLineTrackEnds)
 const isLastSiblingNode = computed(resolveLastSiblingNodeState)
+const isDraggableNode = computed(resolveDraggableNodeState)
+const isDraggingNode = computed(resolveDraggingNodeState)
+const isDropTargetNode = computed(resolveDropTargetNodeState)
+const isDropAllowedNode = computed(resolveDropAllowedNodeState)
+const nodeDropType = computed(resolveNodeDropType)
+const isDropForbiddenNode = computed(() => isDropTargetNode.value && !isDropAllowedNode.value)
+const isDropBeforeNode = computed(() => isDropTargetNode.value && nodeDropType.value === 'before')
+const isDropInsideNode = computed(() => isDropTargetNode.value && nodeDropType.value === 'inner')
+const isDropAfterNode = computed(() => isDropTargetNode.value && nodeDropType.value === 'after')
 const isCheckedNode = computed(resolveCheckedNodeState)
 const isHalfCheckedNode = computed(resolveHalfCheckedNodeState)
 const isCurrentCheckboxDisabled = computed(resolveCheckboxDisabledState)

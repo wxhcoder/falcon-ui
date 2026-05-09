@@ -318,6 +318,12 @@
         <FlButton @click="treeSelectable = !treeSelectable">
           切换 selectable: {{ treeSelectable ? 'on' : 'off' }}
         </FlButton>
+        <FlButton @click="treeDragEnabled = !treeDragEnabled">
+          Toggle draggable: {{ treeDragEnabled ? 'on' : 'off' }}
+        </FlButton>
+        <FlButton @click="treeUseAllowDropGuard = !treeUseAllowDropGuard">
+          Toggle allowDrop guard: {{ treeUseAllowDropGuard ? 'on' : 'off' }}
+        </FlButton>
         <FlButton @click="resetAsyncTreeData">Reset async tree</FlButton>
         <FlButton @click="toggleAsyncTreeControlledLoaded">
           LoadedKeys controlled: {{ asyncTreeUseControlledLoaded ? 'on' : 'off' }}
@@ -346,6 +352,9 @@
           :checked-keys="treeUseControlledCheck ? treeControlledCheckedKeys : undefined"
           :class-names="treeSemanticClassNames"
           :styles="treeSemanticStyles"
+          :draggable="treeDragEnabled"
+          :allow-drag="treeAllowDrag"
+          :allow-drop="treeAllowDrop"
           @update:expanded-keys="handleTreeExpandedKeysChange"
           @update:selected-keys="handleTreeSelectedKeysChange"
           @update:checked-keys="handleTreeCheckedKeysChange"
@@ -353,7 +362,13 @@
           @select="handleTreeSelect"
           @check="handleTreeCheck"
           @node-expand="handleTreeNodeExpand"
-          @node-collapse="handleTreeNodeCollapse">
+          @node-collapse="handleTreeNodeCollapse"
+          @node-drag-start="handleTreeDragStart"
+          @node-drag-enter="handleTreeDragEnter"
+          @node-drag-over="handleTreeDragOver"
+          @node-drag-leave="handleTreeDragLeave"
+          @node-drag-end="handleTreeDragEnd"
+          @node-drop="handleTreeDrop">
           <template v-if="treeUseCustomContent" #default="{ node, data }">
             <span class="tree-slot-content">
               <span class="tree-slot-primary">{{ node.label }}</span>
@@ -426,6 +441,10 @@
         {{ currentAsyncTreeLoadedKeys.length ? currentAsyncTreeLoadedKeys.join(', ') : '(empty)' }}.
       </p>
       <p class="demo-result">
+        Stage 14 drag: draggable={{ treeDragEnabled }}, allowDrop guard={{ treeUseAllowDropGuard }},
+        tree internally reorders data on node-drop.
+      </p>
+      <p class="demo-result">
         Stage 7-9 note: default mode now conducts parent / child checks, strict mode uses `{
         checked, halfChecked }`, and `disabled` / `checkable=false` boundaries are active.
       </p>
@@ -435,7 +454,8 @@
           treeCheckCount
         }}, expand={{ treeNodeExpandCount }}, collapse={{ treeNodeCollapseCount }}, load={{
           treeLoadCount
-        }}
+        }}, node-drag-start={{ treeDragStartCount }}, node-drag-over={{ treeDragOverCount }},
+        node-drop={{ treeDropCount }}
       </p>
       <p class="demo-result">Last node-click: {{ treeLastNodeClick }}</p>
       <p class="demo-result">Last select: {{ treeLastSelect }}</p>
@@ -443,6 +463,7 @@
       <p class="demo-result">Last node-expand: {{ treeLastNodeExpand }}</p>
       <p class="demo-result">Last node-collapse: {{ treeLastNodeCollapse }}</p>
       <p class="demo-result">Last load: {{ treeLastLoad }}</p>
+      <p class="demo-result">Last drag: {{ treeLastDrag }}</p>
       <ul class="tree-event-list">
         <li v-for="item in treeEventRecords" :key="item.id" class="tree-event-item">
           {{ item.message }}
@@ -557,12 +578,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { Eleme, Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
 import { HolderOutlined, MinusSquareOutlined, PlusSquareOutlined } from 'falcon-ui'
 import type {
   RowOrderChangeEvent,
+  TreeAllowDrag,
+  TreeAllowDrop,
   TreeClassNames,
   TreeData,
   TreeCheckEvent,
@@ -570,6 +593,7 @@ import type {
   TreeKey,
   TreeLoadEvent,
   TreeNode,
+  TreeNodeDropType,
   TreeNodeInstance,
   TreeNodeProps,
   TreeSelectEvent,
@@ -730,7 +754,19 @@ interface TreeDefaultExpandConfig {
   sourceExpandedKeys: TreeKey[]
 }
 
-type TreeEventName = 'node-click' | 'select' | 'check' | 'node-expand' | 'node-collapse' | 'load'
+type TreeEventName =
+  | 'node-click'
+  | 'select'
+  | 'check'
+  | 'node-expand'
+  | 'node-collapse'
+  | 'load'
+  | 'node-drag-start'
+  | 'node-drag-enter'
+  | 'node-drag-over'
+  | 'node-drag-leave'
+  | 'node-drag-end'
+  | 'node-drop'
 
 interface TreeEventRecord {
   id: number
@@ -746,7 +782,7 @@ const treeNodeProps: TreeNodeProps = {
   class: 'className'
 }
 
-const treeData: TreeData[] = [
+const treeData = reactive<TreeData[]>([
   {
     key: 'workspace',
     name: 'Workspace',
@@ -1029,7 +1065,7 @@ const treeData: TreeData[] = [
     locked: true,
     leaf: true
   }
-]
+])
 
 const createAsyncTreeData = (): TreeData[] => [
   {
@@ -1112,6 +1148,8 @@ const treeShowLine = ref(true)
 const treeSwitcherIcon = ref<TreeSwitcherIconMode>('arrow')
 const treeUseCustomContent = ref(false)
 const treeUseSemanticStyles = ref(false)
+const treeDragEnabled = ref(true)
+const treeUseAllowDropGuard = ref(false)
 const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>([
   'design-system-components-tree',
   'delivery-quality-unit-test'
@@ -1134,14 +1172,29 @@ const treeCheckCount = ref(0)
 const treeNodeExpandCount = ref(0)
 const treeNodeCollapseCount = ref(0)
 const treeLoadCount = ref(0)
+const treeDragStartCount = ref(0)
+const treeDragEnterCount = ref(0)
+const treeDragOverCount = ref(0)
+const treeDragLeaveCount = ref(0)
+const treeDragEndCount = ref(0)
+const treeDropCount = ref(0)
 const treeLastNodeClick = ref('(none)')
 const treeLastSelect = ref('(none)')
 const treeLastCheck = ref('(none)')
 const treeLastNodeExpand = ref('(none)')
 const treeLastNodeCollapse = ref('(none)')
 const treeLastLoad = ref('(none)')
+const treeLastDrag = ref('(none)')
 const treeEventSequence = ref(0)
 const treeEventRecords = ref<TreeEventRecord[]>([])
+
+const treeAllowDrag: TreeAllowDrag = (node) => node.key !== 'archive'
+
+const treeAllowDrop = computed<TreeAllowDrop | undefined>(() =>
+  treeUseAllowDropGuard.value
+    ? (_draggingNode, dropNode, type) => dropNode.key !== 'archive' && type !== 'inner'
+    : undefined
+)
 
 /**
  * 读取当前树示例的子节点字段，避免示例中的遍历逻辑写死字段名。
@@ -1322,6 +1375,23 @@ const formatTreeNodeSummary = (node: TreeNode) => {
 
   return `key=${String(node.key)}, label=${node.label}, level=${node.level}, leaf=${node.isLeaf}, parent=${parentKey}, children=${node.childNodes.length}`
 }
+
+/**
+ * 统一格式化拖拽目标事件，展示拖拽源、目标节点和落点判定。
+ */
+const formatTreeDragTargetSummary = (
+  draggingNode: TreeNode,
+  dropNode: TreeNode,
+  event: DragEvent
+) => `drag=${String(draggingNode.key)}, target=${String(dropNode.key)}, native=${event.type}`
+
+const formatTreeDropSummary = (
+  draggingNode: TreeNode,
+  dropNode: TreeNode,
+  dropType: TreeNodeDropType,
+  event: DragEvent
+) =>
+  `${formatTreeDragTargetSummary(draggingNode, dropNode, event)}, dropType=${dropType}, reordered=yes`
 
 /**
  * 记录最近一次树事件，控制日志条数，避免示例页信息过载。
@@ -1656,12 +1726,19 @@ const resetTreeEventRecords = () => {
   treeNodeExpandCount.value = 0
   treeNodeCollapseCount.value = 0
   treeLoadCount.value = 0
+  treeDragStartCount.value = 0
+  treeDragEnterCount.value = 0
+  treeDragOverCount.value = 0
+  treeDragLeaveCount.value = 0
+  treeDragEndCount.value = 0
+  treeDropCount.value = 0
   treeLastNodeClick.value = '(none)'
   treeLastSelect.value = '(none)'
   treeLastCheck.value = '(none)'
   treeLastNodeExpand.value = '(none)'
   treeLastNodeCollapse.value = '(none)'
   treeLastLoad.value = '(none)'
+  treeLastDrag.value = '(none)'
   treeEventSequence.value = 0
   treeEventRecords.value = []
 }
@@ -1752,6 +1829,84 @@ const handleTreeLoad = (loadedKeys: TreeKey[], event: TreeLoadEvent) => {
   treeLoadCount.value += 1
   treeLastLoad.value = summary
   appendTreeEventRecord('load', summary)
+}
+
+/**
+ * 演示拖拽开始事件，展示当前拖拽源节点。
+ */
+const handleTreeDragStart = (node: TreeNode, event: DragEvent) => {
+  const summary = `node=${formatTreeNodeSummary(node)}, native=${event.type}`
+
+  treeDragStartCount.value += 1
+  treeLastDrag.value = summary
+  appendTreeEventRecord('node-drag-start', summary)
+}
+
+/**
+ * 演示 node-drag-enter，展示当前拖拽源与目标节点。
+ */
+const handleTreeDragEnter = (draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent) => {
+  const summary = formatTreeDragTargetSummary(draggingNode, dropNode, event)
+
+  treeDragEnterCount.value += 1
+  treeLastDrag.value = summary
+  appendTreeEventRecord('node-drag-enter', summary)
+}
+
+/**
+ * 演示 node-drag-over，展示当前拖拽源与目标节点。
+ */
+const handleTreeDragOver = (draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent) => {
+  const summary = formatTreeDragTargetSummary(draggingNode, dropNode, event)
+
+  treeDragOverCount.value += 1
+  treeLastDrag.value = summary
+  appendTreeEventRecord('node-drag-over', summary)
+}
+
+/**
+ * 演示 node-drag-leave，展示离开前的目标节点。
+ */
+const handleTreeDragLeave = (draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent) => {
+  const summary = formatTreeDragTargetSummary(draggingNode, dropNode, event)
+
+  treeDragLeaveCount.value += 1
+  treeLastDrag.value = summary
+  appendTreeEventRecord('node-drag-leave', summary)
+}
+
+/**
+ * 演示拖拽结束事件，展示最终拖拽源节点。
+ */
+const handleTreeDragEnd = (
+  draggingNode: TreeNode,
+  dropNode: TreeNode | null,
+  dropType: TreeNodeDropType,
+  event: DragEvent
+) => {
+  const summary = dropNode
+    ? formatTreeDropSummary(draggingNode, dropNode, dropType, event)
+    : `node=${formatTreeNodeSummary(draggingNode)}, dropType=${dropType}, native=${event.type}`
+
+  treeDragEndCount.value += 1
+  treeLastDrag.value = summary
+  appendTreeEventRecord('node-drag-end', summary)
+}
+
+/**
+ * 演示 node-drop 事件，组件已经在事件触发前完成内部重排。
+ */
+const handleTreeDrop = (
+  draggingNode: TreeNode,
+  dropNode: TreeNode,
+  dropType: Exclude<TreeNodeDropType, 'none'>,
+  event: DragEvent
+) => {
+  const summary = formatTreeDropSummary(draggingNode, dropNode, dropType, event)
+
+  treeDropCount.value += 1
+  treeLastDrag.value = summary
+  appendTreeEventRecord('node-drop', summary)
 }
 
 const currentTreeDefaultExpandLabel = computed(
