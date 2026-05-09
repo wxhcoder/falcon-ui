@@ -18,6 +18,9 @@
   --fl-tree-leaf-dot-color: var(--el-text-color-secondary);
   --fl-tree-line-color: var(--el-border-color-light, #dcdfe6);
   --fl-tree-line-width: 1px;
+  --fl-tree-drop-line-color: var(--el-color-primary);
+  --fl-tree-drop-forbidden-color: var(--el-color-danger);
+  --fl-tree-drop-inside-bg-color: var(--el-color-primary-light-9);
   --fl-tree-node-indent: 20px;
   --fl-tree-switcher-size: var(--fl-tree-node-indent);
 
@@ -31,6 +34,7 @@
   }
 
   @include bem.e(item-content) {
+    position: relative;
     display: flex;
     align-items: stretch;
     min-height: var(--fl-tree-node-content-height);
@@ -45,6 +49,47 @@
 
     &.is-selected #{bem.selector('tree', 'item-title')} {
       color: var(--fl-tree-node-selected-text-color);
+    }
+
+    &.is-draggable {
+      cursor: grab;
+    }
+
+    &.is-dragging {
+      opacity: 0.45;
+      cursor: grabbing;
+    }
+
+    &.is-drop-inside.is-drop-allowed {
+      background-color: var(--fl-tree-drop-inside-bg-color);
+    }
+
+    &.is-drop-forbidden {
+      cursor: no-drop;
+    }
+
+    &.is-drop-before::before,
+    &.is-drop-after::after {
+      position: absolute;
+      z-index: 2;
+      inset-inline-start: 8px;
+      inset-inline-end: 8px;
+      border-top: 2px solid var(--fl-tree-drop-line-color);
+      content: '';
+      pointer-events: none;
+    }
+
+    &.is-drop-before::before {
+      top: 0;
+    }
+
+    &.is-drop-after::after {
+      bottom: 0;
+    }
+
+    &.is-drop-forbidden::before,
+    &.is-drop-forbidden::after {
+      border-color: var(--fl-tree-drop-forbidden-color);
     }
   }
 

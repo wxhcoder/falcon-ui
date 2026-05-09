@@ -11,11 +11,15 @@ import FlTree, {
   type TreeCheckEvent,
   type TreeCheckedKeys,
   type TreeData,
+  type TreeAllowDrag,
+  type TreeAllowDrop,
+  type TreeAllowDropType,
   type TreeEmits,
   type TreeExpandPayload,
   type TreeKey,
   type TreeLoadEvent,
   type TreeNode,
+  type TreeNodeDropType,
   type TreeNodeModel,
   type TreeProps,
   type TreeSemanticDOM,
@@ -84,6 +88,36 @@ describe('FlTree 契约', () => {
    */
   const getItemContent = (wrapper: VueWrapper, label: string) =>
     findTreeItemByText(wrapper, label).get('.fl-tree__item-content')
+
+  /**
+   * 为 jsdom 中的节点内容区补充稳定尺寸，便于验证拖拽落点分区。
+   */
+  const setItemContentRect = (
+    wrapper: VueWrapper,
+    label: string,
+    rect: { top?: number; height?: number } = {}
+  ) => {
+    const content = getItemContent(wrapper, label)
+    const top = rect.top ?? 0
+    const height = rect.height ?? 100
+
+    Object.defineProperty(content.element, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        top,
+        bottom: top + height,
+        left: 0,
+        right: 240,
+        width: 240,
+        height,
+        x: 0,
+        y: top,
+        toJSON: () => ({})
+      })
+    })
+
+    return content
+  }
 
   /**
    * 判断指定树节点是否处于选中态。
@@ -693,6 +727,14 @@ describe('FlTree 契约', () => {
     expect(treeIndexSource).toContain('TreeLoadArgs')
     expect(treeIndexSource).toContain('TreeLoadData')
     expect(treeIndexSource).toContain('TreeLoadEvent')
+    expect(treeIndexSource).toContain('TreeAllowDrag')
+    expect(treeIndexSource).toContain('TreeAllowDropType')
+    expect(treeIndexSource).toContain('TreeNodeDragStartArgs')
+    expect(treeIndexSource).toContain('TreeNodeDragTargetArgs')
+    expect(treeIndexSource).toContain('TreeNodeDragEndArgs')
+    expect(treeIndexSource).toContain('TreeNodeDropArgs')
+    expect(treeIndexSource).toContain('TreeNodeDropType')
+    expect(treeIndexSource).toContain('TreeAllowDrop')
     expect(treeIndexSource).toContain('TreeSelectEvent')
     expect(treeIndexSource).toContain('TreeNodeModel')
     expect(treeIndexSource).toContain('TreeNode')
@@ -706,6 +748,14 @@ describe('FlTree 契约', () => {
     expect(componentsIndexSource).toContain('TreeLoadArgs')
     expect(componentsIndexSource).toContain('TreeLoadData')
     expect(componentsIndexSource).toContain('TreeLoadEvent')
+    expect(componentsIndexSource).toContain('TreeAllowDrag')
+    expect(componentsIndexSource).toContain('TreeAllowDropType')
+    expect(componentsIndexSource).toContain('TreeNodeDragStartArgs')
+    expect(componentsIndexSource).toContain('TreeNodeDragTargetArgs')
+    expect(componentsIndexSource).toContain('TreeNodeDragEndArgs')
+    expect(componentsIndexSource).toContain('TreeNodeDropArgs')
+    expect(componentsIndexSource).toContain('TreeNodeDropType')
+    expect(componentsIndexSource).toContain('TreeAllowDrop')
     expect(componentsIndexSource).toContain('TreeSelectEvent')
     expect(componentsIndexSource).toContain('TreeNodeModel')
     expect(componentsIndexSource).toContain('TreeNode')
@@ -721,6 +771,10 @@ describe('FlTree 契约', () => {
       TreeCheckEvent,
       TreeExpandPayload,
       TreeLoadEvent,
+      TreeAllowDrag,
+      TreeAllowDrop,
+      TreeAllowDropType,
+      TreeNodeDropType,
       TreeSelectEvent,
       TreeSwitcherLoadingIcon,
       TreeSwitcherIconMode,
@@ -2204,6 +2258,7 @@ describe('FlTree 契约', () => {
         data: createAsyncTreeData(),
         showLine: true,
         checkable: true,
+        draggable: true,
         loadData: () => Promise.resolve(),
         classNames: {
           root: 'async-semantic-root',
@@ -2249,6 +2304,12 @@ describe('FlTree 契约', () => {
     expect(
       findTreeItemByText(wrapper, 'async-async-child').find('.fl-tree__switcher-leaf-line').exists()
     ).toBe(true)
+    expect(getItemContent(wrapper, 'async-async-child').attributes('draggable')).toBe('true')
+
+    await getItemContent(wrapper, 'async-async-child').trigger('dragstart')
+    await nextTick()
+
+    expect(wrapper.emitted('node-drag-start')).toHaveLength(1)
 
     await getItemContent(wrapper, 'async-async-child').trigger('click')
     await nextTick()
@@ -2258,6 +2319,380 @@ describe('FlTree 契约', () => {
     expect(findTreeItemByText(wrapper, 'async-async-child').attributes('aria-checked')).toBe(
       'false'
     )
+  })
+
+  it('draggable 关闭时不设置原生拖拽属性且不触发拖拽事件', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+
+    expect(getItemContent(wrapper, 'Root').attributes('draggable')).toBeUndefined()
+
+    await getItemContent(wrapper, 'Root').trigger('dragstart')
+    await nextTick()
+
+    expect(wrapper.emitted('node-drag-start')).toBeUndefined()
+  })
+
+  it('draggable=true 设置原生拖拽属性，allowDrag=false 阻止拖拽开始', async () => {
+    const allowDrag: TreeAllowDrag = vi.fn((node) => node.key !== 'leaf')
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true,
+        draggable: true,
+        allowDrag
+      }
+    })
+
+    await nextTick()
+
+    expect(getItemContent(wrapper, 'Root').attributes('draggable')).toBe('true')
+    expect(getItemContent(wrapper, 'Leaf').attributes('draggable')).toBe('true')
+
+    await getItemContent(wrapper, 'Leaf').trigger('dragstart')
+    await nextTick()
+
+    expect(allowDrag).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('node-drag-start')).toBeUndefined()
+
+    await getItemContent(wrapper, 'Root').trigger('dragstart')
+    await nextTick()
+
+    expect(wrapper.emitted('node-drag-start')).toHaveLength(1)
+  })
+
+  it('按 Element Plus 顺序触发拖拽事件并先内部重排 data', async () => {
+    const eventOrder: string[] = []
+    const data: TreeData[] = [
+      {
+        key: 'root',
+        label: 'Root',
+        children: [
+          {
+            key: 'leaf',
+            label: 'Leaf'
+          }
+        ]
+      },
+      {
+        key: 'sibling',
+        label: 'Sibling'
+      }
+    ]
+    const wrapper = mount(FlTree, {
+      props: {
+        data,
+        defaultExpandAll: true,
+        draggable: true,
+        onNodeDragStart: () => eventOrder.push('node-drag-start'),
+        onNodeDragEnter: () => eventOrder.push('node-drag-enter'),
+        onNodeDragOver: () => eventOrder.push('node-drag-over'),
+        onNodeDragEnd: () => eventOrder.push('node-drag-end'),
+        onNodeDrop: () => eventOrder.push('node-drop')
+      }
+    })
+
+    await nextTick()
+
+    const rootContent = setItemContentRect(wrapper, 'Root')
+    const siblingContent = setItemContentRect(wrapper, 'Sibling')
+
+    await siblingContent.trigger('dragstart')
+    await rootContent.trigger('dragover', { clientY: 50 })
+    await rootContent.trigger('drop', { clientY: 50 })
+    await siblingContent.trigger('dragend')
+    await nextTick()
+
+    const dragStartArgs = wrapper.emitted('node-drag-start')?.[0]
+    const dragOverArgs = wrapper.emitted('node-drag-over')?.[0]
+    const dragEndArgs = wrapper.emitted('node-drag-end')?.[0]
+    const dropArgs = wrapper.emitted('node-drop')?.[0]
+
+    expect(eventOrder).toEqual([
+      'node-drag-start',
+      'node-drag-enter',
+      'node-drag-over',
+      'node-drag-end',
+      'node-drop'
+    ])
+    expect(dragStartArgs?.[0].key).toBe('sibling')
+    expect(dragStartArgs?.[1].type).toBe('dragstart')
+    expect(dragOverArgs?.[0].key).toBe('sibling')
+    expect(dragOverArgs?.[1].key).toBe('root')
+    expect(dragEndArgs?.[0].key).toBe('sibling')
+    expect(dragEndArgs?.[1]?.key).toBe('root')
+    expect(dragEndArgs?.[2]).toBe('inner')
+    expect(dropArgs?.[0].key).toBe('sibling')
+    expect(dropArgs?.[1].key).toBe('root')
+    expect(dropArgs?.[2]).toBe('inner')
+    expect(data.map((node) => node.key)).toEqual(['root'])
+    expect((data[0].children ?? []).map((node) => node.key)).toEqual(['leaf', 'sibling'])
+    expect(findTreeItemByText(wrapper, 'Sibling').exists()).toBe(true)
+  })
+
+  it('根据目标节点内的鼠标位置生成 before / inner / after 落点并原地重排', async () => {
+    const cases: Array<{
+      clientY: number
+      className: string
+      dropType: Exclude<TreeNodeDropType, 'none'>
+      data: TreeData[]
+      rootOrder: TreeKey[]
+      rootChildren: TreeKey[]
+    }> = [
+      {
+        clientY: 10,
+        className: 'is-drop-before',
+        dropType: 'before',
+        data: [
+          {
+            key: 'root',
+            label: 'Root',
+            children: [
+              {
+                key: 'leaf',
+                label: 'Leaf'
+              }
+            ]
+          },
+          {
+            key: 'sibling',
+            label: 'Sibling'
+          }
+        ],
+        rootOrder: ['sibling', 'root'],
+        rootChildren: ['leaf']
+      },
+      {
+        clientY: 50,
+        className: 'is-drop-inside',
+        dropType: 'inner',
+        data: [
+          {
+            key: 'root',
+            label: 'Root',
+            children: [
+              {
+                key: 'leaf',
+                label: 'Leaf'
+              }
+            ]
+          },
+          {
+            key: 'sibling',
+            label: 'Sibling'
+          }
+        ],
+        rootOrder: ['root'],
+        rootChildren: ['leaf', 'sibling']
+      },
+      {
+        clientY: 90,
+        className: 'is-drop-after',
+        dropType: 'after',
+        data: [
+          {
+            key: 'sibling',
+            label: 'Sibling'
+          },
+          {
+            key: 'root',
+            label: 'Root',
+            children: [
+              {
+                key: 'leaf',
+                label: 'Leaf'
+              }
+            ]
+          }
+        ],
+        rootOrder: ['root', 'sibling'],
+        rootChildren: ['leaf']
+      }
+    ]
+
+    for (const item of cases) {
+      const data = item.data
+      const wrapper = mount(FlTree, {
+        props: {
+          data,
+          defaultExpandAll: true,
+          draggable: true
+        }
+      })
+
+      await nextTick()
+
+      const rootContent = setItemContentRect(wrapper, 'Root')
+      const siblingContent = setItemContentRect(wrapper, 'Sibling')
+
+      await siblingContent.trigger('dragstart')
+      await rootContent.trigger('dragover', { clientY: item.clientY })
+      await nextTick()
+
+      expect(rootContent.classes()).toContain(item.className)
+
+      await rootContent.trigger('drop', { clientY: item.clientY })
+      await siblingContent.trigger('dragend')
+      await nextTick()
+
+      const dropArgs = wrapper.emitted('node-drop')?.[0]
+
+      expect(dropArgs?.[2]).toBe(item.dropType)
+      expect(data.map((node) => node.key)).toEqual(item.rootOrder)
+      expect(
+        ((data.find((node) => node.key === 'root')?.children ?? []) as TreeData[]).map(
+          (node) => node.key
+        )
+      ).toEqual(item.rootChildren)
+    }
+  })
+
+  it('allowDrop=false、自身投放、后代投放和相邻 no-op 都不会触发 node-drop', async () => {
+    const allowDrop = vi.fn<TreeAllowDrop>((_draggingNode, _dropNode, type) => type !== 'inner')
+    const allowDropWrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true,
+        draggable: true,
+        allowDrop
+      }
+    })
+
+    await nextTick()
+
+    const allowDropRootContent = setItemContentRect(allowDropWrapper, 'Root')
+    const allowDropLeafContent = setItemContentRect(allowDropWrapper, 'Leaf')
+
+    await allowDropLeafContent.trigger('dragstart')
+    await allowDropRootContent.trigger('dragover', { clientY: 50 })
+    await nextTick()
+
+    expect(allowDrop).toHaveBeenCalledTimes(3)
+    expect(allowDrop.mock.calls.map((call) => call[2])).toEqual(['prev', 'inner', 'next'])
+    expect(allowDrop.mock.calls[0]?.[0].key).toBe('leaf')
+    expect(allowDrop.mock.calls[0]?.[1].key).toBe('root')
+    expect(allowDropRootContent.classes()).toContain('is-drop-forbidden')
+
+    await allowDropRootContent.trigger('drop', { clientY: 50 })
+    await allowDropLeafContent.trigger('dragend')
+    await nextTick()
+
+    expect(allowDropWrapper.emitted('node-drop')).toBeUndefined()
+
+    const boundaryData = createSimpleTreeData()
+    const boundaryWrapper = mount(FlTree, {
+      props: {
+        data: boundaryData,
+        defaultExpandAll: true,
+        draggable: true
+      }
+    })
+
+    await nextTick()
+
+    const rootContent = setItemContentRect(boundaryWrapper, 'Root')
+    const leafContent = setItemContentRect(boundaryWrapper, 'Leaf')
+
+    await rootContent.trigger('dragstart')
+    await leafContent.trigger('dragover', { clientY: 50 })
+    await leafContent.trigger('drop', { clientY: 50 })
+    await rootContent.trigger('dragend')
+    await nextTick()
+
+    expect(boundaryWrapper.emitted('node-drop')).toBeUndefined()
+    expect(boundaryData.map((node) => node.key)).toEqual(['root'])
+    expect((boundaryData[0].children ?? []).map((node) => node.key)).toEqual(['leaf'])
+
+    const noOpData: TreeData[] = [
+      {
+        key: 'one',
+        label: 'One'
+      },
+      {
+        key: 'two',
+        label: 'Two'
+      }
+    ]
+    const noOpWrapper = mount(FlTree, {
+      props: {
+        data: noOpData,
+        draggable: true,
+        allowDrop: (_draggingNode, _dropNode, type) => type === 'next'
+      }
+    })
+
+    await nextTick()
+
+    const oneContent = setItemContentRect(noOpWrapper, 'One')
+    const twoContent = setItemContentRect(noOpWrapper, 'Two')
+
+    await twoContent.trigger('dragstart')
+    await oneContent.trigger('dragover', { clientY: 90 })
+    await oneContent.trigger('drop', { clientY: 90 })
+    await twoContent.trigger('dragend')
+    await nextTick()
+
+    expect(noOpWrapper.emitted('node-drop')).toBeUndefined()
+    expect(noOpData.map((node) => node.key)).toEqual(['one', 'two'])
+  })
+
+  it('拖拽链路不会误触发点击、选择、勾选或展开事件', async () => {
+    const eventOrder: string[] = []
+    const data: TreeData[] = [
+      {
+        key: 'root',
+        label: 'Root',
+        children: [
+          {
+            key: 'leaf',
+            label: 'Leaf'
+          }
+        ]
+      },
+      {
+        key: 'sibling',
+        label: 'Sibling'
+      }
+    ]
+    const wrapper = mount(FlTree, {
+      props: {
+        data,
+        defaultExpandAll: true,
+        checkable: true,
+        draggable: true,
+        onNodeDragStart: () => eventOrder.push('node-drag-start'),
+        onNodeDragOver: () => eventOrder.push('node-drag-over'),
+        onNodeDrop: () => eventOrder.push('node-drop'),
+        onNodeDragEnd: () => eventOrder.push('node-drag-end'),
+        onNodeClick: () => eventOrder.push('node-click'),
+        onSelect: () => eventOrder.push('select'),
+        onCheck: () => eventOrder.push('check'),
+        onNodeExpand: () => eventOrder.push('node-expand')
+      }
+    })
+
+    await nextTick()
+
+    const rootContent = setItemContentRect(wrapper, 'Root')
+    const siblingContent = setItemContentRect(wrapper, 'Sibling')
+
+    await siblingContent.trigger('dragstart')
+    await rootContent.trigger('dragover', { clientY: 50 })
+    await rootContent.trigger('drop', { clientY: 50 })
+    await siblingContent.trigger('dragend')
+    await nextTick()
+
+    expect(eventOrder).toEqual(['node-drag-start', 'node-drag-over', 'node-drag-end', 'node-drop'])
+    expect(wrapper.emitted('node-click')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    expect(wrapper.emitted('check')).toBeUndefined()
+    expect(wrapper.emitted('node-expand')).toBeUndefined()
   })
 
   it('supports arrow, plus-minus, and folder switcherIcon modes', async () => {

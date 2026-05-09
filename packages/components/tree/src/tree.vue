@@ -16,6 +16,11 @@
       :is-node-selected="isNodeSelected"
       :is-node-loading="isNodeLoading"
       :is-node-expandable="isNodeExpandable"
+      :is-node-draggable="isNodeDraggable"
+      :is-node-dragging="isNodeDragging"
+      :is-node-drop-target="isNodeDropTarget"
+      :is-node-drop-allowed="isNodeDropAllowed"
+      :get-node-drop-type="getNodeDropType"
       :tree-checkable="isTreeCheckable"
       :tree-selectable="isTreeSelectable"
       :show-line="props.showLine"
@@ -25,6 +30,12 @@
       :should-render-checkbox="shouldRenderCheckbox"
       :toggle-node-checked="toggleCheckedNode"
       :toggle-node-expansion="toggleNodeExpansion"
+      :handle-node-drag-start="handleNodeDragStart"
+      :handle-node-drag-enter="handleNodeDragEnter"
+      :handle-node-drag-over="handleNodeDragOver"
+      :handle-node-drag-leave="handleNodeDragLeave"
+      :handle-node-drop="handleNodeDrop"
+      :handle-node-drag-end="handleNodeDragEnd"
       :resolved-class-names="resolvedClassNames"
       :resolved-styles="resolvedStyles">
       <template v-if="hasDefaultSlot" #default="slotProps">
@@ -36,7 +47,7 @@
 
 <script setup lang="ts">
 import { useNamespace } from '@falcon-ui/utils'
-import { computed, useAttrs, type CSSProperties } from 'vue'
+import { computed, ref, useAttrs, type CSSProperties } from 'vue'
 import {
   buildTreeIndex,
   createTreeEventNode,
@@ -52,6 +63,7 @@ import {
 } from './tree'
 import FlTreeNode from './tree-node.vue'
 import { useTreeCheckedState, type TreeCheckedStateEmit } from './use-tree-checked-state'
+import { useTreeDragState, type TreeDragStateEmit } from './use-tree-drag'
 import { useTreeExpandedState, type TreeExpandedStateEmit } from './use-tree-expanded-state'
 import { useTreeLoadState, type TreeLoadStateEmit } from './use-tree-load'
 import { useTreeSelectedState, type TreeSelectedStateEmit } from './use-tree-selected-state'
@@ -69,11 +81,19 @@ const slots = defineSlots<{
 const attrs = useAttrs()
 const ns = useNamespace('tree')
 const rootClassName = ns.b()
+const treeDataVersion = ref(0)
+
+const notifyTreeDataChange = () => {
+  treeDataVersion.value += 1
+}
 
 /**
  * 构建当前渲染所需的标准化树索引。
  */
-const createCurrentTreeIndex = () => buildTreeIndex(props.data, props.props)
+const createCurrentTreeIndex = () => {
+  void treeDataVersion.value
+  return buildTreeIndex(props.data, props.props)
+}
 
 /**
  * 解析组件级语义化 classNames 配置。
@@ -150,6 +170,25 @@ const {
   props,
   treeIndex,
   emit: emit as TreeCheckedStateEmit
+})
+
+const {
+  getNodeDropType,
+  handleNodeDragEnd,
+  handleNodeDragEnter,
+  handleNodeDragLeave,
+  handleNodeDragOver,
+  handleNodeDragStart,
+  handleNodeDrop,
+  isNodeDraggable,
+  isNodeDragging,
+  isNodeDropAllowed,
+  isNodeDropTarget
+} = useTreeDragState({
+  props,
+  treeIndex,
+  emit: emit as TreeDragStateEmit,
+  notifyDataChange: notifyTreeDataChange
 })
 
 /**
