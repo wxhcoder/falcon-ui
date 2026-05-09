@@ -1,8 +1,9 @@
 import { mount } from '@vue/test-utils'
 import type { App, Plugin } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import { MinusSquareOutlined, PlusSquareOutlined } from '..'
+import { HolderOutlined, MinusSquareOutlined, PlusSquareOutlined } from '..'
 import {
+  HolderOutlined as FalconHolderOutlined,
   MinusSquareOutlined as FalconMinusSquareOutlined,
   PlusSquareOutlined as FalconPlusSquareOutlined
 } from '../../falcon-ui'
@@ -53,14 +54,28 @@ describe('@falcon-ui/icons', () => {
     expect(minusPaths.every((path) => path.attributes('fill') === 'currentColor')).toBe(true)
   })
 
+  it('renders HolderOutlined as a six-dot drag handle with the Element Plus SVG contract', () => {
+    const wrapper = mount(HolderOutlined)
+    const svg = wrapper.get('svg')
+    const paths = wrapper.findAll('path')
+
+    expect(svg.attributes('viewBox')).toBe('0 0 1024 1024')
+    expect(paths).toHaveLength(1)
+    expect(paths[0].attributes('fill')).toBe('currentColor')
+    expect(paths[0].attributes('d')).toContain('M300 276.5')
+    expect(paths[0].attributes('d')).toContain('M640 796')
+  })
+
   it('supports single icon installation via app.use', () => {
     const app = createAppMock()
 
     app.use(PlusSquareOutlined)
     app.use(MinusSquareOutlined)
+    app.use(HolderOutlined)
 
     expect(app.component).toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
     expect(app.component).toHaveBeenCalledWith('MinusSquareOutlined', MinusSquareOutlined)
+    expect(app.component).toHaveBeenCalledWith('HolderOutlined', HolderOutlined)
   })
 
   it('re-exports icons from the falcon-ui root entry without auto-registering them', () => {
@@ -68,14 +83,16 @@ describe('@falcon-ui/icons', () => {
 
     expect(FalconPlusSquareOutlined).toBe(PlusSquareOutlined)
     expect(FalconMinusSquareOutlined).toBe(MinusSquareOutlined)
+    expect(FalconHolderOutlined).toBe(HolderOutlined)
 
     app.use({
       install(currentApp) {
-        currentApp.use(FalconPlusSquareOutlined)
+        currentApp.use(FalconHolderOutlined)
       }
     })
 
-    expect(app.component).toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
+    expect(app.component).toHaveBeenCalledWith('HolderOutlined', HolderOutlined)
+    expect(app.component).not.toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
     expect(app.component).not.toHaveBeenCalledWith('MinusSquareOutlined', MinusSquareOutlined)
   })
 })

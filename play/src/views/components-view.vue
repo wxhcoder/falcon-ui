@@ -26,6 +26,12 @@
               <MinusSquareOutlined />
             </ElIcon>
           </div>
+          <div class="icon-demo-card">
+            <span class="icon-demo-label">HolderOutlined</span>
+            <ElIcon :size="iconPreviewSize" :color="iconPreviewColor">
+              <HolderOutlined />
+            </ElIcon>
+          </div>
         </div>
         <div class="demo-column">
           <FlButton @click="iconPreviewSize = iconPreviewSize === 22 ? 30 : 22">
@@ -43,6 +49,9 @@
         </ElIcon>
         <ElIcon :size="iconPreviewSize" :color="iconPreviewColor">
           <MinusSquareOutlined />
+        </ElIcon>
+        <ElIcon :size="iconPreviewSize" :color="iconPreviewColor">
+          <HolderOutlined />
         </ElIcon>
       </div>
       <p class="demo-result">size / color: {{ iconPreviewSize }} / {{ iconPreviewColor }}</p>
@@ -551,7 +560,7 @@
 import { computed, ref } from 'vue'
 import { Eleme, Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
-import { MinusSquareOutlined, PlusSquareOutlined } from 'falcon-ui'
+import { HolderOutlined, MinusSquareOutlined, PlusSquareOutlined } from 'falcon-ui'
 import type {
   RowOrderChangeEvent,
   TreeClassNames,

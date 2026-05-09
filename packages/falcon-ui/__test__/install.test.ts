@@ -10,6 +10,7 @@ import FalconUI, {
   FlSelect,
   FlTable,
   FlTableEditor,
+  HolderOutlined,
   MinusSquareOutlined,
   PlusSquareOutlined,
   install
@@ -49,6 +50,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlTableEditor', FlTableEditor)
     expect(app.component).not.toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
     expect(app.component).not.toHaveBeenCalledWith('MinusSquareOutlined', MinusSquareOutlined)
+    expect(app.component).not.toHaveBeenCalledWith('HolderOutlined', HolderOutlined)
   })
 
   it('registers all components via default plugin', () => {
@@ -67,10 +69,12 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlTableEditor', FlTableEditor)
     expect(app.component).not.toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
     expect(app.component).not.toHaveBeenCalledWith('MinusSquareOutlined', MinusSquareOutlined)
+    expect(app.component).not.toHaveBeenCalledWith('HolderOutlined', HolderOutlined)
   })
 
   it('still re-exports icon components from the root entry', () => {
     expect(PlusSquareOutlined).toBeDefined()
     expect(MinusSquareOutlined).toBeDefined()
+    expect(HolderOutlined).toBeDefined()
   })
 })
