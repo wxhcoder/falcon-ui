@@ -16,13 +16,17 @@ import FlTree, {
   type TreeAllowDropType,
   type TreeEmits,
   type TreeExpandPayload,
+  type TreeExpose,
   type TreeKey,
   type TreeInteractionEvent,
   type TreeLoadEvent,
   type TreeNode,
+  type TreeNodeDblclickArgs,
   type TreeNodeDropType,
   type TreeNodeModel,
   type TreeProps,
+  type TreeScrollAlign,
+  type TreeScrollToOptions,
   type TreeSemanticDOM,
   type TreeSelectEvent,
   type TreeSwitcherLoadingIcon,
@@ -747,6 +751,7 @@ describe('FlTree 契约', () => {
     expect(treeIndexSource).toContain('TreeCheckArgs')
     expect(treeIndexSource).toContain('TreeCheckEvent')
     expect(treeIndexSource).toContain('TreeExpandPayload')
+    expect(treeIndexSource).toContain('TreeExpose')
     expect(treeIndexSource).toContain('TreeInteractionEvent')
     expect(treeIndexSource).toContain('TreeLoadArgs')
     expect(treeIndexSource).toContain('TreeLoadData')
@@ -760,8 +765,11 @@ describe('FlTree 契约', () => {
     expect(treeIndexSource).toContain('TreeNodeDropType')
     expect(treeIndexSource).toContain('TreeAllowDrop')
     expect(treeIndexSource).toContain('TreeSelectEvent')
+    expect(treeIndexSource).toContain('TreeNodeDblclickArgs')
     expect(treeIndexSource).toContain('TreeNodeModel')
     expect(treeIndexSource).toContain('TreeNode')
+    expect(treeIndexSource).toContain('TreeScrollAlign')
+    expect(treeIndexSource).toContain('TreeScrollToOptions')
     expect(treeIndexSource).toContain('TreeSwitcherLoadingIcon')
     expect(treeIndexSource).toContain('TreeSwitcherIconMode')
     expect(treeIndexSource).not.toContain('FlTreeEmits')
@@ -769,6 +777,7 @@ describe('FlTree 契约', () => {
     expect(componentsIndexSource).toContain('TreeCheckArgs')
     expect(componentsIndexSource).toContain('TreeCheckEvent')
     expect(componentsIndexSource).toContain('TreeExpandPayload')
+    expect(componentsIndexSource).toContain('TreeExpose')
     expect(componentsIndexSource).toContain('TreeInteractionEvent')
     expect(componentsIndexSource).toContain('TreeLoadArgs')
     expect(componentsIndexSource).toContain('TreeLoadData')
@@ -782,8 +791,11 @@ describe('FlTree 契约', () => {
     expect(componentsIndexSource).toContain('TreeNodeDropType')
     expect(componentsIndexSource).toContain('TreeAllowDrop')
     expect(componentsIndexSource).toContain('TreeSelectEvent')
+    expect(componentsIndexSource).toContain('TreeNodeDblclickArgs')
     expect(componentsIndexSource).toContain('TreeNodeModel')
     expect(componentsIndexSource).toContain('TreeNode')
+    expect(componentsIndexSource).toContain('TreeScrollAlign')
+    expect(componentsIndexSource).toContain('TreeScrollToOptions')
     expect(componentsIndexSource).toContain('TreeSwitcherLoadingIcon')
     expect(componentsIndexSource).toContain('TreeSwitcherIconMode')
     expect(componentsIndexSource).not.toContain('FlTreeEmits')
@@ -802,6 +814,10 @@ describe('FlTree 契约', () => {
       TreeAllowDropType,
       TreeNodeDropType,
       TreeSelectEvent,
+      TreeNodeDblclickArgs,
+      TreeScrollAlign,
+      TreeScrollToOptions,
+      TreeExpose,
       TreeSwitcherLoadingIcon,
       TreeSwitcherIconMode,
       TreeEmits,
@@ -3044,6 +3060,301 @@ describe('FlTree 契约', () => {
 
     expect(getActiveTreeItemLabel(wrapper)).toBe('custom-Branch A')
     expect(getItemContent(wrapper, 'custom-Branch A').classes()).toContain('is-focused')
+  })
+
+  it('节点内容区双击会派发 dblclick，并复用展开和异步加载链路', async () => {
+    const eventOrder: string[] = []
+    const deferred = createDeferred()
+    const loadData = vi.fn(() => deferred.promise)
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        loadData,
+        onDblclick: () => eventOrder.push('dblclick'),
+        'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys'),
+        onNodeExpand: () => eventOrder.push('node-expand'),
+        onExpand: () => eventOrder.push('expand')
+      }
+    })
+
+    await nextTick()
+
+    await getItemContent(wrapper, 'Async Root').trigger('dblclick')
+    await nextTick()
+
+    const dblclickArgs = wrapper.emitted('dblclick')?.[0] as TreeNodeDblclickArgs | undefined
+
+    expect(eventOrder).toEqual(['dblclick', 'update:expandedKeys', 'node-expand', 'expand'])
+    expect(dblclickArgs?.[1].key).toBe('async-root')
+    expect(dblclickArgs?.[2]).not.toBeNull()
+    expect(dblclickArgs?.[3]).toBeInstanceOf(MouseEvent)
+    expect(loadData).toHaveBeenCalledTimes(1)
+    expect(findTreeItemByText(wrapper, 'Async Root').attributes('aria-expanded')).toBe('true')
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Async Root')
+
+    await getItemContent(wrapper, 'Async Root').trigger('dblclick')
+    await nextTick()
+
+    expect(wrapper.emitted('dblclick')).toHaveLength(2)
+    expect(loadData).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('node-collapse')).toBeUndefined()
+  })
+
+  it('双击叶子节点、switcher 或 checkbox 不会误触发展开链路', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true,
+        checkable: true
+      }
+    })
+
+    await nextTick()
+
+    await getItemContent(wrapper, 'Leaf').trigger('dblclick')
+    await getSwitcherButton(wrapper, 'Root').trigger('dblclick')
+    await getItemCheckbox(wrapper, 'Leaf').trigger('dblclick')
+    await nextTick()
+
+    expect(wrapper.emitted('dblclick')).toHaveLength(1)
+    expect((wrapper.emitted('dblclick')?.[0] as TreeNodeDblclickArgs | undefined)?.[1].key).toBe(
+      'leaf'
+    )
+    expect(wrapper.emitted('node-expand')).toBeUndefined()
+    expect(wrapper.emitted('node-collapse')).toBeUndefined()
+    expect(wrapper.emitted('check')).toBeUndefined()
+  })
+
+  it('双击只触发一次单击选择结果，不会把选中态切换两次', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData()
+      }
+    })
+
+    await nextTick()
+
+    const rootContent = getItemContent(wrapper, 'Root')
+
+    rootContent.element.dispatchEvent(
+      new MouseEvent('click', {
+        bubbles: true,
+        detail: 1
+      })
+    )
+    rootContent.element.dispatchEvent(
+      new MouseEvent('click', {
+        bubbles: true,
+        detail: 2
+      })
+    )
+    await rootContent.trigger('dblclick')
+    await nextTick()
+
+    expect(wrapper.emitted('node-click')).toHaveLength(1)
+    expect(wrapper.emitted('select')).toHaveLength(1)
+    expect(wrapper.emitted('dblclick')).toHaveLength(1)
+    expect(isItemSelected(wrapper, 'Root')).toBe(true)
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('true')
+  })
+
+  it('scrollTo 根据最近可滚动祖先执行 top、bottom、auto 与 offset 定位', async () => {
+    const scrollHost = document.createElement('div')
+    scrollHost.style.overflowY = 'auto'
+    document.body.appendChild(scrollHost)
+
+    Object.defineProperty(scrollHost, 'clientHeight', {
+      configurable: true,
+      value: 100
+    })
+    Object.defineProperty(scrollHost, 'scrollHeight', {
+      configurable: true,
+      value: 500
+    })
+    Object.defineProperty(scrollHost, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        top: 10,
+        bottom: 110,
+        left: 0,
+        right: 300,
+        width: 300,
+        height: 100,
+        x: 0,
+        y: 10,
+        toJSON: () => ({})
+      })
+    })
+
+    const wrapper = mount(FlTree, {
+      attachTo: scrollHost,
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+
+    const treeExpose = wrapper.vm as unknown as TreeExpose
+    const leafContent = setItemContentRect(wrapper, 'Leaf', {
+      top: 210,
+      height: 20
+    })
+
+    expect(typeof treeExpose.scrollTo).toBe('function')
+
+    treeExpose.scrollTo({
+      key: 'leaf',
+      align: 'top',
+      offset: 10
+    })
+
+    expect(scrollHost.scrollTop).toBe(190)
+
+    scrollHost.scrollTop = 0
+    treeExpose.scrollTo({
+      key: 'leaf',
+      align: 'bottom',
+      offset: 5
+    })
+
+    expect(scrollHost.scrollTop).toBe(125)
+
+    scrollHost.scrollTop = 33
+    Object.defineProperty(leafContent.element, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        top: 30,
+        bottom: 50,
+        left: 0,
+        right: 240,
+        width: 240,
+        height: 20,
+        x: 0,
+        y: 30,
+        toJSON: () => ({})
+      })
+    })
+
+    treeExpose.scrollTo({
+      key: 'leaf'
+    })
+
+    expect(scrollHost.scrollTop).toBe(33)
+
+    scrollHost.remove()
+  })
+
+  it('scrollTo 在没有局部滚动祖先时回退页面滚动容器', async () => {
+    const wrapper = mount(FlTree, {
+      attachTo: document.body,
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+
+    const pageScroller = document.scrollingElement ?? document.documentElement
+
+    pageScroller.scrollTop = 0
+    setItemContentRect(wrapper, 'Leaf', {
+      top: 900,
+      height: 20
+    })
+    ;(wrapper.vm as unknown as TreeExpose).scrollTo({
+      key: 'leaf',
+      align: 'top'
+    })
+
+    expect(pageScroller.scrollTop).toBe(900)
+  })
+
+  it('scrollTo 对非法 key、折叠子树和已移除节点保持 no-op', async () => {
+    const scrollHost = document.createElement('div')
+    scrollHost.style.overflowY = 'auto'
+    document.body.appendChild(scrollHost)
+
+    Object.defineProperty(scrollHost, 'clientHeight', {
+      configurable: true,
+      value: 100
+    })
+    Object.defineProperty(scrollHost, 'scrollHeight', {
+      configurable: true,
+      value: 500
+    })
+    Object.defineProperty(scrollHost, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        top: 0,
+        bottom: 100,
+        left: 0,
+        right: 300,
+        width: 300,
+        height: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => ({})
+      })
+    })
+
+    const wrapper = mount(FlTree, {
+      attachTo: scrollHost,
+      props: {
+        data: createSimpleTreeData()
+      }
+    })
+
+    await nextTick()
+
+    const treeExpose = wrapper.vm as unknown as TreeExpose
+
+    scrollHost.scrollTop = 42
+    treeExpose.scrollTo({
+      key: 'missing'
+    })
+    treeExpose.scrollTo({
+      key: 'leaf'
+    })
+
+    expect(scrollHost.scrollTop).toBe(42)
+
+    await getSwitcherButton(wrapper, 'Root').trigger('click')
+    await nextTick()
+
+    setItemContentRect(wrapper, 'Leaf', {
+      top: 180,
+      height: 20
+    })
+    scrollHost.scrollTop = 0
+    treeExpose.scrollTo({
+      key: 'leaf',
+      align: 'top'
+    })
+
+    expect(scrollHost.scrollTop).toBe(180)
+
+    await wrapper.setProps({
+      data: [
+        {
+          key: 'root',
+          label: 'Root'
+        }
+      ]
+    })
+    await nextTick()
+
+    scrollHost.scrollTop = 50
+    treeExpose.scrollTo({
+      key: 'leaf',
+      align: 'top'
+    })
+
+    expect(scrollHost.scrollTop).toBe(50)
+
+    scrollHost.remove()
   })
 
   it('supports arrow, plus-minus, and folder switcherIcon modes', async () => {

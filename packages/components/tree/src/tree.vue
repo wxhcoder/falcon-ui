@@ -13,7 +13,10 @@
       :key="node.key"
       :node="node"
       :get-node-id="getNodeId"
+      :register-node-element="registerNodeElement"
+      :unregister-node-element="unregisterNodeElement"
       :on-node-content-click="handleNodeContentClick"
+      :on-node-content-dblclick="handleNodeContentDblclick"
       :is-node-expanded="isNodeExpanded"
       :is-node-checked="isNodeChecked"
       :is-node-half-checked="isNodeHalfChecked"
@@ -61,6 +64,7 @@ import {
   treeProps,
   type TreeClassValue,
   type TreeData,
+  type TreeExpose,
   type TreeInteractionEvent,
   type TreeNodeInstance,
   type TreeNode,
@@ -73,6 +77,7 @@ import { useTreeDragState, type TreeDragStateEmit } from './use-tree-drag'
 import { useTreeExpandedState, type TreeExpandedStateEmit } from './use-tree-expanded-state'
 import { useTreeKeyboardState } from './use-tree-keyboard'
 import { useTreeLoadState, type TreeLoadStateEmit } from './use-tree-load'
+import { useTreeScrollState } from './use-tree-scroll'
 import { useTreeSelectedState, type TreeSelectedStateEmit } from './use-tree-selected-state'
 
 defineOptions({
@@ -143,10 +148,29 @@ const emitNodeClick = ({
   emit('node-click', node.data, createTreeEventNode({ node }), component, event)
 }
 
+/**
+ * 统一派发节点双击事件。`dblclick` 不暴露 `expanded` 字段。
+ */
+const emitNodeDblclick = ({
+  node,
+  component,
+  event
+}: {
+  node: TreeNodeModel
+  component: TreeNodeInstance
+  event: MouseEvent
+}) => {
+  emit('dblclick', node.data, createTreeEventNode({ node }), component, event)
+}
+
 const { isNodeLoaded, isNodeLoading, loadNode } = useTreeLoadState({
   props,
   treeIndex,
   emit: emit as TreeLoadStateEmit
+})
+
+const { registerNodeElement, scrollTo, unregisterNodeElement } = useTreeScrollState({
+  treeIndex
 })
 
 /**
@@ -263,6 +287,35 @@ const handleNodeContentClick = ({
   })
 }
 
+/**
+ * 节点内容区双击先派发独立事件，再复用展开与异步加载链路。
+ */
+const handleNodeContentDblclick = ({
+  node,
+  component,
+  event
+}: {
+  node: TreeNodeModel
+  component: TreeNodeInstance
+  event: MouseEvent
+}) => {
+  focusNode(node.key)
+  emitNodeDblclick({
+    node,
+    component,
+    event
+  })
+
+  if (!isNodeExpandable(node) || isNodeLoading(node.key)) {
+    return
+  }
+
+  toggleNodeExpansion({
+    node,
+    instance: component
+  })
+}
+
 const handleFocusedNodeAction = (node: TreeNodeModel, event: KeyboardEvent) => {
   handleNodeContentClick({
     node,
@@ -344,4 +397,10 @@ const handleTreeKeydown = (event: KeyboardEvent) => {
     handleFocusedNodeAction(focusedNode, event)
   }
 }
+
+const exposed: TreeExpose = {
+  scrollTo
+}
+
+defineExpose(exposed)
 </script>

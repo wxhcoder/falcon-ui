@@ -319,10 +319,17 @@
         <FlButton @click="toggleAsyncTreeControlledLoaded">
           LoadedKeys controlled: {{ asyncTreeUseControlledLoaded ? 'on' : 'off' }}
         </FlButton>
+        <FlButton @click="scrollTreeTo('workspace', 'top')">Scroll Workspace</FlButton>
+        <FlButton @click="scrollTreeTo('delivery-quality-playground', 'top')">
+          Scroll Playground
+        </FlButton>
+        <FlButton @click="scrollTreeTo('missing-scroll-key', 'auto')">Scroll no-op</FlButton>
+        <FlButton @click="scrollAsyncTreeTo('async-api', 'top')">Scroll async API</FlButton>
         <FlButton @click="resetTreeEventRecords">清空事件日志</FlButton>
       </div>
       <div class="demo-row tree-demo-row">
         <FlTree
+          ref="treeRef"
           :key="treeDemoVersion"
           class="tree-demo"
           :data="treeData"
@@ -350,6 +357,7 @@
           @update:selected-keys="handleTreeSelectedKeysChange"
           @update:checked-keys="handleTreeCheckedKeysChange"
           @node-click="handleTreeNodeClick"
+          @dblclick="handleTreeDblclick"
           @select="handleTreeSelect"
           @check="handleTreeCheck"
           @node-expand="handleTreeNodeExpand"
@@ -370,6 +378,7 @@
       </div>
       <div class="demo-row tree-demo-row">
         <FlTree
+          ref="asyncTreeRef"
           class="tree-demo async-tree-demo"
           :data="asyncTreeData"
           :props="treeNodeProps"
@@ -379,6 +388,7 @@
           :load-data="loadAsyncTreeNode"
           :loaded-keys="asyncTreeUseControlledLoaded ? asyncTreeControlledLoadedKeys : undefined"
           @update:loaded-keys="handleAsyncTreeLoadedKeysChange"
+          @dblclick="handleTreeDblclick"
           @load="handleTreeLoad" />
       </div>
       <p class="demo-result">Root nodes: {{ treeData.length }}</p>
@@ -406,7 +416,7 @@
         当前可见选中 keys:
         {{ currentTreeSelectedKeys.length ? currentTreeSelectedKeys.join(', ') : '(empty)' }}
       </p>
-      <p class="demo-result">普通树多选使用普通点击增删；目录树快捷键多选不在本阶段。</p>
+      <p class="demo-result">普通树多选使用普通点击增删；双击只负责 expandable 节点展开切换。</p>
       <p class="demo-result">
         Check mode:
         {{ treeCheckable ? (treeUseControlledCheck ? 'controlled' : 'default') : 'off' }}, strict={{
@@ -440,25 +450,33 @@
         focus ring and ARIA relationship.
       </p>
       <p class="demo-result">
+        Stage 16 dblclick: node content double-click emits `dblclick` and toggles expandable nodes.
+      </p>
+      <p class="demo-result">
+        Stage 17 scrollTo: buttons call exposed scrollTo without requiring a fixed tree height.
+      </p>
+      <p class="demo-result">
         Stage 7-9 note: default mode now conducts parent / child checks, strict mode uses `{
         checked, halfChecked }`, and `disabled` / `checkable=false` boundaries are active.
       </p>
-      <p class="demo-result">Directory-tree shortcut selection is still out of scope.</p>
       <p class="demo-result">
-        Event counts: click={{ treeNodeClickCount }}, select={{ treeSelectCount }}, check={{
-          treeCheckCount
-        }}, expand={{ treeNodeExpandCount }}, collapse={{ treeNodeCollapseCount }}, load={{
-          treeLoadCount
-        }}, node-drag-start={{ treeDragStartCount }}, node-drag-over={{ treeDragOverCount }},
-        node-drop={{ treeDropCount }}
+        Event counts: click={{ treeNodeClickCount }}, dblclick={{ treeDblclickCount }}, select={{
+          treeSelectCount
+        }}, check={{ treeCheckCount }}, expand={{ treeNodeExpandCount }}, collapse={{
+          treeNodeCollapseCount
+        }}, load={{ treeLoadCount }}, node-drag-start={{ treeDragStartCount }}, node-drag-over={{
+          treeDragOverCount
+        }}, node-drop={{ treeDropCount }}
       </p>
       <p class="demo-result">Last node-click: {{ treeLastNodeClick }}</p>
+      <p class="demo-result">Last dblclick: {{ treeLastDblclick }}</p>
       <p class="demo-result">Last select: {{ treeLastSelect }}</p>
       <p class="demo-result">Last check: {{ treeLastCheck }}</p>
       <p class="demo-result">Last node-expand: {{ treeLastNodeExpand }}</p>
       <p class="demo-result">Last node-collapse: {{ treeLastNodeCollapse }}</p>
       <p class="demo-result">Last load: {{ treeLastLoad }}</p>
       <p class="demo-result">Last drag: {{ treeLastDrag }}</p>
+      <p class="demo-result">Last scrollTo: {{ treeLastScrollTo }}</p>
       <ul class="tree-event-list">
         <li v-for="item in treeEventRecords" :key="item.id" class="tree-event-item">
           {{ item.message }}
@@ -585,6 +603,7 @@ import type {
   TreeData,
   TreeCheckEvent,
   TreeCheckedKeys,
+  TreeExpose,
   TreeKey,
   TreeInteractionEvent,
   TreeLoadEvent,
@@ -592,6 +611,7 @@ import type {
   TreeNodeDropType,
   TreeNodeInstance,
   TreeNodeProps,
+  TreeScrollAlign,
   TreeSelectEvent,
   TreeStyles,
   TreeSwitcherIconMode
@@ -752,6 +772,7 @@ interface TreeDefaultExpandConfig {
 
 type TreeEventName =
   | 'node-click'
+  | 'dblclick'
   | 'select'
   | 'check'
   | 'node-expand'
@@ -1162,7 +1183,10 @@ const asyncTreeData = ref<TreeData[]>(createAsyncTreeData())
 const asyncTreeUseControlledLoaded = ref(false)
 const asyncTreeControlledLoadedKeys = ref<TreeKey[]>([])
 const asyncTreeObservedLoadedKeys = ref<TreeKey[]>([])
+const treeRef = ref<TreeExpose | null>(null)
+const asyncTreeRef = ref<TreeExpose | null>(null)
 const treeNodeClickCount = ref(0)
+const treeDblclickCount = ref(0)
 const treeSelectCount = ref(0)
 const treeCheckCount = ref(0)
 const treeNodeExpandCount = ref(0)
@@ -1175,12 +1199,14 @@ const treeDragLeaveCount = ref(0)
 const treeDragEndCount = ref(0)
 const treeDropCount = ref(0)
 const treeLastNodeClick = ref('(none)')
+const treeLastDblclick = ref('(none)')
 const treeLastSelect = ref('(none)')
 const treeLastCheck = ref('(none)')
 const treeLastNodeExpand = ref('(none)')
 const treeLastNodeCollapse = ref('(none)')
 const treeLastLoad = ref('(none)')
 const treeLastDrag = ref('(none)')
+const treeLastScrollTo = ref('(none)')
 const treeEventSequence = ref(0)
 const treeEventRecords = ref<TreeEventRecord[]>([])
 
@@ -1531,6 +1557,28 @@ const toggleAsyncTreeControlledLoaded = () => {
 }
 
 /**
+ * 调用普通树公开的 scrollTo，验证滚动控制不依赖固定树高度。
+ */
+const scrollTreeTo = (key: TreeKey, align: TreeScrollAlign) => {
+  treeRef.value?.scrollTo({
+    key,
+    align
+  })
+  treeLastScrollTo.value = `tree key=${String(key)}, align=${align}`
+}
+
+/**
+ * 调用异步树公开的 scrollTo，验证异步示例也使用同一 expose。
+ */
+const scrollAsyncTreeTo = (key: TreeKey, align: TreeScrollAlign) => {
+  asyncTreeRef.value?.scrollTo({
+    key,
+    align
+  })
+  treeLastScrollTo.value = `async key=${String(key)}, align=${align}`
+}
+
+/**
  * 模拟业务侧异步请求，并由父组件负责把子节点写回 data。
  */
 const loadAsyncTreeNode = async (node: TreeNode): Promise<unknown> => {
@@ -1717,6 +1765,7 @@ const handleAsyncTreeLoadedKeysChange = (loadedKeys: TreeKey[]) => {
  */
 const resetTreeEventRecords = () => {
   treeNodeClickCount.value = 0
+  treeDblclickCount.value = 0
   treeSelectCount.value = 0
   treeCheckCount.value = 0
   treeNodeExpandCount.value = 0
@@ -1729,12 +1778,14 @@ const resetTreeEventRecords = () => {
   treeDragEndCount.value = 0
   treeDropCount.value = 0
   treeLastNodeClick.value = '(none)'
+  treeLastDblclick.value = '(none)'
   treeLastSelect.value = '(none)'
   treeLastCheck.value = '(none)'
   treeLastNodeExpand.value = '(none)'
   treeLastNodeCollapse.value = '(none)'
   treeLastLoad.value = '(none)'
   treeLastDrag.value = '(none)'
+  treeLastScrollTo.value = '(none)'
   treeEventSequence.value = 0
   treeEventRecords.value = []
 }
@@ -1753,6 +1804,22 @@ const handleTreeNodeClick = (
   treeNodeClickCount.value += 1
   treeLastNodeClick.value = summary
   appendTreeEventRecord('node-click', summary)
+}
+
+/**
+ * 演示 `dblclick` 事件，展示双击节点与原生事件。
+ */
+const handleTreeDblclick = (
+  data: TreeData,
+  node: TreeNode,
+  component: TreeNodeInstance,
+  event: MouseEvent
+) => {
+  const summary = `${formatTreeNodeSummary(node)}, rawLabel=${readTreeLabel(data)}, event=${event.type}, component=${component ? 'ready' : 'null'}`
+
+  treeDblclickCount.value += 1
+  treeLastDblclick.value = summary
+  appendTreeEventRecord('dblclick', summary)
 }
 
 /**
