@@ -20,6 +20,7 @@ export type {
   TreeEmits,
   TreeExpandPayload,
   TreeIndex,
+  TreeInteractionEvent,
   TreeKey,
   TreeLoadArgs,
   TreeLoadData,

@@ -4,16 +4,21 @@
     v-bind="attrs"
     :class="[rootClassName, resolvedClassNames.root, ns.is('show-line', props.showLine)]"
     :style="resolvedStyles.root"
-    role="tree">
+    :tabindex="rootTabIndex"
+    role="tree"
+    :aria-activedescendant="activeDescendantId"
+    @keydown="handleTreeKeydown">
     <FlTreeNode
       v-for="node in treeIndex.nodes"
       :key="node.key"
       :node="node"
+      :get-node-id="getNodeId"
       :on-node-content-click="handleNodeContentClick"
       :is-node-expanded="isNodeExpanded"
       :is-node-checked="isNodeChecked"
       :is-node-half-checked="isNodeHalfChecked"
       :is-node-selected="isNodeSelected"
+      :is-node-focused="isNodeFocused"
       :is-node-loading="isNodeLoading"
       :is-node-expandable="isNodeExpandable"
       :is-node-draggable="isNodeDraggable"
@@ -28,7 +33,7 @@
       :switcher-loading-icon="props.switcherLoadingIcon"
       :is-checkbox-disabled="isCheckboxDisabled"
       :should-render-checkbox="shouldRenderCheckbox"
-      :toggle-node-checked="toggleCheckedNode"
+      :toggle-node-checked="toggleNodeChecked"
       :toggle-node-expansion="toggleNodeExpansion"
       :handle-node-drag-start="handleNodeDragStart"
       :handle-node-drag-enter="handleNodeDragEnter"
@@ -56,6 +61,7 @@ import {
   treeProps,
   type TreeClassValue,
   type TreeData,
+  type TreeInteractionEvent,
   type TreeNodeInstance,
   type TreeNode,
   type TreeNodeModel,
@@ -65,6 +71,7 @@ import FlTreeNode from './tree-node.vue'
 import { useTreeCheckedState, type TreeCheckedStateEmit } from './use-tree-checked-state'
 import { useTreeDragState, type TreeDragStateEmit } from './use-tree-drag'
 import { useTreeExpandedState, type TreeExpandedStateEmit } from './use-tree-expanded-state'
+import { useTreeKeyboardState } from './use-tree-keyboard'
 import { useTreeLoadState, type TreeLoadStateEmit } from './use-tree-load'
 import { useTreeSelectedState, type TreeSelectedStateEmit } from './use-tree-selected-state'
 
@@ -115,6 +122,11 @@ const treeIndex = computed(createCurrentTreeIndex)
 const hasDefaultSlot = computed(() => Boolean(slots.default))
 const resolvedClassNames = computed<TreeSemanticRecord<TreeClassValue>>(createResolvedClassNames)
 const resolvedStyles = computed<TreeSemanticRecord<CSSProperties>>(createResolvedStyles)
+const rootTabIndex = computed(() => {
+  const tabindex = attrs.tabindex ?? attrs.tabIndex
+
+  return tabindex === undefined ? 0 : (tabindex as string | number)
+})
 
 /**
  * 统一派发节点点击事件。`node-click` 不暴露 `expanded` 字段。
@@ -126,7 +138,7 @@ const emitNodeClick = ({
 }: {
   node: TreeNodeModel
   component: TreeNodeInstance
-  event: MouseEvent
+  event: TreeInteractionEvent
 }) => {
   emit('node-click', node.data, createTreeEventNode({ node }), component, event)
 }
@@ -153,7 +165,7 @@ const { isNodeExpanded, toggleNodeExpansion: toggleExpandedNode } = useTreeExpan
   isNodeExpandable
 })
 
-const { isNodeSelected, isTreeSelectable, selectNode } = useTreeSelectedState({
+const { isNodeSelected, isTreeSelectable, selectNode, selectedKeys } = useTreeSelectedState({
   props,
   treeIndex,
   emit: emit as TreeSelectedStateEmit
@@ -191,10 +203,28 @@ const {
   notifyDataChange: notifyTreeDataChange
 })
 
+const {
+  activeDescendantId,
+  focusNode,
+  getFocusedNode,
+  getNodeId,
+  isNodeFocused,
+  moveFocusBy,
+  moveFocusToFirstChild,
+  moveFocusToParent
+} = useTreeKeyboardState({
+  treeIndex,
+  selectedKeys,
+  isNodeExpanded,
+  isNodeExpandable
+})
+
 /**
  * 用户请求展开时先保持原展开事件顺序，再进入异步加载链路。
  */
 const toggleNodeExpansion = (options: { node: TreeNodeModel; instance: TreeNodeInstance }) => {
+  focusNode(options.node.key)
+
   const wasExpanded = isNodeExpanded(options.node.key)
 
   toggleExpandedNode(options)
@@ -202,6 +232,11 @@ const toggleNodeExpansion = (options: { node: TreeNodeModel; instance: TreeNodeI
   if (!wasExpanded) {
     void loadNode(options.node)
   }
+}
+
+const toggleNodeChecked = (options: { node: TreeNodeModel; event: TreeInteractionEvent }) => {
+  focusNode(options.node.key)
+  toggleCheckedNode(options)
 }
 
 /**
@@ -214,8 +249,9 @@ const handleNodeContentClick = ({
 }: {
   node: TreeNodeModel
   component: TreeNodeInstance
-  event: MouseEvent
+  event: TreeInteractionEvent
 }) => {
+  focusNode(node.key)
   emitNodeClick({
     node,
     component,
@@ -225,5 +261,87 @@ const handleNodeContentClick = ({
     node,
     event
   })
+}
+
+const handleFocusedNodeAction = (node: TreeNodeModel, event: KeyboardEvent) => {
+  handleNodeContentClick({
+    node,
+    component: null,
+    event
+  })
+}
+
+const handleTreeKeydown = (event: KeyboardEvent) => {
+  const focusedNode = getFocusedNode()
+
+  if (!focusedNode) {
+    return
+  }
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault()
+    moveFocusBy(1)
+    return
+  }
+
+  if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    moveFocusBy(-1)
+    return
+  }
+
+  if (event.key === 'ArrowRight') {
+    event.preventDefault()
+
+    if (!isNodeExpandable(focusedNode)) {
+      return
+    }
+
+    if (!isNodeExpanded(focusedNode.key)) {
+      toggleNodeExpansion({
+        node: focusedNode,
+        instance: null
+      })
+      return
+    }
+
+    moveFocusToFirstChild(focusedNode)
+    return
+  }
+
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+
+    if (isNodeExpandable(focusedNode) && isNodeExpanded(focusedNode.key)) {
+      toggleNodeExpansion({
+        node: focusedNode,
+        instance: null
+      })
+      return
+    }
+
+    moveFocusToParent(focusedNode)
+    return
+  }
+
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    handleFocusedNodeAction(focusedNode, event)
+    return
+  }
+
+  if (event.key === ' ') {
+    event.preventDefault()
+
+    if (isTreeCheckable.value) {
+      toggleNodeChecked({
+        node: focusedNode,
+        event
+      })
+      return
+    }
+
+    handleFocusedNodeAction(focusedNode, event)
+  }
 }
 </script>

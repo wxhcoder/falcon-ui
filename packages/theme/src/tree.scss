@@ -24,6 +24,10 @@
   --fl-tree-node-indent: 20px;
   --fl-tree-switcher-size: var(--fl-tree-node-indent);
 
+  &:focus {
+    outline: none;
+  }
+
   @include bem.e(item) {
     position: relative;
     box-sizing: border-box;
@@ -45,6 +49,10 @@
 
     &.is-selected {
       background-color: var(--fl-tree-node-selected-bg-color);
+    }
+
+    &.is-focused:not(.is-selected) {
+      background-color: var(--fl-tree-node-hover-bg-color);
     }
 
     &.is-selected #{bem.selector('tree', 'item-title')} {

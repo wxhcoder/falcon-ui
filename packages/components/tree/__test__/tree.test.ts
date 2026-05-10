@@ -17,6 +17,7 @@ import FlTree, {
   type TreeEmits,
   type TreeExpandPayload,
   type TreeKey,
+  type TreeInteractionEvent,
   type TreeLoadEvent,
   type TreeNode,
   type TreeNodeDropType,
@@ -163,6 +164,28 @@ describe('FlTree 契约', () => {
    */
   const getSwitcherButton = (wrapper: VueWrapper, label: string) =>
     findTreeItemByText(wrapper, label).get('.fl-tree__switcher-button')
+
+  /**
+   * 读取当前 `aria-activedescendant` 指向的活动节点。
+   */
+  const getActiveTreeItem = (wrapper: VueWrapper) => {
+    const activeId = wrapper.get('[role="tree"]').attributes('aria-activedescendant')
+    const activeItem = wrapper
+      .findAll('.fl-tree__item')
+      .find((item) => item.attributes('id') === activeId)
+
+    if (!activeItem) {
+      throw new Error(`Unable to find active tree item: ${activeId}`)
+    }
+
+    return activeItem
+  }
+
+  /**
+   * 读取当前键盘活动节点的标题文本。
+   */
+  const getActiveTreeItemLabel = (wrapper: VueWrapper) =>
+    getActiveTreeItem(wrapper).get('.fl-tree__item-title').text()
 
   /**
    * 提供基础树数据，便于覆盖展开相关测试。
@@ -724,6 +747,7 @@ describe('FlTree 契约', () => {
     expect(treeIndexSource).toContain('TreeCheckArgs')
     expect(treeIndexSource).toContain('TreeCheckEvent')
     expect(treeIndexSource).toContain('TreeExpandPayload')
+    expect(treeIndexSource).toContain('TreeInteractionEvent')
     expect(treeIndexSource).toContain('TreeLoadArgs')
     expect(treeIndexSource).toContain('TreeLoadData')
     expect(treeIndexSource).toContain('TreeLoadEvent')
@@ -745,6 +769,7 @@ describe('FlTree 契约', () => {
     expect(componentsIndexSource).toContain('TreeCheckArgs')
     expect(componentsIndexSource).toContain('TreeCheckEvent')
     expect(componentsIndexSource).toContain('TreeExpandPayload')
+    expect(componentsIndexSource).toContain('TreeInteractionEvent')
     expect(componentsIndexSource).toContain('TreeLoadArgs')
     expect(componentsIndexSource).toContain('TreeLoadData')
     expect(componentsIndexSource).toContain('TreeLoadEvent')
@@ -770,6 +795,7 @@ describe('FlTree 契约', () => {
       TreeProps,
       TreeCheckEvent,
       TreeExpandPayload,
+      TreeInteractionEvent,
       TreeLoadEvent,
       TreeAllowDrag,
       TreeAllowDrop,
@@ -2693,6 +2719,331 @@ describe('FlTree 契约', () => {
     expect(wrapper.emitted('select')).toBeUndefined()
     expect(wrapper.emitted('check')).toBeUndefined()
     expect(wrapper.emitted('node-expand')).toBeUndefined()
+  })
+
+  it('根容器可聚焦，并通过 aria-activedescendant 指向内部活动节点', async () => {
+    const selectedWrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        defaultSelectedKeys: ['active-node']
+      }
+    })
+
+    await nextTick()
+
+    const tree = selectedWrapper.get('[role="tree"]')
+    const activeItem = findTreeItemByText(selectedWrapper, 'Active Node')
+    const disabledItem = findTreeItemByText(selectedWrapper, 'Disabled Node')
+
+    expect(tree.attributes('tabindex')).toBe('0')
+    expect(tree.attributes('aria-activedescendant')).toBe(activeItem.attributes('id'))
+    expect(getItemContent(selectedWrapper, 'Active Node').classes()).toContain('is-focused')
+    expect(disabledItem.attributes('aria-disabled')).toBe('true')
+
+    const customTabIndexWrapper = mount(FlTree, {
+      attrs: {
+        tabindex: '-1'
+      },
+      props: {
+        data: createSimpleTreeData()
+      }
+    })
+
+    await nextTick()
+
+    expect(customTabIndexWrapper.get('[role="tree"]').attributes('tabindex')).toBe('-1')
+
+    const mixedKeyWrapper = mount(FlTree, {
+      props: {
+        data: [
+          {
+            key: 1,
+            label: 'Number key'
+          },
+          {
+            key: '1',
+            label: 'String key'
+          }
+        ]
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(mixedKeyWrapper, 'Number key').attributes('id')).not.toBe(
+      findTreeItemByText(mixedKeyWrapper, 'String key').attributes('id')
+    )
+  })
+
+  it('方向键只在展开态下的可见节点间移动焦点', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData(),
+        defaultExpandedKeys: ['root']
+      }
+    })
+
+    await nextTick()
+
+    const tree = wrapper.get('[role="tree"]')
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Root')
+
+    await tree.trigger('keydown', { key: 'ArrowDown' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Branch')
+    expect(wrapper.text()).not.toContain('Leaf')
+
+    await tree.trigger('keydown', { key: 'ArrowDown' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Branch')
+
+    await tree.trigger('keydown', { key: 'ArrowUp' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Root')
+  })
+
+  it('左右键可展开、收起并在父子节点之间移动焦点', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData()
+      }
+    })
+
+    await nextTick()
+
+    const tree = wrapper.get('[role="tree"]')
+
+    await tree.trigger('keydown', { key: 'ArrowRight' })
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root').attributes('aria-expanded')).toBe('true')
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Root')
+
+    await tree.trigger('keydown', { key: 'ArrowRight' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Branch')
+
+    await tree.trigger('keydown', { key: 'ArrowRight' })
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Branch').attributes('aria-expanded')).toBe('true')
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Branch')
+
+    await tree.trigger('keydown', { key: 'ArrowRight' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Leaf')
+
+    await tree.trigger('keydown', { key: 'ArrowLeft' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Branch')
+
+    await tree.trigger('keydown', { key: 'ArrowLeft' })
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Branch').attributes('aria-expanded')).toBe('false')
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Branch')
+
+    await tree.trigger('keydown', { key: 'ArrowLeft' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Root')
+  })
+
+  it('Enter 复用节点内容点击语义，并保持禁用节点边界', async () => {
+    const selectedEventOrder: string[] = []
+    const selectedWrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        defaultSelectedKeys: ['active-node'],
+        onNodeClick: () => selectedEventOrder.push('node-click'),
+        'onUpdate:selectedKeys': () => selectedEventOrder.push('update:selectedKeys'),
+        onSelect: () => selectedEventOrder.push('select')
+      }
+    })
+
+    await nextTick()
+
+    await selectedWrapper.get('[role="tree"]').trigger('keydown', { key: 'Enter' })
+    await nextTick()
+
+    const nodeClickArgs = selectedWrapper.emitted('node-click')?.[0]
+    const selectEvent = selectedWrapper.emitted('select')?.[0]?.[1] as TreeSelectEvent
+
+    expect(selectedEventOrder).toEqual(['node-click', 'update:selectedKeys', 'select'])
+    expect(nodeClickArgs?.[2]).toBeNull()
+    expect(nodeClickArgs?.[3]).toBeInstanceOf(KeyboardEvent)
+    expect(selectEvent.event).toBeInstanceOf(KeyboardEvent)
+    expect(selectEvent.selected).toBe(false)
+
+    const disabledEventOrder: string[] = []
+    const disabledWrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        onNodeClick: () => disabledEventOrder.push('node-click'),
+        'onUpdate:selectedKeys': () => disabledEventOrder.push('update:selectedKeys'),
+        onSelect: () => disabledEventOrder.push('select')
+      }
+    })
+
+    await nextTick()
+
+    const disabledTree = disabledWrapper.get('[role="tree"]')
+
+    await disabledTree.trigger('keydown', { key: 'ArrowDown' })
+    await disabledTree.trigger('keydown', { key: 'Enter' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(disabledWrapper)).toBe('Disabled Node')
+    expect(disabledEventOrder).toEqual(['node-click'])
+    expect(disabledWrapper.emitted('select')).toBeUndefined()
+    expect(disabledWrapper.emitted('update:selectedKeys')).toBeUndefined()
+  })
+
+  it('Space 在 checkable 树中切换勾选，非 checkable 树中切换选择', async () => {
+    const checkableEventOrder: string[] = []
+    const checkableWrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        defaultSelectedKeys: ['active-node'],
+        checkable: true,
+        onNodeClick: () => checkableEventOrder.push('node-click'),
+        onSelect: () => checkableEventOrder.push('select'),
+        'onUpdate:checkedKeys': () => checkableEventOrder.push('update:checkedKeys'),
+        onCheck: () => checkableEventOrder.push('check')
+      }
+    })
+
+    await nextTick()
+
+    await checkableWrapper.get('[role="tree"]').trigger('keydown', { key: ' ' })
+    await nextTick()
+
+    const checkEvent = checkableWrapper.emitted('check')?.[0]?.[1] as TreeCheckEvent
+
+    expect(checkableEventOrder).toEqual(['update:checkedKeys', 'check'])
+    expect(checkEvent.event).toBeInstanceOf(KeyboardEvent)
+    expect(checkEvent.checked).toBe(true)
+    expect(findTreeItemByText(checkableWrapper, 'Active Node').attributes('aria-checked')).toBe(
+      'true'
+    )
+    expect(checkableWrapper.emitted('select')).toBeUndefined()
+    expect(checkableWrapper.emitted('node-click')).toBeUndefined()
+
+    const disabledWrapper = mount(FlTree, {
+      props: {
+        data: createSelectionBoundaryTreeData(),
+        defaultExpandAll: true,
+        checkable: true
+      }
+    })
+
+    await nextTick()
+
+    const disabledTree = disabledWrapper.get('[role="tree"]')
+
+    await disabledTree.trigger('keydown', { key: 'ArrowDown' })
+    await disabledTree.trigger('keydown', { key: ' ' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(disabledWrapper)).toBe('Disabled Node')
+    expect(disabledWrapper.emitted('check')).toBeUndefined()
+    expect(disabledWrapper.emitted('select')).toBeUndefined()
+    expect(disabledWrapper.emitted('node-click')).toBeUndefined()
+
+    const selectableWrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData()
+      }
+    })
+
+    await nextTick()
+
+    await selectableWrapper.get('[role="tree"]').trigger('keydown', { key: ' ' })
+    await nextTick()
+
+    expect(selectableWrapper.emitted('node-click')).toHaveLength(1)
+    expect(selectableWrapper.emitted('select')).toHaveLength(1)
+    expect(findTreeItemByText(selectableWrapper, 'Root').attributes('aria-selected')).toBe('true')
+  })
+
+  it('键盘展开异步节点时触发 loadData 且焦点保持在当前节点', async () => {
+    const deferred = createDeferred()
+    const loadData = vi.fn(() => deferred.promise)
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAsyncTreeData(),
+        loadData
+      }
+    })
+
+    await nextTick()
+
+    const tree = wrapper.get('[role="tree"]')
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Async Root')
+
+    await tree.trigger('keydown', { key: 'ArrowRight' })
+    await nextTick()
+
+    expect(loadData).toHaveBeenCalledTimes(1)
+    expect(findTreeItemByText(wrapper, 'Async Root').attributes('aria-expanded')).toBe('true')
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Async Root')
+    expect(getItemContent(wrapper, 'Async Root').classes()).toContain('is-focused')
+  })
+
+  it('default 插槽、showLine、拖拽与语义化样式不会破坏键盘焦点态', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createLineTreeData(),
+        defaultExpandAll: true,
+        showLine: true,
+        checkable: true,
+        draggable: true,
+        classNames: {
+          root: 'keyboard-semantic-root',
+          item: 'keyboard-semantic-item'
+        },
+        styles: {
+          item: {
+            minHeight: '28px'
+          }
+        }
+      },
+      slots: {
+        default: ({ node }: { node: TreeNode }) => h('span', `custom-${node.label}`)
+      }
+    })
+
+    await nextTick()
+
+    const tree = wrapper.get('[role="tree"]')
+    const rootAContent = getItemContent(wrapper, 'custom-Root A')
+
+    expect(tree.classes()).toContain('keyboard-semantic-root')
+    expect(findTreeItemByText(wrapper, 'custom-Root A').classes()).toContain(
+      'keyboard-semantic-item'
+    )
+    expect(rootAContent.classes()).toContain('is-focused')
+    expect(rootAContent.classes()).toContain('is-line-mode')
+    expect(rootAContent.classes()).toContain('is-draggable')
+    expect(getSwitcherButton(wrapper, 'custom-Root A').attributes('tabindex')).toBe('-1')
+
+    await tree.trigger('keydown', { key: 'ArrowDown' })
+    await nextTick()
+
+    expect(getActiveTreeItemLabel(wrapper)).toBe('custom-Branch A')
+    expect(getItemContent(wrapper, 'custom-Branch A').classes()).toContain('is-focused')
   })
 
   it('supports arrow, plus-minus, and folder switcherIcon modes', async () => {

@@ -1,6 +1,7 @@
 <template>
   <!-- 递归节点消费主入口下发的树状态与交互能力，连线模式仅补充渲染结构，不改动事件链路。 -->
   <div
+    :id="nodeId"
     :class="[
       itemClassName,
       semanticClassNames.item,
@@ -14,6 +15,7 @@
     :aria-expanded="isExpandableNode ? isExpandedNode : undefined"
     :aria-checked="nodeAriaChecked"
     :aria-selected="isSelectableNode ? isSelectedNode : undefined"
+    :aria-disabled="node.disabled ? 'true' : undefined"
     :aria-level="node.level">
     <div
       :class="[
@@ -21,6 +23,7 @@
         ns.is('selected', isSelectedNode),
         ns.is('disabled', node.disabled),
         ns.is('line-mode', showLine),
+        ns.is('focused', isFocusedNode),
         ns.is('draggable', isDraggableNode),
         ns.is('dragging', isDraggingNode),
         ns.is('drop-target', isDropTargetNode),
@@ -58,7 +61,9 @@
             :class="switcherButtonClassName"
             :aria-label="isExpandedNode ? '收起节点' : '展开节点'"
             :disabled="isLoadingNode"
-            @click.stop="handleSwitcherClick">
+            tabindex="-1"
+            @click.stop="handleSwitcherClick"
+            @keydown.stop>
             <ElIcon
               :class="[switcherIconClassName, ns.is('loading', isLoadingNode)]"
               aria-hidden="true">
@@ -82,11 +87,13 @@
       <span
         v-if="shouldShowCheckbox"
         :class="itemCheckboxClassName"
-        @click.stop="handleCheckboxClick">
+        @click.stop="handleCheckboxClick"
+        @keydown.stop>
         <ElCheckbox
           :model-value="isCheckedNode"
           :indeterminate="isHalfCheckedNode"
           :disabled="isCurrentCheckboxDisabled"
+          tabindex="-1"
           aria-label="Select tree node" />
       </span>
       <span :class="itemTitleClassName">
@@ -99,11 +106,13 @@
         v-for="childNode in node.childNodes"
         :key="childNode.key"
         :node="childNode"
+        :get-node-id="getNodeId"
         :on-node-content-click="onNodeContentClick"
         :is-node-expanded="isNodeExpanded"
         :is-node-checked="isNodeChecked"
         :is-node-half-checked="isNodeHalfChecked"
         :is-node-selected="isNodeSelected"
+        :is-node-focused="isNodeFocused"
         :is-node-loading="isNodeLoading"
         :is-node-expandable="isNodeExpandable"
         :is-node-draggable="isNodeDraggable"
@@ -146,6 +155,7 @@ import {
   createTreeEventNode,
   type TreeData,
   type TreeClassValue,
+  type TreeInteractionEvent,
   type TreeKey,
   type TreeNode,
   type TreeNodeDropType,
@@ -176,15 +186,17 @@ interface TreeNodeDragHandlerOptions {
  */
 interface TreeNodeComponentProps {
   node: TreeNodeModel
+  getNodeId: (nodeKey: TreeKey) => string
   onNodeContentClick: (options: {
     node: TreeNodeModel
     component: TreeNodeInstance
-    event: MouseEvent
+    event: TreeInteractionEvent
   }) => void
   isNodeExpanded: (nodeKey: TreeKey) => boolean
   isNodeChecked: (nodeKey: TreeKey) => boolean
   isNodeHalfChecked: (nodeKey: TreeKey) => boolean
   isNodeSelected: (nodeKey: TreeKey) => boolean
+  isNodeFocused: (nodeKey: TreeKey) => boolean
   isNodeLoading: (nodeKey: TreeKey) => boolean
   isNodeExpandable: (node: TreeNodeModel) => boolean
   isNodeDraggable: (node: TreeNodeModel) => boolean
@@ -199,7 +211,7 @@ interface TreeNodeComponentProps {
   switcherLoadingIcon: TreeSwitcherLoadingIcon
   isCheckboxDisabled: (node: TreeNodeModel) => boolean
   shouldRenderCheckbox: (node: TreeNodeModel) => boolean
-  toggleNodeChecked: (options: { node: TreeNodeModel; event: MouseEvent }) => void
+  toggleNodeChecked: (options: { node: TreeNodeModel; event: TreeInteractionEvent }) => void
   toggleNodeExpansion: (options: { node: TreeNodeModel; instance: TreeNodeInstance }) => void
   handleNodeDragStart: (options: TreeNodeDragHandlerOptions) => void
   handleNodeDragEnter: (options: TreeNodeDragTargetHandlerOptions) => void
@@ -316,6 +328,11 @@ const resolveSelectableNodeState = () =>
  * 判断当前节点是否处于选中态。
  */
 const resolveSelectedNodeState = () => props.isNodeSelected(props.node.key)
+
+/**
+ * 判断当前节点是否为键盘活动节点。
+ */
+const resolveFocusedNodeState = () => props.isNodeFocused(props.node.key)
 
 /**
  * 判断当前节点是否处于勾选态。
@@ -471,6 +488,7 @@ const getResolvedClassNames = () => props.resolvedClassNames
  */
 const getResolvedStyles = () => props.resolvedStyles
 
+const nodeId = computed(() => props.getNodeId(props.node.key))
 const itemStyle = computed(createItemStyle)
 const hasDefaultSlot = computed(() => Boolean(slots.default))
 const isExpandableNode = computed(resolveExpandableNodeState)
@@ -495,6 +513,7 @@ const isCurrentCheckboxDisabled = computed(resolveCheckboxDisabledState)
 const shouldShowCheckbox = computed(resolveCheckboxVisibleState)
 const isSelectableNode = computed(resolveSelectableNodeState)
 const isSelectedNode = computed(resolveSelectedNodeState)
+const isFocusedNode = computed(resolveFocusedNodeState)
 const nodeAriaChecked = computed(resolveAriaCheckedState)
 const slotNode = computed(() => createTreeEventNode({ node: props.node }))
 const semanticClassNames = computed(getResolvedClassNames)

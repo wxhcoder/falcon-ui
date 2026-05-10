@@ -39,6 +39,8 @@ export type TreeAllowDrop = (
   type: TreeAllowDropType
 ) => boolean
 
+export type TreeInteractionEvent = MouseEvent | KeyboardEvent
+
 /**
  * 首版使用稳定的默认字段映射，保证常规树数据可直接渲染。
  */
@@ -178,7 +180,7 @@ export interface TreeSelectEvent {
   node: TreeNode
   selectedNodes: TreeNode[]
   key: TreeKey
-  event: MouseEvent
+  event: TreeInteractionEvent
 }
 
 /**
@@ -190,7 +192,7 @@ export interface TreeCheckEvent {
   checkedNodes: TreeNode[]
   halfCheckedKeys: TreeKey[]
   key: TreeKey
-  event: MouseEvent
+  event: TreeInteractionEvent
 }
 
 /**
@@ -214,7 +216,7 @@ export type TreeNodeClickArgs = [
   data: TreeData,
   node: TreeNode,
   component: TreeNodeInstance,
-  event: MouseEvent
+  event: TreeInteractionEvent
 ]
 
 /**
@@ -328,7 +330,7 @@ const isTreeNodeClickArgs = (
   data: TreeData,
   node: TreeNode,
   component: TreeNodeInstance,
-  event: MouseEvent
+  event: TreeInteractionEvent
 ) =>
   isRecord(data) &&
   isTreeNode(node) &&

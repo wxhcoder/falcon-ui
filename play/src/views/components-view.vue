@@ -436,6 +436,10 @@
         tree internally reorders data on node-drop.
       </p>
       <p class="demo-result">
+        Stage 15 keyboard/a11y: focus stays on the tree root, with active node state shown by the
+        focus ring and ARIA relationship.
+      </p>
+      <p class="demo-result">
         Stage 7-9 note: default mode now conducts parent / child checks, strict mode uses `{
         checked, halfChecked }`, and `disabled` / `checkable=false` boundaries are active.
       </p>
@@ -582,6 +586,7 @@ import type {
   TreeCheckEvent,
   TreeCheckedKeys,
   TreeKey,
+  TreeInteractionEvent,
   TreeLoadEvent,
   TreeNode,
   TreeNodeDropType,
@@ -1741,7 +1746,7 @@ const handleTreeNodeClick = (
   data: TreeData,
   node: TreeNode,
   component: TreeNodeInstance,
-  event: MouseEvent
+  event: TreeInteractionEvent
 ) => {
   const summary = `${formatTreeNodeSummary(node)}, rawLabel=${readTreeLabel(data)}, event=${event.type}, component=${component ? 'ready' : 'null'}`
 

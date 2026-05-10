@@ -3,6 +3,7 @@ import {
   createTreeEventNode,
   filterTreeSelectedKeys,
   type TreeIndex,
+  type TreeInteractionEvent,
   type TreeKey,
   type TreeNodeModel,
   type TreeProps,
@@ -22,7 +23,7 @@ export interface TreeSelectedStateEmit {
 
 interface SelectNodeOptions {
   node: TreeNodeModel
-  event: MouseEvent
+  event: TreeInteractionEvent
 }
 
 /**
@@ -128,7 +129,7 @@ export const useTreeSelectedState = ({ props, treeIndex, emit }: UseTreeSelected
     nextSelectedKeys
   }: {
     node: TreeNodeModel
-    event: MouseEvent
+    event: TreeInteractionEvent
     nextSelectedKeys: TreeKey[]
   }) => {
     emit('update:selectedKeys', nextSelectedKeys)

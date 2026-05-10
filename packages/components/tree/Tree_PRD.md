@@ -26,7 +26,7 @@
 - [x] 阶段 12：开发 Tree 语义化 DOM 样式定制功能
 - [x] 阶段 13：开发树节点异步加载功能
 - [x] 阶段 14：开发树节点拖拽功能
-- [ ] 阶段 15：开发树键盘导航与无障碍功能
+- [x] 阶段 15：开发树键盘导航与无障碍功能
 - [ ] 阶段 16：开发目录树模式
 - [ ] 阶段 17：开发树滚动控制能力
 - [ ] 阶段 18：开发虚拟树
@@ -1448,7 +1448,9 @@ interface TreeExpose {
 
 1. 增加 `use-tree-keyboard.ts`
    - 维护内部 `focusedKey`，并把它作为焦点状态唯一事实来源。
-   - 基于 `treeIndex.visibleNodeKeys` 计算当前节点、上一个可见节点、下一个可见节点、
+   - 基于当前展开态递归生成真实可见节点序列，不直接使用 `treeIndex.visibleNodeKeys`
+     全量索引作为键盘导航顺序。
+   - 基于真实可见节点序列计算当前节点、上一个可见节点、下一个可见节点、
      父节点和第一个可见子节点。
    - 在 `data`、展开状态或异步加载结果变化后，如果 `focusedKey` 已不可见，回退到可见祖先
      或第一条可见节点。
@@ -1460,7 +1462,7 @@ interface TreeExpose {
 
 3. 建立节点活动态 DOM 契约
    - 每个 `role="treeitem"` 输出稳定 `id`，供 `aria-activedescendant` 引用。
-   - 当前活动节点输出焦点态 class，用于可视化焦点描边。
+   - 当前活动节点输出焦点态 class，并用背景色提供键盘切换反馈，不额外渲染 outline。
    - 节点输出 `aria-disabled`，让禁用态可被辅助技术识别。
 
 4. 实现键盘导航规则
@@ -1469,7 +1471,8 @@ interface TreeExpose {
    - `Right`：当前节点可展开且未展开时展开；已展开时移动到第一个可见子节点。
    - `Left`：当前节点已展开时收起；未展开或叶子节点时移动到父节点。
    - `Enter`：复用节点内容点击语义，触发 `node-click` 与选择链路。
-   - `Space`：当 `checkable = true` 且当前节点可勾选时切换勾选；否则复用选择链路。
+   - `Space`：当 `checkable = true` 时走勾选链路且不回退选择；
+     `checkable = false` 时复用选择链路。
 
 5. 衔接既有交互
    - 鼠标点击节点内容、switcher、checkbox 时同步更新 `focusedKey`。
@@ -1479,8 +1482,9 @@ interface TreeExpose {
    - 拖拽态不改变键盘焦点模型，本阶段不做键盘拖拽。
 
 6. 补充样式
-   - 给活动节点内容区增加清晰但克制的 focus ring。
-   - 焦点样式需要兼容 selected、hover、disabled、drop target、showLine、checkable。
+   - 禁用树根容器与活动节点内容区的 outline，避免方向键切换时出现边框跳动。
+   - 活动节点使用 hover 背景色作为视觉反馈，不使用 border / outline。
+   - 焦点状态 class 需要兼容 selected、hover、disabled、drop target、showLine、checkable。
    - 不改变现有 hover、selected、checked、dragging 的优先级语义。
 
 ### 22.4 本阶段不做的事情
@@ -1502,18 +1506,18 @@ interface TreeExpose {
 
 ### 22.6 验收测试范围
 
-| 编号 | 测试内容        | 关注点                                     | 预期结果                                          |
-| ---- | --------------- | ------------------------------------------ | ------------------------------------------------- |
-| 1    | 根容器可聚焦    | `tabindex` 与 `aria-activedescendant`      | Tab 进入树后存在稳定活动节点                      |
-| 2    | 上下导航        | `Up / Down` 与 `visibleNodeKeys`           | 只在当前可见节点间移动，不进入已收起子树          |
-| 3    | 左右展开收起    | `Left / Right` 与展开链路                  | 可展开节点按预期展开、收起、移动到父子节点        |
-| 4    | 键盘选择        | `Enter` 与 selectable / disabled 边界      | 事件顺序和鼠标点击一致，禁用节点不进入选中态      |
-| 5    | 键盘勾选        | `Space` 与 checkable / half-check          | 勾选传导、半选、禁用边界与鼠标勾选一致            |
-| 6    | 异步节点        | 键盘展开未加载节点                         | 触发 `loadData`，加载中焦点保持在当前节点         |
-| 7    | ARIA 状态       | expanded / selected / checked / disabled   | 屏幕阅读器可读取当前节点关键状态                  |
-| 8    | 样式回归        | focus / hover / selected / showLine / drag | 焦点样式可见，且不破坏既有视觉状态                |
-| 9    | 插槽回归        | default 插槽复杂内容                       | 键盘事件仍由 Tree 控制，插槽无需额外实现键盘逻辑  |
-| 10   | Playground 示例 | 可视化键盘操作与事件日志                   | 示例能直接演示方向键、Enter、Space 和当前活动节点 |
+| 编号 | 测试内容        | 关注点                                     | 预期结果                                                 |
+| ---- | --------------- | ------------------------------------------ | -------------------------------------------------------- |
+| 1    | 根容器可聚焦    | `tabindex` 与 `aria-activedescendant`      | Tab 进入树后存在稳定活动节点                             |
+| 2    | 上下导航        | `Up / Down` 与 `visibleNodeKeys`           | 只在当前可见节点间移动，不进入已收起子树                 |
+| 3    | 左右展开收起    | `Left / Right` 与展开链路                  | 可展开节点按预期展开、收起、移动到父子节点               |
+| 4    | 键盘选择        | `Enter` 与 selectable / disabled 边界      | 事件顺序和鼠标点击一致，禁用节点不进入选中态             |
+| 5    | 键盘勾选        | `Space` 与 checkable / half-check          | 勾选传导、半选、禁用边界与鼠标勾选一致                   |
+| 6    | 异步节点        | 键盘展开未加载节点                         | 触发 `loadData`，加载中焦点保持在当前节点                |
+| 7    | ARIA 状态       | expanded / selected / checked / disabled   | 屏幕阅读器可读取当前节点关键状态                         |
+| 8    | 样式回归        | focus / hover / selected / showLine / drag | 上下切换有背景反馈，不出现 outline，且不破坏既有视觉状态 |
+| 9    | 插槽回归        | default 插槽复杂内容                       | 键盘事件仍由 Tree 控制，插槽无需额外实现键盘逻辑         |
+| 10   | Playground 示例 | 可视化键盘操作与事件日志                   | 示例能直接演示方向键、Enter、Space 和当前活动节点        |
 
 ### 22.7 Playground 建议
 
@@ -1523,7 +1527,7 @@ interface TreeExpose {
   - `checkable` 权限树
   - 包含 disabled / disableCheckbox / half-check 的边界树
   - 一个异步加载节点
-- 页面展示当前 `focusedKey`、`selectedKeys`、`checkedKeys`、`expandedKeys` 和最近事件日志。
+- 页面不展示内部 `focusedKey`；通过焦点样式、ARIA 关系和最近事件日志观察结果。
 - 示例文案只说明验证入口，不在组件 UI 内写快捷键教学内容。
 
 ### 22.8 结果判定标准
@@ -1532,3 +1536,44 @@ interface TreeExpose {
 - 当前活动节点由 `focusedKey` 驱动，不能通过 DOM 查询反推组件状态。
 - 现有点击、勾选、展开、异步加载、拖拽、showLine、语义化样式能力不回退。
 - 自动化测试、类型检查、样式构建和 Playground 构建均通过后，阶段 15 才能标记完成。
+
+### 22.9 当前固定契约
+
+- `focusedKey` 为内部状态，不新增公开 prop、emit 或 expose。
+- 树根容器默认输出 `tabindex="0"`，外部显式传入 `tabindex` 时保留外部值。
+- 树根容器通过 `aria-activedescendant` 指向当前活动 `treeitem`。
+- 每个节点输出稳定 `id`；节点 key 的类型会参与 id 生成，避免 `1` 与 `'1'` 冲突。
+- `disabled` 节点输出 `aria-disabled="true"`。
+- switcher button 与 checkbox 从 Tab 顺序中移除，树保持单一 Tab 入口。
+- `Enter` 复用节点内容点击语义，键盘触发时 `node-click` 的 component 参数为 `null`。
+- `Space` 在 `checkable = true` 时只尝试勾选；节点不可勾选时不回退为选择。
+- `Space` 在 `checkable = false` 时复用节点内容点击 / 选择语义。
+- `TreeInteractionEvent = MouseEvent | KeyboardEvent`，用于统一选择、勾选和点击事件。
+
+### 22.10 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- Playground 验证入口：
+  - `play/src/views/components-view.vue`
+- 当前已执行命令：
+  - `pnpm exec eslint packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/src/use-tree-keyboard.ts packages/components/tree/src/use-tree-selected-state.ts packages/components/tree/src/use-tree-checked-state.ts packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue --max-warnings=0`
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib:style`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 当前执行结果：
+  - 目标 ESLint：通过
+  - 树组件单测：`71 passed`
+  - `vue-tsc`：通过
+  - `build:lib:style`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+  - `build:lib` 仍存在既有 `dialog.vue` dynamic import warning
+  - `play build` 仍存在既有 chunk size warning，本阶段未引入构建失败
+
+### 22.11 当前判定
+
+- 当前判定：阶段 15 已完成。
+- 下一阶段状态：阶段 15 已归档；阶段 16 为目录树模式。
