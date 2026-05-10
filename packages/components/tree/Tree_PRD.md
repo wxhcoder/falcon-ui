@@ -29,9 +29,8 @@
 - [x] 阶段 15：开发树键盘导航与无障碍功能
 - [ ] 阶段 16：开发目录树模式
 - [ ] 阶段 17：开发树滚动控制能力
-- [ ] 阶段 18：开发虚拟树
-- [ ] 阶段 19：开发文档示例与单元测试补全
-- [ ] 阶段 20：质量门禁
+- [ ] 阶段 18：开发文档示例与单元测试补全
+- [ ] 阶段 19：质量门禁
 
 ## 1. 对标基线与目标
 
@@ -48,7 +47,7 @@
 - 在 Falcon UI 中提供 `FlTree` 组件，交互语义尽量对齐 Ant Design `Tree`。
 - API 命名尽量贴近 Ant Design，同时符合 Vue 3 受控写法与 `v-model:*` 习惯。
 - 组件采用完全独立开发，不基于 Element Plus `ElTree` 或其他现成树组件做二次封装。
-- 内部自行实现树数据标准化、可见节点拍平、勾选传导、键盘导航、拖拽落点与虚拟滚动适配。
+- 内部自行实现树数据标准化、可见节点拍平、勾选传导、键盘导航与拖拽落点判定。
 - 实现统一使用 Vue 3 Composition API、`<script setup lang="ts">`、类型先行。
 
 ### 1.3 非目标
@@ -64,13 +63,13 @@
 - 对标对象：Ant Design `Tree`
 - 技术路线：
   - 基于 Falcon UI 自研树状态引擎与节点渲染层实现
-  - 普通树与虚拟树共享同一套标准化数据模型与交互状态模型
-  - 渲染层按“普通渲染 / 虚拟渲染”分支适配，不依赖第三方树组件 DOM 结构
+  - 渲染层聚焦普通树递归 / 拍平渲染
+  - 不依赖第三方树组件 DOM 结构
 - 设计原则：
   - 树数据语义尽量对齐 Ant Design
   - Vue 对外事件统一采用 kebab-case emits
   - 受控状态同时支持属性输入与 `update:*` 输出
-  - 逻辑层与渲染层解耦，避免后续目录树、异步树、虚拟树互相污染
+  - 逻辑层与渲染层解耦，避免后续目录树、异步树和滚动控制互相污染
 
 ## 3. 范围定义
 
@@ -85,7 +84,7 @@
 - 语义化 DOM 样式定制：`classNames`、`styles`
 - 异步加载：`loadData`、`loadedKeys`、`isLeaf`
 - 拖拽：节点可拖拽、投放位置限制、拖拽事件
-- 虚拟滚动：`height`、`virtual`、`scrollTo`
+- 滚动控制：`scrollTo`
 - 筛选高亮：`filterTreeNode`
 - 目录树模式：`directory`、`expandAction`
 - 类型导出、组件暴露方法、测试矩阵与文档示例
@@ -95,6 +94,7 @@
 - 不提供与 Ant Design Tree Component Token 一一对应的主题兼容层
 - 不提供搜索面板、右键菜单、上下文命令面板
 - 不提供跨树拖拽、远程分页树、超大规模节点专项优化
+- 不提供虚拟树或虚拟滚动；相关能力由独立组件承接
 
 ## 4. 核心需求拆解
 
@@ -321,11 +321,10 @@
   `node-drag-end` 与 `node-drop`。
 - 首版拖拽排序仅保证单树内部拖拽，不做跨树拖拽。
 
-### 4.11 虚拟滚动与滚动控制
+### 4.11 滚动控制
 
-- `height` 存在时，组件进入虚拟滚动模式。
-- `virtual = false` 时，强制关闭虚拟滚动。
-- 虚拟滚动必须建立在“可见节点拍平数组”之上，而不是依赖第三方虚拟树黑盒能力。
+- 滚动控制只负责定位当前已渲染且可见的节点，不切换渲染策略。
+- 折叠子树中的节点、已不存在节点或非法 `key` 不触发滚动。
 - 暴露 `scrollTo` 方法：
 
 ```ts
@@ -335,8 +334,6 @@ scrollTo(options: {
   offset?: number
 }): void
 ```
-
-- 保留 Ant Design 文档中的限制说明：虚拟滚动只渲染可见区域。
 
 ### 4.12 目录树模式
 
@@ -444,10 +441,8 @@ interface TreeSelectEvent {
   - `draggable`
   - `allowDrag`
   - `allowDrop`
-- 筛选与滚动
+- 筛选
   - `filterTreeNode`
-  - `height`
-  - `virtual`
 - 目录树相关
   - `directory`
   - `expandAction`
@@ -522,7 +517,7 @@ interface TreeExpose {
 - `src/use-tree-normalize.ts`
   - 树数据标准化、索引建立、字段映射
 - `src/use-tree-flatten.ts`
-  - 可见节点拍平、缩进层级、虚拟滚动输入
+  - 可见节点拍平、缩进层级、滚动定位输入
 - `src/use-tree-check-conduct.ts`
   - 父子勾选传导、半选态计算、禁用节点边界
 - `src/use-tree-render.ts`
@@ -533,8 +528,8 @@ interface TreeExpose {
   - 拖拽与落点判定
 - `src/use-tree-load.ts`
   - 异步加载状态管理
-- `src/use-tree-virtual.ts`
-  - 虚拟滚动与 `scrollTo`
+- `src/use-tree-scroll.ts`
+  - 滚动定位与 `scrollTo`
 - `src/use-tree-keyboard.ts`
   - 键盘导航、焦点管理、无障碍属性映射
 - `__test__/tree.test.ts`
@@ -543,8 +538,7 @@ interface TreeExpose {
 ### 6.2 技术取舍建议
 
 - 不依赖 Element Plus `ElTree`、`ElTreeV2` 或其他 UI 树组件作为底座。
-- 普通模式与虚拟模式共用同一套标准化数据、状态管理与事件语义。
-- `height + virtual !== false` 时，仅切换渲染策略，不切换交互语义与状态模型。
+- `FlTree` 的渲染与状态能力保持单一链路，独立组件如需复用纯逻辑能力时另行设计契约。
 - 受控状态统一通过“合并状态”模型处理，不允许散落在多个分支里各自维护。
 - 事件 payload 必须回传原始节点对象与标准化 keys，减少业务侧二次查询。
 - 勾选、展开、选中、拖拽四类核心能力都应具备可单测的纯逻辑层。
@@ -554,13 +548,11 @@ interface TreeExpose {
 
 ## 7. 风险与待确认项
 
-- 普通树渲染与虚拟树渲染如何共享同一份拍平结果，需要在实现前固定接口。
 - `directory` 模式作为 `FlTree` 的 prop 是否足够清晰，还是需要同步导出
   `FlDirectoryTree`。
 - 拖拽排序是否只做事件回传，还是允许组件内部直接重排 `data` 视图。
 - 异步加载与受控 `expandedKeys`、`loadedKeys` 同时存在时，状态优先级需要固定。
-- `default` 插槽与虚拟滚动同时开启时，是否存在高度测量抖动。
-- 普通渲染与虚拟渲染下，`root / item` 的语义挂点是否能保持一致。
+- `scrollTo` 遇到折叠子树节点、异步未加载节点或已不存在节点时的 no-op 语义需要固定。
 
 ## 8. 验收标准（首版）
 
@@ -571,7 +563,7 @@ interface TreeExpose {
 - `disabled` / `disableCheckbox` 节点联动边界与 Ant Design FAQ 一致。
 - `loadData` 可在节点展开时异步加载，并正确维护加载中与已加载状态。
 - `draggable`、`allowDrag`、`allowDrop` 与 `node-drop` 事件可完整表达节点拖放过程。
-- `height` 开启后可使用虚拟滚动，并支持 `scrollTo({ key })`。
+- `scrollTo({ key })` 可定位当前已渲染且可见的节点。
 - `filterTreeNode` 只负责高亮，不主动篡改展开状态。
 - `directory` 模式支持 `expandAction` 与快捷键多选。
 - `switcherIcon` 支持 `arrow / plus-minus / folder` 三种模式，且 `folder`
@@ -619,7 +611,7 @@ interface TreeExpose {
 2. `classNames.item` / `styles.item` 可稳定挂载到节点条目容器。
 3. 传入函数形式时，可基于 `props` 返回语义化结构映射。
 4. 节点内部 icon / checkbox / title DOM 不作为公开语义化挂点消费。
-5. 普通渲染与虚拟渲染模式下，两类语义化结构挂点语义保持一致。
+5. 展开、异步加载和拖拽状态变化后，两类语义化结构挂点语义保持一致。
 
 ### 9.6 阶段 11 默认内容与 `switcherIcon`
 
@@ -660,11 +652,11 @@ interface TreeExpose {
 2. `allowDrop` 返回 `false` 时禁止落点。
 3. `node-drop` 事件可拿到 `draggingNode`、`dropNode` 与 `dropType`。
 
-### 9.10 虚拟滚动
+### 9.10 滚动控制
 
-1. `height` 开启后，仅渲染可见区域节点。
-2. `scrollTo({ key })` 可滚动到指定节点。
-3. 长标题在虚拟滚动下不要求自动撑出横向滚动。
+1. `scrollTo({ key })` 可滚动到当前已渲染且可见的指定节点。
+2. 目标 key 不存在、非法或处于折叠子树中时，不触发滚动。
+3. 数据、展开态或异步加载结果变化后，滚动定位仍使用最新可见节点序列。
 
 ## 10. 当前落盘结果
 
@@ -1299,7 +1291,7 @@ interface TreeExpose {
 
 ### 20.1 测试范围
 
-阶段 13 只验证异步加载链路，不进入拖拽、键盘导航、目录树和虚拟树能力：
+阶段 13 只验证异步加载链路，不进入拖拽、键盘导航、目录树和滚动控制能力：
 
 1. `loadData(node)` 用户展开触发。
 2. `loadedKeys` 受控 / 非受控状态合并。
@@ -1367,7 +1359,7 @@ interface TreeExpose {
 ### 21.1 测试范围
 
 阶段 14 验证单树内部拖拽、内部原地重排和 Element Plus 风格事件链路，不进入跨树拖拽、
-键盘拖拽、目录树和虚拟树能力：
+键盘拖拽、目录树和滚动控制能力：
 
 1. `draggable` boolean 与 `allowDrag` 节点级拖拽源控制。
 2. `allowDrop(draggingNode, dropNode, type)` 的 `prev | inner | next` 判断。
@@ -1430,7 +1422,7 @@ interface TreeExpose {
 屏幕阅读器能理解树、节点、展开态、选中态、勾选态、禁用态与当前活动节点。
 
 本阶段不是新增业务形态，而是补齐 Tree 作为基础交互组件必须具备的键盘与无障碍契约。后续
-目录树、滚动控制和虚拟树都应复用本阶段建立的 `focusedKey`、可见节点顺序和活动节点语义。
+目录树和滚动控制都应复用本阶段建立的 `focusedKey`、可见节点顺序和活动节点语义。
 
 ### 22.2 使用场景与作用
 
@@ -1442,7 +1434,6 @@ interface TreeExpose {
 | 异步加载树      | 远程组织节点、按需加载分类、懒加载资源树     | 键盘展开异步节点时复用阶段 13 的 `loadData`，加载中焦点不丢失               |
 | 禁用节点树      | 部分节点不可选、不可勾选或不可展开           | 禁用节点仍可被读屏感知，但不会触发被禁止的选择、勾选或展开行为              |
 | 自定义内容树    | `default` 插槽渲染复杂标题、标签、状态徽标   | 焦点与键盘事件仍由 Tree 外壳接管，不要求业务插槽自己实现可访问交互          |
-| 后续虚拟树      | 大数据量树只渲染可见区域                     | 焦点状态不依赖 DOM 查询，后续可与虚拟列表和 `scrollTo` 共享状态输入         |
 
 ### 22.3 本阶段要做的事情
 
@@ -1493,7 +1484,7 @@ interface TreeExpose {
 - 不实现键盘拖拽；阶段 14 只覆盖鼠标拖拽，本阶段只保证拖拽与键盘焦点互不污染。
 - 不新增 `Home / End / PageUp / PageDown / *` 等扩展快捷键。
 - 不做搜索输入、首字母跳转或 typeahead。
-- 不实现独立 `scrollTo` API 或虚拟滚动适配；滚动控制留到阶段 17，虚拟树留到阶段 18。
+- 不实现独立 `scrollTo` API；滚动控制留到阶段 17。
 - 不改变 `classNames` / `styles` 的公开语义挂点。
 
 ### 22.5 事件与类型注意事项
