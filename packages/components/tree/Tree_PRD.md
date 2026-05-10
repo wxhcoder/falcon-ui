@@ -26,12 +26,11 @@
 - [x] 阶段 12：开发 Tree 语义化 DOM 样式定制功能
 - [x] 阶段 13：开发树节点异步加载功能
 - [x] 阶段 14：开发树节点拖拽功能
-- [ ] 阶段 15：开发树键盘导航与无障碍功能
-- [ ] 阶段 16：开发目录树模式
-- [ ] 阶段 17：开发树滚动控制能力
-- [ ] 阶段 18：开发虚拟树
-- [ ] 阶段 19：开发文档示例与单元测试补全
-- [ ] 阶段 20：质量门禁
+- [x] 阶段 15：开发树键盘导航与无障碍功能
+- [x] 阶段 16：开发树节点双击展开功能
+- [x] 阶段 17：开发树滚动控制能力
+- [ ] 阶段 18：开发文档示例与单元测试补全
+- [ ] 阶段 19：质量门禁
 
 ## 1. 对标基线与目标
 
@@ -48,7 +47,7 @@
 - 在 Falcon UI 中提供 `FlTree` 组件，交互语义尽量对齐 Ant Design `Tree`。
 - API 命名尽量贴近 Ant Design，同时符合 Vue 3 受控写法与 `v-model:*` 习惯。
 - 组件采用完全独立开发，不基于 Element Plus `ElTree` 或其他现成树组件做二次封装。
-- 内部自行实现树数据标准化、可见节点拍平、勾选传导、键盘导航、拖拽落点与虚拟滚动适配。
+- 内部自行实现树数据标准化、可见节点拍平、勾选传导、键盘导航与拖拽落点判定。
 - 实现统一使用 Vue 3 Composition API、`<script setup lang="ts">`、类型先行。
 
 ### 1.3 非目标
@@ -64,13 +63,13 @@
 - 对标对象：Ant Design `Tree`
 - 技术路线：
   - 基于 Falcon UI 自研树状态引擎与节点渲染层实现
-  - 普通树与虚拟树共享同一套标准化数据模型与交互状态模型
-  - 渲染层按“普通渲染 / 虚拟渲染”分支适配，不依赖第三方树组件 DOM 结构
+  - 渲染层聚焦普通树递归 / 拍平渲染
+  - 不依赖第三方树组件 DOM 结构
 - 设计原则：
   - 树数据语义尽量对齐 Ant Design
   - Vue 对外事件统一采用 kebab-case emits
   - 受控状态同时支持属性输入与 `update:*` 输出
-  - 逻辑层与渲染层解耦，避免后续目录树、异步树、虚拟树互相污染
+  - 逻辑层与渲染层解耦，避免后续异步树、拖拽和滚动控制互相污染
 
 ## 3. 范围定义
 
@@ -78,16 +77,16 @@
 
 - 树节点数据渲染：`data`、`props`、节点级状态字段
 - 展开行为：默认展开、受控展开、父级联动展开
-- 选择行为：单选、多选、目录树模式下的多选
+- 选择行为：单选、多选
 - 勾选行为：父子联动勾选、严格勾选、半选态
 - 节点禁用能力：`disabled`、`disableCheckbox`、`selectable`
 - 自定义渲染：标题、图标、展开图标、连线、整行占满
 - 语义化 DOM 样式定制：`classNames`、`styles`
 - 异步加载：`loadData`、`loadedKeys`、`isLeaf`
 - 拖拽：节点可拖拽、投放位置限制、拖拽事件
-- 虚拟滚动：`height`、`virtual`、`scrollTo`
+- 滚动控制：`scrollTo`
 - 筛选高亮：`filterTreeNode`
-- 目录树模式：`directory`、`expandAction`
+- 双击展开：节点内容区双击展开 / 收起
 - 类型导出、组件暴露方法、测试矩阵与文档示例
 
 ### 3.2 Out of Scope（首版不做）
@@ -95,6 +94,7 @@
 - 不提供与 Ant Design Tree Component Token 一一对应的主题兼容层
 - 不提供搜索面板、右键菜单、上下文命令面板
 - 不提供跨树拖拽、远程分页树、超大规模节点专项优化
+- 不提供虚拟树或虚拟滚动；相关能力由独立组件承接
 
 ## 4. 核心需求拆解
 
@@ -133,15 +133,15 @@
   - `defaultExpandParent`
 - 受控模式下，组件内部不得持久化最终展开结果；最终状态以外部传入为准。
 - 非受控模式下，组件内部维护展开状态，并在变更时同步发出 `update:expandedKeys`。
-- `directory` 模式下支持 `expandAction`：
-  - `click`
-  - `doubleClick`
-  - `false`
+- 支持节点内容区双击展开 / 收起：
+  - 仅非叶子、可展开且非加载中节点生效
+  - 双击复用既有展开状态、异步加载和展开事件链路
+  - 不新增选择模式，不改变单击选择、switcher 点击和 checkbox 勾选职责
 
 ### 4.3 选择行为
 
 - 默认 `selectable = true`。
-- 当前阶段已实现普通树单选与 `multiple = true` 的普通树多选；`directory = true` 的目录树快捷键多选仍留在后续阶段。
+- 当前阶段已实现普通树单选与 `multiple = true` 的普通树多选。
 - 提供：
   - `defaultSelectedKeys`
   - `selectedKeys`
@@ -159,7 +159,7 @@
 - 单选运行时语义固定为：
   - 点击未选中节点：切换为该节点唯一选中
   - 点击已选中节点：取消选中，`selectedKeys` 变为 `[]`
-- 普通树多选运行时语义固定为：
+- 多选运行时语义固定为：
   - 点击未选中节点：将当前 key 追加到 `selectedKeys` 末尾
   - 点击已选中节点：仅移除当前 key，保留其他已选中项
   - 不引入 `ctrl` / `command` 组合键语义
@@ -176,9 +176,6 @@
 - 若业务侧需要原始数据，统一通过：
   - `event.node.data`
   - `event.selectedNodes.map((node) => node.data)`
-- 目录树多选后续需兼容平台快捷键语义：
-  - Windows 使用 `ctrl`
-  - macOS 使用 `command`
 
 ### 4.4 勾选行为
 
@@ -321,11 +318,10 @@
   `node-drag-end` 与 `node-drop`。
 - 首版拖拽排序仅保证单树内部拖拽，不做跨树拖拽。
 
-### 4.11 虚拟滚动与滚动控制
+### 4.11 滚动控制
 
-- `height` 存在时，组件进入虚拟滚动模式。
-- `virtual = false` 时，强制关闭虚拟滚动。
-- 虚拟滚动必须建立在“可见节点拍平数组”之上，而不是依赖第三方虚拟树黑盒能力。
+- 滚动控制只负责定位当前已渲染且可见的节点，不切换渲染策略。
+- 折叠子树中的节点、已不存在节点或非法 `key` 不触发滚动。
 - 暴露 `scrollTo` 方法：
 
 ```ts
@@ -336,16 +332,13 @@ scrollTo(options: {
 }): void
 ```
 
-- 保留 Ant Design 文档中的限制说明：虚拟滚动只渲染可见区域。
+### 4.12 节点双击展开
 
-### 4.12 目录树模式
-
-- 首版不单独拆 `FlDirectoryTree`，统一通过 `directory` 模式承接。
-- 目录树模式要求：
-  - 视觉风格与普通树区分
-  - 选中态与普通树可分别配置样式变量
-  - 支持 `expandAction`
-  - 支持快捷键多选
+- 双击节点内容区时，可展开节点切换展开 / 收起状态。
+- 双击叶子节点、不可展开节点或加载中节点时，不触发展开状态变更。
+- 双击展开只作为普通树展开能力补充，不改变单击选择链路。
+- 双击展开必须复用阶段 13 的异步加载链路：双击展开未加载节点时触发 `loadData`。
+- 双击展开不得影响 switcher 点击、checkbox 点击、拖拽和键盘事件职责边界。
 
 ### 4.13 无障碍与键盘交互
 
@@ -444,13 +437,8 @@ interface TreeSelectEvent {
   - `draggable`
   - `allowDrag`
   - `allowDrop`
-- 筛选与滚动
+- 筛选
   - `filterTreeNode`
-  - `height`
-  - `virtual`
-- 目录树相关
-  - `directory`
-  - `expandAction`
 
 ### 5.3 Slots 草案
 
@@ -522,7 +510,7 @@ interface TreeExpose {
 - `src/use-tree-normalize.ts`
   - 树数据标准化、索引建立、字段映射
 - `src/use-tree-flatten.ts`
-  - 可见节点拍平、缩进层级、虚拟滚动输入
+  - 可见节点拍平、缩进层级、滚动定位输入
 - `src/use-tree-check-conduct.ts`
   - 父子勾选传导、半选态计算、禁用节点边界
 - `src/use-tree-render.ts`
@@ -533,8 +521,8 @@ interface TreeExpose {
   - 拖拽与落点判定
 - `src/use-tree-load.ts`
   - 异步加载状态管理
-- `src/use-tree-virtual.ts`
-  - 虚拟滚动与 `scrollTo`
+- `src/use-tree-scroll.ts`
+  - 滚动定位与 `scrollTo`
 - `src/use-tree-keyboard.ts`
   - 键盘导航、焦点管理、无障碍属性映射
 - `__test__/tree.test.ts`
@@ -543,8 +531,7 @@ interface TreeExpose {
 ### 6.2 技术取舍建议
 
 - 不依赖 Element Plus `ElTree`、`ElTreeV2` 或其他 UI 树组件作为底座。
-- 普通模式与虚拟模式共用同一套标准化数据、状态管理与事件语义。
-- `height + virtual !== false` 时，仅切换渲染策略，不切换交互语义与状态模型。
+- `FlTree` 的渲染与状态能力保持单一链路，独立组件如需复用纯逻辑能力时另行设计契约。
 - 受控状态统一通过“合并状态”模型处理，不允许散落在多个分支里各自维护。
 - 事件 payload 必须回传原始节点对象与标准化 keys，减少业务侧二次查询。
 - 勾选、展开、选中、拖拽四类核心能力都应具备可单测的纯逻辑层。
@@ -554,13 +541,10 @@ interface TreeExpose {
 
 ## 7. 风险与待确认项
 
-- 普通树渲染与虚拟树渲染如何共享同一份拍平结果，需要在实现前固定接口。
-- `directory` 模式作为 `FlTree` 的 prop 是否足够清晰，还是需要同步导出
-  `FlDirectoryTree`。
 - 拖拽排序是否只做事件回传，还是允许组件内部直接重排 `data` 视图。
 - 异步加载与受控 `expandedKeys`、`loadedKeys` 同时存在时，状态优先级需要固定。
-- `default` 插槽与虚拟滚动同时开启时，是否存在高度测量抖动。
-- 普通渲染与虚拟渲染下，`root / item` 的语义挂点是否能保持一致。
+- 双击展开与单击选择事件顺序需要固定，避免一次双击导致选择链路异常。
+- `scrollTo` 遇到折叠子树节点、异步未加载节点或已不存在节点时的 no-op 语义需要固定。
 
 ## 8. 验收标准（首版）
 
@@ -571,9 +555,9 @@ interface TreeExpose {
 - `disabled` / `disableCheckbox` 节点联动边界与 Ant Design FAQ 一致。
 - `loadData` 可在节点展开时异步加载，并正确维护加载中与已加载状态。
 - `draggable`、`allowDrag`、`allowDrop` 与 `node-drop` 事件可完整表达节点拖放过程。
-- `height` 开启后可使用虚拟滚动，并支持 `scrollTo({ key })`。
+- `scrollTo({ key })` 可定位当前已渲染且可见的节点。
 - `filterTreeNode` 只负责高亮，不主动篡改展开状态。
-- `directory` 模式支持 `expandAction` 与快捷键多选。
+- 节点内容区双击可展开 / 收起非叶子节点，并保持单击选择、switcher 和 checkbox 链路隔离。
 - `switcherIcon` 支持 `arrow / plus-minus / folder` 三种模式，且 `folder`
   仅作用于非叶子节点。
 - `switcherLoadingIcon` 可在异步加载中覆盖当前 `switcherIcon` 模式。
@@ -598,7 +582,8 @@ interface TreeExpose {
 
 1. `defaultExpandAll` 仅初始化生效。
 2. `expandedKeys` 受控时，内部点击只通过事件请求外部更新。
-3. `multiple = true` 时支持多选；目录树模式下支持快捷键多选。
+3. 节点内容区双击可展开 / 收起非叶子节点。
+4. `multiple = true` 时支持多选。
 
 ### 9.3 勾选
 
@@ -619,7 +604,7 @@ interface TreeExpose {
 2. `classNames.item` / `styles.item` 可稳定挂载到节点条目容器。
 3. 传入函数形式时，可基于 `props` 返回语义化结构映射。
 4. 节点内部 icon / checkbox / title DOM 不作为公开语义化挂点消费。
-5. 普通渲染与虚拟渲染模式下，两类语义化结构挂点语义保持一致。
+5. 展开、异步加载和拖拽状态变化后，两类语义化结构挂点语义保持一致。
 
 ### 9.6 阶段 11 默认内容与 `switcherIcon`
 
@@ -660,11 +645,11 @@ interface TreeExpose {
 2. `allowDrop` 返回 `false` 时禁止落点。
 3. `node-drop` 事件可拿到 `draggingNode`、`dropNode` 与 `dropType`。
 
-### 9.10 虚拟滚动
+### 9.10 滚动控制
 
-1. `height` 开启后，仅渲染可见区域节点。
-2. `scrollTo({ key })` 可滚动到指定节点。
-3. 长标题在虚拟滚动下不要求自动撑出横向滚动。
+1. `scrollTo({ key })` 可滚动到当前已渲染且可见的指定节点。
+2. 目标 key 不存在、非法或处于折叠子树中时，不触发滚动。
+3. 数据、展开态或异步加载结果变化后，滚动定位仍使用最新可见节点序列。
 
 ## 10. 当前落盘结果
 
@@ -926,7 +911,7 @@ interface TreeExpose {
   - `update:selectedKeys`
   - `select(selectedKeys, event: TreeSelectEvent)`
 - 本阶段已固定的运行时契约：
-  - 只实现单选，不实现多选、目录树快捷键多选与 `checkable`
+  - 只实现单选，不实现多选与 `checkable`
   - 点击内容区进入单选链路；点击当前已选中节点会取消选中
   - switcher 点击只处理展开 / 收起，不再参与 `node-click` / `select`
   - `selectedNodes` 返回 `TreeNode[]`，原始数据统一通过 `.data` 读取
@@ -937,7 +922,6 @@ interface TreeExpose {
   - 节点 hover 使用手型光标强化可点击反馈
 - 明确未进入本阶段的能力：
   - `multiple = true`
-  - `directory = true` 的快捷键多选
   - `checkable`、父子勾选联动、`checkStrictly`
   - 键盘选中与焦点管理增强
 
@@ -971,7 +955,7 @@ interface TreeExpose {
 | 6    | 多选边界             | 树级 `selectable=false`、节点 `disabled`、节点 `selectable=false`    | 不触发选中状态变更，不输出错误的多选事件                               |
 | 7    | switcher 交互边界    | switcher 点击是否误入多选链路                                        | 仅触发展开 / 收起链路，不触发 `select`                                 |
 | 8    | 单选回归稳定         | `multiple` 未传或为 `false` 时阶段 4 单选语义是否回退                | 单选替换、再次点击取消、事件顺序保持不变                               |
-| 9    | Playground 多选示例  | 默认多选、受控多选、清空 / 切换选中集合与事件日志是否可见            | 示例可直接演示多选追加 / 取消；明确说明目录树快捷键多选不在本阶段      |
+| 9    | Playground 多选示例  | 默认多选、受控多选、清空 / 切换选中集合与事件日志是否可见            | 示例可直接演示多选追加 / 取消                                          |
 
 ### 15.3 当前测试结果
 
@@ -996,7 +980,7 @@ interface TreeExpose {
   - `select` 事件在多选模式下返回完整 `selectedKeys` 与 `selectedNodes`，`event.selected` 仅表示当前点击节点的最终状态
   - 树级 `selectable = false`、节点 `disabled`、节点 `selectable = false` 在多选模式下仍不会进入选中态
   - switcher 点击继续只负责展开 / 收起，不参与多选链路
-  - Playground 已补充默认多选、受控多选、清空 / 切换选中集合与事件日志示例，并明确目录树快捷键多选不在本阶段
+  - Playground 已补充默认多选、受控多选、清空 / 切换选中集合与事件日志示例
   - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning；`play build` 仍存在既有的 chunk size warning，本阶段树组件改动未引入新的构建失败
 
 ### 15.4 功能归档
@@ -1015,9 +999,8 @@ interface TreeExpose {
   - `selectedNodes` 返回 `TreeNode[]`，原始数据统一通过 `.data` 读取
   - `disabled`、节点级 `selectable = false`、树级 `selectable = false` 均不会进入选中态
 - 明确未进入本阶段的能力：
-  - `directory = true` 的快捷键多选
   - `checkable`、父子勾选联动、`checkStrictly`
-  - 键盘多选与目录树模式增强
+  - 键盘多选增强
 
 ### 15.5 结果判定
 
@@ -1099,7 +1082,7 @@ interface TreeExpose {
 - 明确未进入本阶段的能力：
   - `checkStrictly = false` 下的父子联动勾选
   - 半选态与 `{ checked, halfChecked }` 对象形态
-  - 目录树模式下的快捷键多选与键盘勾选增强
+  - 键盘勾选增强
 
 ### 16.5 结果判定
 
@@ -1170,7 +1153,6 @@ interface TreeExpose {
   - `check` 事件统一返回 `TreeCheckEvent`，并新增 `halfCheckedKeys`
   - `disabled` / `disableCheckbox` / `checkable = false` 的边界已按阶段 9 收口
 - 明确未进入本阶段的能力：
-  - 目录树快捷键勾选
   - 键盘勾选增强
   - 异步加载场景下的专项勾选优化
 
@@ -1299,7 +1281,7 @@ interface TreeExpose {
 
 ### 20.1 测试范围
 
-阶段 13 只验证异步加载链路，不进入拖拽、键盘导航、目录树和虚拟树能力：
+阶段 13 只验证异步加载链路，不进入拖拽、键盘导航、双击展开和滚动控制能力：
 
 1. `loadData(node)` 用户展开触发。
 2. `loadedKeys` 受控 / 非受控状态合并。
@@ -1367,7 +1349,7 @@ interface TreeExpose {
 ### 21.1 测试范围
 
 阶段 14 验证单树内部拖拽、内部原地重排和 Element Plus 风格事件链路，不进入跨树拖拽、
-键盘拖拽、目录树和虚拟树能力：
+键盘拖拽、双击展开和滚动控制能力：
 
 1. `draggable` boolean 与 `allowDrag` 节点级拖拽源控制。
 2. `allowDrop(draggingNode, dropNode, type)` 的 `prev | inner | next` 判断。
@@ -1430,25 +1412,26 @@ interface TreeExpose {
 屏幕阅读器能理解树、节点、展开态、选中态、勾选态、禁用态与当前活动节点。
 
 本阶段不是新增业务形态，而是补齐 Tree 作为基础交互组件必须具备的键盘与无障碍契约。后续
-目录树、滚动控制和虚拟树都应复用本阶段建立的 `focusedKey`、可见节点顺序和活动节点语义。
+双击展开和滚动控制都应复用本阶段建立的 `focusedKey`、可见节点顺序和活动节点语义。
 
 ### 22.2 使用场景与作用
 
-| 场景            | 典型用法                                     | 阶段 15 的作用                                                              |
-| --------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
-| 键盘用户浏览树  | 设置中心、组织架构、分类树中只用键盘查看层级 | `Up / Down` 在当前可见节点间移动焦点；`Left / Right` 折叠、展开或进入子节点 |
-| 权限勾选树      | 角色权限、菜单权限、资源授权树               | `Space` 可切换当前节点勾选；半选、已选、未选通过 `aria-checked` 被读屏识别  |
-| 文件 / 目录类树 | 文件管理器、知识库目录、配置目录             | 方向键语义接近用户对目录树的预期，为阶段 16 `directory` 模式做基础          |
-| 异步加载树      | 远程组织节点、按需加载分类、懒加载资源树     | 键盘展开异步节点时复用阶段 13 的 `loadData`，加载中焦点不丢失               |
-| 禁用节点树      | 部分节点不可选、不可勾选或不可展开           | 禁用节点仍可被读屏感知，但不会触发被禁止的选择、勾选或展开行为              |
-| 自定义内容树    | `default` 插槽渲染复杂标题、标签、状态徽标   | 焦点与键盘事件仍由 Tree 外壳接管，不要求业务插槽自己实现可访问交互          |
-| 后续虚拟树      | 大数据量树只渲染可见区域                     | 焦点状态不依赖 DOM 查询，后续可与虚拟列表和 `scrollTo` 共享状态输入         |
+| 场景           | 典型用法                                     | 阶段 15 的作用                                                              |
+| -------------- | -------------------------------------------- | --------------------------------------------------------------------------- |
+| 键盘用户浏览树 | 设置中心、组织架构、分类树中只用键盘查看层级 | `Up / Down` 在当前可见节点间移动焦点；`Left / Right` 折叠、展开或进入子节点 |
+| 权限勾选树     | 角色权限、菜单权限、资源授权树               | `Space` 可切换当前节点勾选；半选、已选、未选通过 `aria-checked` 被读屏识别  |
+| 层级资源树     | 文件管理器、知识库导航、配置分类             | 方向键语义接近层级导航预期，为阶段 16 双击展开做基础                        |
+| 异步加载树     | 远程组织节点、按需加载分类、懒加载资源树     | 键盘展开异步节点时复用阶段 13 的 `loadData`，加载中焦点不丢失               |
+| 禁用节点树     | 部分节点不可选、不可勾选或不可展开           | 禁用节点仍可被读屏感知，但不会触发被禁止的选择、勾选或展开行为              |
+| 自定义内容树   | `default` 插槽渲染复杂标题、标签、状态徽标   | 焦点与键盘事件仍由 Tree 外壳接管，不要求业务插槽自己实现可访问交互          |
 
 ### 22.3 本阶段要做的事情
 
 1. 增加 `use-tree-keyboard.ts`
    - 维护内部 `focusedKey`，并把它作为焦点状态唯一事实来源。
-   - 基于 `treeIndex.visibleNodeKeys` 计算当前节点、上一个可见节点、下一个可见节点、
+   - 基于当前展开态递归生成真实可见节点序列，不直接使用 `treeIndex.visibleNodeKeys`
+     全量索引作为键盘导航顺序。
+   - 基于真实可见节点序列计算当前节点、上一个可见节点、下一个可见节点、
      父节点和第一个可见子节点。
    - 在 `data`、展开状态或异步加载结果变化后，如果 `focusedKey` 已不可见，回退到可见祖先
      或第一条可见节点。
@@ -1460,7 +1443,7 @@ interface TreeExpose {
 
 3. 建立节点活动态 DOM 契约
    - 每个 `role="treeitem"` 输出稳定 `id`，供 `aria-activedescendant` 引用。
-   - 当前活动节点输出焦点态 class，用于可视化焦点描边。
+   - 当前活动节点输出焦点态 class，并用背景色提供键盘切换反馈，不额外渲染 outline。
    - 节点输出 `aria-disabled`，让禁用态可被辅助技术识别。
 
 4. 实现键盘导航规则
@@ -1469,7 +1452,8 @@ interface TreeExpose {
    - `Right`：当前节点可展开且未展开时展开；已展开时移动到第一个可见子节点。
    - `Left`：当前节点已展开时收起；未展开或叶子节点时移动到父节点。
    - `Enter`：复用节点内容点击语义，触发 `node-click` 与选择链路。
-   - `Space`：当 `checkable = true` 且当前节点可勾选时切换勾选；否则复用选择链路。
+   - `Space`：当 `checkable = true` 时走勾选链路且不回退选择；
+     `checkable = false` 时复用选择链路。
 
 5. 衔接既有交互
    - 鼠标点击节点内容、switcher、checkbox 时同步更新 `focusedKey`。
@@ -1479,17 +1463,17 @@ interface TreeExpose {
    - 拖拽态不改变键盘焦点模型，本阶段不做键盘拖拽。
 
 6. 补充样式
-   - 给活动节点内容区增加清晰但克制的 focus ring。
-   - 焦点样式需要兼容 selected、hover、disabled、drop target、showLine、checkable。
+   - 禁用树根容器与活动节点内容区的 outline，避免方向键切换时出现边框跳动。
+   - 活动节点使用 hover 背景色作为视觉反馈，不使用 border / outline。
+   - 焦点状态 class 需要兼容 selected、hover、disabled、drop target、showLine、checkable。
    - 不改变现有 hover、selected、checked、dragging 的优先级语义。
 
 ### 22.4 本阶段不做的事情
 
-- 不实现目录树快捷键多选；该能力留到阶段 16。
 - 不实现键盘拖拽；阶段 14 只覆盖鼠标拖拽，本阶段只保证拖拽与键盘焦点互不污染。
 - 不新增 `Home / End / PageUp / PageDown / *` 等扩展快捷键。
 - 不做搜索输入、首字母跳转或 typeahead。
-- 不实现独立 `scrollTo` API 或虚拟滚动适配；滚动控制留到阶段 17，虚拟树留到阶段 18。
+- 不实现独立 `scrollTo` API；滚动控制留到阶段 17。
 - 不改变 `classNames` / `styles` 的公开语义挂点。
 
 ### 22.5 事件与类型注意事项
@@ -1502,18 +1486,18 @@ interface TreeExpose {
 
 ### 22.6 验收测试范围
 
-| 编号 | 测试内容        | 关注点                                     | 预期结果                                          |
-| ---- | --------------- | ------------------------------------------ | ------------------------------------------------- |
-| 1    | 根容器可聚焦    | `tabindex` 与 `aria-activedescendant`      | Tab 进入树后存在稳定活动节点                      |
-| 2    | 上下导航        | `Up / Down` 与 `visibleNodeKeys`           | 只在当前可见节点间移动，不进入已收起子树          |
-| 3    | 左右展开收起    | `Left / Right` 与展开链路                  | 可展开节点按预期展开、收起、移动到父子节点        |
-| 4    | 键盘选择        | `Enter` 与 selectable / disabled 边界      | 事件顺序和鼠标点击一致，禁用节点不进入选中态      |
-| 5    | 键盘勾选        | `Space` 与 checkable / half-check          | 勾选传导、半选、禁用边界与鼠标勾选一致            |
-| 6    | 异步节点        | 键盘展开未加载节点                         | 触发 `loadData`，加载中焦点保持在当前节点         |
-| 7    | ARIA 状态       | expanded / selected / checked / disabled   | 屏幕阅读器可读取当前节点关键状态                  |
-| 8    | 样式回归        | focus / hover / selected / showLine / drag | 焦点样式可见，且不破坏既有视觉状态                |
-| 9    | 插槽回归        | default 插槽复杂内容                       | 键盘事件仍由 Tree 控制，插槽无需额外实现键盘逻辑  |
-| 10   | Playground 示例 | 可视化键盘操作与事件日志                   | 示例能直接演示方向键、Enter、Space 和当前活动节点 |
+| 编号 | 测试内容        | 关注点                                     | 预期结果                                                 |
+| ---- | --------------- | ------------------------------------------ | -------------------------------------------------------- |
+| 1    | 根容器可聚焦    | `tabindex` 与 `aria-activedescendant`      | Tab 进入树后存在稳定活动节点                             |
+| 2    | 上下导航        | `Up / Down` 与 `visibleNodeKeys`           | 只在当前可见节点间移动，不进入已收起子树                 |
+| 3    | 左右展开收起    | `Left / Right` 与展开链路                  | 可展开节点按预期展开、收起、移动到父子节点               |
+| 4    | 键盘选择        | `Enter` 与 selectable / disabled 边界      | 事件顺序和鼠标点击一致，禁用节点不进入选中态             |
+| 5    | 键盘勾选        | `Space` 与 checkable / half-check          | 勾选传导、半选、禁用边界与鼠标勾选一致                   |
+| 6    | 异步节点        | 键盘展开未加载节点                         | 触发 `loadData`，加载中焦点保持在当前节点                |
+| 7    | ARIA 状态       | expanded / selected / checked / disabled   | 屏幕阅读器可读取当前节点关键状态                         |
+| 8    | 样式回归        | focus / hover / selected / showLine / drag | 上下切换有背景反馈，不出现 outline，且不破坏既有视觉状态 |
+| 9    | 插槽回归        | default 插槽复杂内容                       | 键盘事件仍由 Tree 控制，插槽无需额外实现键盘逻辑         |
+| 10   | Playground 示例 | 可视化键盘操作与事件日志                   | 示例能直接演示方向键、Enter、Space 和当前活动节点        |
 
 ### 22.7 Playground 建议
 
@@ -1523,7 +1507,7 @@ interface TreeExpose {
   - `checkable` 权限树
   - 包含 disabled / disableCheckbox / half-check 的边界树
   - 一个异步加载节点
-- 页面展示当前 `focusedKey`、`selectedKeys`、`checkedKeys`、`expandedKeys` 和最近事件日志。
+- 页面不展示内部 `focusedKey`；通过焦点样式、ARIA 关系和最近事件日志观察结果。
 - 示例文案只说明验证入口，不在组件 UI 内写快捷键教学内容。
 
 ### 22.8 结果判定标准
@@ -1532,3 +1516,186 @@ interface TreeExpose {
 - 当前活动节点由 `focusedKey` 驱动，不能通过 DOM 查询反推组件状态。
 - 现有点击、勾选、展开、异步加载、拖拽、showLine、语义化样式能力不回退。
 - 自动化测试、类型检查、样式构建和 Playground 构建均通过后，阶段 15 才能标记完成。
+
+### 22.9 当前固定契约
+
+- `focusedKey` 为内部状态，不新增公开 prop、emit 或 expose。
+- 树根容器默认输出 `tabindex="0"`，外部显式传入 `tabindex` 时保留外部值。
+- 树根容器通过 `aria-activedescendant` 指向当前活动 `treeitem`。
+- 每个节点输出稳定 `id`；节点 key 的类型会参与 id 生成，避免 `1` 与 `'1'` 冲突。
+- `disabled` 节点输出 `aria-disabled="true"`。
+- switcher button 与 checkbox 从 Tab 顺序中移除，树保持单一 Tab 入口。
+- `Enter` 复用节点内容点击语义，键盘触发时 `node-click` 的 component 参数为 `null`。
+- `Space` 在 `checkable = true` 时只尝试勾选；节点不可勾选时不回退为选择。
+- `Space` 在 `checkable = false` 时复用节点内容点击 / 选择语义。
+- `TreeInteractionEvent = MouseEvent | KeyboardEvent`，用于统一选择、勾选和点击事件。
+
+### 22.10 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- Playground 验证入口：
+  - `play/src/views/components-view.vue`
+- 当前已执行命令：
+  - `pnpm exec eslint packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/src/use-tree-keyboard.ts packages/components/tree/src/use-tree-selected-state.ts packages/components/tree/src/use-tree-checked-state.ts packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue --max-warnings=0`
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib:style`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 当前执行结果：
+  - 目标 ESLint：通过
+  - 树组件单测：`71 passed`
+  - `vue-tsc`：通过
+  - `build:lib:style`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+  - `build:lib` 仍存在既有 `dialog.vue` dynamic import warning
+  - `play build` 仍存在既有 chunk size warning，本阶段未引入构建失败
+
+### 22.11 当前判定
+
+- 当前判定：阶段 15 已完成。
+- 下一阶段状态：阶段 15 已归档；阶段 16 为树节点双击展开功能。
+
+## 23. 阶段 16 测试文档：树节点双击展开功能
+
+### 23.1 阶段目标
+
+阶段 16 补齐节点内容区双击展开 / 收起能力，让普通树在不新增目录树模式的前提下支持
+常见资源树交互。双击能力必须复用现有展开、异步加载、焦点和事件链路，不引入新的状态模型。
+
+### 23.2 本阶段要做的事情
+
+1. 在节点内容区接入 `dblclick` 事件。
+2. 新增 `dblclick(data, node, component, event)` emit，参数形态对齐 `node-click`。
+3. 双击可展开、非加载中的非叶子节点时，复用 `toggleNodeExpansion` 切换展开状态。
+4. 双击展开未加载异步节点时，继续触发阶段 13 的 `loadData`。
+5. 双击时同步当前 `focusedKey`，让阶段 15 的活动节点语义保持一致。
+6. 节点单击处理忽略 `MouseEvent.detail > 1`，避免双击导致选中态切换两次。
+7. switcher 与 checkbox 阻止 `dblclick` 冒泡，保持职责边界。
+
+### 23.3 本阶段不做的事情
+
+- 不新增 `directory`、`expandAction` 或目录树快捷键多选。
+- 不改变单击选择、switcher 点击、checkbox 勾选、拖拽和键盘事件职责。
+- 不让 `dblclick` 事件替代 `node-expand` / `node-collapse` / `expand`。
+
+### 23.4 验收测试范围
+
+| 编号 | 测试内容        | 关注点                                 | 预期结果                                    |
+| ---- | --------------- | -------------------------------------- | ------------------------------------------- |
+| 1    | 双击事件参数    | `dblclick` 多参数出参                  | 返回 data、node、component、MouseEvent      |
+| 2    | 双击展开链路    | 事件顺序与展开状态                     | `dblclick -> update:expandedKeys -> expand` |
+| 3    | 异步节点        | 未加载节点双击展开                     | 触发 `loadData`，加载中不重复切换           |
+| 4    | 叶子边界        | 叶子节点双击                           | 只触发 `dblclick`，不触发展开               |
+| 5    | 单击选择隔离    | 双击产生的第二次 click                 | 不会把选中态切换两次                        |
+| 6    | 内部控件隔离    | switcher / checkbox 双击               | 不冒泡到节点内容区，不误触发双击展开        |
+| 7    | Playground 示例 | 普通树与异步树双击事件、展开和日志展示 | 可直接观察双击展开、异步加载与事件计数      |
+
+### 23.5 当前固定契约
+
+- `dblclick` 对所有节点内容区触发；展开切换只对可展开且非加载中节点生效。
+- `dblclick` 的 `event` 固定为 `MouseEvent`。
+- 双击展开复用原展开链路，最终展开结果仍以 `expandedKeys` / `node-expand` /
+  `node-collapse` / `expand` 观察。
+- 双击不新增公开 prop，不改变既有受控展开优先级。
+
+### 23.6 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- Playground 验证入口：
+  - `play/src/views/components-view.vue`
+- 当前已执行命令：
+  - `pnpm exec eslint packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/src/use-tree-scroll.ts packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue --max-warnings=0`
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 当前执行结果：
+  - 目标 ESLint：通过
+  - 树组件单测：`77 passed`
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+  - `build:lib` 仍存在既有 `dialog.vue` dynamic import warning
+  - `play build` 仍存在既有 chunk size warning，本阶段未引入构建失败
+
+### 23.7 当前判定
+
+- 当前判定：阶段 16 已完成。
+- 下一阶段状态：阶段 16 已归档；阶段 17 为树滚动控制能力。
+
+## 24. 阶段 17 测试文档：树滚动控制能力
+
+### 24.1 阶段目标
+
+阶段 17 暴露 `scrollTo` 方法，用于定位当前已渲染且可见的节点。滚动控制只负责定位，不展开
+折叠祖先、不触发异步加载、不切换渲染策略，也不要求 `FlTree` 或使用方设置固定高度。
+
+### 24.2 本阶段要做的事情
+
+1. 新增 `use-tree-scroll.ts`，维护 `key -> HTMLElement` 的节点内容区元素注册表。
+2. TreeNode 挂载时注册内容区元素，卸载时注销；折叠子树节点因此自动不可滚动。
+3. `scrollTo` 根据目标节点查找最近可滚动祖先；找不到局部滚动祖先时回退页面滚动容器。
+4. 支持 `align = 'top' | 'bottom' | 'auto'` 与 `offset`。
+5. 暴露 `TreeExpose.scrollTo(options)`，并导出 `TreeScrollAlign` / `TreeScrollToOptions`。
+6. Playground 增加普通树和异步树 scrollTo 按钮，演示布局不作为组件高度契约。
+
+### 24.3 本阶段不做的事情
+
+- 不提供虚拟滚动或虚拟树。
+- 不主动展开折叠祖先，不触发 `loadData`。
+- 不内置平滑滚动。
+- 不把 Tree 根节点固定定义为滚动容器，不要求组件设置 `height`、`max-height` 或
+  `overflow`。
+
+### 24.4 验收测试范围
+
+| 编号 | 测试内容        | 关注点                             | 预期结果                                        |
+| ---- | --------------- | ---------------------------------- | ----------------------------------------------- |
+| 1    | expose 契约     | `scrollTo` 是否可通过组件 ref 调用 | 对外实例存在 `scrollTo`                         |
+| 2    | 最近滚动祖先    | Tree 外层存在滚动容器              | 使用最近可滚动祖先计算 `scrollTop`              |
+| 3    | 页面回退        | 无局部滚动祖先                     | 回退 `document.scrollingElement` / 页面滚动容器 |
+| 4    | 对齐方式        | `top` / `bottom` / `auto`          | 按目标位置和 `offset` 计算滚动距离              |
+| 5    | 折叠子树 no-op  | 目标节点未渲染                     | 不改变滚动位置                                  |
+| 6    | 非法 / 移除 key | key 不存在或已从数据中移除         | 不改变滚动位置                                  |
+| 7    | 展开后定位      | 节点重新渲染后注册 DOM             | 使用最新可见节点元素执行定位                    |
+| 8    | Playground 示例 | 普通树、异步树和 no-op 按钮        | 可观察 scrollTo 调用且不依赖固定树高度          |
+
+### 24.5 当前固定契约
+
+- `scrollTo` 只定位当前已渲染且可见的节点。
+- `align` 默认值为 `auto`，`offset` 默认值为 `0`。
+- 非法 key、折叠子树、异步未加载节点和已移除节点全部 no-op。
+- 组件不新增滚动相关 prop，不修改展开、选择、勾选、拖拽和键盘状态。
+
+### 24.6 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- Playground 验证入口：
+  - `play/src/views/components-view.vue`
+- 浏览器验证结果：
+  - 已在 Chrome 中验证 `Scroll Playground` 使用 `align="top"` 与默认 `offset=0` 后，
+    目标节点 `Playground` 进入客户区顶部，上一节点底部对齐客户区顶部。
+- 当前已执行命令：
+  - `pnpm exec eslint packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/src/use-tree-scroll.ts packages/components/tree/__test__/tree.test.ts play/src/views/components-view.vue --max-warnings=0`
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm build:lib`
+  - `pnpm --dir play build`
+- 当前执行结果：
+  - 目标 ESLint：通过
+  - 树组件单测：`77 passed`
+  - `vue-tsc`：通过
+  - `build:lib`：通过
+  - `play build`：通过
+  - `build:lib` 仍存在既有 `dialog.vue` dynamic import warning
+  - `play build` 仍存在既有 chunk size warning，本阶段未引入构建失败
+
+### 24.7 当前判定
+
+- 当前判定：阶段 17 已完成。
+- 下一阶段状态：阶段 17 已归档；阶段 18 为文档示例与单元测试补全。

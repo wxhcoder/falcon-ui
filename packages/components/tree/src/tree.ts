@@ -39,6 +39,20 @@ export type TreeAllowDrop = (
   type: TreeAllowDropType
 ) => boolean
 
+export type TreeInteractionEvent = MouseEvent | KeyboardEvent
+
+export type TreeScrollAlign = 'top' | 'bottom' | 'auto'
+
+export interface TreeScrollToOptions {
+  key: TreeKey
+  align?: TreeScrollAlign
+  offset?: number
+}
+
+export interface TreeExpose {
+  scrollTo: (options: TreeScrollToOptions) => void
+}
+
 /**
  * 首版使用稳定的默认字段映射，保证常规树数据可直接渲染。
  */
@@ -178,7 +192,7 @@ export interface TreeSelectEvent {
   node: TreeNode
   selectedNodes: TreeNode[]
   key: TreeKey
-  event: MouseEvent
+  event: TreeInteractionEvent
 }
 
 /**
@@ -190,7 +204,7 @@ export interface TreeCheckEvent {
   checkedNodes: TreeNode[]
   halfCheckedKeys: TreeKey[]
   key: TreeKey
-  event: MouseEvent
+  event: TreeInteractionEvent
 }
 
 /**
@@ -211,6 +225,16 @@ export type TreeNodeInstance = ComponentPublicInstance | null
  * `node-click` 事件固定采用 Element Plus 风格的多参数出参。
  */
 export type TreeNodeClickArgs = [
+  data: TreeData,
+  node: TreeNode,
+  component: TreeNodeInstance,
+  event: TreeInteractionEvent
+]
+
+/**
+ * `dblclick` 事件固定采用 Element Plus 风格的多参数出参。
+ */
+export type TreeNodeDblclickArgs = [
   data: TreeData,
   node: TreeNode,
   component: TreeNodeInstance,
@@ -325,6 +349,21 @@ const isTreeNode = (value: unknown): value is TreeNode =>
  * 验证 `node-click` 事件的四元组参数。
  */
 const isTreeNodeClickArgs = (
+  data: TreeData,
+  node: TreeNode,
+  component: TreeNodeInstance,
+  event: TreeInteractionEvent
+) =>
+  isRecord(data) &&
+  isTreeNode(node) &&
+  isTreeNodeInstance(component) &&
+  isRecord(event) &&
+  typeof event.type === 'string'
+
+/**
+ * 验证 `dblclick` 事件的四元组参数。
+ */
+const isTreeNodeDblclickArgs = (
   data: TreeData,
   node: TreeNode,
   component: TreeNodeInstance,
@@ -464,6 +503,10 @@ export const treeEmits = {
    * 节点被点击时抛出节点数据、节点对象、组件实例与鼠标事件。
    */
   'node-click': (...args: TreeNodeClickArgs) => isTreeNodeClickArgs(...args),
+  /**
+   * 节点内容区被双击时抛出节点数据、节点对象、组件实例与鼠标事件。
+   */
+  dblclick: (...args: TreeNodeDblclickArgs) => isTreeNodeDblclickArgs(...args),
   /**
    * 节点被选中或取消选中时抛出最新选中结果。
    */

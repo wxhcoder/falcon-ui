@@ -4,6 +4,7 @@ import {
   type TreeCheckEvent,
   type TreeCheckedKeys,
   type TreeIndex,
+  type TreeInteractionEvent,
   type TreeKey,
   type TreeNodeModel,
   type TreeProps
@@ -28,7 +29,7 @@ export interface TreeCheckedStateEmit {
 
 interface ToggleCheckedNodeOptions {
   node: TreeNodeModel
-  event: MouseEvent
+  event: TreeInteractionEvent
 }
 
 /**
@@ -180,7 +181,7 @@ export const useTreeCheckedState = ({ props, treeIndex, emit }: UseTreeCheckedSt
     nextCheckedState
   }: {
     node: TreeNodeModel
-    event: MouseEvent
+    event: TreeInteractionEvent
     nextCheckedState: TreeCheckedState
   }) => {
     const nextCheckedKeysValue = createTreeCheckedKeysValue({
