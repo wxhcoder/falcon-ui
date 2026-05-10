@@ -22,6 +22,10 @@ import FlTree, {
   type TreeLoadEvent,
   type TreeNode,
   type TreeNodeDblclickArgs,
+  type TreeNodeDragEndArgs,
+  type TreeNodeDragStartArgs,
+  type TreeNodeDragTargetArgs,
+  type TreeNodeDropArgs,
   type TreeNodeDropType,
   type TreeNodeModel,
   type TreeProps,
@@ -2451,10 +2455,14 @@ describe('FlTree 契约', () => {
     await siblingContent.trigger('dragend')
     await nextTick()
 
-    const dragStartArgs = wrapper.emitted('node-drag-start')?.[0]
-    const dragOverArgs = wrapper.emitted('node-drag-over')?.[0]
-    const dragEndArgs = wrapper.emitted('node-drag-end')?.[0]
-    const dropArgs = wrapper.emitted('node-drop')?.[0]
+    const dragStartArgs = wrapper.emitted('node-drag-start')?.[0] as
+      | TreeNodeDragStartArgs
+      | undefined
+    const dragOverArgs = wrapper.emitted('node-drag-over')?.[0] as
+      | TreeNodeDragTargetArgs
+      | undefined
+    const dragEndArgs = wrapper.emitted('node-drag-end')?.[0] as TreeNodeDragEndArgs | undefined
+    const dropArgs = wrapper.emitted('node-drop')?.[0] as TreeNodeDropArgs | undefined
 
     expect(eventOrder).toEqual([
       'node-drag-start',
