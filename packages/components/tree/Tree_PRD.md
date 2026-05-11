@@ -29,8 +29,8 @@
 - [x] 阶段 15：开发树键盘导航与无障碍功能
 - [x] 阶段 16：开发树节点双击展开功能
 - [x] 阶段 17：开发树滚动控制能力
-- [ ] 阶段 18：开发文档示例与单元测试补全
-- [ ] 阶段 19：质量门禁
+- [x] 阶段 18：开发文档示例与单元测试补全
+- [x] 阶段 19：质量门禁
 
 ## 1. 对标基线与目标
 
@@ -1699,3 +1699,117 @@ interface TreeExpose {
 
 - 当前判定：阶段 17 已完成。
 - 下一阶段状态：阶段 17 已归档；阶段 18 为文档示例与单元测试补全。
+
+## 25. 阶段 18 测试文档：文档示例与单元测试补全
+
+### 25.1 阶段目标
+
+阶段 18 收口 `FlTree` 的公开文档、按阶段组织的 VitePress 示例、API 元数据入口和阶段末
+单测缺口。文档示例按开发阶段组织；相同目标的阶段合并到同一个示例，避免重复展示相同
+交互。
+
+### 25.2 本阶段完成内容
+
+1. 新增 `docs/components/tree.md`，接入 `FlTree` 文档页和 API 表格。
+2. 新增 `docs/examples/tree/` 示例目录，按阶段组织示例：
+   - 阶段 1：`basic.vue`
+   - 阶段 2-3：`expand.vue`
+   - 阶段 4-5：`selection.vue`
+   - 阶段 6-9：`checkable.vue`
+   - 阶段 10-11：`line-content.vue`
+   - 阶段 12：`semantic-style.vue`
+   - 阶段 13：`async.vue`
+   - 阶段 14：`drag.vue`
+   - 阶段 15：`keyboard-a11y.vue`
+   - 阶段 16-17：`dblclick-scroll.vue`
+3. 文档侧接入 `FlTree`：
+   - VitePress sidebar 增加 `/components/tree`
+   - 组件总览增加 `FlTree`
+   - 新增 `docs/public/overview/fl-tree.svg`
+   - `scripts/docs/generate-api-meta.mjs` 增加 `fl-tree`
+   - 生成 `docs/public/api-meta/fl-tree.json`
+4. 补齐 PRD 首版验收中未完全落地的公开契约：
+   - `showLine` 支持 `boolean | { showLeafIcon?: boolean }`
+   - `filterTreeNode(node)` 只添加过滤命中态，不自动展开、不滚动、不改状态
+   - `right-click` 事件对齐节点事件多参数出参，不触发选择、勾选或展开链路
+5. 补充类型导出：
+   - `TreeShowLine`
+   - `TreeShowLineOptions`
+   - `TreeFilterTreeNode`
+   - `TreeNodeRightClickArgs`
+
+### 25.3 本阶段补充测试
+
+新增或补齐以下单测：
+
+1. `showLine` 对象形态和 `showLeafIcon = false` 时叶子连线结构稳定。
+2. `filterTreeNode` 命中态 class、props 更新和不自动展开行为。
+3. `right-click` 事件参数、事件隔离和焦点同步。
+4. 新增 Tree 类型在 `@falcon-ui/components/tree` 与 `@falcon-ui/components` 中可导出。
+
+### 25.4 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 文档验证入口：
+  - `docs/components/tree.md`
+- 当前已执行命令：
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec eslint packages/components/tree/src/tree-types.ts packages/components/tree/src/tree.ts packages/components/tree/src/tree.vue packages/components/tree/src/tree-node.vue packages/components/tree/__test__/tree.test.ts packages/components/tree/index.ts packages/components/index.ts docs/examples/tree/*.vue docs/.vitepress/config.ts docs/.vitepress/data/overview-components.ts scripts/docs/generate-api-meta.mjs --max-warnings=0`
+  - `pnpm docs:api`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm docs:build`
+- 当前执行结果：
+  - 树组件单测：`80 passed`
+  - 目标 ESLint：通过
+  - `docs:api`：通过，已生成 `fl-tree.json`
+  - `vue-tsc`：通过
+  - `docs:build`：通过
+  - `docs:build` 仍存在既有 `dialog.vue` dynamic import warning、chunk size warning 和 Sass legacy JS API warning，本阶段未引入构建失败
+
+### 25.5 当前判定
+
+- 当前判定：阶段 18 已完成。
+- 下一阶段状态：阶段 18 已归档；阶段 19 为质量门禁。
+
+## 26. 阶段 19 测试文档：质量门禁
+
+### 26.1 阶段目标
+
+阶段 19 对 `FlTree` 阶段 1-18 的实现、测试、文档和构建链路执行完整质量门禁，确保组件、
+文档示例、类型导出、样式构建和 Playground 构建均可稳定通过。
+
+### 26.2 门禁命令
+
+阶段 19 固定执行以下命令：
+
+1. `pnpm lint`
+2. `pnpm test`
+3. `pnpm format:check`
+4. `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+5. `pnpm build:lib:style`
+6. `pnpm build:lib`
+7. `pnpm docs:check`
+8. `pnpm play:build`
+
+### 26.3 当前执行结果
+
+- 当前执行结果：
+  - `pnpm lint`：通过
+  - `pnpm test`：通过
+  - `pnpm format:check`：通过
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`：通过
+  - `pnpm build:lib:style`：通过
+  - `pnpm build:lib`：通过
+  - `pnpm docs:check`：通过
+  - `pnpm play:build`：通过
+- 已知非阻塞告警：
+  - `dialog.vue` dynamic import warning 为既有构建告警
+  - chunk size warning 为既有构建告警
+  - Sass legacy JS API deprecation warning 来自当前构建链路依赖
+  - `play:build` 的 `npm link` 仍提示 1 个 moderate npm audit warning，命令退出码为 0
+
+### 26.4 当前判定
+
+- 当前判定：阶段 19 已完成。
+- `FlTree` 阶段 1-19 已全部归档。

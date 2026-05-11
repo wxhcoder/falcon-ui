@@ -14,6 +14,7 @@ export type {
   TreeCheckedKeys,
   TreeCheckedKeysObject,
   TreeData,
+  TreeFilterTreeNode,
   TreeAllowDrag,
   TreeAllowDrop,
   TreeAllowDropType,
@@ -34,6 +35,7 @@ export type {
   TreeNodeDragTargetArgs,
   TreeNodeDropArgs,
   TreeNodeDropType,
+  TreeNodeRightClickArgs,
   TreeNodeInstance,
   TreeNodeModel,
   TreeNodeProps,
@@ -47,5 +49,7 @@ export type {
   TreeScrollToOptions,
   TreeSemanticDOM,
   TreeSemanticRecord,
+  TreeShowLine,
+  TreeShowLineOptions,
   TreeStyles
 } from './src/tree'

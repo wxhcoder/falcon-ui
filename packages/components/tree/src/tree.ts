@@ -12,6 +12,8 @@ import type {
   TreeSemanticDOM,
   TreeSemanticInfo,
   TreeSemanticRecord,
+  TreeShowLine,
+  TreeShowLineOptions,
   TreeSwitcherIconMode,
   TreeStyles as TreeStylesSource
 } from './tree-types'
@@ -26,6 +28,8 @@ export type TreeCheckedKeys = TreeKey[] | TreeCheckedKeysObject
 export type TreeLoadData = (node: TreeNode) => Promise<unknown>
 
 export type TreeSwitcherLoadingIcon = Component
+
+export type TreeFilterTreeNode = (node: TreeNode) => boolean
 
 export type TreeAllowDropType = 'prev' | 'inner' | 'next'
 
@@ -73,7 +77,7 @@ export const treeProps = {
     default: () => []
   },
   showLine: {
-    type: Boolean,
+    type: [Boolean, Object] as PropType<TreeShowLine>,
     default: false
   },
   switcherIcon: {
@@ -165,6 +169,10 @@ export const treeProps = {
   allowDrop: {
     type: Function as PropType<TreeAllowDrop | undefined>,
     default: undefined
+  },
+  filterTreeNode: {
+    type: Function as PropType<TreeFilterTreeNode | undefined>,
+    default: undefined
   }
 } as const
 
@@ -235,6 +243,13 @@ export type TreeNodeClickArgs = [
  * `dblclick` 事件固定采用 Element Plus 风格的多参数出参。
  */
 export type TreeNodeDblclickArgs = [
+  data: TreeData,
+  node: TreeNode,
+  component: TreeNodeInstance,
+  event: MouseEvent
+]
+
+export type TreeNodeRightClickArgs = [
   data: TreeData,
   node: TreeNode,
   component: TreeNodeInstance,
@@ -375,6 +390,8 @@ const isTreeNodeDblclickArgs = (
   isRecord(event) &&
   typeof event.type === 'string'
 
+const isTreeNodeRightClickArgs = isTreeNodeDblclickArgs
+
 /**
  * 验证 `node-expand` / `node-collapse` 事件的三元组参数。
  */
@@ -507,6 +524,7 @@ export const treeEmits = {
    * 节点内容区被双击时抛出节点数据、节点对象、组件实例与鼠标事件。
    */
   dblclick: (...args: TreeNodeDblclickArgs) => isTreeNodeDblclickArgs(...args),
+  'right-click': (...args: TreeNodeRightClickArgs) => isTreeNodeRightClickArgs(...args),
   /**
    * 节点被选中或取消选中时抛出最新选中结果。
    */
@@ -967,5 +985,7 @@ export type {
   TreeSemanticDOM,
   TreeSemanticInfo,
   TreeSemanticRecord,
+  TreeShowLine,
+  TreeShowLineOptions,
   TreeSwitcherIconMode
 }

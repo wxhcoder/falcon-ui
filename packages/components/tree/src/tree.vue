@@ -2,7 +2,7 @@
   <!-- 根节点在阶段 4 起同时接入展开与单选状态层，并把渲染能力下发给递归节点。 -->
   <div
     v-bind="attrs"
-    :class="[rootClassName, resolvedClassNames.root, ns.is('show-line', props.showLine)]"
+    :class="[rootClassName, resolvedClassNames.root, ns.is('show-line', showLineEnabled)]"
     :style="resolvedStyles.root"
     :tabindex="rootTabIndex"
     role="tree"
@@ -17,11 +17,13 @@
       :unregister-node-element="unregisterNodeElement"
       :on-node-content-click="handleNodeContentClick"
       :on-node-content-dblclick="handleNodeContentDblclick"
+      :on-node-content-contextmenu="handleNodeContentContextmenu"
       :is-node-expanded="isNodeExpanded"
       :is-node-checked="isNodeChecked"
       :is-node-half-checked="isNodeHalfChecked"
       :is-node-selected="isNodeSelected"
       :is-node-focused="isNodeFocused"
+      :is-node-filtered="isNodeFiltered"
       :is-node-loading="isNodeLoading"
       :is-node-expandable="isNodeExpandable"
       :is-node-draggable="isNodeDraggable"
@@ -31,7 +33,8 @@
       :get-node-drop-type="getNodeDropType"
       :tree-checkable="isTreeCheckable"
       :tree-selectable="isTreeSelectable"
-      :show-line="props.showLine"
+      :show-line="showLineEnabled"
+      :show-leaf-icon="showLeafIcon"
       :switcher-icon="props.switcherIcon"
       :switcher-loading-icon="props.switcherLoadingIcon"
       :is-checkbox-disabled="isCheckboxDisabled"
@@ -127,6 +130,12 @@ const treeIndex = computed(createCurrentTreeIndex)
 const hasDefaultSlot = computed(() => Boolean(slots.default))
 const resolvedClassNames = computed<TreeSemanticRecord<TreeClassValue>>(createResolvedClassNames)
 const resolvedStyles = computed<TreeSemanticRecord<CSSProperties>>(createResolvedStyles)
+const showLineEnabled = computed(() => Boolean(props.showLine))
+const showLeafIcon = computed(() =>
+  typeof props.showLine === 'object' && props.showLine !== null
+    ? props.showLine.showLeafIcon !== false
+    : false
+)
 const rootTabIndex = computed(() => {
   const tabindex = attrs.tabindex ?? attrs.tabIndex
 
@@ -163,6 +172,18 @@ const emitNodeDblclick = ({
   emit('dblclick', node.data, createTreeEventNode({ node }), component, event)
 }
 
+const emitNodeRightClick = ({
+  node,
+  component,
+  event
+}: {
+  node: TreeNodeModel
+  component: TreeNodeInstance
+  event: MouseEvent
+}) => {
+  emit('right-click', node.data, createTreeEventNode({ node }), component, event)
+}
+
 const { isNodeLoaded, isNodeLoading, loadNode } = useTreeLoadState({
   props,
   treeIndex,
@@ -188,6 +209,16 @@ const { isNodeExpanded, toggleNodeExpansion: toggleExpandedNode } = useTreeExpan
   emit: emit as TreeExpandedStateEmit,
   isNodeExpandable
 })
+
+const isNodeFiltered = (node: TreeNodeModel) =>
+  Boolean(
+    props.filterTreeNode?.(
+      createTreeEventNode({
+        node,
+        resolveExpanded: isNodeExpanded
+      })
+    )
+  )
 
 const { isNodeSelected, isTreeSelectable, selectNode, selectedKeys } = useTreeSelectedState({
   props,
@@ -313,6 +344,23 @@ const handleNodeContentDblclick = ({
   toggleNodeExpansion({
     node,
     instance: component
+  })
+}
+
+const handleNodeContentContextmenu = ({
+  node,
+  component,
+  event
+}: {
+  node: TreeNodeModel
+  component: TreeNodeInstance
+  event: MouseEvent
+}) => {
+  focusNode(node.key)
+  emitNodeRightClick({
+    node,
+    component,
+    event
   })
 }
 

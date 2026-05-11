@@ -8,6 +8,8 @@ const rootDir = path.resolve(currentDir, '../..')
 const tsconfigPath = path.resolve(rootDir, 'tsconfig.docs.json')
 const outputDir = path.resolve(rootDir, 'docs/public/api-meta')
 
+const toProjectLineEndings = (content) => content.replace(/\n/g, '\r\n')
+
 const targets = [
   {
     id: 'fl-button',
@@ -44,6 +46,10 @@ const targets = [
   {
     id: 'fl-dialog',
     filePath: path.resolve(rootDir, 'packages/components/dialog/src/dialog.vue')
+  },
+  {
+    id: 'fl-tree',
+    filePath: path.resolve(rootDir, 'packages/components/tree/src/tree.vue')
   },
   {
     id: 'fl-table',
@@ -187,7 +193,11 @@ const generate = () => {
     const meta = checker.getComponentMeta(target.filePath)
     const output = toApiMeta(target.id, meta)
     const outputPath = path.resolve(outputDir, `${target.id}.json`)
-    fs.writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8')
+    fs.writeFileSync(
+      outputPath,
+      toProjectLineEndings(`${JSON.stringify(output, null, 2)}\n`),
+      'utf8'
+    )
     process.stdout.write(`[docs:api] generated ${path.relative(rootDir, outputPath)}\n`)
   }
 }

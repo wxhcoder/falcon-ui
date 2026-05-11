@@ -25,6 +25,7 @@
         ns.is('disabled', node.disabled),
         ns.is('line-mode', showLine),
         ns.is('focused', isFocusedNode),
+        ns.is('filtered', isFilteredNode),
         ns.is('draggable', isDraggableNode),
         ns.is('dragging', isDraggingNode),
         ns.is('drop-target', isDropTargetNode),
@@ -37,6 +38,7 @@
       :draggable="isDraggableNode ? true : undefined"
       @click="handleNodeContentClick"
       @dblclick="handleNodeContentDblclick"
+      @contextmenu="handleNodeContentContextmenu"
       @dragstart.stop="handleDragStart"
       @dragenter.stop="handleDragEnter"
       @dragover.stop="handleDragOver"
@@ -55,6 +57,7 @@
           :class="[switcherClassName, switcherNoopClassName]"
           aria-hidden="true">
           <span :class="switcherLeafLineClassName" />
+          <span v-if="showLeafIcon" :class="switcherLeafIconClassName" />
         </span>
         <span v-else-if="isLeafNode" :class="switcherDotClassName" aria-hidden="true" />
         <span v-else :class="switcherClassName">
@@ -115,11 +118,13 @@
         :unregister-node-element="unregisterNodeElement"
         :on-node-content-click="onNodeContentClick"
         :on-node-content-dblclick="onNodeContentDblclick"
+        :on-node-content-contextmenu="onNodeContentContextmenu"
         :is-node-expanded="isNodeExpanded"
         :is-node-checked="isNodeChecked"
         :is-node-half-checked="isNodeHalfChecked"
         :is-node-selected="isNodeSelected"
         :is-node-focused="isNodeFocused"
+        :is-node-filtered="isNodeFiltered"
         :is-node-loading="isNodeLoading"
         :is-node-expandable="isNodeExpandable"
         :is-node-draggable="isNodeDraggable"
@@ -130,6 +135,7 @@
         :tree-checkable="treeCheckable"
         :tree-selectable="treeSelectable"
         :show-line="showLine"
+        :show-leaf-icon="showLeafIcon"
         :switcher-icon="switcherIcon"
         :switcher-loading-icon="switcherLoadingIcon"
         :is-checkbox-disabled="isCheckboxDisabled"
@@ -213,11 +219,17 @@ interface TreeNodeComponentProps {
     component: TreeNodeInstance
     event: MouseEvent
   }) => void
+  onNodeContentContextmenu: (options: {
+    node: TreeNodeModel
+    component: TreeNodeInstance
+    event: MouseEvent
+  }) => void
   isNodeExpanded: (nodeKey: TreeKey) => boolean
   isNodeChecked: (nodeKey: TreeKey) => boolean
   isNodeHalfChecked: (nodeKey: TreeKey) => boolean
   isNodeSelected: (nodeKey: TreeKey) => boolean
   isNodeFocused: (nodeKey: TreeKey) => boolean
+  isNodeFiltered: (node: TreeNodeModel) => boolean
   isNodeLoading: (nodeKey: TreeKey) => boolean
   isNodeExpandable: (node: TreeNodeModel) => boolean
   isNodeDraggable: (node: TreeNodeModel) => boolean
@@ -228,6 +240,7 @@ interface TreeNodeComponentProps {
   treeCheckable: boolean
   treeSelectable: boolean
   showLine: boolean
+  showLeafIcon: boolean
   switcherIcon: TreeSwitcherIconMode
   switcherLoadingIcon: TreeSwitcherLoadingIcon
   isCheckboxDisabled: (node: TreeNodeModel) => boolean
@@ -263,6 +276,7 @@ const switcherButtonClassName = ns.e('switcher-button')
 const switcherDotClassName = ns.e('switcher-dot')
 const switcherIconClassName = ns.e('switcher-icon')
 const switcherLeafLineClassName = ns.e('switcher-leaf-line')
+const switcherLeafIconClassName = ns.e('switcher-leaf-icon')
 const itemTitleClassName = ns.e('item-title')
 const childrenClassName = ns.e('children')
 
@@ -356,6 +370,8 @@ const resolveSelectedNodeState = () => props.isNodeSelected(props.node.key)
  */
 const resolveFocusedNodeState = () => props.isNodeFocused(props.node.key)
 
+const resolveFilteredNodeState = () => props.isNodeFiltered(props.node)
+
 /**
  * 判断当前节点是否处于勾选态。
  */
@@ -412,6 +428,14 @@ const handleNodeContentClick = (event: MouseEvent) => {
  */
 const handleNodeContentDblclick = (event: MouseEvent) => {
   props.onNodeContentDblclick({
+    node: props.node,
+    component: getNodeInstance(),
+    event
+  })
+}
+
+const handleNodeContentContextmenu = (event: MouseEvent) => {
+  props.onNodeContentContextmenu({
     node: props.node,
     component: getNodeInstance(),
     event
@@ -551,6 +575,7 @@ const shouldShowCheckbox = computed(resolveCheckboxVisibleState)
 const isSelectableNode = computed(resolveSelectableNodeState)
 const isSelectedNode = computed(resolveSelectedNodeState)
 const isFocusedNode = computed(resolveFocusedNodeState)
+const isFilteredNode = computed(resolveFilteredNodeState)
 const nodeAriaChecked = computed(resolveAriaCheckedState)
 const slotNode = computed(() => createTreeEventNode({ node: props.node }))
 const semanticClassNames = computed(getResolvedClassNames)

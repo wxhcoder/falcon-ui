@@ -46,6 +46,7 @@ export default defineConfig({
             { text: 'FlSelect', link: '/components/select' },
             { text: 'FlInputSearch', link: '/components/input-search' },
             { text: 'FlInputNumber', link: '/components/input-number' },
+            { text: 'FlTree', link: '/components/tree' },
             { text: 'FlTable', link: '/components/table' }
           ]
         }

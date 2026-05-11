@@ -1,0 +1,318 @@
+{
+  "component": "fl-tree",
+  "description": "",
+  "events": [
+    {
+      "description": "",
+      "name": "check",
+      "signature": "(event: \"check\", checkedKeys: TreeCheckedKeys, event: TreeCheckEvent): void",
+      "type": "[checkedKeys: TreeCheckedKeys, event: TreeCheckEvent]"
+    },
+    {
+      "description": "",
+      "name": "dblclick",
+      "signature": "(event: \"dblclick\", data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent): void",
+      "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent]"
+    },
+    {
+      "description": "",
+      "name": "expand",
+      "signature": "(event: \"expand\", payload: TreeExpandPayload): void",
+      "type": "[payload: TreeExpandPayload]"
+    },
+    {
+      "description": "",
+      "name": "load",
+      "signature": "(event: \"load\", loadedKeys: TreeKey[], event: TreeLoadEvent): void",
+      "type": "[loadedKeys: TreeKey[], event: TreeLoadEvent]"
+    },
+    {
+      "description": "",
+      "name": "node-click",
+      "signature": "(event: \"node-click\", data: TreeData, node: TreeNode, component: TreeNodeInstance, event: TreeInteractionEvent): void",
+      "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: TreeInteractionEvent]"
+    },
+    {
+      "description": "",
+      "name": "node-collapse",
+      "signature": "(event: \"node-collapse\", data: TreeData, node: TreeNode & { expanded: boolean; }, instance: TreeNodeInstance): void",
+      "type": "[data: TreeData, node: TreeNode & { expanded: boolean; }, instance: TreeNodeInstance]"
+    },
+    {
+      "description": "",
+      "name": "node-drag-end",
+      "signature": "(event: \"node-drag-end\", draggingNode: TreeNode, dropNode: TreeNode | null, dropType: TreeNodeDropType, event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode | null, dropType: TreeNodeDropType, event: DragEvent]"
+    },
+    {
+      "description": "",
+      "name": "node-drag-enter",
+      "signature": "(event: \"node-drag-enter\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
+    },
+    {
+      "description": "",
+      "name": "node-drag-leave",
+      "signature": "(event: \"node-drag-leave\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
+    },
+    {
+      "description": "",
+      "name": "node-drag-over",
+      "signature": "(event: \"node-drag-over\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
+    },
+    {
+      "description": "",
+      "name": "node-drag-start",
+      "signature": "(event: \"node-drag-start\", node: TreeNode, event: DragEvent): void",
+      "type": "[node: TreeNode, event: DragEvent]"
+    },
+    {
+      "description": "",
+      "name": "node-drop",
+      "signature": "(event: \"node-drop\", draggingNode: TreeNode, dropNode: TreeNode, dropType: \"before\" | \"after\" | \"inner\", event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode, dropType: \"before\" | \"after\" | \"inner\", event: DragEvent]"
+    },
+    {
+      "description": "",
+      "name": "node-expand",
+      "signature": "(event: \"node-expand\", data: TreeData, node: TreeNode & { expanded: boolean; }, instance: TreeNodeInstance): void",
+      "type": "[data: TreeData, node: TreeNode & { expanded: boolean; }, instance: TreeNodeInstance]"
+    },
+    {
+      "description": "",
+      "name": "right-click",
+      "signature": "(event: \"right-click\", data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent): void",
+      "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent]"
+    },
+    {
+      "description": "",
+      "name": "select",
+      "signature": "(event: \"select\", selectedKeys: TreeKey[], event: TreeSelectEvent): void",
+      "type": "[selectedKeys: TreeKey[], event: TreeSelectEvent]"
+    },
+    {
+      "description": "",
+      "name": "update:checkedKeys",
+      "signature": "(event: \"update:checkedKeys\", value: TreeCheckedKeys): void",
+      "type": "[value: TreeCheckedKeys]"
+    },
+    {
+      "description": "",
+      "name": "update:expandedKeys",
+      "signature": "(event: \"update:expandedKeys\", value: TreeKey[]): void",
+      "type": "[value: TreeKey[]]"
+    },
+    {
+      "description": "",
+      "name": "update:loadedKeys",
+      "signature": "(event: \"update:loadedKeys\", value: TreeKey[]): void",
+      "type": "[value: TreeKey[]]"
+    },
+    {
+      "description": "",
+      "name": "update:selectedKeys",
+      "signature": "(event: \"update:selectedKeys\", value: TreeKey[]): void",
+      "type": "[value: TreeKey[]]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "",
+      "name": "scrollTo",
+      "type": "(options: TreeScrollToOptions) => void"
+    }
+  ],
+  "props": [
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "allowDrag",
+      "required": false,
+      "type": "TreeAllowDrag | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "allowDrop",
+      "required": false,
+      "type": "TreeAllowDrop | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "autoExpandParent",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "checkable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "checkedKeys",
+      "required": false,
+      "type": "TreeCheckedKeys | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "checkStrictly",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "classNames",
+      "required": false,
+      "type": "TreeClassNames | undefined"
+    },
+    {
+      "default": "[]",
+      "description": "",
+      "name": "data",
+      "required": false,
+      "type": "TreeData[] | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "defaultCheckedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "defaultExpandAll",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "defaultExpandedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "true",
+      "description": "",
+      "name": "defaultExpandParent",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "defaultSelectedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "draggable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "expandedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "filterTreeNode",
+      "required": false,
+      "type": "TreeFilterTreeNode | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "loadData",
+      "required": false,
+      "type": "TreeLoadData | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "loadedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "multiple",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "{ ...treeNodePropsDefaults }",
+      "description": "",
+      "name": "props",
+      "required": false,
+      "type": "TreeNodeProps | undefined"
+    },
+    {
+      "default": "true",
+      "description": "",
+      "name": "selectable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "selectedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "showLine",
+      "required": false,
+      "type": "TreeShowLine | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "styles",
+      "required": false,
+      "type": "TreeStyles | undefined"
+    },
+    {
+      "default": "'arrow'",
+      "description": "",
+      "name": "switcherIcon",
+      "required": false,
+      "type": "TreeSwitcherIconMode | undefined"
+    },
+    {
+      "default": "Loading",
+      "description": "",
+      "name": "switcherLoadingIcon",
+      "required": false,
+      "type": "TreeSwitcherLoadingIcon | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "",
+      "name": "default",
+      "type": "{ node: TreeNode; data: TreeData; }"
+    }
+  ]
+}

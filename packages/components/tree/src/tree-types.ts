@@ -10,6 +10,12 @@ export type TreeKey = string | number
  */
 export type TreeSwitcherIconMode = 'arrow' | 'plus-minus' | 'folder'
 
+export interface TreeShowLineOptions {
+  showLeafIcon?: boolean
+}
+
+export type TreeShowLine = boolean | TreeShowLineOptions
+
 /**
  * 原始树节点允许保留业务字段，但 `key` 始终是必填字段。
  */

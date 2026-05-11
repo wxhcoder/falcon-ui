@@ -11,6 +11,7 @@ import FlTree, {
   type TreeCheckEvent,
   type TreeCheckedKeys,
   type TreeData,
+  type TreeFilterTreeNode,
   type TreeAllowDrag,
   type TreeAllowDrop,
   type TreeAllowDropType,
@@ -27,12 +28,15 @@ import FlTree, {
   type TreeNodeDragTargetArgs,
   type TreeNodeDropArgs,
   type TreeNodeDropType,
+  type TreeNodeRightClickArgs,
   type TreeNodeModel,
   type TreeProps,
   type TreeScrollAlign,
   type TreeScrollToOptions,
   type TreeSemanticDOM,
   type TreeSelectEvent,
+  type TreeShowLine,
+  type TreeShowLineOptions,
   type TreeSwitcherLoadingIcon,
   type TreeSwitcherIconMode
 } from '@falcon-ui/components/tree'
@@ -684,6 +688,88 @@ describe('FlTree 契约', () => {
     expect(leafA2Item.classes()).toContain('is-last')
   })
 
+  it('marks filterTreeNode hits without expanding or changing tree state', async () => {
+    const filterTreeNode = vi.fn<TreeFilterTreeNode>((node) => node.label === 'Leaf')
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData(),
+        defaultExpandAll: true,
+        filterTreeNode
+      }
+    })
+
+    await nextTick()
+
+    expect(filterTreeNode).toHaveBeenCalled()
+    expect(getItemContent(wrapper, 'Root').classes()).not.toContain('is-filtered')
+    expect(getItemContent(wrapper, 'Leaf').classes()).toContain('is-filtered')
+
+    await wrapper.setProps({
+      filterTreeNode: ((node: TreeNode) => node.label === 'Branch') satisfies TreeFilterTreeNode
+    })
+    await nextTick()
+
+    expect(getItemContent(wrapper, 'Branch').classes()).toContain('is-filtered')
+    expect(getItemContent(wrapper, 'Leaf').classes()).not.toContain('is-filtered')
+
+    const collapsedWrapper = mount(FlTree, {
+      props: {
+        data: createNestedTreeData(),
+        filterTreeNode: ((node: TreeNode) => node.label === 'Leaf') satisfies TreeFilterTreeNode
+      }
+    })
+
+    await nextTick()
+
+    expect(collapsedWrapper.text()).not.toContain('Leaf')
+    expect(collapsedWrapper.emitted('update:expandedKeys')).toBeUndefined()
+    expect(collapsedWrapper.emitted('expand')).toBeUndefined()
+  })
+
+  it('supports object showLine and keeps leaf line structure when leaf icons are hidden', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createLineTreeData(),
+        showLine: { showLeafIcon: false },
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+
+    const leafA1Item = findTreeItemByText(wrapper, 'Leaf A1')
+
+    expect(wrapper.get('[role="tree"]').classes()).toContain('is-show-line')
+    expect(leafA1Item.find('.fl-tree__switcher-leaf-line').exists()).toBe(true)
+    expect(leafA1Item.find('.fl-tree__switcher-leaf-icon').exists()).toBe(false)
+    expect(leafA1Item.find('.fl-tree__switcher-dot').exists()).toBe(false)
+
+    await wrapper.setProps({
+      showLine: { showLeafIcon: true }
+    })
+    await nextTick()
+
+    expect(
+      findTreeItemByText(wrapper, 'Leaf A1').find('.fl-tree__switcher-leaf-line').exists()
+    ).toBe(true)
+    expect(
+      findTreeItemByText(wrapper, 'Leaf A1').find('.fl-tree__switcher-leaf-icon').exists()
+    ).toBe(true)
+
+    await wrapper.setProps({
+      showLine: false
+    })
+    await nextTick()
+
+    expect(wrapper.get('[role="tree"]').classes()).not.toContain('is-show-line')
+    expect(
+      findTreeItemByText(wrapper, 'Leaf A1').find('.fl-tree__switcher-leaf-line').exists()
+    ).toBe(false)
+    expect(findTreeItemByText(wrapper, 'Leaf A1').find('.fl-tree__switcher-dot').exists()).toBe(
+      true
+    )
+  })
+
   it('keeps showLine and checkable layout hooks stable without leaking checkbox clicks', async () => {
     const eventOrder: string[] = []
     const wrapper = mount(FlTree, {
@@ -770,6 +856,10 @@ describe('FlTree 契约', () => {
     expect(treeIndexSource).toContain('TreeAllowDrop')
     expect(treeIndexSource).toContain('TreeSelectEvent')
     expect(treeIndexSource).toContain('TreeNodeDblclickArgs')
+    expect(treeIndexSource).toContain('TreeNodeRightClickArgs')
+    expect(treeIndexSource).toContain('TreeFilterTreeNode')
+    expect(treeIndexSource).toContain('TreeShowLine')
+    expect(treeIndexSource).toContain('TreeShowLineOptions')
     expect(treeIndexSource).toContain('TreeNodeModel')
     expect(treeIndexSource).toContain('TreeNode')
     expect(treeIndexSource).toContain('TreeScrollAlign')
@@ -796,6 +886,10 @@ describe('FlTree 契约', () => {
     expect(componentsIndexSource).toContain('TreeAllowDrop')
     expect(componentsIndexSource).toContain('TreeSelectEvent')
     expect(componentsIndexSource).toContain('TreeNodeDblclickArgs')
+    expect(componentsIndexSource).toContain('TreeNodeRightClickArgs')
+    expect(componentsIndexSource).toContain('TreeFilterTreeNode')
+    expect(componentsIndexSource).toContain('TreeShowLine')
+    expect(componentsIndexSource).toContain('TreeShowLineOptions')
     expect(componentsIndexSource).toContain('TreeNodeModel')
     expect(componentsIndexSource).toContain('TreeNode')
     expect(componentsIndexSource).toContain('TreeScrollAlign')
@@ -819,6 +913,10 @@ describe('FlTree 契约', () => {
       TreeNodeDropType,
       TreeSelectEvent,
       TreeNodeDblclickArgs,
+      TreeNodeRightClickArgs,
+      TreeFilterTreeNode,
+      TreeShowLine,
+      TreeShowLineOptions,
       TreeScrollAlign,
       TreeScrollToOptions,
       TreeExpose,
@@ -1641,6 +1739,41 @@ describe('FlTree 契约', () => {
     expect('expanded' in nodeArg).toBe(false)
     expect(componentArg).toBeTruthy()
     expect(eventArg).toBeInstanceOf(MouseEvent)
+  })
+
+  it('right-click emits an isolated node event and updates the active descendant', async () => {
+    const eventOrder: string[] = []
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createSimpleTreeData(),
+        defaultExpandAll: true,
+        onRightClick: () => eventOrder.push('right-click'),
+        onNodeClick: () => eventOrder.push('node-click'),
+        'onUpdate:selectedKeys': () => eventOrder.push('update:selectedKeys'),
+        onSelect: () => eventOrder.push('select'),
+        'onUpdate:expandedKeys': () => eventOrder.push('update:expandedKeys')
+      }
+    })
+
+    await nextTick()
+    await getItemContent(wrapper, 'Leaf').trigger('contextmenu')
+    await nextTick()
+
+    const rightClickEvents = wrapper.emitted('right-click')
+    const [dataArg, nodeArg, componentArg, eventArg] =
+      rightClickEvents?.[0] as TreeNodeRightClickArgs
+
+    expect(eventOrder).toEqual(['right-click'])
+    expect(rightClickEvents).toHaveLength(1)
+    expect(dataArg.key).toBe('leaf')
+    expect(nodeArg.key).toBe('leaf')
+    expect(componentArg).toBeTruthy()
+    expect(eventArg).toBeInstanceOf(MouseEvent)
+    expect(getActiveTreeItemLabel(wrapper)).toBe('Leaf')
+    expect(wrapper.emitted('node-click')).toBeUndefined()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
+    expect(wrapper.emitted('update:expandedKeys')).toBeUndefined()
   })
 
   it('点击收起态 switcher 时只触发展开链路，不再触发 `node-click` 与 `select`', async () => {

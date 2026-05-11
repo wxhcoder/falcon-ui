@@ -56,6 +56,14 @@ export const overviewComponents: readonly OverviewItem[] = [
     icon: '/overview/fl-table.svg'
   },
   {
+    name: 'FlTree',
+    title: 'Tree',
+    group: 'interaction',
+    link: '/components/tree',
+    description: 'Hierarchical data component with selection, checking, async loading and drag.',
+    icon: '/overview/fl-tree.svg'
+  },
+  {
     name: 'FlInput',
     title: 'Input',
     group: 'form',
