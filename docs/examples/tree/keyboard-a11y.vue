@@ -25,7 +25,7 @@ const data: TreeData[] = [
     children: [
       { key: 'view', label: '查看' },
       { key: 'edit', label: '编辑' },
-      { key: 'disabled', label: '禁用项', disabled: true }
+      { key: 'publish', label: '发布' }
     ]
   }
 ]

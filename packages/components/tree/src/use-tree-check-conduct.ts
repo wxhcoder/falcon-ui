@@ -20,7 +20,7 @@ type TreeConductState = 'full' | 'partial' | 'none' | 'skip'
 /**
  * 判断节点自身是否允许渲染复选框并进入勾选结果。
  */
-const isNodeCheckable = (node: TreeNodeModel) => node.checkable
+const isNodeCheckable = (node: TreeNodeModel) => node.checkboxVisible
 
 /**
  * 按树的可见遍历顺序输出 key，保证勾选与半选结果稳定。
@@ -32,8 +32,8 @@ const orderTreeKeys = (keySet: Set<TreeKey>, treeIndex: TreeIndex) =>
  * 归一化勾选 key：
  * 1. 过滤非法 / 不存在节点
  * 2. 去重
- * 3. 过滤节点级 `checkable=false`
- * 4. 保留 `disabled` / `disableCheckbox`，以支持受控展示
+ * 3. 过滤 `hiddenCheckboxKeys`
+ * 4. 保留 `disabledKeys` / `disabledCheckboxKeys`，以支持受控展示
  */
 const normalizeTreeCheckedKeyList = (
   keys: TreeKey[] | undefined,
@@ -79,7 +79,7 @@ const normalizeStrictHalfCheckedKeys = (
 
 /**
  * 从树节点向下收集当前联动分支内所有可进入勾选结果的 key。
- * `disabled` 是硬边界；`checkable=false` 只跳过自身，不阻断对子孙的遍历。
+ * `disabledKeys` 是硬边界；`hiddenCheckboxKeys` 只跳过自身，不阻断对子孙的遍历。
  */
 const collectConductBranchKeys = (node: TreeNodeModel) => {
   const branchKeySet = new Set<TreeKey>()
@@ -155,7 +155,7 @@ const createConductedCheckedKeySet = (sourceCheckedKeys: TreeKey[], treeIndex: T
 /**
  * 自底向上计算最终 checked / halfChecked：
  * 1. `disabled` 节点只保留自身受控状态，并阻断向父级的贡献
- * 2. `checkable=false` 节点作为透明桥接层，只透传子孙勾选结果
+ * 2. 隐藏 checkbox 的节点作为透明桥接层，只透传子孙勾选结果
  */
 const createConductedTreeCheckedState = (
   sourceCheckedKeySet: Set<TreeKey>,

@@ -36,7 +36,7 @@ interface ToggleCheckedNodeOptions {
  * FlTree 阶段 7-9 的勾选状态层统一负责：
  * 1. 默认联动模式的父子传导与半选态
  * 2. strict 模式的 `{ checked, halfChecked }` 对象态
- * 3. `disabled` / `disableCheckbox` / `checkable=false` 的交互边界
+ * 3. key-based 禁用、禁用 checkbox 与隐藏 checkbox 的交互边界
  */
 export const useTreeCheckedState = ({ props, treeIndex, emit }: UseTreeCheckedStateOptions) => {
   const uncontrolledCheckedState = shallowRef<TreeCheckedState>({
@@ -126,15 +126,14 @@ export const useTreeCheckedState = ({ props, treeIndex, emit }: UseTreeCheckedSt
   const isNodeHalfChecked = (nodeKey: TreeKey) => getCurrentHalfCheckedKeys().includes(nodeKey)
 
   /**
-   * 节点级 `checkable=false` 只隐藏自身复选框，不阻断后代勾选。
+   * `hiddenCheckboxKeys` 只隐藏当前节点复选框，不阻断后代勾选。
    */
-  const shouldRenderCheckbox = (node: TreeNodeModel) => node.checkable
+  const shouldRenderCheckbox = (node: TreeNodeModel) => node.checkboxVisible
 
   /**
-   * `disabled` 与 `disableCheckbox` 都会使当前节点复选框不可交互。
-   * 其中 `disableCheckbox` 只影响交互，不阻断父子联动。
+   * `disabledKeys` 与 `disabledCheckboxKeys` 都会使当前节点复选框不可交互。
    */
-  const isCheckboxDisabled = (node: TreeNodeModel) => node.disabled || node.disableCheckbox
+  const isCheckboxDisabled = (node: TreeNodeModel) => node.checkboxDisabled
 
   /**
    * 判断当前节点是否允许响应复选框点击。

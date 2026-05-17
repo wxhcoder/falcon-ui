@@ -1,22 +1,30 @@
 <template>
   <div class="demo-col">
-    <div class="demo-toolbar">
-      <el-switch v-model="multiple" active-text="多选" inactive-text="单选" />
-      <FlButton size="small" @click="selectedKeys = []">清空选择</FlButton>
+    <div class="demo-group">
+      <div class="demo-group__title">默认选中</div>
+      <FlTree :data="data" default-expand-all :default-selected-keys="['tree']" />
     </div>
 
-    <FlTree
-      :data="data"
-      default-expand-all
-      :multiple="multiple"
-      :selected-keys="selectedKeys"
-      @update:selected-keys="selectedKeys = $event"
-      @select="handleSelect"
-      @right-click="handleRightClick" />
+    <div class="demo-group">
+      <div class="demo-group__title">受控选择与右键事件</div>
+      <div class="demo-toolbar">
+        <el-switch v-model="multiple" active-text="多选" inactive-text="单选" />
+        <FlButton size="small" @click="selectedKeys = []">清空选择</FlButton>
+      </div>
 
-    <div class="demo-result">当前选中：{{ selectedKeys.join(', ') || '(none)' }}</div>
-    <div class="demo-result">最近选择：{{ latestSelect || '(none)' }}</div>
-    <div class="demo-result">最近右键：{{ latestRightClick || '(none)' }}</div>
+      <FlTree
+        :data="data"
+        default-expand-all
+        :multiple="multiple"
+        :selected-keys="selectedKeys"
+        @update:selected-keys="selectedKeys = $event"
+        @select="handleSelect"
+        @right-click="handleRightClick" />
+
+      <div class="demo-result">当前选中：{{ selectedKeys.join(', ') || '(none)' }}</div>
+      <div class="demo-result">最近选择：{{ latestSelect || '(none)' }}</div>
+      <div class="demo-result">最近右键：{{ latestRightClick || '(none)' }}</div>
+    </div>
   </div>
 </template>
 
@@ -37,8 +45,8 @@ const data: TreeData[] = [
     children: [
       { key: 'button', label: 'Button' },
       { key: 'tree', label: 'Tree' },
-      { key: 'legacy', label: 'Legacy', selectable: false },
-      { key: 'disabled', label: 'Disabled', disabled: true }
+      { key: 'select', label: 'Select' },
+      { key: 'table', label: 'Table' }
     ]
   }
 ]
@@ -69,6 +77,17 @@ const handleRightClick = (
 </script>
 
 <style scoped>
+.demo-group + .demo-group {
+  margin-top: 18px;
+}
+
+.demo-group__title {
+  margin-bottom: 8px;
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+  font-size: 14px;
+}
+
 .demo-toolbar {
   display: flex;
   flex-wrap: wrap;

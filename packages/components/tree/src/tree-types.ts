@@ -23,10 +23,6 @@ export interface TreeData {
   key: TreeKey
   children?: TreeData[]
   class?: TreeClassValue
-  disabled?: boolean
-  selectable?: boolean
-  disableCheckbox?: boolean
-  checkable?: boolean
   isLeaf?: boolean
   [key: string]: unknown
 }
@@ -37,7 +33,6 @@ export interface TreeData {
 export interface TreeNodeProps {
   label?: string
   children?: string
-  disabled?: string
   isLeaf?: string
   class?: string
 }
@@ -96,8 +91,8 @@ export interface TreeNodeModel {
   label: string
   disabled: boolean
   selectable: boolean
-  disableCheckbox: boolean
-  checkable: boolean
+  checkboxDisabled: boolean
+  checkboxVisible: boolean
   isLeaf: boolean
   className: TreeClassValue
   isLastSibling: boolean
@@ -116,8 +111,8 @@ export interface TreeNode {
   label: string
   disabled: boolean
   selectable: boolean
-  disableCheckbox: boolean
-  checkable: boolean
+  checkboxDisabled: boolean
+  checkboxVisible: boolean
   isLeaf: boolean
   parent: TreeNode | null
   childNodes: TreeNode[]

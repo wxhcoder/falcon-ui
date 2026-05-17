@@ -75,11 +75,11 @@
 
 ### 3.1 In Scope
 
-- 树节点数据渲染：`data`、`props`、节点级状态字段
+- 树节点数据渲染：`data`、`props`、key-based 交互状态
 - 展开行为：默认展开、受控展开、父级联动展开
 - 选择行为：单选、多选
 - 勾选行为：父子联动勾选、严格勾选、半选态
-- 节点禁用能力：`disabled`、`disableCheckbox`、`selectable`
+- 节点禁用能力：`disabledKeys`、`unselectableKeys`、`disabledCheckboxKeys`、`hiddenCheckboxKeys`
 - 自定义渲染：标题、图标、展开图标、连线、整行占满
 - 语义化 DOM 样式定制：`classNames`、`styles`
 - 异步加载：`loadData`、`loadedKeys`、`isLeaf`
@@ -109,19 +109,18 @@
   - `key -> parentKey`
   - `key -> childrenKeys`
   - `visibleNodeKeys`
-- 默认字段映射遵循 Element Plus Tree 的 `props` 风格：
+- 默认字段映射遵循 Element Plus Tree 的 `props` 风格，但不映射组件交互状态：
   - `label`
   - `children`
-  - `disabled`
   - `isLeaf`
 - `key` 始终作为树节点主键单独要求，不通过 `props` 做映射。
 - `props` 首版至少支持：
   - `label`
   - `children`
-  - `disabled`
   - `isLeaf`
   - `class`
 - 除保留字段外，其余业务字段原样保留，并在事件与自定义渲染中回传。
+- `TreeData` 不承载组件交互状态；禁用、不可选、禁用 checkbox 与隐藏 checkbox 均通过 key-based props 声明。
 
 ### 4.2 展开行为
 
@@ -145,6 +144,8 @@
 - 提供：
   - `defaultSelectedKeys`
   - `selectedKeys`
+  - `disabledKeys`
+  - `unselectableKeys`
 - 单选与多选共用同一套选中态合并模型：
   - 受控模式只读取外部 `selectedKeys`
   - 非受控模式只在初始化时消费 `defaultSelectedKeys`
@@ -153,8 +154,8 @@
   - 去重
   - 过滤非法 key
   - 过滤已不存在节点
-  - 过滤 `disabled` 节点
-  - 过滤 `selectable = false` 节点
+  - 过滤 `disabledKeys`
+  - 过滤 `unselectableKeys`
   - 保持剩余 key 的原始顺序
 - 单选运行时语义固定为：
   - 点击未选中节点：切换为该节点唯一选中
@@ -164,7 +165,7 @@
   - 点击已选中节点：仅移除当前 key，保留其他已选中项
   - 不引入 `ctrl` / `command` 组合键语义
 - 阶段 4 / 5 统一通过节点内容区触发选中链路；`switcher` 点击只负责展开 / 收起，不再触发 `node-click` / `select`。
-- 节点 `disabled` 或 `selectable = false` 时，不允许进入选中态。
+- `disabledKeys` 或 `unselectableKeys` 命中的节点不允许进入选中态。
 - 树级 `selectable = false` 时，整棵树不进入选中链路：
   - 不同步 `defaultSelectedKeys` / `selectedKeys`
   - 不输出 `aria-selected`
@@ -184,17 +185,20 @@
   - `defaultCheckedKeys`
   - `checkedKeys`
   - `checkStrictly`
+  - `disabledCheckboxKeys`
+  - `hiddenCheckboxKeys`
 - `checkStrictly = false` 时，对齐 Ant Design 的父子联动勾选规则。
 - `checkStrictly = true` 时：
   - 父子节点勾选状态相互独立
   - `checkedKeys` 支持 `{ checked, halfChecked }`
-- `disableCheckbox = true` 时，节点仍可展示但勾选框不可交互。
+- `disabledCheckboxKeys` 命中的节点仍可展示但勾选框不可交互。
+- `hiddenCheckboxKeys` 命中的节点不渲染自身勾选框，但不阻断子孙节点勾选。
 - 勾选状态计算必须基于独立的传导算法实现，不能依赖第三方树组件内建回传。
 
 ### 4.5 禁用节点联动规则
 
 - 遵守 Ant Design 文档中的禁用节点传导规则：
-  - 勾选或展开状态向上、向下传导时，遇到 `disabled` 节点必须停止影响该分支
+  - 勾选状态向上、向下传导时，遇到 `disabledKeys` 命中的节点必须停止影响该分支
   - 被禁用的父节点不应因为子节点勾选而被动改变
   - 被禁用的子节点不应因为父节点勾选而被动改变
 - 以上规则必须写入测试用例，避免后续回归破坏树语义。
@@ -368,7 +372,6 @@ type TreeSemanticDOM = 'root' | 'item'
 interface TreeNodeProps {
   label?: string
   children?: string
-  disabled?: string
   isLeaf?: string
   class?: string
 }
@@ -377,10 +380,6 @@ interface TreeData {
   key: TreeKey
   label?: string
   children?: TreeData[]
-  disabled?: boolean
-  disableCheckbox?: boolean
-  selectable?: boolean
-  checkable?: boolean
   isLeaf?: boolean
   [key: string]: unknown
 }
@@ -417,16 +416,19 @@ interface TreeSelectEvent {
   - `multiple`
   - `defaultSelectedKeys`
   - `selectedKeys`
+  - `disabledKeys`
+  - `unselectableKeys`
 - 勾选相关
   - `checkable`
   - `checkStrictly`
   - `defaultCheckedKeys`
   - `checkedKeys`
+  - `disabledCheckboxKeys`
+  - `hiddenCheckboxKeys`
 - 异步相关
   - `loadData`
   - `loadedKeys`
 - 视觉相关
-  - `disabled`
   - `showLine`
   - `switcherIcon`
     - `'arrow' | 'plus-minus' | 'folder'`
@@ -552,7 +554,7 @@ interface TreeExpose {
 - `expandedKeys`、`selectedKeys`、`checkedKeys`、`loadedKeys` 均支持受控与非受控模式。
 - `checkStrictly = false` 时，父子勾选联动与半选态符合 Ant Design 语义。
 - `checkStrictly = true` 时，父子勾选互不影响，且支持 `{ checked, halfChecked }`。
-- `disabled` / `disableCheckbox` 节点联动边界与 Ant Design FAQ 一致。
+- `disabledKeys` / `disabledCheckboxKeys` / `hiddenCheckboxKeys` 边界与 Ant Design FAQ 一致。
 - `loadData` 可在节点展开时异步加载，并正确维护加载中与已加载状态。
 - `draggable`、`allowDrag`、`allowDrop` 与 `node-drop` 事件可完整表达节点拖放过程。
 - `scrollTo({ key })` 可定位当前已渲染且可见的节点。
@@ -573,7 +575,7 @@ interface TreeExpose {
 
 1. 基础树正常渲染，层级缩进正确。
 2. `props` 生效，非默认字段可映射渲染。
-3. 节点 `disabled`、`disableCheckbox`、`selectable = false` 表现正确。
+3. `disabledKeys`、`unselectableKeys`、`disabledCheckboxKeys`、`hiddenCheckboxKeys` 表现正确。
 4. `data` 变化后，内部 `TreeNode` 递归结构可正确响应并重渲染。
 5. 默认 `switcherIcon = 'arrow'` 时，叶子节点显示圆点，默认收起的非叶子节点
    显示 `CaretRight`，展开后显示 `CaretBottom`。
@@ -853,25 +855,25 @@ interface TreeExpose {
 2. `defaultSelectedKeys` 默认单选
 3. `selectedKeys` 受控单选与 `update:selectedKeys` / `select` 事件
 4. 单选切换、替换与再次点击取消
-5. `disabled` / `selectable = false` 节点的单选边界
+5. `disabledKeys` / `unselectableKeys` 节点的单选边界
 6. `aria-selected` 与选中高亮样式
 7. switcher 点击不再触发 `node-click` / `select`
 8. Tree 类型导出补齐 `TreeSelectEvent`
 
 ### 14.2 测试内容
 
-| 编号 | 测试内容                  | 关注点                                                       | 预期结果                                                              |
-| ---- | ------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
-| 1    | 默认无选中态              | 未传选中相关 props 时是否输出稳定初始状态                    | 可选节点输出 `aria-selected="false"`，内容区无选中高亮                |
-| 2    | `defaultSelectedKeys`     | 默认单选是否只保留第一个合法且可选的 key                     | 非法 key、重复 key、禁用节点与 `selectable = false` 节点被自动过滤    |
-| 3    | 单选事件顺序              | 点击内容区时事件链路是否稳定                                 | 顺序固定为 `node-click -> update:selectedKeys -> select`              |
-| 4    | 再次点击取消              | 点击已选中节点时是否清空单选                                 | 第二次点击后 `selectedKeys = []`，`select.selected = false`           |
-| 5    | 单选替换                  | 点击另一节点时是否替换旧选中项                               | 新节点成为唯一选中项，旧节点退出选中态                                |
-| 6    | 受控 `selectedKeys`       | 组件内部是否只请求外部更新且视图严格跟随 prop                | 外部不回写时视图不变，回写后视图同步                                  |
-| 7    | 节点级单选边界            | `disabled` / `selectable = false` 内容区点击是否错误进入选中 | 允许保留 `node-click` 观察能力，但不触发 `update:selectedKeys/select` |
-| 8    | 树级 `selectable = false` | 树级关闭单选能力时是否彻底禁用选中表现                       | 不输出 `aria-selected`，不渲染高亮，不触发单选事件                    |
-| 9    | switcher 交互边界         | switcher 点击是否仍误触发阶段 3 的点击链路                   | 仅触发展开 / 收起链路，不再触发 `node-click` / `select`               |
-| 10   | 类型与导出回归            | `TreeSelectEvent` 是否进入树模块与组件总入口导出             | `@falcon-ui/components/tree` 与 `@falcon-ui/components` 均可导出      |
+| 编号 | 测试内容                  | 关注点                                                         | 预期结果                                                              |
+| ---- | ------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 1    | 默认无选中态              | 未传选中相关 props 时是否输出稳定初始状态                      | 可选节点输出 `aria-selected="false"`，内容区无选中高亮                |
+| 2    | `defaultSelectedKeys`     | 默认单选是否只保留第一个合法且可选的 key                       | 非法 key、重复 key、`disabledKeys` 与 `unselectableKeys` 被自动过滤   |
+| 3    | 单选事件顺序              | 点击内容区时事件链路是否稳定                                   | 顺序固定为 `node-click -> update:selectedKeys -> select`              |
+| 4    | 再次点击取消              | 点击已选中节点时是否清空单选                                   | 第二次点击后 `selectedKeys = []`，`select.selected = false`           |
+| 5    | 单选替换                  | 点击另一节点时是否替换旧选中项                                 | 新节点成为唯一选中项，旧节点退出选中态                                |
+| 6    | 受控 `selectedKeys`       | 组件内部是否只请求外部更新且视图严格跟随 prop                  | 外部不回写时视图不变，回写后视图同步                                  |
+| 7    | 节点级单选边界            | `disabledKeys` / `unselectableKeys` 内容区点击是否错误进入选中 | 允许保留 `node-click` 观察能力，但不触发 `update:selectedKeys/select` |
+| 8    | 树级 `selectable = false` | 树级关闭单选能力时是否彻底禁用选中表现                         | 不输出 `aria-selected`，不渲染高亮，不触发单选事件                    |
+| 9    | switcher 交互边界         | switcher 点击是否仍误触发阶段 3 的点击链路                     | 仅触发展开 / 收起链路，不再触发 `node-click` / `select`               |
+| 10   | 类型与导出回归            | `TreeSelectEvent` 是否进入树模块与组件总入口导出               | `@falcon-ui/components/tree` 与 `@falcon-ui/components` 均可导出      |
 
 ### 14.3 当前测试结果
 
@@ -894,7 +896,7 @@ interface TreeExpose {
   - `update:selectedKeys` / `select` 已接入，事件对象类型统一命名为 `TreeSelectEvent`
   - `TreeSelectEvent.node` 与 `TreeSelectEvent.selectedNodes` 均返回事件层 `TreeNode`，其中 `selectedNodes` 最终定稿为 `TreeNode[]`，不返回原始 `TreeData[]`
   - 单选支持点击选中、点击其他节点替换、再次点击当前节点取消
-  - `disabled` / `selectable = false` 节点不会进入选中态
+  - `disabledKeys` / `unselectableKeys` 命中的节点不会进入选中态
   - 树级 `selectable = false` 时，不输出选中态与选中事件
   - `aria-selected` 与选中高亮样式已接入
   - switcher 点击已调整为只触发展开 / 收起，不再触发 `node-click` / `select`
@@ -915,7 +917,7 @@ interface TreeExpose {
   - 点击内容区进入单选链路；点击当前已选中节点会取消选中
   - switcher 点击只处理展开 / 收起，不再参与 `node-click` / `select`
   - `selectedNodes` 返回 `TreeNode[]`，原始数据统一通过 `.data` 读取
-  - `disabled`、节点级 `selectable = false`、树级 `selectable = false` 均不会进入选中态
+  - `disabledKeys`、`unselectableKeys`、树级 `selectable = false` 均不会进入选中态
 - 本阶段已完成的渲染与无障碍能力：
   - 可选节点输出 `aria-selected`
   - 选中态高亮作用于节点内容区
@@ -939,23 +941,23 @@ interface TreeExpose {
 1. `multiple = true` 的普通树多选能力
 2. `defaultSelectedKeys` / `selectedKeys` 在多选模式下的受控与非受控行为
 3. 多选模式下 `update:selectedKeys` / `select` 事件语义与顺序
-4. `disabled` / `selectable = false` / 树级 `selectable = false` 的多选边界
+4. `disabledKeys` / `unselectableKeys` / 树级 `selectable = false` 的多选边界
 5. `switcher` 点击与多选链路的职责隔离
 6. Playground 多选示例与事件展示
 
 ### 15.2 测试内容
 
-| 编号 | 测试内容             | 关注点                                                               | 预期结果                                                               |
-| ---- | -------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| 1    | 默认多选归一化       | `multiple=true + defaultSelectedKeys` 是否保留全部合法可选 key       | 去重、过滤非法 key、过滤 `disabled` / `selectable = false`，并保持顺序 |
-| 2    | 非受控多选追加与取消 | 普通点击未选中节点是否追加；再次点击已选中节点是否只移除当前项       | 未选中节点追加到末尾；已选中节点仅移除自身，不清空其余选中项           |
-| 3    | 受控多选请求更新     | 内部交互是否只发出下一组 `selectedKeys` 请求                         | 外部不回写时视图不变；回写后视图与外部值同步                           |
-| 4    | 多选事件对象         | `select` 事件中的 `selectedKeys`、`event.key`、`event.selectedNodes` | 返回点击后的完整多选结果，顺序稳定                                     |
-| 5    | 多选事件布尔语义     | `event.selected` 是否只表达当前点击节点最终是选中还是取消选中        | 选中时为 `true`，取消时为 `false`                                      |
-| 6    | 多选边界             | 树级 `selectable=false`、节点 `disabled`、节点 `selectable=false`    | 不触发选中状态变更，不输出错误的多选事件                               |
-| 7    | switcher 交互边界    | switcher 点击是否误入多选链路                                        | 仅触发展开 / 收起链路，不触发 `select`                                 |
-| 8    | 单选回归稳定         | `multiple` 未传或为 `false` 时阶段 4 单选语义是否回退                | 单选替换、再次点击取消、事件顺序保持不变                               |
-| 9    | Playground 多选示例  | 默认多选、受控多选、清空 / 切换选中集合与事件日志是否可见            | 示例可直接演示多选追加 / 取消                                          |
+| 编号 | 测试内容             | 关注点                                                               | 预期结果                                                                 |
+| ---- | -------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1    | 默认多选归一化       | `multiple=true + defaultSelectedKeys` 是否保留全部合法可选 key       | 去重、过滤非法 key、过滤 `disabledKeys` / `unselectableKeys`，并保持顺序 |
+| 2    | 非受控多选追加与取消 | 普通点击未选中节点是否追加；再次点击已选中节点是否只移除当前项       | 未选中节点追加到末尾；已选中节点仅移除自身，不清空其余选中项             |
+| 3    | 受控多选请求更新     | 内部交互是否只发出下一组 `selectedKeys` 请求                         | 外部不回写时视图不变；回写后视图与外部值同步                             |
+| 4    | 多选事件对象         | `select` 事件中的 `selectedKeys`、`event.key`、`event.selectedNodes` | 返回点击后的完整多选结果，顺序稳定                                       |
+| 5    | 多选事件布尔语义     | `event.selected` 是否只表达当前点击节点最终是选中还是取消选中        | 选中时为 `true`，取消时为 `false`                                        |
+| 6    | 多选边界             | 树级 `selectable=false`、`disabledKeys`、`unselectableKeys`          | 不触发选中状态变更，不输出错误的多选事件                                 |
+| 7    | switcher 交互边界    | switcher 点击是否误入多选链路                                        | 仅触发展开 / 收起链路，不触发 `select`                                   |
+| 8    | 单选回归稳定         | `multiple` 未传或为 `false` 时阶段 4 单选语义是否回退                | 单选替换、再次点击取消、事件顺序保持不变                                 |
+| 9    | Playground 多选示例  | 默认多选、受控多选、清空 / 切换选中集合与事件日志是否可见            | 示例可直接演示多选追加 / 取消                                            |
 
 ### 15.3 当前测试结果
 
@@ -978,7 +980,7 @@ interface TreeExpose {
   - 普通树多选已接入统一选中态模型，单选与多选共享同一套受控 / 非受控语义
   - 多选模式下默认选中、点击追加、再次点击移除当前项、受控请求更新均已通过验证
   - `select` 事件在多选模式下返回完整 `selectedKeys` 与 `selectedNodes`，`event.selected` 仅表示当前点击节点的最终状态
-  - 树级 `selectable = false`、节点 `disabled`、节点 `selectable = false` 在多选模式下仍不会进入选中态
+  - 树级 `selectable = false`、`disabledKeys`、`unselectableKeys` 在多选模式下仍不会进入选中态
   - switcher 点击继续只负责展开 / 收起，不参与多选链路
   - Playground 已补充默认多选、受控多选、清空 / 切换选中集合与事件日志示例
   - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning；`play build` 仍存在既有的 chunk size warning，本阶段树组件改动未引入新的构建失败
@@ -997,7 +999,7 @@ interface TreeExpose {
   - 新选中 key 追加到末尾；点击已选中 key 时仅移除当前 key
   - 受控模式只读外部 `selectedKeys`；非受控模式只初始化一次 `defaultSelectedKeys`
   - `selectedNodes` 返回 `TreeNode[]`，原始数据统一通过 `.data` 读取
-  - `disabled`、节点级 `selectable = false`、树级 `selectable = false` 均不会进入选中态
+  - `disabledKeys`、`unselectableKeys`、树级 `selectable = false` 均不会进入选中态
 - 明确未进入本阶段的能力：
   - `checkable`、父子勾选联动、`checkStrictly`
   - 键盘多选增强
@@ -1017,23 +1019,23 @@ interface TreeExpose {
 2. `defaultCheckedKeys` / `checkedKeys` 的受控与非受控显示
 3. `checkStrictly = true` 下的严格独立勾选与 `update:checkedKeys` / `check` 事件
 4. `checkStrictly !== true` 下的只渲染不交互分支
-5. `disabled` / `disableCheckbox` / 树级 `selectable = false` / 节点级 `checkable = false` 的阶段 6 边界
+5. `disabledKeys` / `disabledCheckboxKeys` / `hiddenCheckboxKeys` / 树级 `selectable = false` 的阶段 6 边界
 6. Playground 复选框示例与事件日志展示
 
 ### 16.2 测试内容
 
-| 编号 | 测试内容            | 关注点                                                           | 预期结果                                                               |
-| ---- | ------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| 1    | 复选框渲染          | `checkable=true` / `false` 下是否正确渲染 `ElCheckbox`           | 开启时渲染复选框并输出 `aria-checked`；关闭时完全不渲染                |
-| 2    | 默认勾选归一化      | `defaultCheckedKeys` 是否去重、过滤非法 key 与已不存在节点       | 合法 key 保留显示；`disabled` / `disableCheckbox` 节点可保持已勾选视觉 |
-| 3    | 严格独立勾选        | `checkStrictly=true` 时点击是否只增删当前节点                    | 未勾选节点追加到末尾；已勾选节点仅移除自身                             |
-| 4    | 严格勾选事件语义    | `update:checkedKeys -> check` 顺序与 `TreeCheckEvent` 载荷       | 事件顺序稳定；`checkedKeys` / `checkedNodes` 返回完整结果              |
-| 5    | 受控勾选            | 受控 `checkedKeys` 是否只请求外部更新                            | 外部未回写前视图不变；回写后视图与外部值同步                           |
-| 6    | 非严格渲染分支      | `checkStrictly !== true` 时用户点击是否被拦截                    | 复选框可见且显示勾选态，但不会触发 `update:checkedKeys` / `check`      |
-| 7    | 禁用勾选边界        | `disabled` / `disableCheckbox` 是否禁用复选框且阻止交互          | 复选框禁用；若 key 已在 `checkedKeys` 中则保留已勾选视觉               |
-| 8    | 事件链路隔离        | 复选框点击是否误触发 `node-click` / `select` / 展开收起事件      | 只进入勾选链路，不进入选择与展开链路                                   |
-| 9    | 选择与勾选独立      | 树级 `selectable=false` 与节点级 `checkable=false` 的阶段 6 表现 | 内容区不进入选中态；勾选链路仍可工作；节点级 `checkable=false` 被忽略  |
-| 10   | Playground 阶段说明 | 默认示例、严格勾选、边界示例与日志展示是否可见                   | 示例可演示 render-only / strict / boundary，明确父子联动留在下一阶段   |
+| 编号 | 测试内容            | 关注点                                                           | 预期结果                                                                        |
+| ---- | ------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 1    | 复选框渲染          | `checkable=true` / `false` 下是否正确渲染 `ElCheckbox`           | 开启时渲染复选框并输出 `aria-checked`；关闭时完全不渲染                         |
+| 2    | 默认勾选归一化      | `defaultCheckedKeys` 是否去重、过滤非法 key 与已不存在节点       | 合法 key 保留显示；`disabledKeys` / `disabledCheckboxKeys` 节点可保持已勾选视觉 |
+| 3    | 严格独立勾选        | `checkStrictly=true` 时点击是否只增删当前节点                    | 未勾选节点追加到末尾；已勾选节点仅移除自身                                      |
+| 4    | 严格勾选事件语义    | `update:checkedKeys -> check` 顺序与 `TreeCheckEvent` 载荷       | 事件顺序稳定；`checkedKeys` / `checkedNodes` 返回完整结果                       |
+| 5    | 受控勾选            | 受控 `checkedKeys` 是否只请求外部更新                            | 外部未回写前视图不变；回写后视图与外部值同步                                    |
+| 6    | 非严格渲染分支      | `checkStrictly !== true` 时用户点击是否被拦截                    | 复选框可见且显示勾选态，但不会触发 `update:checkedKeys` / `check`               |
+| 7    | 禁用勾选边界        | `disabledKeys` / `disabledCheckboxKeys` 是否禁用复选框且阻止交互 | 复选框禁用；若 key 已在 `checkedKeys` 中则保留已勾选视觉                        |
+| 8    | 事件链路隔离        | 复选框点击是否误触发 `node-click` / `select` / 展开收起事件      | 只进入勾选链路，不进入选择与展开链路                                            |
+| 9    | 选择与勾选独立      | 树级 `selectable=false` 与 `hiddenCheckboxKeys` 的阶段 6 表现    | 内容区不进入选中态；勾选链路仍可工作；隐藏 checkbox 不阻断子孙节点              |
+| 10   | Playground 阶段说明 | 默认示例、严格勾选、边界示例与日志展示是否可见                   | 示例可演示 render-only / strict / boundary，明确父子联动留在下一阶段            |
 
 ### 16.3 当前测试结果
 
@@ -1057,7 +1059,7 @@ interface TreeExpose {
   - 树节点复选框固定使用 `ElCheckbox` 渲染，并已接入主题样式导入
   - `checkStrictly = true` 已实现严格独立勾选；`checkStrictly !== true` 当前仅渲染复选框，不允许用户修改状态
   - `check` 事件返回完整 `checkedKeys` 与 `checkedNodes`，`event.checked` 仅表示当前点击节点在本次交互后的最终勾选状态
-  - `disabled`、`disableCheckbox` 节点会禁用复选框，但若外部传入勾选 key 仍会保持已勾选视觉
+  - `disabledKeys`、`disabledCheckboxKeys` 命中的节点会禁用复选框，但若外部传入勾选 key 仍会保持已勾选视觉
   - 复选框点击不会误触发 `node-click`、`select`、`node-expand` 或 `node-collapse`
   - Playground 已补充 render-only / strict / boundary 示例、受控勾选按钮与 `check` 日志展示
   - `build:lib` 仍存在既有的 `dialog.vue` dynamic import warning；`play build` 仍存在既有的 chunk size warning，本阶段树组件改动未引入新的构建失败
@@ -1072,12 +1074,12 @@ interface TreeExpose {
   - `update:checkedKeys`
   - `check(checkedKeys, event: TreeCheckEvent)`
 - 本阶段已固定的运行时契约：
-  - `checkable = true` 时渲染 `ElCheckbox`；`checkable = false` 时不渲染复选框，也不输出 `aria-checked`
+  - `checkable = true` 时渲染 `ElCheckbox`；`checkable = false` 时整棵树不渲染复选框，也不输出 `aria-checked`
   - `checkStrictly = true` 时启用严格独立勾选：勾选未选中节点会追加到末尾；取消已勾选节点仅移除当前 key
   - `checkStrictly !== true` 时仅渲染复选框和勾选态，不允许用户点击修改状态
   - 受控模式只读外部 `checkedKeys`；非受控模式只初始化一次 `defaultCheckedKeys`，后续数据变化仅裁剪失效 key
   - `checkedKeys` 当前仅支持 `TreeKey[]`；不接收 `{ checked, halfChecked }` 对象形态
-  - `disabled`、`disableCheckbox` 节点会禁用复选框，但不会从勾选结果中自动移除
+  - `disabledKeys`、`disabledCheckboxKeys` 命中的节点会禁用复选框，但不会从勾选结果中自动移除
   - 复选框点击只进入勾选链路；节点内容区仍保持阶段 4 / 5 的选择语义
 - 明确未进入本阶段的能力：
   - `checkStrictly = false` 下的父子联动勾选
@@ -1099,7 +1101,7 @@ interface TreeExpose {
 2. half-check 运行时计算、`aria-checked="mixed"` 与 `ElCheckbox.indeterminate`
 3. `checkStrictly = true` 的 `{ checked, halfChecked }` 对象态
 4. `update:checkedKeys` / `check` 在默认模式与 strict 模式下的值形态与事件语义
-5. `disabled` / `disableCheckbox` / 节点级 `checkable = false` 的联动边界
+5. `disabledKeys` / `disabledCheckboxKeys` / `hiddenCheckboxKeys` 的联动边界
 6. Playground 三组示例与事件日志同步
 
 ### 17.2 当前测试结果
@@ -1131,9 +1133,9 @@ interface TreeExpose {
   - `checkedKeys` / `update:checkedKeys` / `check` 首参均支持 `{ checked, halfChecked }`
   - `defaultCheckedKeys` 仍只初始化 `checked`
 - 阶段 9 已完成：
-  - `disabled` 成为勾选传导硬边界
-  - `disableCheckbox` 仅禁用交互，不阻断联动
-  - 节点级 `checkable = false` 会隐藏自身复选框，不进入勾选结果，但不阻断对子孙的联动
+  - `disabledKeys` 成为勾选传导硬边界
+  - `disabledCheckboxKeys` 仅禁用交互，不阻断联动
+  - `hiddenCheckboxKeys` 会隐藏自身复选框，不进入勾选结果，但不阻断对子孙的联动
 - 渲染与无障碍同步更新：
   - half-check 使用 `ElCheckbox` 的 `indeterminate`
   - 节点级 `aria-checked` 在 half-check 下输出 `mixed`
@@ -1151,7 +1153,7 @@ interface TreeExpose {
   - `checkStrictly = false`：`checkedKeys` 使用数组，组件内部负责父子联动与 half-check
   - `checkStrictly = true`：`checkedKeys` 支持 `{ checked, halfChecked }`
   - `check` 事件统一返回 `TreeCheckEvent`，并新增 `halfCheckedKeys`
-  - `disabled` / `disableCheckbox` / `checkable = false` 的边界已按阶段 9 收口
+  - `disabledKeys` / `disabledCheckboxKeys` / `hiddenCheckboxKeys` 的边界已按阶段 9 收口
 - 明确未进入本阶段的能力：
   - 键盘勾选增强
   - 异步加载场景下的专项勾选优化
@@ -1505,7 +1507,7 @@ interface TreeExpose {
 - 示例默认包含：
   - 普通可选择树
   - `checkable` 权限树
-  - 包含 disabled / disableCheckbox / half-check 的边界树
+  - 包含 disabledKeys / disabledCheckboxKeys / hiddenCheckboxKeys / half-check 的边界树
   - 一个异步加载节点
 - 页面不展示内部 `focusedKey`；通过焦点样式、ARIA 关系和最近事件日志观察结果。
 - 示例文案只说明验证入口，不在组件 UI 内写快捷键教学内容。
@@ -1523,7 +1525,7 @@ interface TreeExpose {
 - 树根容器默认输出 `tabindex="0"`，外部显式传入 `tabindex` 时保留外部值。
 - 树根容器通过 `aria-activedescendant` 指向当前活动 `treeitem`。
 - 每个节点输出稳定 `id`；节点 key 的类型会参与 id 生成，避免 `1` 与 `'1'` 冲突。
-- `disabled` 节点输出 `aria-disabled="true"`。
+- `disabledKeys` 命中的节点输出 `aria-disabled="true"`。
 - switcher button 与 checkbox 从 Tab 顺序中移除，树保持单一 Tab 入口。
 - `Enter` 复用节点内容点击语义，键盘触发时 `node-click` 的 component 参数为 `null`。
 - `Space` 在 `checkable = true` 时只尝试勾选；节点不可勾选时不回退为选择。
@@ -1704,24 +1706,25 @@ interface TreeExpose {
 
 ### 25.1 阶段目标
 
-阶段 18 收口 `FlTree` 的公开文档、按阶段组织的 VitePress 示例、API 元数据入口和阶段末
-单测缺口。文档示例按开发阶段组织；相同目标的阶段合并到同一个示例，避免重复展示相同
+阶段 18 收口 `FlTree` 的公开文档、按能力场景组织的 VitePress 示例、API 元数据入口和阶段末
+单测缺口。文档示例使用准确的能力名称；相同目标的能力合并到同一个示例，避免重复展示相同
 交互。
 
 ### 25.2 本阶段完成内容
 
 1. 新增 `docs/components/tree.md`，接入 `FlTree` 文档页和 API 表格。
-2. 新增 `docs/examples/tree/` 示例目录，按阶段组织示例：
-   - 阶段 1：`basic.vue`
-   - 阶段 2-3：`expand.vue`
-   - 阶段 4-5：`selection.vue`
-   - 阶段 6-9：`checkable.vue`
-   - 阶段 10-11：`line-content.vue`
-   - 阶段 12：`semantic-style.vue`
-   - 阶段 13：`async.vue`
-   - 阶段 14：`drag.vue`
-   - 阶段 15：`keyboard-a11y.vue`
-   - 阶段 16-17：`dblclick-scroll.vue`
+2. 新增 `docs/examples/tree/` 示例目录，按能力场景组织示例：
+   - 基础用法：`basic.vue`
+   - 默认展开与受控展开：`expand.vue`
+   - 默认选中、单选/多选与右键事件：`selection.vue`
+   - 复选框与勾选联动：`checkable.vue`
+   - 禁用、不可选与复选框边界：`disabled.vue`
+   - 连线、自定义内容与切换图标：`line-content.vue`
+   - 语义化样式：`semantic-style.vue`
+   - 异步加载：`async.vue`
+   - 节点拖拽：`drag.vue`
+   - 键盘导航与无障碍：`keyboard-a11y.vue`
+   - 双击展开、筛选高亮与滚动定位：`dblclick-scroll.vue`
 3. 文档侧接入 `FlTree`：
    - VitePress sidebar 增加 `/components/tree`
    - 组件总览增加 `FlTree`
@@ -1813,3 +1816,48 @@ interface TreeExpose {
 
 - 当前判定：阶段 19 已完成。
 - `FlTree` 阶段 1-19 已全部归档。
+
+## 27. 阶段 20 测试文档：节点交互状态契约修正
+
+### 27.1 阶段目标
+
+阶段 20 按破坏式契约修正 `FlTree` 节点交互状态来源：`TreeData` 只承载业务数据与树结构，
+禁用、不可选、禁用 checkbox、隐藏 checkbox 全部改由 key-based props 声明。
+
+### 27.2 本阶段完成内容
+
+1. `TreeData` 移除 `disabled`、`selectable`、`disableCheckbox`、`checkable` 主契约字段。
+2. `TreeNodeProps` 移除 `disabled` 字段映射。
+3. 新增公开 props：
+   - `disabledKeys`
+   - `unselectableKeys`
+   - `disabledCheckboxKeys`
+   - `hiddenCheckboxKeys`
+4. 运行时节点状态改为从 key-based props 派生：
+   - `disabled`
+   - `selectable`
+   - `checkboxDisabled`
+   - `checkboxVisible`
+5. Playground 与 VitePress 示例均改为纯业务数据，不再在节点数据中写组件交互状态。
+
+### 27.3 行为判定
+
+- `disabledKeys`：节点整体禁用，不可选中，checkbox 禁用，输出 disabled 样式与 ARIA，
+  并作为勾选联动硬边界。
+- `unselectableKeys`：节点正常展示和交互，但不进入 `selectedKeys`，不触发 `select`。
+- `disabledCheckboxKeys`：仅禁用当前节点 checkbox 交互，不阻断父子联动。
+- `hiddenCheckboxKeys`：不渲染当前节点 checkbox，不阻断子孙节点勾选。
+- `TreeData` 中即使存在旧交互字段，也不再产生组件行为。
+
+### 27.4 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 当前已执行命令：
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+- 当前执行结果：
+  - 树组件单测：通过，`81 passed`
+
+### 27.5 当前判定
+
+- 当前判定：阶段 20 已完成。

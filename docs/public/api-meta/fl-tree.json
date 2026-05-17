@@ -217,6 +217,20 @@
       "type": "TreeKey[] | undefined"
     },
     {
+      "default": "undefined",
+      "description": "",
+      "name": "disabledCheckboxKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "disabledKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
       "default": "false",
       "description": "",
       "name": "draggable",
@@ -236,6 +250,13 @@
       "name": "filterTreeNode",
       "required": false,
       "type": "TreeFilterTreeNode | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "hiddenCheckboxKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
     },
     {
       "default": "undefined",
@@ -306,6 +327,13 @@
       "name": "switcherLoadingIcon",
       "required": false,
       "type": "TreeSwitcherLoadingIcon | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "unselectableKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
     }
   ],
   "slots": [

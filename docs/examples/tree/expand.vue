@@ -1,21 +1,28 @@
 <template>
   <div class="demo-col">
-    <div class="demo-toolbar">
-      <FlButton size="small" @click="expandedKeys = allExpandableKeys">全部展开</FlButton>
-      <FlButton size="small" @click="expandedKeys = []">全部收起</FlButton>
-      <el-switch v-model="autoExpandParent" active-text="自动展开父级" />
+    <div class="demo-group">
+      <div class="demo-group__title">默认展开</div>
+      <FlTree :data="data" :default-expanded-keys="['guide']" />
     </div>
 
-    <FlTree
-      :data="data"
-      :expanded-keys="expandedKeys"
-      :auto-expand-parent="autoExpandParent"
-      :default-expanded-keys="['workspace']"
-      @update:expanded-keys="expandedKeys = $event"
-      @expand="handleExpand" />
+    <div class="demo-group">
+      <div class="demo-group__title">受控展开</div>
+      <div class="demo-toolbar">
+        <FlButton size="small" @click="expandedKeys = allExpandableKeys">全部展开</FlButton>
+        <FlButton size="small" @click="expandedKeys = []">全部收起</FlButton>
+        <el-switch v-model="autoExpandParent" active-text="自动展开父级" />
+      </div>
 
-    <div class="demo-result">展开 key：{{ expandedKeys.join(', ') || '(none)' }}</div>
-    <div class="demo-result">最近展开事件：{{ latestExpand || '(none)' }}</div>
+      <FlTree
+        :data="data"
+        :expanded-keys="expandedKeys"
+        :auto-expand-parent="autoExpandParent"
+        @update:expanded-keys="expandedKeys = $event"
+        @expand="handleExpand" />
+
+      <div class="demo-result">展开 key：{{ expandedKeys.join(', ') || '(none)' }}</div>
+      <div class="demo-result">最近展开事件：{{ latestExpand || '(none)' }}</div>
+    </div>
   </div>
 </template>
 
@@ -56,6 +63,17 @@ const handleExpand = (payload: TreeExpandPayload) => {
 </script>
 
 <style scoped>
+.demo-group + .demo-group {
+  margin-top: 18px;
+}
+
+.demo-group__title {
+  margin-bottom: 8px;
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+  font-size: 14px;
+}
+
 .demo-toolbar {
   display: flex;
   flex-wrap: wrap;

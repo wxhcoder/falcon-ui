@@ -107,7 +107,12 @@ const notifyTreeDataChange = () => {
  */
 const createCurrentTreeIndex = () => {
   void treeDataVersion.value
-  return buildTreeIndex(props.data, props.props)
+  return buildTreeIndex(props.data, props.props, {
+    disabledKeys: props.disabledKeys,
+    unselectableKeys: props.unselectableKeys,
+    disabledCheckboxKeys: props.disabledCheckboxKeys,
+    hiddenCheckboxKeys: props.hiddenCheckboxKeys
+  })
 }
 
 /**

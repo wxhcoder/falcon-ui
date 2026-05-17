@@ -354,6 +354,10 @@
           :default-expand-parent="treeDefaultExpandParent"
           :default-selected-keys="treeDefaultSelectedKeys"
           :default-checked-keys="treeDefaultCheckedKeys"
+          :disabled-keys="treeDisabledKeys"
+          :unselectable-keys="treeUnselectableKeys"
+          :disabled-checkbox-keys="treeDisabledCheckboxKeys"
+          :hidden-checkbox-keys="treeHiddenCheckboxKeys"
           :expanded-keys="treeUseControlledExpand ? treeControlledExpandedKeys : undefined"
           :selected-keys="treeUseControlledSelect ? treeControlledSelectedKeys : undefined"
           :checked-keys="treeUseControlledCheck ? treeControlledCheckedKeys : undefined"
@@ -466,7 +470,7 @@
       </p>
       <p class="demo-result">
         Stage 7-9 note: default mode now conducts parent / child checks, strict mode uses `{
-        checked, halfChecked }`, and `disabled` / `checkable=false` boundaries are active.
+        checked, halfChecked }`, and key-based disabled / hidden checkbox boundaries are active.
       </p>
       <p class="demo-result">
         Event counts: click={{ treeNodeClickCount }}, dblclick={{ treeDblclickCount }}, select={{
@@ -803,7 +807,6 @@ interface TreeEventRecord {
 const treeNodeProps: TreeNodeProps = {
   label: 'name',
   children: 'nodes',
-  disabled: 'locked',
   isLeaf: 'leaf',
   class: 'className'
 }
@@ -1034,13 +1037,11 @@ const treeData = reactive<TreeData[]>([
           {
             key: 'delivery-quality-checkbox-disabled',
             name: 'Checkbox Disabled',
-            disableCheckbox: true,
             leaf: true
           },
           {
-            key: 'delivery-quality-legacy-checkable',
-            name: 'Legacy checkable=false',
-            checkable: false,
+            key: 'delivery-quality-hidden-checkbox',
+            name: 'Hidden Checkbox',
             leaf: true
           },
           {
@@ -1088,7 +1089,6 @@ const treeData = reactive<TreeData[]>([
   {
     key: 'archive',
     name: 'Archive',
-    locked: true,
     leaf: true
   }
 ])
@@ -1181,6 +1181,10 @@ const treeDefaultSelectedKeys = ref<TreeKey[] | undefined>([
   'delivery-quality-unit-test'
 ])
 const treeDefaultCheckedKeys = ref<TreeKey[] | undefined>(undefined)
+const treeDisabledKeys: TreeKey[] = ['archive']
+const treeUnselectableKeys: TreeKey[] = ['delivery-quality']
+const treeDisabledCheckboxKeys: TreeKey[] = ['delivery-quality-checkbox-disabled']
+const treeHiddenCheckboxKeys: TreeKey[] = ['delivery-quality-hidden-checkbox']
 const treeUseControlledSelect = ref(false)
 const treeControlledSelectedKeys = ref<TreeKey[]>([])
 const treeObservedSelectedKeys = ref<TreeKey[]>(treeDefaultSelectedKeys.value ?? [])
@@ -1250,11 +1254,8 @@ const readTreeLabel = (node: TreeData): string => {
 /**
  * 读取树节点是否处于可选状态，保持 playground 展示与组件运行时一致。
  */
-const isTreeNodeSelectable = (node: TreeData) => {
-  const disabledFieldName = treeNodeProps.disabled ?? 'disabled'
-
-  return node.selectable !== false && !node[disabledFieldName]
-}
+const isTreeNodeSelectable = (node: TreeData) =>
+  !treeDisabledKeys.includes(node.key) && !treeUnselectableKeys.includes(node.key)
 
 /**
  * 构建当前示例数据的 key -> node 索引，供选中结果展示与控制按钮复用。
@@ -1325,8 +1326,8 @@ const isTreeCheckedKeysObject = (
  * 归一化树示例中的单组勾选 key：
  * 1. 去重
  * 2. 过滤非法或已不存在的 key
- * 3. 过滤节点级 `checkable=false`
- * 4. 保留 disabled / disableCheckbox 的已勾选显示
+ * 3. 过滤 hiddenCheckboxKeys
+ * 4. 保留 disabledKeys / disabledCheckboxKeys 的已勾选显示
  */
 const normalizeTreeCheckedKeyList = (checkedKeys: TreeKey[]): TreeKey[] => {
   const keyNodeMap = createTreeNodeLookup(treeData)
@@ -1336,7 +1337,7 @@ const normalizeTreeCheckedKeyList = (checkedKeys: TreeKey[]): TreeKey[] => {
   for (const key of checkedKeys) {
     const node = keyNodeMap.get(key)
 
-    if (visitedKeys.has(key) || !node || node.checkable === false) {
+    if (visitedKeys.has(key) || !node || treeHiddenCheckboxKeys.includes(key)) {
       continue
     }
 
@@ -1698,11 +1699,7 @@ const applyCheckBoundaryScenario = () => {
   treeCheckable.value = true
   treeCheckStrictly.value = false
   treeUseControlledCheck.value = false
-  treeDefaultCheckedKeys.value = [
-    'archive',
-    'delivery-quality',
-    'delivery-quality-legacy-checkable'
-  ]
+  treeDefaultCheckedKeys.value = ['archive', 'delivery-quality', 'delivery-quality-hidden-checkbox']
   treeControlledCheckedKeys.value = createEmptyTreeCheckedValue()
   treeObservedCheckedKeys.value = normalizeTreeCheckedValue(treeDefaultCheckedKeys.value ?? [])
   treeObservedHalfCheckedKeys.value = ['delivery']

@@ -57,13 +57,26 @@ export interface TreeExpose {
   scrollTo: (options: TreeScrollToOptions) => void
 }
 
+export interface TreeInteractionStateConfig {
+  disabledKeys?: TreeKey[]
+  unselectableKeys?: TreeKey[]
+  disabledCheckboxKeys?: TreeKey[]
+  hiddenCheckboxKeys?: TreeKey[]
+}
+
+export interface TreeInteractionStateSets {
+  disabledKeySet: Set<TreeKey>
+  unselectableKeySet: Set<TreeKey>
+  disabledCheckboxKeySet: Set<TreeKey>
+  hiddenCheckboxKeySet: Set<TreeKey>
+}
+
 /**
  * 首版使用稳定的默认字段映射，保证常规树数据可直接渲染。
  */
 export const treeNodePropsDefaults: Required<TreeNodeProps> = {
   label: 'label',
   children: 'children',
-  disabled: 'disabled',
   isLeaf: 'isLeaf',
   class: 'class'
 }
@@ -142,12 +155,28 @@ export const treeProps = {
     type: Array as PropType<TreeKey[] | undefined>,
     default: undefined
   },
+  disabledKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
+    default: undefined
+  },
+  unselectableKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
+    default: undefined
+  },
   defaultCheckedKeys: {
     type: Array as PropType<TreeKey[] | undefined>,
     default: undefined
   },
   checkedKeys: {
     type: [Array, Object] as PropType<TreeCheckedKeys | undefined>,
+    default: undefined
+  },
+  disabledCheckboxKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
+    default: undefined
+  },
+  hiddenCheckboxKeys: {
+    type: Array as PropType<TreeKey[] | undefined>,
     default: undefined
   },
   loadData: {
@@ -353,9 +382,9 @@ const isTreeNode = (value: unknown): value is TreeNode =>
   typeof value.level === 'number' &&
   typeof value.label === 'string' &&
   typeof value.disabled === 'boolean' &&
-  typeof value.disableCheckbox === 'boolean' &&
-  typeof value.checkable === 'boolean' &&
   typeof value.selectable === 'boolean' &&
+  typeof value.checkboxDisabled === 'boolean' &&
+  typeof value.checkboxVisible === 'boolean' &&
   typeof value.isLeaf === 'boolean' &&
   Array.isArray(value.childNodes) &&
   'data' in value
@@ -584,6 +613,37 @@ export const resolveTreeNodePropsConfig = (
 })
 
 /**
+ * 将 key-based 交互策略归一化为 Set，后续节点标准化只读取这些集合。
+ */
+const createTreeKeySet = (keys: TreeKey[] | undefined): Set<TreeKey> => {
+  if (!Array.isArray(keys)) {
+    return new Set()
+  }
+
+  const keySet = new Set<TreeKey>()
+
+  for (const key of keys) {
+    if (isTreeKey(key)) {
+      keySet.add(key)
+    }
+  }
+
+  return keySet
+}
+
+const createTreeInteractionStateSets = ({
+  disabledKeys,
+  unselectableKeys,
+  disabledCheckboxKeys,
+  hiddenCheckboxKeys
+}: TreeInteractionStateConfig = {}): TreeInteractionStateSets => ({
+  disabledKeySet: createTreeKeySet(disabledKeys),
+  unselectableKeySet: createTreeKeySet(unselectableKeys),
+  disabledCheckboxKeySet: createTreeKeySet(disabledCheckboxKeys),
+  hiddenCheckboxKeySet: createTreeKeySet(hiddenCheckboxKeys)
+})
+
+/**
  * 按映射字段名读取原始节点字段，避免字段读取逻辑散落在各处。
  */
 const readTreeField = (node: TreeData, fieldName: string): unknown => node[fieldName]
@@ -618,6 +678,7 @@ export const normalizeTreeNode = (
   rawNode: TreeData,
   level: number,
   propsConfig?: TreeNodeProps,
+  interactionStateSets: TreeInteractionStateSets = createTreeInteractionStateSets(),
   parent: TreeNodeModel | null = null,
   isLastSibling = true,
   lineTrackEnds: boolean[] = []
@@ -627,7 +688,6 @@ export const normalizeTreeNode = (
   const childNodes = Array.isArray(childrenValue) ? (childrenValue as TreeData[]) : []
 
   const labelValue = readTreeField(rawNode, mappedProps.label)
-  const disabledValue = readTreeField(rawNode, mappedProps.disabled)
   const isLeafValue = readTreeField(rawNode, mappedProps.isLeaf)
   const classValue = readTreeField(rawNode, mappedProps.class)
 
@@ -635,15 +695,17 @@ export const normalizeTreeNode = (
     throw new Error('[FlTree] Every node must provide a unique `key`.')
   }
 
+  const disabled = interactionStateSets.disabledKeySet.has(rawNode.key)
+
   const treeNode: TreeNodeModel = {
     key: rawNode.key,
     level,
     data: rawNode,
     label: labelValue == null ? '' : String(labelValue),
-    disabled: Boolean(disabledValue),
-    disableCheckbox: Boolean(rawNode.disableCheckbox),
-    checkable: rawNode.checkable !== false,
-    selectable: rawNode.selectable !== false,
+    disabled,
+    selectable: !disabled && !interactionStateSets.unselectableKeySet.has(rawNode.key),
+    checkboxDisabled: disabled || interactionStateSets.disabledCheckboxKeySet.has(rawNode.key),
+    checkboxVisible: !interactionStateSets.hiddenCheckboxKeySet.has(rawNode.key),
     isLeaf: Boolean(isLeafValue),
     className: resolveNodeClassName(classValue),
     isLastSibling,
@@ -657,6 +719,7 @@ export const normalizeTreeNode = (
       childNode,
       level + 1,
       mappedProps,
+      interactionStateSets,
       treeNode,
       index === childNodes.length - 1,
       [...lineTrackEnds, isLastSibling]
@@ -669,13 +732,18 @@ export const normalizeTreeNode = (
 /**
  * 在递归树结构之外，同时建立扁平索引，供后续阶段复用。
  */
-export const buildTreeIndex = (data: TreeData[], propsConfig?: TreeNodeProps): TreeIndex => {
+export const buildTreeIndex = (
+  data: TreeData[],
+  propsConfig?: TreeNodeProps,
+  interactionStateConfig?: TreeInteractionStateConfig
+): TreeIndex => {
   const keyNodeMap = new Map<TreeKey, TreeNodeModel>()
   const parentKeyMap = new Map<TreeKey, TreeKey | null>()
   const childrenKeyMap = new Map<TreeKey, TreeKey[]>()
   const visibleNodeKeys: TreeKey[] = []
+  const interactionStateSets = createTreeInteractionStateSets(interactionStateConfig)
   const normalizedNodes = data.map((node, index) =>
-    normalizeTreeNode(node, 1, propsConfig, null, index === data.length - 1)
+    normalizeTreeNode(node, 1, propsConfig, interactionStateSets, null, index === data.length - 1)
   )
 
   /**
@@ -935,9 +1003,9 @@ export const createTreeEventNode = ({
       data: currentNode.data,
       label: currentNode.label,
       disabled: currentNode.disabled,
-      disableCheckbox: currentNode.disableCheckbox,
-      checkable: currentNode.checkable,
       selectable: currentNode.selectable,
+      checkboxDisabled: currentNode.checkboxDisabled,
+      checkboxVisible: currentNode.checkboxVisible,
       isLeaf: currentNode.isLeaf,
       parent: null,
       childNodes: []

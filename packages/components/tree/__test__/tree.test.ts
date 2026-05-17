@@ -305,7 +305,7 @@ describe('FlTree 契约', () => {
   }
 
   /**
-   * 提供包含 disabled / selectable=false 边界的树数据。
+   * 提供包含选择与 checkbox 边界节点的纯业务树数据。
    */
   const createSelectionBoundaryTreeData = () => [
     {
@@ -314,23 +314,19 @@ describe('FlTree 契约', () => {
       children: [
         {
           key: 'disabled-node',
-          label: 'Disabled Node',
-          disabled: true
+          label: 'Disabled Node'
         },
         {
           key: 'checkbox-disabled-node',
-          label: 'Checkbox Disabled Node',
-          disableCheckbox: true
+          label: 'Checkbox Disabled Node'
         },
         {
           key: 'unselectable-node',
-          label: 'Unselectable Node',
-          selectable: false
+          label: 'Unselectable Node'
         },
         {
-          key: 'legacy-checkable-node',
-          label: 'Legacy Checkable False Node',
-          checkable: false
+          key: 'hidden-checkbox-node',
+          label: 'Hidden Checkbox Node'
         },
         {
           key: 'active-node',
@@ -341,7 +337,7 @@ describe('FlTree 契约', () => {
   ]
 
   /**
-   * 提供覆盖父子联动、半选态、禁用边界与 `checkable=false` 透明节点的树数据。
+   * 提供覆盖父子联动、半选态、禁用边界与隐藏 checkbox 透明节点的树数据。
    */
   const createCheckConductTreeData = () => [
     {
@@ -365,7 +361,6 @@ describe('FlTree 契约', () => {
         {
           key: 'disabled-branch',
           label: 'Disabled Branch',
-          disabled: true,
           children: [
             {
               key: 'disabled-branch-leaf',
@@ -375,13 +370,11 @@ describe('FlTree 契约', () => {
         },
         {
           key: 'checkbox-disabled-node',
-          label: 'Checkbox Disabled Node',
-          disableCheckbox: true
+          label: 'Checkbox Disabled Node'
         },
         {
-          key: 'non-checkable-bridge',
-          label: 'Non Checkable Bridge',
-          checkable: false,
+          key: 'hidden-checkbox-bridge',
+          label: 'Hidden Checkbox Bridge',
           children: [
             {
               key: 'bridge-leaf-1',
@@ -1053,6 +1046,8 @@ describe('FlTree 契约', () => {
       props: {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
+        disabledKeys: ['disabled-node'],
+        unselectableKeys: ['unselectable-node'],
         defaultSelectedKeys: ['missing-node', 'disabled-node', 'active-node', 'root']
       }
     })
@@ -1075,6 +1070,8 @@ describe('FlTree 契约', () => {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
         multiple: true,
+        disabledKeys: ['disabled-node'],
+        unselectableKeys: ['unselectable-node'],
         defaultSelectedKeys: [
           'missing-node',
           'root',
@@ -1097,6 +1094,37 @@ describe('FlTree 契约', () => {
     expect(isItemSelected(wrapper, 'Root')).toBe(true)
     expect(isItemSelected(wrapper, 'Active Node')).toBe(true)
     expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
+  })
+
+  it('TreeData 中的旧交互字段不会再驱动组件行为', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: [
+          {
+            key: 'legacy-state-node',
+            label: 'Legacy State Node',
+            disabled: true,
+            selectable: false,
+            disableCheckbox: true,
+            checkable: false
+          }
+        ],
+        checkable: true,
+        defaultSelectedKeys: ['legacy-state-node'],
+        defaultCheckedKeys: ['legacy-state-node']
+      }
+    })
+
+    await nextTick()
+
+    const legacyItem = findTreeItemByText(wrapper, 'Legacy State Node')
+
+    expect(legacyItem.attributes('aria-disabled')).toBeUndefined()
+    expect(legacyItem.attributes('aria-selected')).toBe('true')
+    expect(legacyItem.attributes('aria-checked')).toBe('true')
+    expect(isItemSelected(wrapper, 'Legacy State Node')).toBe(true)
+    expect(hasItemCheckbox(wrapper, 'Legacy State Node')).toBe(true)
+    expect(isItemCheckboxDisabled(wrapper, 'Legacy State Node')).toBe(false)
   })
 
   it('点击节点内容区时按顺序触发 `node-click`、`update:selectedKeys`、`select`', async () => {
@@ -1294,11 +1322,13 @@ describe('FlTree 契约', () => {
     expect(isItemSelected(wrapper, 'Active Node')).toBe(true)
   })
 
-  it('disabled 与 selectable=false 节点点击内容区只保留 `node-click` 观察能力', async () => {
+  it('disabledKeys 与 unselectableKeys 节点点击内容区只保留 `node-click` 观察能力', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: createSelectionBoundaryTreeData(),
-        defaultExpandAll: true
+        defaultExpandAll: true,
+        disabledKeys: ['disabled-node'],
+        unselectableKeys: ['unselectable-node']
       }
     })
 
@@ -1314,12 +1344,14 @@ describe('FlTree 契约', () => {
     expect(isItemSelected(wrapper, 'Unselectable Node')).toBe(false)
   })
 
-  it('多选模式下 disabled 与 selectable=false 节点仍不会触发选中状态变更', async () => {
+  it('多选模式下 disabledKeys 与 unselectableKeys 节点仍不会触发选中状态变更', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
-        multiple: true
+        multiple: true,
+        disabledKeys: ['disabled-node'],
+        unselectableKeys: ['unselectable-node']
       }
     })
 
@@ -1389,9 +1421,12 @@ describe('FlTree 契约', () => {
         defaultExpandAll: true,
         checkable: true,
         checkStrictly: true,
+        disabledKeys: ['disabled-node'],
+        disabledCheckboxKeys: ['checkbox-disabled-node'],
+        hiddenCheckboxKeys: ['hidden-checkbox-node'],
         checkedKeys: {
           checked: ['active-node', 'checkbox-disabled-node', 'missing-node'],
-          halfChecked: ['root', 'legacy-checkable-node', 'active-node']
+          halfChecked: ['root', 'hidden-checkbox-node', 'active-node']
         }
       }
     })
@@ -1407,9 +1442,9 @@ describe('FlTree 契约', () => {
     expect(isItemHalfChecked(wrapper, 'Root')).toBe(true)
     expect(isItemChecked(wrapper, 'Active Node')).toBe(true)
     expect(isItemChecked(wrapper, 'Checkbox Disabled Node')).toBe(true)
-    expect(hasItemCheckbox(wrapper, 'Legacy Checkable False Node')).toBe(false)
+    expect(hasItemCheckbox(wrapper, 'Hidden Checkbox Node')).toBe(false)
     expect(
-      findTreeItemByText(wrapper, 'Legacy Checkable False Node').attributes('aria-checked')
+      findTreeItemByText(wrapper, 'Hidden Checkbox Node').attributes('aria-checked')
     ).toBeUndefined()
   })
 
@@ -1575,13 +1610,15 @@ describe('FlTree 契约', () => {
     expect(isItemHalfChecked(wrapper, 'Root')).toBe(true)
   })
 
-  it('disabled 与 `disableCheckbox` 复选框会禁用，但保留已勾选视觉并阻止交互', async () => {
+  it('disabledKeys 与 disabledCheckboxKeys 会禁用复选框，但保留已勾选视觉并阻止交互', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
         checkable: true,
         checkStrictly: true,
+        disabledKeys: ['disabled-node'],
+        disabledCheckboxKeys: ['checkbox-disabled-node'],
         checkedKeys: {
           checked: ['disabled-node', 'checkbox-disabled-node'],
           halfChecked: []
@@ -1604,12 +1641,15 @@ describe('FlTree 契约', () => {
     expect(wrapper.emitted('check')).toBeUndefined()
   })
 
-  it('默认联动模式下 `disabled` / `disableCheckbox` / `checkable=false` 边界符合阶段 9 约束', async () => {
+  it('默认联动模式下 key-based 禁用、禁用 checkbox 与隐藏 checkbox 边界符合阶段 9 约束', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: createCheckConductTreeData(),
         defaultExpandAll: true,
         checkable: true,
+        disabledKeys: ['disabled-branch'],
+        disabledCheckboxKeys: ['checkbox-disabled-node'],
+        hiddenCheckboxKeys: ['hidden-checkbox-bridge'],
         defaultCheckedKeys: ['root']
       }
     })
@@ -1630,8 +1670,8 @@ describe('FlTree 契约', () => {
     expect(findTreeItemByText(wrapper, 'Bridge Leaf 2').attributes('aria-checked')).toBe('true')
     expect(isItemChecked(wrapper, 'Branch A')).toBe(true)
     expect(isItemCheckboxDisabled(wrapper, 'Checkbox Disabled Node')).toBe(true)
-    expect(hasItemCheckbox(wrapper, 'Non Checkable Bridge')).toBe(false)
-    expect(findTreeItemByText(wrapper, 'Non Checkable Bridge').attributes('aria-checked')).toBe(
+    expect(hasItemCheckbox(wrapper, 'Hidden Checkbox Bridge')).toBe(false)
+    expect(findTreeItemByText(wrapper, 'Hidden Checkbox Bridge').attributes('aria-checked')).toBe(
       undefined
     )
   })
@@ -1641,7 +1681,8 @@ describe('FlTree 契约', () => {
       props: {
         data: createCheckConductTreeData(),
         defaultExpandAll: true,
-        checkable: true
+        checkable: true,
+        disabledKeys: ['disabled-branch']
       }
     })
 
@@ -1676,14 +1717,15 @@ describe('FlTree 契约', () => {
     expect(wrapper.emitted('update:checkedKeys')).toEqual([[['root', 'leaf']]])
   })
 
-  it('树级 `selectable=false` 与勾选能力可共存，节点级 `checkable=false` 会隐藏复选框并阻止自身勾选', async () => {
+  it('树级 `selectable=false` 与勾选能力可共存，hiddenCheckboxKeys 会隐藏复选框并阻止自身勾选', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
         selectable: false,
         checkable: true,
-        checkStrictly: true
+        checkStrictly: true,
+        hiddenCheckboxKeys: ['hidden-checkbox-node']
       }
     })
 
@@ -1693,11 +1735,11 @@ describe('FlTree 契约', () => {
 
     expect(findTreeItemByText(wrapper, 'Root').attributes('aria-selected')).toBeUndefined()
     expect(
-      findTreeItemByText(wrapper, 'Legacy Checkable False Node').attributes('aria-selected')
+      findTreeItemByText(wrapper, 'Hidden Checkbox Node').attributes('aria-selected')
     ).toBeUndefined()
-    expect(hasItemCheckbox(wrapper, 'Legacy Checkable False Node')).toBe(false)
+    expect(hasItemCheckbox(wrapper, 'Hidden Checkbox Node')).toBe(false)
     expect(
-      findTreeItemByText(wrapper, 'Legacy Checkable False Node').attributes('aria-checked')
+      findTreeItemByText(wrapper, 'Hidden Checkbox Node').attributes('aria-checked')
     ).toBeUndefined()
     expect(wrapper.emitted('update:selectedKeys')).toBeUndefined()
     expect(wrapper.emitted('select')).toBeUndefined()
@@ -2883,6 +2925,7 @@ describe('FlTree 契约', () => {
       props: {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
+        disabledKeys: ['disabled-node'],
         defaultSelectedKeys: ['active-node']
       }
     })
@@ -3021,6 +3064,7 @@ describe('FlTree 契约', () => {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
         defaultSelectedKeys: ['active-node'],
+        disabledKeys: ['disabled-node'],
         onNodeClick: () => selectedEventOrder.push('node-click'),
         'onUpdate:selectedKeys': () => selectedEventOrder.push('update:selectedKeys'),
         onSelect: () => selectedEventOrder.push('select')
@@ -3046,6 +3090,7 @@ describe('FlTree 契约', () => {
       props: {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
+        disabledKeys: ['disabled-node'],
         onNodeClick: () => disabledEventOrder.push('node-click'),
         'onUpdate:selectedKeys': () => disabledEventOrder.push('update:selectedKeys'),
         onSelect: () => disabledEventOrder.push('select')
@@ -3074,6 +3119,7 @@ describe('FlTree 契约', () => {
         defaultExpandAll: true,
         defaultSelectedKeys: ['active-node'],
         checkable: true,
+        disabledKeys: ['disabled-node'],
         onNodeClick: () => checkableEventOrder.push('node-click'),
         onSelect: () => checkableEventOrder.push('select'),
         'onUpdate:checkedKeys': () => checkableEventOrder.push('update:checkedKeys'),
@@ -3101,7 +3147,8 @@ describe('FlTree 契约', () => {
       props: {
         data: createSelectionBoundaryTreeData(),
         defaultExpandAll: true,
-        checkable: true
+        checkable: true,
+        disabledKeys: ['disabled-node']
       }
     })
 

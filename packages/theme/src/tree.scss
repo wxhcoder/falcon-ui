@@ -158,6 +158,7 @@
   }
 
   @include bem.e(switcher) {
+    position: relative;
     display: inline-flex;
     align-self: stretch;
     align-items: center;

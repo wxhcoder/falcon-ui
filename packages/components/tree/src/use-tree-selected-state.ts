@@ -27,7 +27,7 @@ interface SelectNodeOptions {
 }
 
 /**
- * 过滤非法 key，并跳过 disabled / selectable=false 的节点。
+ * 过滤非法 key，并跳过 disabledKeys / unselectableKeys 命中的节点。
  */
 const collectSelectableKeys = (keys: TreeKey[] | undefined, treeIndex: TreeIndex): TreeKey[] =>
   filterTreeSelectedKeys(keys, treeIndex.keyNodeMap).filter((key) => {
@@ -68,7 +68,7 @@ export const useTreeSelectedState = ({ props, treeIndex, emit }: UseTreeSelected
   /**
    * 统一归一化选中 key：
    * 1. 去重并过滤非法 key
-   * 2. 跳过 disabled / selectable=false 节点
+   * 2. 跳过 disabledKeys / unselectableKeys 命中的节点
    * 3. 单选模式只保留第一个合法 key，多选模式保留完整集合
    */
   const normalizeSelectedKeys = (keys: TreeKey[] | undefined): TreeKey[] => {

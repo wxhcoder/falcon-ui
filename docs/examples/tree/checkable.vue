@@ -34,16 +34,15 @@ const data: TreeData[] = [
         label: '仪表盘',
         children: [
           { key: 'dashboard-view', label: '查看' },
-          { key: 'dashboard-edit', label: '编辑', disableCheckbox: true }
+          { key: 'dashboard-edit', label: '编辑' },
+          { key: 'dashboard-publish', label: '发布' }
         ]
       },
       {
         key: 'system',
         label: '系统',
-        disabled: true,
         children: [{ key: 'system-audit', label: '审计' }]
-      },
-      { key: 'hidden-checkbox', label: '隐藏复选框', checkable: false }
+      }
     ]
   }
 ]
