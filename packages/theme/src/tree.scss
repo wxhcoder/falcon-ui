@@ -15,6 +15,7 @@
   --fl-tree-node-icon-color: var(--el-tree-expand-icon-color, var(--el-text-color-placeholder));
   --fl-tree-node-selected-bg-color: var(--el-color-primary-light-9);
   --fl-tree-node-selected-text-color: var(--el-color-primary);
+  --fl-tree-node-disabled-text-color: var(--el-disabled-text-color);
   --fl-tree-leaf-dot-color: var(--el-text-color-secondary);
   --fl-tree-line-color: var(--el-border-color-light, #dcdfe6);
   --fl-tree-line-width: 1px;
@@ -68,6 +69,11 @@
     &.is-filtered #{bem.selector('tree', 'item-title')} {
       color: var(--fl-tree-node-filtered-color);
       font-weight: 600;
+    }
+
+    &.is-disabled #{bem.selector('tree', 'item-icon')},
+    &.is-disabled #{bem.selector('tree', 'item-title')} {
+      color: var(--fl-tree-node-disabled-text-color);
     }
 
     &.is-draggable {
