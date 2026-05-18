@@ -108,53 +108,57 @@
         <template v-else>{{ node.label }}</template>
       </span>
     </div>
-    <div v-if="hasChildNodes && isExpandedNode" :class="childrenClassName" role="group">
-      <FlTreeNode
-        v-for="childNode in node.childNodes"
-        :key="childNode.key"
-        :node="childNode"
-        :get-node-id="getNodeId"
-        :register-node-element="registerNodeElement"
-        :unregister-node-element="unregisterNodeElement"
-        :on-node-content-click="onNodeContentClick"
-        :on-node-content-dblclick="onNodeContentDblclick"
-        :on-node-content-contextmenu="onNodeContentContextmenu"
-        :is-node-expanded="isNodeExpanded"
-        :is-node-checked="isNodeChecked"
-        :is-node-half-checked="isNodeHalfChecked"
-        :is-node-selected="isNodeSelected"
-        :is-node-focused="isNodeFocused"
-        :is-node-filtered="isNodeFiltered"
-        :is-node-loading="isNodeLoading"
-        :is-node-expandable="isNodeExpandable"
-        :is-node-draggable="isNodeDraggable"
-        :is-node-dragging="isNodeDragging"
-        :is-node-drop-target="isNodeDropTarget"
-        :is-node-drop-allowed="isNodeDropAllowed"
-        :get-node-drop-type="getNodeDropType"
-        :tree-checkable="treeCheckable"
-        :tree-selectable="treeSelectable"
-        :show-line="showLine"
-        :show-leaf-icon="showLeafIcon"
-        :switcher-icon="switcherIcon"
-        :switcher-loading-icon="switcherLoadingIcon"
-        :is-checkbox-disabled="isCheckboxDisabled"
-        :should-render-checkbox="shouldRenderCheckbox"
-        :toggle-node-checked="toggleNodeChecked"
-        :toggle-node-expansion="toggleNodeExpansion"
-        :handle-node-drag-start="handleNodeDragStart"
-        :handle-node-drag-enter="handleNodeDragEnter"
-        :handle-node-drag-over="handleNodeDragOver"
-        :handle-node-drag-leave="handleNodeDragLeave"
-        :handle-node-drop="handleNodeDrop"
-        :handle-node-drag-end="handleNodeDragEnd"
-        :resolved-class-names="resolvedClassNames"
-        :resolved-styles="resolvedStyles">
-        <template v-if="hasDefaultSlot" #default="slotProps">
-          <slot v-bind="slotProps" />
-        </template>
-      </FlTreeNode>
-    </div>
+    <Transition name="fl-tree-collapse">
+      <div v-if="hasChildNodes && isExpandedNode" :class="childrenClassName" role="group">
+        <div :class="childrenInnerClassName" role="presentation">
+          <FlTreeNode
+            v-for="childNode in node.childNodes"
+            :key="childNode.key"
+            :node="childNode"
+            :get-node-id="getNodeId"
+            :register-node-element="registerNodeElement"
+            :unregister-node-element="unregisterNodeElement"
+            :on-node-content-click="onNodeContentClick"
+            :on-node-content-dblclick="onNodeContentDblclick"
+            :on-node-content-contextmenu="onNodeContentContextmenu"
+            :is-node-expanded="isNodeExpanded"
+            :is-node-checked="isNodeChecked"
+            :is-node-half-checked="isNodeHalfChecked"
+            :is-node-selected="isNodeSelected"
+            :is-node-focused="isNodeFocused"
+            :is-node-filtered="isNodeFiltered"
+            :is-node-loading="isNodeLoading"
+            :is-node-expandable="isNodeExpandable"
+            :is-node-draggable="isNodeDraggable"
+            :is-node-dragging="isNodeDragging"
+            :is-node-drop-target="isNodeDropTarget"
+            :is-node-drop-allowed="isNodeDropAllowed"
+            :get-node-drop-type="getNodeDropType"
+            :tree-checkable="treeCheckable"
+            :tree-selectable="treeSelectable"
+            :show-line="showLine"
+            :show-leaf-icon="showLeafIcon"
+            :switcher-icon="switcherIcon"
+            :switcher-loading-icon="switcherLoadingIcon"
+            :is-checkbox-disabled="isCheckboxDisabled"
+            :should-render-checkbox="shouldRenderCheckbox"
+            :toggle-node-checked="toggleNodeChecked"
+            :toggle-node-expansion="toggleNodeExpansion"
+            :handle-node-drag-start="handleNodeDragStart"
+            :handle-node-drag-enter="handleNodeDragEnter"
+            :handle-node-drag-over="handleNodeDragOver"
+            :handle-node-drag-leave="handleNodeDragLeave"
+            :handle-node-drop="handleNodeDrop"
+            :handle-node-drag-end="handleNodeDragEnd"
+            :resolved-class-names="resolvedClassNames"
+            :resolved-styles="resolvedStyles">
+            <template v-if="hasDefaultSlot" #default="slotProps">
+              <slot v-bind="slotProps" />
+            </template>
+          </FlTreeNode>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -279,6 +283,7 @@ const switcherLeafLineClassName = ns.e('switcher-leaf-line')
 const switcherLeafIconClassName = ns.e('switcher-leaf-icon')
 const itemTitleClassName = ns.e('item-title')
 const childrenClassName = ns.e('children')
+const childrenInnerClassName = ns.e('children-inner')
 
 /**
  * 返回当前递归节点组件的 public instance。

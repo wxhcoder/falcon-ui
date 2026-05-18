@@ -33,6 +33,7 @@
 - [x] 阶段 19：质量门禁
 - [x] 阶段 20：节点交互状态契约修正
 - [x] 阶段 21：开发树节点手风琴展开模式
+- [x] 阶段 22：开发树节点展开 / 折叠动画
 
 ## 1. 对标基线与目标
 
@@ -147,6 +148,12 @@
   - 仅非叶子、可展开且非加载中节点生效
   - 双击复用既有展开状态、异步加载和展开事件链路
   - 不新增选择模式，不改变单击选择、switcher 点击和 checkbox 勾选职责
+- 展开 / 折叠默认具备视觉动画：
+  - 动画只影响子树显隐视觉，不改变展开状态、事件顺序、受控优先级或异步加载链路
+  - 动画通过 Vue 内置 `Transition` 输出 `fl-tree-collapse` 过渡 class
+  - 动画样式由 Falcon UI Tree 原生 SCSS 实现，不引用 Element Plus transition 组件或样式文件
+  - 展开后的子节点容器继续保留 `role="group"`，动画内部包裹层仅作为 presentation 结构
+  - 收起后子树仍按既有 `v-if` 逻辑卸载，折叠节点继续不参与滚动、键盘和节点注册
 
 ### 4.3 选择行为
 
@@ -1900,14 +1907,14 @@ interface TreeExpose {
 
 ### 28.4 验收测试范围
 
-| 编号 | 测试内容       | 关注点                                       | 预期结果                                  |
-| ---- | -------------- | -------------------------------------------- | ----------------------------------------- |
-| 1    | 非受控交互     | 同级节点依次展开                             | 后展开节点保持展开，原同级节点收起       |
-| 2    | 受控事件       | `expandedKeys` 受控时点击同级节点            | `update:expandedKeys` 输出归一化后的结果 |
-| 3    | `defaultExpandAll` | 初始化展开全部节点                         | 每个同级组只保留最后一个展开节点         |
-| 4    | `defaultExpandParent` | 默认展开子节点时祖先补齐                 | 祖先补齐结果仍受手风琴约束               |
-| 5    | `autoExpandParent` | 受控子节点 key 带动祖先展开               | 祖先补齐结果不绕过手风琴约束             |
-| 6    | 交互入口回归   | switcher、双击展开、键盘展开、异步展开       | 均复用同一展开状态归一化链路             |
+| 编号 | 测试内容              | 关注点                                 | 预期结果                                 |
+| ---- | --------------------- | -------------------------------------- | ---------------------------------------- |
+| 1    | 非受控交互            | 同级节点依次展开                       | 后展开节点保持展开，原同级节点收起       |
+| 2    | 受控事件              | `expandedKeys` 受控时点击同级节点      | `update:expandedKeys` 输出归一化后的结果 |
+| 3    | `defaultExpandAll`    | 初始化展开全部节点                     | 每个同级组只保留最后一个展开节点         |
+| 4    | `defaultExpandParent` | 默认展开子节点时祖先补齐               | 祖先补齐结果仍受手风琴约束               |
+| 5    | `autoExpandParent`    | 受控子节点 key 带动祖先展开            | 祖先补齐结果不绕过手风琴约束             |
+| 6    | 交互入口回归          | switcher、双击展开、键盘展开、异步展开 | 均复用同一展开状态归一化链路             |
 
 ### 28.5 当前固定契约
 
@@ -1940,3 +1947,64 @@ interface TreeExpose {
 ### 28.7 当前判定
 
 - 当前判定：阶段 21 已完成。
+
+## 29. 阶段 22 测试文档：树节点展开 / 折叠动画
+
+### 29.1 阶段目标
+
+阶段 22 为 `FlTree` 子树展开 / 折叠补齐默认视觉动画。该能力只增强节点显隐的视觉反馈，
+不新增公开 API，不改变展开状态模型、事件顺序、受控 / 非受控优先级、异步加载、键盘导航、
+滚动定位和拖拽链路。
+
+### 29.2 本阶段完成内容
+
+1. `tree-node.vue` 使用 Vue 内置 `Transition`，过渡名称固定为 `fl-tree-collapse`。
+2. 子树容器继续使用 `.fl-tree__children[role="group"]`，保持既有树语义。
+3. 新增 `.fl-tree__children-inner[role="presentation"]` 作为 CSS Grid 高度动画内部结构。
+4. `tree.scss` 使用原生 CSS 实现动画，不引用 Element Plus transition 组件或样式文件。
+5. 动画通过 `grid-template-rows`、`opacity` 和 `transform` 表现展开 / 折叠过程。
+6. 动画时长使用 `--el-transition-duration`，默认约 `0.3s`。
+7. `prefers-reduced-motion: reduce` 下禁用过渡和位移效果。
+
+### 29.3 本阶段不做的事情
+
+- 不新增 `motion`、`animation`、`transition`、`collapseDuration` 等公开 prop。
+- 不引入 `ElCollapseTransition`，不引入 `collapse-transition.scss`。
+- 不移除 Tree 里已有的 `ElIcon`、`ElCheckbox` 或 Element Plus 图标依赖。
+- 不改变 `node-expand`、`node-collapse`、`expand`、`update:expandedKeys` 的派发顺序。
+- 不改变子树收起后的卸载语义；折叠子树节点仍不可滚动、不可键盘访问、不可注册 DOM。
+
+### 29.4 验收测试范围
+
+| 编号 | 测试内容     | 关注点                           | 预期结果                                   |
+| ---- | ------------ | -------------------------------- | ------------------------------------------ |
+| 1    | 子树语义结构 | `role="group"` 是否保持          | 展开后仍存在 `.fl-tree__children` 分组容器 |
+| 2    | 动画内部结构 | CSS Grid 动画承载层              | 存在 `.fl-tree__children-inner`            |
+| 3    | 原生 CSS     | 是否自研动画样式                 | 存在 `fl-tree-collapse` 与 grid 行动画     |
+| 4    | 外部依赖边界 | Element Plus transition 是否误入 | 不包含 `ElCollapseTransition` 与样式引用   |
+| 5    | 可访问性偏好 | 减少动态效果设置                 | 存在 `prefers-reduced-motion` 兜底         |
+| 6    | 行为回归     | 展开、折叠和受控展开既有测试     | 原有 Tree 单测全部通过                     |
+
+### 29.5 当前固定契约
+
+- 展开 / 折叠动画默认启用，不提供公开开关。
+- 动画只作用于子树容器的视觉过渡，不作为状态事实来源。
+- `fl-tree-collapse` 是内部样式契约，不作为公开 API 承诺给业务侧控制。
+- 组件仍完全自研 Tree 结构，不基于 Element Plus Tree 或 Element Plus collapse transition。
+
+### 29.6 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 当前已执行命令：
+  - `pnpm test -- packages/components/tree/__test__/tree.test.ts`
+  - `pnpm build:lib:style`
+  - `pnpm lint`
+- 当前执行结果：
+  - 树组件单测：通过，`86 passed`
+  - 样式构建：通过
+  - ESLint：通过
+
+### 29.7 当前判定
+
+- 当前判定：阶段 22 已完成。

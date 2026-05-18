@@ -26,6 +26,8 @@
   --fl-tree-node-filtered-bg-color: var(--el-color-primary-light-9);
   --fl-tree-node-indent: 20px;
   --fl-tree-switcher-size: var(--fl-tree-node-indent);
+  --fl-tree-collapse-duration: var(--el-transition-duration, 0.3s);
+  --fl-tree-collapse-easing: var(--el-transition-function-ease-in-out-bezier, ease-in-out);
 
   &:focus {
     outline: none;
@@ -247,8 +249,52 @@
   }
 
   @include bem.e(children) {
+    display: grid;
+    grid-template-rows: 1fr;
+    overflow: hidden;
+  }
+
+  @include bem.e(children-inner) {
     display: flex;
     flex-direction: column;
+    min-height: 0;
+  }
+
+  .fl-tree-collapse-enter-active,
+  .fl-tree-collapse-leave-active {
+    transform-origin: top;
+    transition:
+      grid-template-rows var(--fl-tree-collapse-duration) var(--fl-tree-collapse-easing),
+      opacity var(--fl-tree-collapse-duration) var(--fl-tree-collapse-easing),
+      transform var(--fl-tree-collapse-duration) var(--fl-tree-collapse-easing);
+  }
+
+  .fl-tree-collapse-enter-from,
+  .fl-tree-collapse-leave-to {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  .fl-tree-collapse-enter-to,
+  .fl-tree-collapse-leave-from {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fl-tree-collapse-enter-active,
+    .fl-tree-collapse-leave-active {
+      transition: none;
+    }
+
+    .fl-tree-collapse-enter-from,
+    .fl-tree-collapse-leave-to,
+    .fl-tree-collapse-enter-to,
+    .fl-tree-collapse-leave-from {
+      transform: none;
+    }
   }
 
   &.is-show-line {

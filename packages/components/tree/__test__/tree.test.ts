@@ -520,6 +520,11 @@ describe('FlTree 契约', () => {
 
     expect(items.map((item) => item.attributes('aria-level'))).toEqual(['1', '2', '3'])
     expect(groups).toHaveLength(2)
+    expect(
+      groups.every((group) =>
+        group.element.firstElementChild?.classList.contains('fl-tree__children-inner')
+      )
+    ).toBe(true)
     expect(items.every((item) => item.find('.fl-tree__item-content').exists())).toBe(true)
     expect(items.every((item) => item.find('.fl-tree__item-icon').exists())).toBe(true)
     expect(items.every((item) => item.find('.fl-tree__item-title').exists())).toBe(true)
@@ -527,9 +532,14 @@ describe('FlTree 契约', () => {
 
   it('继承 Element Plus 视觉变量契约', async () => {
     const treeScss = readProjectFile('packages/theme/src/tree.scss')
+    const treeNodeSource = readProjectFile('packages/components/tree/src/tree-node.vue')
 
     expect(treeScss).toContain("@use 'element-plus/theme-chalk/src/checkbox.scss';")
     expect(treeScss).toContain("@use 'element-plus/theme-chalk/src/tree.scss';")
+    expect(treeScss).not.toContain('collapse-transition.scss')
+    expect(treeNodeSource).not.toContain('ElCollapseTransition')
+    expect(treeNodeSource).toContain('<Transition name="fl-tree-collapse">')
+    expect(treeNodeSource).toContain('childrenInnerClassName')
     expect(treeScss).toContain(
       '--fl-tree-node-content-height: var(--el-tree-node-content-height, 26px);'
     )
@@ -553,6 +563,12 @@ describe('FlTree 契约', () => {
     expect(treeScss).toContain('@include bem.e(indent-unit)')
     expect(treeScss).toContain('@include bem.e(switcher-leaf-line)')
     expect(treeScss).toContain('@include bem.e(item-checkbox)')
+    expect(treeScss).toContain('@include bem.e(children-inner)')
+    expect(treeScss).toContain('--fl-tree-collapse-duration: var(')
+    expect(treeScss).toContain('.fl-tree-collapse-enter-active')
+    expect(treeScss).toContain('grid-template-rows: 0fr;')
+    expect(treeScss).toContain('grid-template-rows: 1fr;')
+    expect(treeScss).toContain('@media (prefers-reduced-motion: reduce)')
     expect(treeScss).toContain('&.is-loading')
     expect(treeScss).toContain('animation: rotating 2s linear infinite;')
     expect(treeScss).toContain('@keyframes rotating')
