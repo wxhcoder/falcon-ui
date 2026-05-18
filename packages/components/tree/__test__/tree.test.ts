@@ -256,6 +256,54 @@ describe('FlTree 契约', () => {
   ]
 
   /**
+   * 提供覆盖根层级与子层级同级展开互斥的树数据。
+   */
+  const createAccordionTreeData = () => [
+    {
+      key: 'root-a',
+      label: 'Root A',
+      children: [
+        {
+          key: 'branch-a1',
+          label: 'Branch A1',
+          children: [
+            {
+              key: 'leaf-a1',
+              label: 'Leaf A1'
+            }
+          ]
+        },
+        {
+          key: 'branch-a2',
+          label: 'Branch A2',
+          children: [
+            {
+              key: 'leaf-a2',
+              label: 'Leaf A2'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      key: 'root-b',
+      label: 'Root B',
+      children: [
+        {
+          key: 'branch-b1',
+          label: 'Branch B1',
+          children: [
+            {
+              key: 'leaf-b1',
+              label: 'Leaf B1'
+            }
+          ]
+        }
+      ]
+    }
+  ]
+
+  /**
    * 提供根节点带叶子节点的最小展开树。
    */
   const createSimpleTreeData = () => [
@@ -1043,6 +1091,114 @@ describe('FlTree 契约', () => {
     expect(wrapper.text()).not.toContain('Branch')
     expect(wrapper.text()).not.toContain('Leaf')
     expect(wrapper.findComponent(CaretRight).exists()).toBe(true)
+  })
+
+  it('accordion constrains defaultExpandAll to one expanded node per sibling group', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAccordionTreeData(),
+        defaultExpandAll: true,
+        accordion: true
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root A').attributes('aria-expanded')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Root B').attributes('aria-expanded')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Branch B1').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.text()).not.toContain('Branch A1')
+    expect(wrapper.text()).toContain('Leaf B1')
+  })
+
+  it('accordion constrains defaultExpandParent inherited ancestors', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAccordionTreeData(),
+        defaultExpandedKeys: ['leaf-a1', 'leaf-a2'],
+        accordion: true
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root A').attributes('aria-expanded')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Branch A1').attributes('aria-expanded')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Branch A2').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.text()).not.toContain('Leaf A1')
+    expect(wrapper.text()).toContain('Leaf A2')
+  })
+
+  it('accordion constrains uncontrolled switcher expansion by parentKey siblings', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAccordionTreeData(),
+        accordion: true
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Root A').trigger('click')
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Branch A1').trigger('click')
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Branch A2').trigger('click')
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Branch A1').attributes('aria-expanded')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Branch A2').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.text()).not.toContain('Leaf A1')
+    expect(wrapper.text()).toContain('Leaf A2')
+
+    await getSwitcherButton(wrapper, 'Root B').trigger('click')
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root A').attributes('aria-expanded')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Root B').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.text()).not.toContain('Branch A2')
+    expect(wrapper.text()).toContain('Branch B1')
+  })
+
+  it('accordion constrains controlled update requests without mutating the rendered prop state', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAccordionTreeData(),
+        expandedKeys: ['root-a'],
+        accordion: true
+      }
+    })
+
+    await nextTick()
+    await getSwitcherButton(wrapper, 'Root B').trigger('click')
+    await nextTick()
+
+    expect(wrapper.emitted('update:expandedKeys')).toEqual([[['root-b']]])
+    expect(wrapper.emitted('expand')?.[0]?.[0] as TreeExpandPayload).toMatchObject({
+      expanded: true,
+      key: 'root-b',
+      expandedKeys: ['root-b']
+    })
+    expect(findTreeItemByText(wrapper, 'Root A').attributes('aria-expanded')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Root B').attributes('aria-expanded')).toBe('false')
+  })
+
+  it('accordion keeps autoExpandParent ancestor expansion within one root sibling', async () => {
+    const wrapper = mount(FlTree, {
+      props: {
+        data: createAccordionTreeData(),
+        expandedKeys: ['leaf-a1', 'leaf-b1'],
+        autoExpandParent: true,
+        accordion: true
+      }
+    })
+
+    await nextTick()
+
+    expect(findTreeItemByText(wrapper, 'Root A').attributes('aria-expanded')).toBe('false')
+    expect(findTreeItemByText(wrapper, 'Root B').attributes('aria-expanded')).toBe('true')
+    expect(findTreeItemByText(wrapper, 'Branch B1').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.text()).not.toContain('Branch A1')
+    expect(wrapper.text()).toContain('Leaf B1')
   })
 
   it('支持通过 `defaultSelectedKeys` 初始化单选状态，并过滤非法与不可选节点', async () => {

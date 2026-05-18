@@ -31,6 +31,8 @@
 - [x] 阶段 17：开发树滚动控制能力
 - [x] 阶段 18：开发文档示例与单元测试补全
 - [x] 阶段 19：质量门禁
+- [x] 阶段 20：节点交互状态契约修正
+- [x] 阶段 21：开发树节点手风琴展开模式
 
 ## 1. 对标基线与目标
 
@@ -130,8 +132,17 @@
   - `expandedKeys`
   - `autoExpandParent`
   - `defaultExpandParent`
+  - `accordion`
 - 受控模式下，组件内部不得持久化最终展开结果；最终状态以外部传入为准。
 - 非受控模式下，组件内部维护展开状态，并在变更时同步发出 `update:expandedKeys`。
+- `accordion = true` 时启用手风琴展开模式，同一层级、同一父节点下最多只允许一个
+  可展开节点处于展开状态。
+- `parentKey` 不是公开属性，仅作为内部 `key -> parentKey` 标准化索引，用于精确定义同级
+  节点；两个节点的 `parentKey` 相同，即视为同级。
+- 手风琴约束优先于 `defaultExpandedKeys`、`defaultExpandAll`、受控 `expandedKeys` 和用户
+  交互结果；同一同级组出现多个展开 key 时，保留输入顺序中最后出现的 key。
+- `autoExpandParent` 与 `defaultExpandParent` 是既有展开属性，只负责祖先补齐，不得绕过
+  `accordion` 的同级唯一展开约束。
 - 支持节点内容区双击展开 / 收起：
   - 仅非叶子、可展开且非加载中节点生效
   - 双击复用既有展开状态、异步加载和展开事件链路
@@ -411,6 +422,7 @@ interface TreeSelectEvent {
   - `expandedKeys`
   - `autoExpandParent`
   - `defaultExpandParent`
+  - `accordion`
 - 选择相关
   - `selectable`
   - `multiple`
@@ -1861,3 +1873,70 @@ interface TreeExpose {
 ### 27.5 当前判定
 
 - 当前判定：阶段 20 已完成。
+
+## 28. 阶段 21 测试文档：树节点手风琴展开模式
+
+### 28.1 阶段目标
+
+阶段 21 新增 `accordion` 展开模式开关，用于支持同一层级、同一父节点下只能展开一个
+可展开节点的业务场景。该能力基于内部 `parentKey` 索引判断同级关系，不新增公开
+`parentKey` 属性。
+
+### 28.2 本阶段完成内容
+
+1. 新增公开 prop：`accordion`，默认值为 `false`。
+2. `accordion = true` 时，展开任一节点会收起同一 `parentKey` 分组下其他已展开节点。
+3. `defaultExpandedKeys`、`defaultExpandAll`、受控 `expandedKeys` 和用户交互产生的展开 key
+   都需要经过手风琴归一化。
+4. 同一同级组出现多个展开 key 时，保留输入顺序中最后出现的 key。
+5. `autoExpandParent` 与 `defaultExpandParent` 仍作为既有祖先补齐属性，不绕过手风琴约束。
+6. `docs/examples/tree/accordion.vue` 增加独立“手风琴展开”示例，并在 Tree 文档页单独接入。
+
+### 28.3 本阶段不做的事情
+
+- 不新增公开 `parentKey`、节点路径或层级 prop。
+- 不改变选择、勾选、拖拽、滚动和节点渲染契约。
+- 不为被手风琴模式自动收起的同级节点额外派发独立 `node-collapse` 事件。
+
+### 28.4 验收测试范围
+
+| 编号 | 测试内容       | 关注点                                       | 预期结果                                  |
+| ---- | -------------- | -------------------------------------------- | ----------------------------------------- |
+| 1    | 非受控交互     | 同级节点依次展开                             | 后展开节点保持展开，原同级节点收起       |
+| 2    | 受控事件       | `expandedKeys` 受控时点击同级节点            | `update:expandedKeys` 输出归一化后的结果 |
+| 3    | `defaultExpandAll` | 初始化展开全部节点                         | 每个同级组只保留最后一个展开节点         |
+| 4    | `defaultExpandParent` | 默认展开子节点时祖先补齐                 | 祖先补齐结果仍受手风琴约束               |
+| 5    | `autoExpandParent` | 受控子节点 key 带动祖先展开               | 祖先补齐结果不绕过手风琴约束             |
+| 6    | 交互入口回归   | switcher、双击展开、键盘展开、异步展开       | 均复用同一展开状态归一化链路             |
+
+### 28.5 当前固定契约
+
+- `accordion` 为树级 boolean prop，默认 `false`。
+- 同级关系由内部 `parentKeyMap` 判断；根节点的 `parentKey` 统一视为 `null`。
+- `accordion` 只约束展开状态，不影响选择、勾选、拖拽、滚动和自定义渲染。
+- 受控模式下组件仍不持久化最终展开结果，只通过 `update:expandedKeys` 请求外部同步归一化后
+  的展开 key 集合。
+
+### 28.6 当前测试结果
+
+- 自动化测试文件：
+  - `packages/components/tree/__test__/tree.test.ts`
+- 当前已执行命令：
+  - `pnpm exec vitest run packages/components/tree/__test__/tree.test.ts`
+  - `pnpm exec eslint packages/components/tree/src/tree.ts packages/components/tree/src/use-tree-expanded-state.ts packages/components/tree/__test__/tree.test.ts scripts/docs/generate-api-meta.mjs --max-warnings=0`
+  - `pnpm docs:api`
+  - `pnpm exec vue-tsc -p tsconfig.build.json --noEmit`
+  - `pnpm exec eslint docs/examples/tree/expand.vue docs/examples/tree/accordion.vue --max-warnings=0`
+  - `pnpm docs:build`
+- 当前执行结果：
+  - 树组件单测：通过，`86 passed`
+  - 目标 ESLint：通过
+  - `docs:api`：通过，已生成 `fl-tree.json`
+  - `vue-tsc`：通过
+  - 文档示例 ESLint：通过
+  - `docs:build`：通过
+  - `docs:build` 仍存在既有 `dialog.vue` dynamic import warning、chunk size warning 和 Sass legacy JS API warning，本阶段未引入构建失败
+
+### 28.7 当前判定
+
+- 当前判定：阶段 21 已完成。

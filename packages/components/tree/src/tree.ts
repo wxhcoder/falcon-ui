@@ -147,6 +147,10 @@ export const treeProps = {
     type: Boolean,
     default: true
   },
+  accordion: {
+    type: Boolean,
+    default: false
+  },
   defaultSelectedKeys: {
     type: Array as PropType<TreeKey[] | undefined>,
     default: undefined
@@ -806,6 +810,21 @@ export const filterTreeExpandedKeys = (
   return nextExpandedKeys
 }
 
+export const normalizeAccordionExpandedKeys = (
+  expandedKeys: TreeKey[],
+  parentKeyMap: Map<TreeKey, TreeKey | null>
+): TreeKey[] => {
+  const lastSiblingExpandedKeyMap = new Map<TreeKey | null, TreeKey>()
+
+  for (const key of expandedKeys) {
+    lastSiblingExpandedKeyMap.set(parentKeyMap.get(key) ?? null, key)
+  }
+
+  return expandedKeys.filter(
+    (key) => lastSiblingExpandedKeyMap.get(parentKeyMap.get(key) ?? null) === key
+  )
+}
+
 /**
  * 过滤无效、重复或已从树结构中移除的选中键。
  */
@@ -954,22 +973,48 @@ export const collectAncestorExpandedKeys = (
 export const createEffectiveExpandedKeySet = ({
   sourceExpandedKeys,
   parentKeyMap,
-  includeAncestorKeys
+  includeAncestorKeys,
+  accordion = false
 }: {
   sourceExpandedKeys: TreeKey[]
   parentKeyMap: Map<TreeKey, TreeKey | null>
   includeAncestorKeys: boolean
+  accordion?: boolean
 }): Set<TreeKey> => {
-  const effectiveExpandedKeys = new Set<TreeKey>(sourceExpandedKeys)
+  if (accordion) {
+    const orderedExpandedKeys: TreeKey[] = []
+    const visitedKeys = new Set<TreeKey>()
+    const addExpandedKey = (key: TreeKey) => {
+      if (!visitedKeys.has(key)) {
+        visitedKeys.add(key)
+        orderedExpandedKeys.push(key)
+      }
+    }
 
-  if (!includeAncestorKeys) {
-    return effectiveExpandedKeys
+    for (const key of sourceExpandedKeys) {
+      if (includeAncestorKeys) {
+        let parentKey = parentKeyMap.get(key) ?? null
+
+        while (parentKey !== null) {
+          addExpandedKey(parentKey)
+          parentKey = parentKeyMap.get(parentKey) ?? null
+        }
+      }
+
+      addExpandedKey(key)
+    }
+
+    return new Set(normalizeAccordionExpandedKeys(orderedExpandedKeys, parentKeyMap))
   }
 
-  const ancestorKeys = collectAncestorExpandedKeys(sourceExpandedKeys, parentKeyMap)
+  const effectiveExpandedKeys = new Set<TreeKey>(sourceExpandedKeys)
 
-  for (const key of ancestorKeys) {
-    effectiveExpandedKeys.add(key)
+  if (includeAncestorKeys) {
+    const ancestorKeys = collectAncestorExpandedKeys(sourceExpandedKeys, parentKeyMap)
+
+    for (const key of ancestorKeys) {
+      effectiveExpandedKeys.add(key)
+    }
   }
 
   return effectiveExpandedKeys

@@ -5,6 +5,7 @@ import {
   createEffectiveExpandedKeySet,
   createTreeEventNode,
   filterTreeExpandedKeys,
+  normalizeAccordionExpandedKeys,
   pruneTreeKeySet,
   type TreeExpandPayload,
   type TreeIndex,
@@ -64,16 +65,27 @@ const toggleExpandedKey = (expandedKeys: TreeKey[], nodeKey: TreeKey): TreeKey[]
   return [...expandedKeys, nodeKey]
 }
 
+const normalizeSourceExpandedKeys = (
+  expandedKeys: TreeKey[],
+  props: TreeProps,
+  treeIndex: TreeIndex
+) =>
+  props.accordion ? normalizeAccordionExpandedKeys(expandedKeys, treeIndex.parentKeyMap) : expandedKeys
+
 /**
  * 构建非受控模式的初始化源展开键集合。
  */
 const createInitialSourceExpandedKeys = (props: TreeProps, treeIndex: TreeIndex): TreeKey[] => {
+  let initialExpandedKeys: TreeKey[]
+
   if (props.defaultExpandedKeys !== undefined) {
-    return filterTreeExpandedKeys(props.defaultExpandedKeys, treeIndex.keyNodeMap)
+    initialExpandedKeys = filterTreeExpandedKeys(props.defaultExpandedKeys, treeIndex.keyNodeMap)
+    return normalizeSourceExpandedKeys(initialExpandedKeys, props, treeIndex)
   }
 
   if (props.defaultExpandAll) {
-    return collectExpandableTreeKeys(treeIndex.nodes)
+    initialExpandedKeys = collectExpandableTreeKeys(treeIndex.nodes)
+    return normalizeSourceExpandedKeys(initialExpandedKeys, props, treeIndex)
   }
 
   return []
@@ -109,18 +121,51 @@ const createInitialInheritedExpandedKeySet = (
 const createUncontrolledEffectiveExpandedKeySet = ({
   sourceExpandedKeys,
   inheritedExpandedKeySet,
-  collapsedInheritedKeySet
+  collapsedInheritedKeySet,
+  parentKeyMap,
+  accordion
 }: {
   sourceExpandedKeys: TreeKey[]
   inheritedExpandedKeySet: Set<TreeKey>
   collapsedInheritedKeySet: Set<TreeKey>
+  parentKeyMap: Map<TreeKey, TreeKey | null>
+  accordion: boolean
 }): Set<TreeKey> => {
+  const inheritedExpandedKeys = [...inheritedExpandedKeySet].filter(
+    (key) => !collapsedInheritedKeySet.has(key)
+  )
+
+  if (accordion) {
+    const orderedExpandedKeys: TreeKey[] = []
+    const visitedKeys = new Set<TreeKey>()
+    const addExpandedKey = (key: TreeKey) => {
+      if (!visitedKeys.has(key)) {
+        visitedKeys.add(key)
+        orderedExpandedKeys.push(key)
+      }
+    }
+
+    for (const key of sourceExpandedKeys) {
+      let parentKey = parentKeyMap.get(key) ?? null
+
+      while (parentKey !== null) {
+        if (inheritedExpandedKeySet.has(parentKey) && !collapsedInheritedKeySet.has(parentKey)) {
+          addExpandedKey(parentKey)
+        }
+
+        parentKey = parentKeyMap.get(parentKey) ?? null
+      }
+
+      addExpandedKey(key)
+    }
+
+    return new Set(normalizeAccordionExpandedKeys(orderedExpandedKeys, parentKeyMap))
+  }
+
   const effectiveExpandedKeys = new Set<TreeKey>(sourceExpandedKeys)
 
-  for (const key of inheritedExpandedKeySet) {
-    if (!collapsedInheritedKeySet.has(key)) {
-      effectiveExpandedKeys.add(key)
-    }
+  for (const key of inheritedExpandedKeys) {
+    effectiveExpandedKeys.add(key)
   }
 
   return effectiveExpandedKeys
@@ -154,7 +199,11 @@ export const useTreeExpandedState = ({
    * 受控模式下直接基于外部 prop 过滤源展开键。
    */
   const controlledSourceExpandedKeys = computed(() =>
-    filterTreeExpandedKeys(props.expandedKeys, treeIndex.value.keyNodeMap)
+    normalizeSourceExpandedKeys(
+      filterTreeExpandedKeys(props.expandedKeys, treeIndex.value.keyNodeMap),
+      props,
+      treeIndex.value
+    )
   )
 
   /**
@@ -181,9 +230,10 @@ export const useTreeExpandedState = ({
       return
     }
 
-    uncontrolledSourceExpandedKeys.value = filterTreeExpandedKeys(
-      uncontrolledSourceExpandedKeys.value,
-      treeIndex.value.keyNodeMap
+    uncontrolledSourceExpandedKeys.value = normalizeSourceExpandedKeys(
+      filterTreeExpandedKeys(uncontrolledSourceExpandedKeys.value, treeIndex.value.keyNodeMap),
+      props,
+      treeIndex.value
     )
     inheritedExpandedKeySet.value = pruneTreeKeySet(
       inheritedExpandedKeySet.value,
@@ -202,7 +252,8 @@ export const useTreeExpandedState = ({
     createEffectiveExpandedKeySet({
       sourceExpandedKeys: controlledSourceExpandedKeys.value,
       parentKeyMap: treeIndex.value.parentKeyMap,
-      includeAncestorKeys: Boolean(props.autoExpandParent)
+      includeAncestorKeys: Boolean(props.autoExpandParent),
+      accordion: Boolean(props.accordion)
     })
 
   /**
@@ -212,7 +263,9 @@ export const useTreeExpandedState = ({
     createUncontrolledEffectiveExpandedKeySet({
       sourceExpandedKeys: uncontrolledSourceExpandedKeys.value,
       inheritedExpandedKeySet: inheritedExpandedKeySet.value,
-      collapsedInheritedKeySet: collapsedInheritedKeySet.value
+      collapsedInheritedKeySet: collapsedInheritedKeySet.value,
+      parentKeyMap: treeIndex.value.parentKeyMap,
+      accordion: Boolean(props.accordion)
     })
 
   /**
@@ -293,11 +346,16 @@ export const useTreeExpandedState = ({
     }
 
     if (isControlled.value) {
-      const nextSourceExpandedKeys = toggleExpandedKey(controlledSourceExpandedKeys.value, node.key)
+      const nextSourceExpandedKeys = normalizeSourceExpandedKeys(
+        toggleExpandedKey(controlledSourceExpandedKeys.value, node.key),
+        props,
+        treeIndex.value
+      )
       const nextEffectiveExpandedKeySet = createEffectiveExpandedKeySet({
         sourceExpandedKeys: nextSourceExpandedKeys,
         parentKeyMap: treeIndex.value.parentKeyMap,
-        includeAncestorKeys: Boolean(props.autoExpandParent)
+        includeAncestorKeys: Boolean(props.autoExpandParent),
+        accordion: Boolean(props.accordion)
       })
 
       emitExpandedStateChange({
@@ -326,13 +384,16 @@ export const useTreeExpandedState = ({
       nextSourceExpandedKeys = toggleExpandedKey(uncontrolledSourceExpandedKeys.value, node.key)
     }
 
+    nextSourceExpandedKeys = normalizeSourceExpandedKeys(nextSourceExpandedKeys, props, treeIndex.value)
     uncontrolledSourceExpandedKeys.value = nextSourceExpandedKeys
     collapsedInheritedKeySet.value = nextCollapsedInheritedKeySet
 
     const nextEffectiveExpandedKeySet = createUncontrolledEffectiveExpandedKeySet({
       sourceExpandedKeys: nextSourceExpandedKeys,
       inheritedExpandedKeySet: inheritedExpandedKeySet.value,
-      collapsedInheritedKeySet: nextCollapsedInheritedKeySet
+      collapsedInheritedKeySet: nextCollapsedInheritedKeySet,
+      parentKeyMap: treeIndex.value.parentKeyMap,
+      accordion: Boolean(props.accordion)
     })
 
     emitExpandedStateChange({
