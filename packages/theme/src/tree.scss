@@ -50,6 +50,7 @@
     padding: 0 8px;
     border-radius: var(--fl-radius-sm);
     cursor: pointer;
+    user-select: none;
     transition: background-color var(--el-transition-duration);
 
     &.is-selected {

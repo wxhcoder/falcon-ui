@@ -573,6 +573,7 @@ describe('FlTree 契约', () => {
     expect(treeScss).toContain('animation: rotating 2s linear infinite;')
     expect(treeScss).toContain('@keyframes rotating')
     expect(treeScss).toContain('cursor: pointer;')
+    expect(treeScss).toContain('user-select: none;')
     expect(treeScss).toContain('align-items: stretch;')
     expect(treeScss).toContain('align-self: stretch;')
     expect(treeScss).toContain('top: 50%;')
