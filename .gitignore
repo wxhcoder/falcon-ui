@@ -21,3 +21,4 @@ logs/
 .husky/_/
 docs/.vitepress/cache/
 .codex-chrome/
+.codex/*
