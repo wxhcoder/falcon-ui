@@ -1,5 +1,3 @@
-import type { CSSProperties } from 'vue'
-
 /**
  * 树节点主键仅允许字符串或数字，避免首版引入额外的键值归一成本。
  */
@@ -50,36 +48,7 @@ export type TreeSemanticRecord<T> = Partial<Record<TreeSemanticDOM, T>>
 /**
  * 支持字符串、数组和对象三种 Vue class 绑定形式。
  */
-export type TreeClassValue = string | string[] | Record<string, boolean> | undefined
-
-/**
- * 语义化样式工厂函数接收当前组件公开 props 快照。
- */
-export interface TreeSemanticInfo<Props = unknown> {
-  props: Props
-}
-
-/**
- * 语义化配置回调由组件主动调用，实际传入的 props 由组件保证。
- * 使用双变参数让导出的 TreeProps 专用回调能兼容 Vue SFC 生成的默认泛型 prop。
- */
-type TreeSemanticResolver<T, Props = unknown> = {
-  bivarianceHack(info: TreeSemanticInfo<Props>): TreeSemanticRecord<T>
-}['bivarianceHack']
-
-/**
- * `classNames` 支持对象形式和工厂函数形式。
- */
-export type TreeClassNames<Props = unknown> =
-  | TreeSemanticRecord<TreeClassValue>
-  | TreeSemanticResolver<TreeClassValue, Props>
-
-/**
- * `styles` 与 `classNames` 形式一致，但值类型为内联样式对象。
- */
-export type TreeStyles<Props = unknown> =
-  | TreeSemanticRecord<CSSProperties>
-  | TreeSemanticResolver<CSSProperties, Props>
+export type TreeClassValue = string | string[] | Record<string, boolean>
 
 /**
  * 标准化节点是内部递归渲染骨架使用的统一结构。
@@ -94,7 +63,7 @@ export interface TreeNodeModel {
   checkboxDisabled: boolean
   checkboxVisible: boolean
   isLeaf: boolean
-  className: TreeClassValue
+  className?: TreeClassValue
   isLastSibling: boolean
   lineTrackEnds: boolean[]
   parent: TreeNodeModel | null
@@ -116,7 +85,6 @@ export interface TreeNode {
   isLeaf: boolean
   parent: TreeNode | null
   childNodes: TreeNode[]
-  expanded?: boolean
 }
 
 /**

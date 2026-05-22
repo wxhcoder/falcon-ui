@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { TreeData, TreeExpandPayload, TreeKey } from '@falcon-ui/components'
+import type { TreeData, TreeExpandEvent, TreeKey } from '@falcon-ui/components'
 
 const data: TreeData[] = [
   {
@@ -57,7 +57,7 @@ const expandedKeys = ref<TreeKey[]>(['workspace'])
 const autoExpandParent = ref(true)
 const latestExpand = ref('')
 
-const handleExpand = (payload: TreeExpandPayload) => {
+const handleExpand = (payload: TreeExpandEvent) => {
   latestExpand.value = `${String(payload.key)} -> ${payload.expanded ? '展开' : '收起'}`
 }
 </script>

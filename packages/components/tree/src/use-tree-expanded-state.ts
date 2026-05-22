@@ -7,10 +7,10 @@ import {
   filterTreeExpandedKeys,
   normalizeAccordionExpandedKeys,
   pruneTreeKeySet,
-  type TreeExpandPayload,
+  type TreeExpandEvent,
+  type TreeExpandedNode,
   type TreeIndex,
   type TreeKey,
-  type TreeNode,
   type TreeNodeInstance,
   type TreeNodeModel,
   type TreeProps
@@ -31,17 +31,17 @@ interface UseTreeExpandedStateOptions {
  */
 export interface TreeExpandedStateEmit {
   (event: 'update:expandedKeys', value: TreeKey[]): void
-  (event: 'expand', payload: TreeExpandPayload): void
+  (event: 'expand', eventPayload: TreeExpandEvent): void
   (
     event: 'node-expand',
     data: TreeNodeModel['data'],
-    node: TreeNode,
+    node: TreeExpandedNode,
     instance: TreeNodeInstance
   ): void
   (
     event: 'node-collapse',
     data: TreeNodeModel['data'],
-    node: TreeNode,
+    node: TreeExpandedNode,
     instance: TreeNodeInstance
   ): void
 }
@@ -70,7 +70,9 @@ const normalizeSourceExpandedKeys = (
   props: TreeProps,
   treeIndex: TreeIndex
 ) =>
-  props.accordion ? normalizeAccordionExpandedKeys(expandedKeys, treeIndex.parentKeyMap) : expandedKeys
+  props.accordion
+    ? normalizeAccordionExpandedKeys(expandedKeys, treeIndex.parentKeyMap)
+    : expandedKeys
 
 /**
  * 构建非受控模式的初始化源展开键集合。
@@ -384,7 +386,11 @@ export const useTreeExpandedState = ({
       nextSourceExpandedKeys = toggleExpandedKey(uncontrolledSourceExpandedKeys.value, node.key)
     }
 
-    nextSourceExpandedKeys = normalizeSourceExpandedKeys(nextSourceExpandedKeys, props, treeIndex.value)
+    nextSourceExpandedKeys = normalizeSourceExpandedKeys(
+      nextSourceExpandedKeys,
+      props,
+      treeIndex.value
+    )
     uncontrolledSourceExpandedKeys.value = nextSourceExpandedKeys
     collapsedInheritedKeySet.value = nextCollapsedInheritedKeySet
 

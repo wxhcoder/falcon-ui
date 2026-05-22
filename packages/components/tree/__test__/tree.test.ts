@@ -10,13 +10,15 @@ import FlTree, {
   FlTree as FlTreeFromTreePackage,
   type TreeCheckEvent,
   type TreeCheckedKeys,
+  type TreeClassNames,
   type TreeData,
   type TreeFilterTreeNode,
   type TreeAllowDrag,
   type TreeAllowDrop,
   type TreeAllowDropType,
   type TreeEmits,
-  type TreeExpandPayload,
+  type TreeExpandEvent,
+  type TreeExpandedNode,
   type TreeExpose,
   type TreeKey,
   type TreeInteractionEvent,
@@ -37,11 +39,13 @@ import FlTree, {
   type TreeSelectEvent,
   type TreeShowLine,
   type TreeShowLineOptions,
+  type TreeStyles,
   type TreeSwitcherLoadingIcon,
   type TreeSwitcherIconMode
 } from '@falcon-ui/components/tree'
 import { FlTree as FlTreeFromComponents } from '@falcon-ui/components'
 import FalconUI, { install as installFalconUI } from '@falcon-ui/falcon-ui'
+import { normalizeTreeNode } from '../src/tree'
 
 enableAutoUnmount(afterEach)
 
@@ -505,6 +509,17 @@ describe('FlTree 契约', () => {
     expect(items[0]?.classes()).toContain('fl-tree__item')
   })
 
+  it('只在标准化节点存在 class 时保留 className 字段', () => {
+    const nodeWithoutClass = normalizeTreeNode({ key: 'without-class', label: 'Without Class' }, 1)
+    const nodeWithClass = normalizeTreeNode(
+      { key: 'with-class', label: 'With Class', class: 'is-highlighted' },
+      1
+    )
+
+    expect(nodeWithoutClass).not.toHaveProperty('className')
+    expect(nodeWithClass).toHaveProperty('className', 'is-highlighted')
+  })
+
   it('保持递归 TreeNode 骨架在多层级下可见', async () => {
     const wrapper = mount(FlTree, {
       props: {
@@ -894,15 +909,29 @@ describe('FlTree 契约', () => {
 
     const treePackageSource = readProjectFile('packages/components/package.json')
     const treeIndexSource = readProjectFile('packages/components/tree/index.ts')
+    const treeSource = readProjectFile('packages/components/tree/src/tree.ts')
+    const treeTypesSource = readProjectFile('packages/components/tree/src/tree-types.ts')
     const componentsIndexSource = readProjectFile('packages/components/index.ts')
     const globalDts = readProjectFile('packages/falcon-ui/global.d.ts')
     const themeIndex = readProjectFile('packages/theme/index.scss')
 
     expect(treePackageSource).toContain('"./tree": "./tree/index.ts"')
+    expect(treeSource).not.toMatch(/PropType<[^>]*undefined/)
+    expect(treeSource).not.toContain('default: undefined')
+    expect(treeSource).not.toContain('TreeExpandPayload')
+    expect(treeTypesSource).toContain('className?: TreeClassValue')
+    expect(treeTypesSource).not.toContain('className: TreeClassValue | undefined')
+    expect(treeTypesSource).not.toContain('Props = unknown')
+    expect(treeTypesSource).not.toContain('TreeSemanticInfo')
+    expect(treeTypesSource).not.toContain('TreeSemanticResolver')
+    expect(treeTypesSource).not.toContain('TreeClassNames<')
+    expect(treeTypesSource).not.toContain('TreeStyles<')
     expect(treeIndexSource).toContain('TreeEmits')
     expect(treeIndexSource).toContain('TreeCheckArgs')
     expect(treeIndexSource).toContain('TreeCheckEvent')
-    expect(treeIndexSource).toContain('TreeExpandPayload')
+    expect(treeIndexSource).toContain('TreeExpandEvent')
+    expect(treeIndexSource).toContain('TreeExpandedNode')
+    expect(treeIndexSource).not.toContain('TreeExpandPayload')
     expect(treeIndexSource).toContain('TreeExpose')
     expect(treeIndexSource).toContain('TreeInteractionEvent')
     expect(treeIndexSource).toContain('TreeLoadArgs')
@@ -932,7 +961,9 @@ describe('FlTree 契约', () => {
     expect(componentsIndexSource).toContain('TreeEmits')
     expect(componentsIndexSource).toContain('TreeCheckArgs')
     expect(componentsIndexSource).toContain('TreeCheckEvent')
-    expect(componentsIndexSource).toContain('TreeExpandPayload')
+    expect(componentsIndexSource).toContain('TreeExpandEvent')
+    expect(componentsIndexSource).toContain('TreeExpandedNode')
+    expect(componentsIndexSource).not.toContain('TreeExpandPayload')
     expect(componentsIndexSource).toContain('TreeExpose')
     expect(componentsIndexSource).toContain('TreeInteractionEvent')
     expect(componentsIndexSource).toContain('TreeLoadArgs')
@@ -966,7 +997,7 @@ describe('FlTree 契约', () => {
       TreeKey,
       TreeProps,
       TreeCheckEvent,
-      TreeExpandPayload,
+      TreeExpandEvent,
       TreeInteractionEvent,
       TreeLoadEvent,
       TreeAllowDrag,
@@ -985,9 +1016,31 @@ describe('FlTree 契约', () => {
       TreeSwitcherLoadingIcon,
       TreeSwitcherIconMode,
       TreeEmits,
+      TreeExpandedNode,
       TreeNodeModel
     ]
+    const inferredClassNames: TreeProps['classNames'] = ({ props }) => ({
+      root: props.checkable ? 'type-check-checkable-root' : 'type-check-root',
+      item: props.showLine ? 'type-check-line-item' : 'type-check-item'
+    })
+    const inferredStyles: TreeProps['styles'] = ({ props }) => ({
+      root: {
+        outlineStyle: props.selectable === false ? 'dashed' : 'solid'
+      }
+    })
+    const treeClassNames: TreeClassNames = ({ props }) => ({
+      root: props.multiple ? 'type-check-multiple-root' : 'type-check-single-root'
+    })
+    const treeStyles: TreeStyles = ({ props }) => ({
+      item: {
+        outlineStyle: props.disabledKeys ? 'dotted' : 'solid'
+      }
+    })
     const treeTypeSmoke: TreeTypeSmoke | null = null
+    expect(typeof inferredClassNames).toBe('function')
+    expect(typeof inferredStyles).toBe('function')
+    expect(typeof treeClassNames).toBe('function')
+    expect(typeof treeStyles).toBe('function')
     expect(treeTypeSmoke).toBeNull()
   })
 
@@ -1190,7 +1243,7 @@ describe('FlTree 契约', () => {
     await nextTick()
 
     expect(wrapper.emitted('update:expandedKeys')).toEqual([[['root-b']]])
-    expect(wrapper.emitted('expand')?.[0]?.[0] as TreeExpandPayload).toMatchObject({
+    expect(wrapper.emitted('expand')?.[0]?.[0] as TreeExpandEvent).toMatchObject({
       expanded: true,
       key: 'root-b',
       expandedKeys: ['root-b']
@@ -2036,7 +2089,7 @@ describe('FlTree 契约', () => {
     expect(nodeArg.childNodes).toHaveLength(1)
     expect(nodeArg.childNodes[0]?.key).toBe('leaf')
     expect(instanceArg).toBeTruthy()
-    expect(expandEvents?.[0]?.[0] as TreeExpandPayload).toMatchObject({
+    expect(expandEvents?.[0]?.[0] as TreeExpandEvent).toMatchObject({
       expanded: true,
       key: 'root',
       expandedKeys: ['root']
@@ -2198,7 +2251,7 @@ describe('FlTree 契约', () => {
 
     expect(updateExpandedKeysEvents).toEqual([[['root']]])
     expect(expandEvents).toHaveLength(1)
-    expect(expandEvents?.[0]?.[0] as TreeExpandPayload).toMatchObject({
+    expect(expandEvents?.[0]?.[0] as TreeExpandEvent).toMatchObject({
       expanded: true,
       key: 'root',
       expandedKeys: ['root']

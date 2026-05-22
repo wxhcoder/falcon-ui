@@ -1,7 +1,12 @@
 import { Loading } from '@element-plus/icons-vue'
-import type { Component, ComponentPublicInstance, ExtractPublicPropTypes, PropType } from 'vue'
 import type {
-  TreeClassNames as TreeClassNamesSource,
+  Component,
+  ComponentPublicInstance,
+  CSSProperties,
+  ExtractPublicPropTypes,
+  PropType
+} from 'vue'
+import type {
   TreeClassValue,
   TreeData,
   TreeIndex,
@@ -10,12 +15,10 @@ import type {
   TreeNodeModel,
   TreeNodeProps,
   TreeSemanticDOM,
-  TreeSemanticInfo,
   TreeSemanticRecord,
   TreeShowLine,
   TreeShowLineOptions,
-  TreeSwitcherIconMode,
-  TreeStyles as TreeStylesSource
+  TreeSwitcherIconMode
 } from './tree-types'
 
 export interface TreeCheckedKeysObject {
@@ -72,6 +75,25 @@ export interface TreeInteractionStateSets {
 }
 
 /**
+ * Tree 语义化样式回调接收当前组件公开 props 快照。
+ */
+export interface TreeSemanticInfo {
+  props: TreeProps
+}
+
+interface TreeClassNamesResolver {
+  (info: TreeSemanticInfo): TreeSemanticRecord<TreeClassValue>
+}
+
+interface TreeStylesResolver {
+  (info: TreeSemanticInfo): TreeSemanticRecord<CSSProperties>
+}
+
+export type TreeClassNames = TreeSemanticRecord<TreeClassValue> | TreeClassNamesResolver
+
+export type TreeStyles = TreeSemanticRecord<CSSProperties> | TreeStylesResolver
+
+/**
  * 首版使用稳定的默认字段映射，保证常规树数据可直接渲染。
  */
 export const treeNodePropsDefaults: Required<TreeNodeProps> = {
@@ -122,22 +144,20 @@ export const treeProps = {
     default: () => ({ ...treeNodePropsDefaults })
   },
   classNames: {
-    type: [Object, Function] as PropType<TreeClassNamesSource>
+    type: [Object, Function] as PropType<TreeClassNames>
   },
   styles: {
-    type: [Object, Function] as PropType<TreeStylesSource>
+    type: [Object, Function] as PropType<TreeStyles>
   },
   defaultExpandAll: {
     type: Boolean,
     default: false
   },
   defaultExpandedKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   expandedKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   autoExpandParent: {
     type: Boolean,
@@ -152,73 +172,56 @@ export const treeProps = {
     default: false
   },
   defaultSelectedKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   selectedKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   disabledKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   unselectableKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   defaultCheckedKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   checkedKeys: {
-    type: [Array, Object] as PropType<TreeCheckedKeys | undefined>,
-    default: undefined
+    type: [Array, Object] as PropType<TreeCheckedKeys>
   },
   disabledCheckboxKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   hiddenCheckboxKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   loadData: {
-    type: Function as PropType<TreeLoadData | undefined>,
-    default: undefined
+    type: Function as PropType<TreeLoadData>
   },
   loadedKeys: {
-    type: Array as PropType<TreeKey[] | undefined>,
-    default: undefined
+    type: Array as PropType<TreeKey[]>
   },
   draggable: {
     type: Boolean,
     default: false
   },
   allowDrag: {
-    type: Function as PropType<TreeAllowDrag | undefined>,
-    default: undefined
+    type: Function as PropType<TreeAllowDrag>
   },
   allowDrop: {
-    type: Function as PropType<TreeAllowDrop | undefined>,
-    default: undefined
+    type: Function as PropType<TreeAllowDrop>
   },
   filterTreeNode: {
-    type: Function as PropType<TreeFilterTreeNode | undefined>,
-    default: undefined
+    type: Function as PropType<TreeFilterTreeNode>
   }
 } as const
 
 export type TreeProps = ExtractPublicPropTypes<typeof treeProps>
 
-export type TreeClassNames = TreeClassNamesSource<TreeProps>
-
-export type TreeStyles = TreeStylesSource<TreeProps>
-
 /**
  * 树节点展开事件统一返回本次节点状态与当前源展开键集合。
  */
-export interface TreeExpandPayload {
+export interface TreeExpandEvent {
   expanded: boolean
   node: TreeData
   key: TreeKey
@@ -262,6 +265,8 @@ export interface TreeLoadEvent {
  */
 export type TreeNodeInstance = ComponentPublicInstance | null
 
+export type TreeExpandedNode = TreeNode & { expanded: boolean }
+
 /**
  * `node-click` 事件固定采用 Element Plus 风格的多参数出参。
  */
@@ -294,7 +299,7 @@ export type TreeNodeRightClickArgs = [
  */
 export type TreeNodeToggleArgs = [
   data: TreeData,
-  node: TreeNode & { expanded: boolean },
+  node: TreeExpandedNode,
   instance: TreeNodeInstance
 ]
 
@@ -428,11 +433,7 @@ const isTreeNodeRightClickArgs = isTreeNodeDblclickArgs
 /**
  * 验证 `node-expand` / `node-collapse` 事件的三元组参数。
  */
-const isTreeNodeToggleArgs = (
-  data: TreeData,
-  node: TreeNode & { expanded: boolean },
-  instance: TreeNodeInstance
-) =>
+const isTreeNodeToggleArgs = (data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance) =>
   isRecord(data) &&
   isTreeNode(node) &&
   typeof node.expanded === 'boolean' &&
@@ -542,13 +543,13 @@ export const treeEmits = {
   /**
    * 节点展开状态切换后抛出当前节点的展开结果。
    */
-  expand: (payload: TreeExpandPayload) =>
-    typeof payload.expanded === 'boolean' &&
-    isTreeKey(payload.key) &&
-    Array.isArray(payload.expandedKeys) &&
-    payload.expandedKeys.every((item) => isTreeKey(item)) &&
-    payload.node !== null &&
-    typeof payload.node === 'object',
+  expand: (event: TreeExpandEvent) =>
+    typeof event.expanded === 'boolean' &&
+    isTreeKey(event.key) &&
+    Array.isArray(event.expandedKeys) &&
+    event.expandedKeys.every((item) => isTreeKey(item)) &&
+    event.node !== null &&
+    typeof event.node === 'object',
   /**
    * 节点被点击时抛出节点数据、节点对象、组件实例与鼠标事件。
    */
@@ -655,20 +656,16 @@ const readTreeField = (node: TreeData, fieldName: string): unknown => node[field
 /**
  * 将任意合法 class 值归一化为 Vue 可直接绑定的形式。
  */
-const resolveNodeClassName = (value: unknown): TreeClassValue => {
+const resolveNodeClassName = (value: unknown): TreeClassValue | undefined => {
   if (Array.isArray(value)) {
     return value as string[]
   }
 
-  if (value === null) {
+  if (value === null || value === undefined) {
     return undefined
   }
 
-  if (
-    typeof value === 'string' ||
-    value === undefined ||
-    (value !== null && typeof value === 'object')
-  ) {
+  if (typeof value === 'string' || (value !== null && typeof value === 'object')) {
     return value as TreeClassValue
   }
 
@@ -694,6 +691,7 @@ export const normalizeTreeNode = (
   const labelValue = readTreeField(rawNode, mappedProps.label)
   const isLeafValue = readTreeField(rawNode, mappedProps.isLeaf)
   const classValue = readTreeField(rawNode, mappedProps.class)
+  const className = resolveNodeClassName(classValue)
 
   if (rawNode.key === undefined || rawNode.key === null) {
     throw new Error('[FlTree] Every node must provide a unique `key`.')
@@ -711,11 +709,14 @@ export const normalizeTreeNode = (
     checkboxDisabled: disabled || interactionStateSets.disabledCheckboxKeySet.has(rawNode.key),
     checkboxVisible: !interactionStateSets.hiddenCheckboxKeySet.has(rawNode.key),
     isLeaf: Boolean(isLeafValue),
-    className: resolveNodeClassName(classValue),
     isLastSibling,
     lineTrackEnds,
     parent,
     childNodes: []
+  }
+
+  if (className !== undefined) {
+    treeNode.className = className
   }
 
   treeNode.childNodes = childNodes.map((childNode, index) =>
@@ -1020,22 +1021,31 @@ export const createEffectiveExpandedKeySet = ({
   return effectiveExpandedKeys
 }
 
+interface CreateTreeEventNodeOptions {
+  node: TreeNodeModel
+  resolveExpanded?: undefined
+}
+
+interface CreateExpandedTreeEventNodeOptions {
+  node: TreeNodeModel
+  resolveExpanded: (nodeKey: TreeKey) => boolean
+}
+
 /**
  * 根据内部节点模型构造对外事件节点对象，并按需附带展开状态。
  */
-export const createTreeEventNode = ({
+export function createTreeEventNode(options: CreateExpandedTreeEventNodeOptions): TreeExpandedNode
+export function createTreeEventNode(options: CreateTreeEventNodeOptions): TreeNode
+export function createTreeEventNode({
   node,
   resolveExpanded
-}: {
-  node: TreeNodeModel
-  resolveExpanded?: (nodeKey: TreeKey) => boolean
-}): TreeNode => {
-  const cachedNodes = new Map<TreeKey, TreeNode>()
+}: CreateTreeEventNodeOptions | CreateExpandedTreeEventNodeOptions): TreeNode | TreeExpandedNode {
+  const cachedNodes = new Map<TreeKey, TreeNode | TreeExpandedNode>()
 
   /**
    * 递归复制节点字段，并通过缓存避免父子链循环导致的无限递归。
    */
-  const visit = (currentNode: TreeNodeModel): TreeNode => {
+  const visit = (currentNode: TreeNodeModel): TreeNode | TreeExpandedNode => {
     const cachedNode = cachedNodes.get(currentNode.key)
 
     if (cachedNode) {
@@ -1057,7 +1067,9 @@ export const createTreeEventNode = ({
     }
 
     if (resolveExpanded) {
-      eventNode.expanded = resolveExpanded(currentNode.key)
+      const expandedEventNode = eventNode as TreeExpandedNode
+
+      expandedEventNode.expanded = resolveExpanded(currentNode.key)
     }
 
     cachedNodes.set(currentNode.key, eventNode)
@@ -1074,11 +1086,8 @@ export const createTreeEventNode = ({
  * 统一解析对象形式和工厂函数形式的语义化记录。
  */
 export const resolveTreeSemanticRecord = <T>(
-  source:
-    | TreeSemanticRecord<T>
-    | ((info: TreeSemanticInfo<TreeProps>) => TreeSemanticRecord<T>)
-    | undefined,
-  info: TreeSemanticInfo<TreeProps>
+  source: TreeSemanticRecord<T> | ((info: TreeSemanticInfo) => TreeSemanticRecord<T>) | undefined,
+  info: TreeSemanticInfo
 ): TreeSemanticRecord<T> => {
   if (typeof source === 'function') {
     return source(info) ?? {}
@@ -1096,7 +1105,6 @@ export type {
   TreeNodeModel,
   TreeNodeProps,
   TreeSemanticDOM,
-  TreeSemanticInfo,
   TreeSemanticRecord,
   TreeShowLine,
   TreeShowLineOptions,

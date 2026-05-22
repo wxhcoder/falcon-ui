@@ -473,7 +473,7 @@ switcher 点击只负责展开或收起，不触发 `node-click`、`select` 或 
 - `TreeCheckedKeys`
 - `TreeCheckEvent`
 - `TreeSelectEvent`
-- `TreeExpandPayload`
+- `TreeExpandEvent`
 - `TreeLoadEvent`
 - `TreeAllowDrag`
 - `TreeAllowDrop`
