@@ -287,8 +287,15 @@
       "type": "boolean | undefined"
     },
     {
+      "default": "-",
+      "description": "节点外壳 class 回调，接收 { node, data } 并返回 Vue class 绑定值。",
+      "name": "nodeClassName",
+      "required": false,
+      "type": "TreeNodeClassName | undefined"
+    },
+    {
       "default": "{ ...treeNodePropsDefaults }",
-      "description": "树节点字段映射配置，用于指定 label、children、isLeaf 和 class 字段名。",
+      "description": "树节点字段映射配置，用于指定 label、children 和 isLeaf 字段名。",
       "name": "props",
       "required": false,
       "type": "TreeNodeProps | undefined"

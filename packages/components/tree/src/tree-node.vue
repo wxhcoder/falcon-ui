@@ -5,7 +5,7 @@
     :class="[
       itemClassName,
       semanticClassNames.item,
-      node.className,
+      customNodeClassName,
       ns.is('line-mode', showLine),
       ns.is('leaf', isLeafNode),
       ns.is('last', isLastSiblingNode)
@@ -151,6 +151,7 @@
             :handle-node-drop="handleNodeDrop"
             :handle-node-drag-end="handleNodeDragEnd"
             :resolved-class-names="resolvedClassNames"
+            :node-class-name="nodeClassName"
             :resolved-styles="resolvedStyles">
             <template v-if="hasDefaultSlot" #default="slotProps">
               <slot v-bind="slotProps" />
@@ -182,6 +183,7 @@ import {
   type TreeInteractionEvent,
   type TreeKey,
   type TreeNode,
+  type TreeNodeClassName,
   type TreeNodeDropType,
   type TreeNodeInstance,
   type TreeNodeModel,
@@ -258,6 +260,7 @@ interface TreeNodeComponentProps {
   handleNodeDrop: (options: TreeNodeDragTargetHandlerOptions) => void
   handleNodeDragEnd: (options: TreeNodeDragHandlerOptions) => void
   resolvedClassNames: TreeSemanticRecord<TreeClassValue>
+  nodeClassName?: TreeNodeClassName
   resolvedStyles: TreeSemanticRecord<CSSProperties>
 }
 
@@ -550,6 +553,15 @@ const handleDragEnd = (event: DragEvent) => {
 const getResolvedClassNames = () => props.resolvedClassNames
 
 /**
+ * 返回由视图层回调解析出的节点级 class。
+ */
+const resolveCustomNodeClassName = () =>
+  props.nodeClassName?.({
+    node: slotNode.value,
+    data: props.node.data
+  })
+
+/**
  * 返回已经解析完成的语义化 styles。
  */
 const getResolvedStyles = () => props.resolvedStyles
@@ -584,6 +596,7 @@ const isFilteredNode = computed(resolveFilteredNodeState)
 const nodeAriaChecked = computed(resolveAriaCheckedState)
 const slotNode = computed(() => createTreeEventNode({ node: props.node }))
 const semanticClassNames = computed(getResolvedClassNames)
+const customNodeClassName = computed(resolveCustomNodeClassName)
 const semanticStyles = computed(getResolvedStyles)
 
 onMounted(() => {

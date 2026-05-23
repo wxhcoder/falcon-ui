@@ -12,6 +12,8 @@ import type {
   TreeIndex,
   TreeKey,
   TreeNode,
+  TreeNodeClassName,
+  TreeNodeClassNameInfo,
   TreeNodeModel,
   TreeNodeProps,
   TreeSemanticDOM,
@@ -99,8 +101,7 @@ export type TreeStyles = TreeSemanticRecord<CSSProperties> | TreeStylesResolver
 export const treeNodePropsDefaults: Required<TreeNodeProps> = {
   label: 'label',
   children: 'children',
-  isLeaf: 'isLeaf',
-  class: 'class'
+  isLeaf: 'isLeaf'
 }
 
 /**
@@ -145,6 +146,9 @@ export const treeProps = {
   },
   classNames: {
     type: [Object, Function] as PropType<TreeClassNames>
+  },
+  nodeClassName: {
+    type: Function as PropType<TreeNodeClassName>
   },
   styles: {
     type: [Object, Function] as PropType<TreeStyles>
@@ -654,25 +658,6 @@ const createTreeInteractionStateSets = ({
 const readTreeField = (node: TreeData, fieldName: string): unknown => node[fieldName]
 
 /**
- * 将任意合法 class 值归一化为 Vue 可直接绑定的形式。
- */
-const resolveNodeClassName = (value: unknown): TreeClassValue | undefined => {
-  if (Array.isArray(value)) {
-    return value as string[]
-  }
-
-  if (value === null || value === undefined) {
-    return undefined
-  }
-
-  if (typeof value === 'string' || (value !== null && typeof value === 'object')) {
-    return value as TreeClassValue
-  }
-
-  return String(value)
-}
-
-/**
  * 将单个原始节点转换为内部标准化节点。
  */
 export const normalizeTreeNode = (
@@ -690,8 +675,6 @@ export const normalizeTreeNode = (
 
   const labelValue = readTreeField(rawNode, mappedProps.label)
   const isLeafValue = readTreeField(rawNode, mappedProps.isLeaf)
-  const classValue = readTreeField(rawNode, mappedProps.class)
-  const className = resolveNodeClassName(classValue)
 
   if (rawNode.key === undefined || rawNode.key === null) {
     throw new Error('[FlTree] Every node must provide a unique `key`.')
@@ -713,10 +696,6 @@ export const normalizeTreeNode = (
     lineTrackEnds,
     parent,
     childNodes: []
-  }
-
-  if (className !== undefined) {
-    treeNode.className = className
   }
 
   treeNode.childNodes = childNodes.map((childNode, index) =>
@@ -1102,6 +1081,8 @@ export type {
   TreeIndex,
   TreeKey,
   TreeNode,
+  TreeNodeClassName,
+  TreeNodeClassNameInfo,
   TreeNodeModel,
   TreeNodeProps,
   TreeSemanticDOM,

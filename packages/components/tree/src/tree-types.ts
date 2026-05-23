@@ -20,19 +20,17 @@ export type TreeShowLine = boolean | TreeShowLineOptions
 export interface TreeData {
   key: TreeKey
   children?: TreeData[]
-  class?: TreeClassValue
   isLeaf?: boolean
   [key: string]: unknown
 }
 
 /**
- * 首版字段映射保持 Element Plus Tree 的最小集合。
+ * 字段映射只负责把业务数据结构转换为树节点结构。
  */
 export interface TreeNodeProps {
   label?: string
   children?: string
   isLeaf?: string
-  class?: string
 }
 
 /**
@@ -63,7 +61,6 @@ export interface TreeNodeModel {
   checkboxDisabled: boolean
   checkboxVisible: boolean
   isLeaf: boolean
-  className?: TreeClassValue
   isLastSibling: boolean
   lineTrackEnds: boolean[]
   parent: TreeNodeModel | null
@@ -86,6 +83,13 @@ export interface TreeNode {
   parent: TreeNode | null
   childNodes: TreeNode[]
 }
+
+export interface TreeNodeClassNameInfo {
+  node: TreeNode
+  data: TreeData
+}
+
+export type TreeNodeClassName = (info: TreeNodeClassNameInfo) => TreeClassValue | undefined
 
 /**
  * 树索引为后续展开、选择、勾选等交互能力提供基础结构。

@@ -59,8 +59,8 @@ FlTree 是 Falcon UI 的自研树组件，用于展示层级数据并承载展�
 
 ## 语义化样式
 
-通过 `classNames` 和 `styles` 可以为树根容器与节点条目注入样式。
-函数形式会接收当前公开 props 快照，适合按配置动态调整样式。
+通过 `classNames` 和 `styles` 可以为树根容器与节点条目注入稳定挂点样式。
+通过 `nodeClassName` 可以按 `{ node, data }` 为具体节点外壳注入 class，样式规则保留在视图层。
 
 ::: demo tree/semantic-style
 :::

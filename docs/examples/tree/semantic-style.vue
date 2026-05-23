@@ -8,23 +8,31 @@
       :data="data"
       default-expand-all
       :class-names="active ? classNames : undefined"
+      :node-class-name="active ? nodeClassName : undefined"
       :styles="active ? styles : undefined" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { TreeClassNames, TreeData, TreeStyles } from '@falcon-ui/components'
+import type { TreeClassNames, TreeData, TreeNodeClassName, TreeStyles } from '@falcon-ui/components'
+
+interface StyledTreeData extends TreeData {
+  kind?: 'section' | 'token'
+  status?: 'new'
+  children?: StyledTreeData[]
+}
 
 const active = ref(true)
 
-const data: TreeData[] = [
+const data: StyledTreeData[] = [
   {
     key: 'semantic',
     label: '语义化 DOM',
+    kind: 'section',
     children: [
-      { key: 'root', label: 'root 挂点' },
-      { key: 'item', label: 'item 挂点' }
+      { key: 'root', label: 'root 挂点', kind: 'token' },
+      { key: 'item', label: 'item 挂点', kind: 'token', status: 'new' }
     ]
   }
 ]
@@ -32,6 +40,12 @@ const data: TreeData[] = [
 const classNames: TreeClassNames = ({ props }) => ({
   root: props.showLine ? 'docs-tree-root docs-tree-root--line' : 'docs-tree-root',
   item: 'docs-tree-item'
+})
+
+const nodeClassName: TreeNodeClassName = ({ node, data }) => ({
+  'docs-tree-node--section': node.key === 'semantic',
+  'docs-tree-node--token': data.kind === 'token',
+  'docs-tree-node--new': data.status === 'new'
 })
 
 const styles: TreeStyles = {
@@ -57,5 +71,17 @@ const styles: TreeStyles = {
 
 :deep(.docs-tree-item > .fl-tree__item-content) {
   border-radius: var(--fl-radius-base);
+}
+
+:deep(.docs-tree-node--section > .fl-tree__item-content .fl-tree__item-title) {
+  font-weight: 600;
+}
+
+:deep(.docs-tree-node--token > .fl-tree__item-content) {
+  padding-inline-end: 8px;
+}
+
+:deep(.docs-tree-node--new > .fl-tree__item-content .fl-tree__item-title) {
+  color: var(--el-color-success);
 }
 </style>

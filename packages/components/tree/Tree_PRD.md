@@ -55,18 +55,17 @@ Element Plus 的 Checkbox、Icon 与图标资源，以保证 Falcon UI 现有主
 - 每个节点必须提供全局唯一 `key`，`key` 仅支持字符串或数字。
 - 缺失 `key` 或出现重复 `key` 应视为非法输入，并在运行时抛出错误。
 - 业务字段可以任意保留，事件与插槽会通过 `node.data` 或 `data` 原样回传。
-- `TreeData` 只承载业务数据与树结构，不承载组件交互状态。
+- `TreeData` 只承载业务数据与树结构，不承载组件交互状态或样式 class。
 
 ### 5.2 字段映射
 
 `props` 用于配置业务字段到树节点标准字段的映射：
 
-| 字段       | 默认值     | 说明                    |
-| ---------- | ---------- | ----------------------- |
-| `label`    | `label`    | 节点标题字段            |
-| `children` | `children` | 子节点数组字段          |
-| `isLeaf`   | `isLeaf`   | 是否叶子节点字段        |
-| `class`    | `class`    | 节点条目附加 class 字段 |
+| 字段       | 默认值     | 说明             |
+| ---------- | ---------- | ---------------- |
+| `label`    | `label`    | 节点标题字段     |
+| `children` | `children` | 子节点数组字段   |
+| `isLeaf`   | `isLeaf`   | 是否叶子节点字段 |
 
 `key` 不参与 `props` 映射，始终要求直接存在于节点数据上。
 
@@ -337,6 +336,7 @@ switcher 点击只负责展开或收起，不触发 `node-click`、`select` 或 
 | `switcherIcon`        | 展开器图标模式，支持 `arrow`、`plus-minus`、`folder` |
 | `switcherLoadingIcon` | 异步加载中的展开器图标                               |
 | `classNames`          | 注入语义化 DOM class                                 |
+| `nodeClassName`       | 按节点快照与原始数据注入节点外壳 class               |
 | `styles`              | 注入语义化 DOM 内联样式                              |
 
 `showLine` 规则：
@@ -360,6 +360,7 @@ switcher 点击只负责展开或收起，不触发 `node-click`、`select` 或 
 | `item` | 单个树节点条目外壳 |
 
 `itemIcon`、`itemCheckbox`、`itemTitle` 等内部结构不作为公开语义化挂点。
+单节点差异化 class 通过 `nodeClassName({ node, data })` 计算，不从 `TreeData` 读取样式字段。
 
 ### 7.14 键盘导航与无障碍
 
@@ -390,39 +391,40 @@ switcher 点击只负责展开或收起，不触发 `node-click`、`select` 或 
 
 ### 8.1 Props
 
-| 属性                   | 默认值       | 说明                                             |
-| ---------------------- | ------------ | ------------------------------------------------ |
-| `data`                 | `[]`         | 树形数据源                                       |
-| `props`                | 默认字段映射 | 配置 `label`、`children`、`isLeaf`、`class` 字段 |
-| `defaultExpandAll`     | `false`      | 初始化时展开所有可展开节点                       |
-| `defaultExpandedKeys`  | `undefined`  | 非受控初始化展开 key                             |
-| `expandedKeys`         | `undefined`  | 受控展开 key                                     |
-| `defaultExpandParent`  | `true`       | 默认展开时补齐祖先节点                           |
-| `autoExpandParent`     | `false`      | 受控展开时补齐祖先节点                           |
-| `accordion`            | `false`      | 手风琴展开                                       |
-| `selectable`           | `true`       | 是否允许节点选中                                 |
-| `multiple`             | `false`      | 是否允许多选                                     |
-| `defaultSelectedKeys`  | `undefined`  | 非受控初始化选中 key                             |
-| `selectedKeys`         | `undefined`  | 受控选中 key                                     |
-| `disabledKeys`         | `undefined`  | 整体禁用节点 key                                 |
-| `unselectableKeys`     | `undefined`  | 不可选节点 key                                   |
-| `checkable`            | `false`      | 是否显示复选框                                   |
-| `checkStrictly`        | `false`      | 是否关闭父子勾选联动                             |
-| `defaultCheckedKeys`   | `undefined`  | 非受控初始化勾选 key                             |
-| `checkedKeys`          | `undefined`  | 受控勾选 key                                     |
-| `disabledCheckboxKeys` | `undefined`  | 禁用复选框 key                                   |
-| `hiddenCheckboxKeys`   | `undefined`  | 隐藏复选框 key                                   |
-| `loadData`             | `undefined`  | 异步加载函数                                     |
-| `loadedKeys`           | `undefined`  | 受控已加载 key                                   |
-| `draggable`            | `false`      | 是否开启单树内部拖拽                             |
-| `allowDrag`            | `undefined`  | 拖拽源拦截                                       |
-| `allowDrop`            | `undefined`  | 投放位置拦截                                     |
-| `filterTreeNode`       | `undefined`  | 筛选命中函数                                     |
-| `showLine`             | `false`      | 是否显示连线                                     |
-| `switcherIcon`         | `arrow`      | 展开器图标模式                                   |
-| `switcherLoadingIcon`  | `Loading`    | 加载态展开器图标                                 |
-| `classNames`           | `undefined`  | 语义化 DOM class                                 |
-| `styles`               | `undefined`  | 语义化 DOM style                                 |
+| 属性                   | 默认值       | 说明                                    |
+| ---------------------- | ------------ | --------------------------------------- |
+| `data`                 | `[]`         | 树形数据源                              |
+| `props`                | 默认字段映射 | 配置 `label`、`children`、`isLeaf` 字段 |
+| `defaultExpandAll`     | `false`      | 初始化时展开所有可展开节点              |
+| `defaultExpandedKeys`  | `undefined`  | 非受控初始化展开 key                    |
+| `expandedKeys`         | `undefined`  | 受控展开 key                            |
+| `defaultExpandParent`  | `true`       | 默认展开时补齐祖先节点                  |
+| `autoExpandParent`     | `false`      | 受控展开时补齐祖先节点                  |
+| `accordion`            | `false`      | 手风琴展开                              |
+| `selectable`           | `true`       | 是否允许节点选中                        |
+| `multiple`             | `false`      | 是否允许多选                            |
+| `defaultSelectedKeys`  | `undefined`  | 非受控初始化选中 key                    |
+| `selectedKeys`         | `undefined`  | 受控选中 key                            |
+| `disabledKeys`         | `undefined`  | 整体禁用节点 key                        |
+| `unselectableKeys`     | `undefined`  | 不可选节点 key                          |
+| `checkable`            | `false`      | 是否显示复选框                          |
+| `checkStrictly`        | `false`      | 是否关闭父子勾选联动                    |
+| `defaultCheckedKeys`   | `undefined`  | 非受控初始化勾选 key                    |
+| `checkedKeys`          | `undefined`  | 受控勾选 key                            |
+| `disabledCheckboxKeys` | `undefined`  | 禁用复选框 key                          |
+| `hiddenCheckboxKeys`   | `undefined`  | 隐藏复选框 key                          |
+| `loadData`             | `undefined`  | 异步加载函数                            |
+| `loadedKeys`           | `undefined`  | 受控已加载 key                          |
+| `draggable`            | `false`      | 是否开启单树内部拖拽                    |
+| `allowDrag`            | `undefined`  | 拖拽源拦截                              |
+| `allowDrop`            | `undefined`  | 投放位置拦截                            |
+| `filterTreeNode`       | `undefined`  | 筛选命中函数                            |
+| `showLine`             | `false`      | 是否显示连线                            |
+| `switcherIcon`         | `arrow`      | 展开器图标模式                          |
+| `switcherLoadingIcon`  | `Loading`    | 加载态展开器图标                        |
+| `classNames`           | `undefined`  | 语义化 DOM class                        |
+| `nodeClassName`        | `undefined`  | 节点外壳 class 回调                     |
+| `styles`               | `undefined`  | 语义化 DOM style                        |
 
 ### 8.2 Events
 
@@ -468,6 +470,8 @@ switcher 点击只负责展开或收起，不触发 `node-click`、`select` 或 
 - `TreeData`
 - `TreeNode`
 - `TreeNodeProps`
+- `TreeNodeClassName`
+- `TreeNodeClassNameInfo`
 - `TreeProps`
 - `TreeEmits`
 - `TreeCheckedKeys`
@@ -557,6 +561,7 @@ VitePress 文档页位于 `docs/components/tree.md`，示例按能力拆分：
 - 新增能力优先保持 key-based 状态模型，避免从节点数据字段读取交互状态。
 - 新增事件必须明确事件职责、触发入口和与既有事件的隔离关系。
 - 新增视觉扩展优先通过 Falcon UI 变量、BEM 类名和语义化挂点完成。
+- 节点级样式差异通过 `nodeClassName` 在视图层计算，不在 `TreeData` 中承载 class 字段。
 - 不应把内部节点结构挂点随意升级为公开 `classNames` / `styles` 语义。
 - 涉及展开、选择、勾选、异步、拖拽或键盘焦点的改动必须补充单测。
 - 任何破坏性 API 调整都需要同步更新文档示例、API 元数据和类型导出。

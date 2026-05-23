@@ -48,6 +48,7 @@
       :handle-node-drop="handleNodeDrop"
       :handle-node-drag-end="handleNodeDragEnd"
       :resolved-class-names="resolvedClassNames"
+      :node-class-name="props.nodeClassName"
       :resolved-styles="resolvedStyles">
       <template v-if="hasDefaultSlot" #default="slotProps">
         <slot v-bind="slotProps" />

@@ -10,15 +10,13 @@ import type { TreeData, TreeNodeProps } from '@falcon-ui/components'
 
 const fieldProps: TreeNodeProps = {
   label: 'name',
-  children: 'items',
-  class: 'className'
+  children: 'items'
 }
 
 const data = [
   {
     key: 'workspace',
     name: '工作区',
-    className: 'docs-tree-node--strong',
     items: [
       {
         key: 'design',
@@ -42,9 +40,5 @@ const data = [
 .demo-result {
   color: var(--vp-c-text-2);
   font-size: 13px;
-}
-
-:deep(.docs-tree-node--strong > .fl-tree__item-content .fl-tree__item-title) {
-  font-weight: 600;
 }
 </style>

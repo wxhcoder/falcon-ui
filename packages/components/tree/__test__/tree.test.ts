@@ -11,6 +11,7 @@ import FlTree, {
   type TreeCheckEvent,
   type TreeCheckedKeys,
   type TreeClassNames,
+  type TreeClassValue,
   type TreeData,
   type TreeFilterTreeNode,
   type TreeAllowDrag,
@@ -31,6 +32,8 @@ import FlTree, {
   type TreeNodeDropArgs,
   type TreeNodeDropType,
   type TreeNodeRightClickArgs,
+  type TreeNodeClassName,
+  type TreeNodeClassNameInfo,
   type TreeNodeModel,
   type TreeProps,
   type TreeScrollAlign,
@@ -471,7 +474,7 @@ describe('FlTree 契约', () => {
     expect(wrapper.findComponent(CaretBottom).exists()).toBe(false)
   })
 
-  it('通过 `props` 映射 label、children 和 class', async () => {
+  it('通过 `props` 只映射 label、children 和 isLeaf，不再消费节点 class 字段', async () => {
     const wrapper = mount(FlTree, {
       props: {
         data: [
@@ -483,7 +486,8 @@ describe('FlTree 契约', () => {
               {
                 key: 'child',
                 title: 'Mapped Child',
-                nodeClass: 'child-kind'
+                nodeClass: 'child-kind',
+                leafFlag: true
               }
             ]
           }
@@ -491,8 +495,9 @@ describe('FlTree 契约', () => {
         props: {
           label: 'title',
           children: 'nodes',
+          isLeaf: 'leafFlag',
           class: 'nodeClass'
-        },
+        } as unknown as TreeProps['props'],
         defaultExpandAll: true
       }
     })
@@ -504,20 +509,109 @@ describe('FlTree 契约', () => {
     expect(wrapper.text()).toContain('Mapped Root')
     expect(wrapper.text()).toContain('Mapped Child')
     expect(items).toHaveLength(2)
-    expect(items[0]?.classes()).toContain('root-kind')
-    expect(items[1]?.classes()).toContain('child-kind')
+    expect(items[0]?.classes()).not.toContain('root-kind')
+    expect(items[1]?.classes()).not.toContain('child-kind')
     expect(items[0]?.classes()).toContain('fl-tree__item')
+    expect(findTreeItemByText(wrapper, 'Mapped Child').attributes('aria-expanded')).toBeUndefined()
   })
 
-  it('只在标准化节点存在 class 时保留 className 字段', () => {
+  it('标准化节点不再保留来自业务数据的 className 字段', () => {
     const nodeWithoutClass = normalizeTreeNode({ key: 'without-class', label: 'Without Class' }, 1)
     const nodeWithClass = normalizeTreeNode(
-      { key: 'with-class', label: 'With Class', class: 'is-highlighted' },
-      1
+      {
+        key: 'with-class',
+        label: 'With Class',
+        class: 'is-highlighted',
+        className: 'is-legacy-highlighted'
+      },
+      1,
+      {
+        class: 'className'
+      } as unknown as TreeProps['props']
     )
 
     expect(nodeWithoutClass).not.toHaveProperty('className')
-    expect(nodeWithClass).toHaveProperty('className', 'is-highlighted')
+    expect(nodeWithClass).not.toHaveProperty('className')
+  })
+
+  it('通过 nodeClassName 在视图层为节点外壳注入 class', async () => {
+    interface StyledTreeData extends TreeData {
+      kind?: 'workspace' | 'file'
+      status?: 'normal' | 'new'
+      children?: StyledTreeData[]
+    }
+
+    const data: StyledTreeData[] = [
+      {
+        key: 'workspace',
+        label: 'Workspace',
+        kind: 'workspace',
+        children: [
+          {
+            key: 'readme',
+            label: 'README',
+            kind: 'file',
+            status: 'new'
+          }
+        ]
+      }
+    ]
+    const nodeClassName: TreeNodeClassName = ({ node, data }): TreeClassValue | undefined => {
+      if (node.key === 'workspace') {
+        return 'docs-tree-node--workspace'
+      }
+
+      if (data.status === 'new') {
+        return ['docs-tree-node--file', { 'docs-tree-node--new': true }]
+      }
+
+      return undefined
+    }
+    const wrapper = mount(FlTree, {
+      props: {
+        data,
+        nodeClassName,
+        defaultExpandAll: true
+      }
+    })
+
+    await nextTick()
+
+    const workspaceItem = findTreeItemByText(wrapper, 'Workspace')
+    const readmeItem = findTreeItemByText(wrapper, 'README')
+
+    expect(workspaceItem.classes()).toContain('docs-tree-node--workspace')
+    expect(readmeItem.classes()).toContain('docs-tree-node--file')
+    expect(readmeItem.classes()).toContain('docs-tree-node--new')
+  })
+
+  it('nodeClassName 接收事件节点快照与原始节点数据', async () => {
+    const rootData: TreeData = {
+      key: 'root',
+      label: 'Root'
+    }
+    const observed: TreeNodeClassNameInfo[] = []
+    const nodeClassName: TreeNodeClassName = (info) => {
+      observed.push(info)
+
+      return undefined
+    }
+
+    mount(FlTree, {
+      props: {
+        data: [rootData],
+        nodeClassName
+      }
+    })
+
+    await nextTick()
+
+    expect(observed).toHaveLength(1)
+    expect(observed[0]?.data).toBe(observed[0]?.node.data)
+    expect(observed[0]?.data).toMatchObject(rootData)
+    expect(observed[0]?.node.key).toBe('root')
+    expect(observed[0]?.node.label).toBe('Root')
+    expect(observed[0]?.node).not.toHaveProperty('expanded')
   })
 
   it('保持递归 TreeNode 骨架在多层级下可见', async () => {
@@ -919,8 +1013,10 @@ describe('FlTree 契约', () => {
     expect(treeSource).not.toMatch(/PropType<[^>]*undefined/)
     expect(treeSource).not.toContain('default: undefined')
     expect(treeSource).not.toContain('TreeExpandPayload')
-    expect(treeTypesSource).toContain('className?: TreeClassValue')
+    expect(treeTypesSource).not.toContain('className?: TreeClassValue')
     expect(treeTypesSource).not.toContain('className: TreeClassValue | undefined')
+    expect(treeTypesSource).toContain('export interface TreeNodeClassNameInfo')
+    expect(treeTypesSource).toContain('export type TreeNodeClassName')
     expect(treeTypesSource).not.toContain('Props = unknown')
     expect(treeTypesSource).not.toContain('TreeSemanticInfo')
     expect(treeTypesSource).not.toContain('TreeSemanticResolver')
@@ -952,6 +1048,8 @@ describe('FlTree 契约', () => {
     expect(treeIndexSource).toContain('TreeShowLine')
     expect(treeIndexSource).toContain('TreeShowLineOptions')
     expect(treeIndexSource).toContain('TreeNodeModel')
+    expect(treeIndexSource).toContain('TreeNodeClassName')
+    expect(treeIndexSource).toContain('TreeNodeClassNameInfo')
     expect(treeIndexSource).toContain('TreeNode')
     expect(treeIndexSource).toContain('TreeScrollAlign')
     expect(treeIndexSource).toContain('TreeScrollToOptions')
@@ -984,6 +1082,8 @@ describe('FlTree 契约', () => {
     expect(componentsIndexSource).toContain('TreeShowLine')
     expect(componentsIndexSource).toContain('TreeShowLineOptions')
     expect(componentsIndexSource).toContain('TreeNodeModel')
+    expect(componentsIndexSource).toContain('TreeNodeClassName')
+    expect(componentsIndexSource).toContain('TreeNodeClassNameInfo')
     expect(componentsIndexSource).toContain('TreeNode')
     expect(componentsIndexSource).toContain('TreeScrollAlign')
     expect(componentsIndexSource).toContain('TreeScrollToOptions')
@@ -1017,8 +1117,12 @@ describe('FlTree 契约', () => {
       TreeSwitcherIconMode,
       TreeEmits,
       TreeExpandedNode,
-      TreeNodeModel
+      TreeNodeModel,
+      TreeNodeClassName,
+      TreeNodeClassNameInfo
     ]
+    const inferredNodeClassName: TreeProps['nodeClassName'] = ({ node, data }) =>
+      node.key === data.key ? 'type-check-node' : undefined
     const inferredClassNames: TreeProps['classNames'] = ({ props }) => ({
       root: props.checkable ? 'type-check-checkable-root' : 'type-check-root',
       item: props.showLine ? 'type-check-line-item' : 'type-check-item'
@@ -1037,6 +1141,7 @@ describe('FlTree 契约', () => {
       }
     })
     const treeTypeSmoke: TreeTypeSmoke | null = null
+    expect(typeof inferredNodeClassName).toBe('function')
     expect(typeof inferredClassNames).toBe('function')
     expect(typeof inferredStyles).toBe('function')
     expect(typeof treeClassNames).toBe('function')

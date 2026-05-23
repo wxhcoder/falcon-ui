@@ -29,6 +29,8 @@ export type {
   TreeLoadEvent,
   TreeNode,
   TreeNodeClickArgs,
+  TreeNodeClassName,
+  TreeNodeClassNameInfo,
   TreeNodeDblclickArgs,
   TreeNodeDragEndArgs,
   TreeNodeDragStartArgs,
