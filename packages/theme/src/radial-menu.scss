@@ -124,6 +124,71 @@
     transform: translateY(-50%);
   }
 
+  @include bem.e(more) {
+    position: absolute;
+    top: calc(50% + var(--fl-radial-menu-radius) + 18px);
+    left: 50%;
+    z-index: 3;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--el-fill-color-light);
+    color: var(--el-text-color-primary);
+    cursor: pointer;
+    pointer-events: auto;
+    transform: translateX(-50%);
+  }
+
+  @include bem.e(more-dropdown) {
+    position: absolute;
+    top: calc(50% + var(--fl-radial-menu-radius) + 54px);
+    left: 50%;
+    z-index: 4;
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 140px;
+    padding: 6px;
+    border: 1px solid var(--el-border-color-light);
+    border-radius: 8px;
+    background: var(--el-bg-color-overlay);
+    box-shadow: var(--el-box-shadow-light);
+    pointer-events: auto;
+    transform: translateX(-50%);
+  }
+
+  @include bem.e(more-item) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 30px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--el-text-color-regular);
+    cursor: pointer;
+    gap: 12px;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--fl-radial-menu-active-bg-color);
+      color: var(--fl-radial-menu-primary-color);
+    }
+
+    @include bem.when(disabled) {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  @include bem.e(shortcut) {
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--el-fill-color);
+    color: var(--el-text-color-secondary);
+    font-size: 11px;
+  }
+
   @include bem.when(disabled) {
     pointer-events: none;
     opacity: 0.6;

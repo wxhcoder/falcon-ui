@@ -152,3 +152,51 @@ describe('FlRadialMenu styles and active sector', () => {
     expect(wrapper.emitted('active-change')?.[0]?.[0]).toMatchObject({ key: 'item-2' })
   })
 })
+
+describe('FlRadialMenu More dropdown and select', () => {
+  it('renders overflow items in the More dropdown', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(8),
+        modelValue: true
+      }
+    })
+
+    expect(wrapper.findAll('.fl-radial-menu__item')).toHaveLength(6)
+    expect(wrapper.get('.fl-radial-menu__more').text()).toContain('More')
+
+    await wrapper.get('.fl-radial-menu__more').trigger('click')
+
+    expect(wrapper.findAll('.fl-radial-menu__more-item')).toHaveLength(2)
+  })
+
+  it('emits select and closes after choosing a ring item', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(2),
+        modelValue: true
+      }
+    })
+
+    await wrapper.get('[data-radial-menu-key="item-1"]').trigger('click')
+
+    expect(wrapper.emitted('select')?.[0]?.[0]).toMatchObject({ key: 'item-1' })
+    expect(wrapper.emitted('select')?.[0]?.[1]).toMatchObject({ source: 'ring', index: 0 })
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([false])
+  })
+
+  it('keeps open when closeOnSelect is false', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(2),
+        modelValue: true,
+        closeOnSelect: false
+      }
+    })
+
+    await wrapper.get('[data-radial-menu-key="item-1"]').trigger('click')
+
+    expect(wrapper.emitted('select')).toHaveLength(1)
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+})
