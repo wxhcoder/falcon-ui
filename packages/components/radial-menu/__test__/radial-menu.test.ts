@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { mount } from '@vue/test-utils'
+import RadialMenu from '../src/radial-menu.vue'
 import { splitRadialMenuItems } from '../src/use-radial-menu-items'
 import { getRadialMenuItemLayout, getRadialMenuSectorPath } from '../src/use-radial-menu-position'
 import type { FlRadialMenuItem } from '../src/types'
@@ -56,5 +58,64 @@ describe('radial menu helpers', () => {
     expect(path).toContain('A 112 112')
     expect(path).toContain('A 36 36')
     expect(path.endsWith(' Z')).toBe(true)
+  })
+})
+
+describe('FlRadialMenu basic ring display', () => {
+  it('renders only the center button before opening', () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(3),
+        centerLabel: 'Tools'
+      }
+    })
+
+    expect(wrapper.get('button').classes()).toContain('fl-radial-menu__center')
+    expect(wrapper.get('button').text()).toContain('Tools')
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(0)
+  })
+
+  it('opens ring items on center click', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(3)
+      }
+    })
+
+    await wrapper.get('button').trigger('click')
+
+    expect(wrapper.classes()).toContain('is-opened')
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(3)
+    expect(wrapper.find('[data-radial-menu-key="item-1"]').attributes('style')).toContain(
+      '--fl-radial-menu-item-x'
+    )
+  })
+
+  it('does not open from center click in manual trigger mode', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(2),
+        trigger: 'manual'
+      }
+    })
+
+    await wrapper.get('button').trigger('click')
+
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(0)
+  })
+
+  it('supports controlled modelValue', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(2),
+        modelValue: true
+      }
+    })
+
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(2)
+
+    await wrapper.setProps({ modelValue: false })
+
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(0)
   })
 })
