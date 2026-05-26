@@ -20,15 +20,26 @@
     </button>
 
     <div v-if="opened" :class="ns.e('panel')" role="menu">
+      <svg v-if="sectorPath" :class="ns.e('sector')" viewBox="-140 -140 280 280" aria-hidden="true">
+        <path :class="ns.e('sector-path')" :d="sectorPath" />
+      </svg>
+
       <button
         v-for="(item, index) in ringItems"
         :key="item.key"
         type="button"
         role="menuitem"
-        :class="[ns.e('item'), ns.is('disabled', item.disabled)]"
+        :class="[
+          ns.e('item'),
+          ns.is('active', activeRingIndex === index),
+          ns.is('disabled', item.disabled)
+        ]"
         :style="getItemStyle(index)"
         :disabled="item.disabled"
-        :data-radial-menu-key="item.key">
+        :data-radial-menu-key="item.key"
+        @mouseenter="setActiveRingIndex(index)"
+        @focus="setActiveRingIndex(index)"
+        @mouseleave="setActiveRingIndex(null)">
         <component :is="item.icon" v-if="item.icon && typeof item.icon !== 'string'" />
         <span v-else-if="item.icon" :class="ns.e('item-icon')">{{ item.icon }}</span>
         <span :class="ns.e('item-label')">{{ item.label }}</span>
@@ -38,11 +49,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRef, useTemplateRef } from 'vue'
+import { computed, ref, toRef, useTemplateRef } from 'vue'
 import { useNamespace } from '@falcon-ui/utils'
 import { flRadialMenuEmits, flRadialMenuProps } from './radial-menu'
 import { splitRadialMenuItems } from './use-radial-menu-items'
-import { getRadialMenuItemLayout } from './use-radial-menu-position'
+import { getRadialMenuItemLayout, getRadialMenuSectorPath } from './use-radial-menu-position'
 import { useRadialMenuState } from './use-radial-menu-state'
 import type { FlRadialMenuExpose, FlRadialMenuOpenOptions } from './types'
 
@@ -54,9 +65,25 @@ const props = defineProps(flRadialMenuProps)
 const emit = defineEmits(flRadialMenuEmits)
 const ns = useNamespace('radial-menu')
 const centerRef = useTemplateRef<HTMLButtonElement>('centerRef')
+const activeRingIndex = ref<number | null>(null)
 
 const splitItems = computed(() => splitRadialMenuItems(props.items, props.maxRingItems))
 const ringItems = computed(() => splitItems.value.ringItems)
+const activeItem = computed(() =>
+  activeRingIndex.value === null ? null : (ringItems.value[activeRingIndex.value] ?? null)
+)
+const sectorPath = computed(() => {
+  if (activeRingIndex.value === null || ringItems.value.length === 0) {
+    return ''
+  }
+
+  return getRadialMenuSectorPath({
+    activeIndex: activeRingIndex.value,
+    count: ringItems.value.length,
+    innerRadius: props.centerSize / 2 + 8,
+    outerRadius: props.radius + props.itemSize / 2 + 14
+  })
+})
 
 const { opened, open, close, toggle } = useRadialMenuState({
   modelValue: toRef(props, 'modelValue'),
@@ -90,6 +117,11 @@ const getItemStyle = (index: number) => {
     '--fl-radial-menu-item-y': `${layout.y}px`,
     '--fl-radial-menu-item-index': String(index)
   }
+}
+
+const setActiveRingIndex = (index: number | null) => {
+  activeRingIndex.value = index
+  emit('active-change', activeItem.value)
 }
 
 const handleCenterClick = () => {

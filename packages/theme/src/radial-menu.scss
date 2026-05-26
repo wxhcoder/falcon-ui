@@ -1,0 +1,137 @@
+@use './mixins/bem.scss' as bem;
+
+@include bem.b(radial-menu) {
+  --fl-radial-menu-primary-color: var(--el-color-primary);
+  --fl-radial-menu-track-color: var(--el-border-color-lighter);
+  --fl-radial-menu-active-bg-color: var(--el-color-primary-light-9);
+  --fl-radial-menu-active-ring-color: var(--el-color-primary-light-5);
+  --fl-radial-menu-duration: 180ms;
+  --fl-radial-menu-easing: cubic-bezier(0.2, 0, 0, 1);
+
+  position: relative;
+  z-index: var(--fl-radial-menu-z-index);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--fl-radial-menu-center-size);
+  height: var(--fl-radial-menu-center-size);
+
+  @include bem.e(center) {
+    position: relative;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--fl-radial-menu-center-size);
+    height: var(--fl-radial-menu-center-size);
+    border: 2px solid var(--fl-radial-menu-primary-color);
+    border-radius: 50%;
+    background: var(--el-bg-color);
+    color: var(--fl-radial-menu-primary-color);
+    cursor: pointer;
+  }
+
+  @include bem.e(center-label) {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  @include bem.e(panel) {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: calc(var(--fl-radial-menu-radius) * 2);
+      height: calc(var(--fl-radial-menu-radius) * 2);
+      border: 2px solid var(--fl-radial-menu-track-color);
+      border-radius: 50%;
+      content: '';
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  @include bem.e(sector) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 280px;
+    height: 280px;
+    overflow: visible;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+
+  @include bem.e(sector-path) {
+    fill: color-mix(in srgb, var(--fl-radial-menu-primary-color) 14%, transparent);
+  }
+
+  @include bem.e(item) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--fl-radial-menu-item-size);
+    height: var(--fl-radial-menu-item-size);
+    border: 1px solid var(--el-border-color-light);
+    border-radius: 12px;
+    background: var(--el-bg-color);
+    box-shadow: var(--el-box-shadow-light);
+    color: var(--el-text-color-regular);
+    cursor: pointer;
+    pointer-events: auto;
+    transform: translate(
+        calc(-50% + var(--fl-radial-menu-item-x)),
+        calc(-50% + var(--fl-radial-menu-item-y))
+      )
+      scale(1);
+    transition:
+      transform var(--fl-radial-menu-duration) var(--fl-radial-menu-easing),
+      opacity var(--fl-radial-menu-duration) var(--fl-radial-menu-easing),
+      border-color var(--fl-radial-menu-duration) var(--fl-radial-menu-easing),
+      color var(--fl-radial-menu-duration) var(--fl-radial-menu-easing);
+
+    @include bem.when(active) {
+      border-color: var(--fl-radial-menu-primary-color);
+      background: var(--fl-radial-menu-active-bg-color);
+      color: var(--fl-radial-menu-primary-color);
+    }
+
+    @include bem.when(disabled) {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  @include bem.e(item-label) {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 8px);
+    max-width: 120px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--el-fill-color-light);
+    color: var(--el-text-color-primary);
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    transform: translateY(-50%);
+  }
+
+  @include bem.when(disabled) {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    @include bem.e(item) {
+      transition: none;
+    }
+  }
+}

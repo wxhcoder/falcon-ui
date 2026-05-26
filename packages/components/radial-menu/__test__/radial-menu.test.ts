@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import RadialMenu from '../src/radial-menu.vue'
@@ -10,6 +12,9 @@ const createItems = (count: number): FlRadialMenuItem[] =>
     key: `item-${index + 1}`,
     label: `Item ${index + 1}`
   }))
+
+const readProjectFile = (relativePath: string) =>
+  readFileSync(resolve(process.cwd(), relativePath), 'utf8')
 
 describe('radial menu helpers', () => {
   it('filters hidden items and limits ring items to six', () => {
@@ -117,5 +122,33 @@ describe('FlRadialMenu basic ring display', () => {
     await wrapper.setProps({ modelValue: false })
 
     expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(0)
+  })
+})
+
+describe('FlRadialMenu styles and active sector', () => {
+  it('uses Falcon BEM helpers in Vue and SCSS sources', () => {
+    const vueSource = readProjectFile('packages/components/radial-menu/src/radial-menu.vue')
+    const scssSource = readProjectFile('packages/theme/src/radial-menu.scss')
+
+    expect(vueSource).toContain("useNamespace('radial-menu')")
+    expect(scssSource).toContain('@include bem.b(radial-menu)')
+    expect(scssSource).toContain('@include bem.e(center)')
+    expect(scssSource).toContain('@include bem.e(item)')
+    expect(scssSource).not.toContain('.fl-radial-menu__item')
+  })
+
+  it('sets active item and sector on hover', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(3),
+        modelValue: true
+      }
+    })
+
+    await wrapper.find('[data-radial-menu-key="item-2"]').trigger('mouseenter')
+
+    expect(wrapper.find('[data-radial-menu-key="item-2"]').classes()).toContain('is-active')
+    expect(wrapper.find('.fl-radial-menu__sector-path').exists()).toBe(true)
+    expect(wrapper.emitted('active-change')?.[0]?.[0]).toMatchObject({ key: 'item-2' })
   })
 })
