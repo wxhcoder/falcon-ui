@@ -100,6 +100,7 @@ import { flRadialMenuEmits, flRadialMenuProps } from './radial-menu'
 import { splitRadialMenuItems } from './use-radial-menu-items'
 import { useRadialMenuKeyboard } from './use-radial-menu-keyboard'
 import { getRadialMenuItemLayout, getRadialMenuSectorPath } from './use-radial-menu-position'
+import { useRadialMenuShortcut } from './use-radial-menu-shortcut'
 import { useRadialMenuState } from './use-radial-menu-state'
 import type { FlRadialMenuExpose, FlRadialMenuItem, FlRadialMenuOpenOptions } from './types'
 
@@ -135,10 +136,16 @@ const sectorPath = computed(() => {
   })
 })
 
-const { opened, open, close, toggle } = useRadialMenuState({
+const { opened, floatingX, floatingY, open, close, toggle } = useRadialMenuState({
   modelValue: toRef(props, 'modelValue'),
   disabled: toRef(props, 'disabled'),
   emitUpdate: (nextOpened) => emit('update:modelValue', nextOpened)
+})
+
+useRadialMenuShortcut({
+  shortcut: toRef(props, 'shortcut'),
+  enabled: computed(() => props.shortcutEnabled && Boolean(props.shortcut)),
+  open
 })
 
 const rootClass = computed(() => [
@@ -152,6 +159,8 @@ const rootStyle = computed(() => ({
   '--fl-radial-menu-radius': `${props.radius}px`,
   '--fl-radial-menu-center-size': `${props.centerSize}px`,
   '--fl-radial-menu-item-size': `${props.itemSize}px`,
+  '--fl-radial-menu-floating-x': `${floatingX.value ?? (typeof window === 'undefined' ? 0 : window.innerWidth / 2)}px`,
+  '--fl-radial-menu-floating-y': `${floatingY.value ?? (typeof window === 'undefined' ? 0 : window.innerHeight / 2)}px`,
   '--fl-radial-menu-z-index': String(props.zIndex)
 }))
 

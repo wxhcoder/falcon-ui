@@ -31,6 +31,13 @@
     cursor: pointer;
   }
 
+  @include bem.m(floating) {
+    position: fixed;
+    top: var(--fl-radial-menu-floating-y);
+    left: var(--fl-radial-menu-floating-x);
+    transform: translate(-50%, -50%);
+  }
+
   @include bem.e(center-label) {
     font-size: 13px;
     line-height: 1;

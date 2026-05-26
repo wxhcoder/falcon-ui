@@ -255,3 +255,46 @@ describe('FlRadialMenu keyboard accessibility', () => {
     wrapper.unmount()
   })
 })
+
+describe('FlRadialMenu floating shortcut', () => {
+  it('opens in floating mode from shortcut using last mouse position', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: createItems(2),
+        mode: 'floating',
+        shortcut: 'Alt+W'
+      }
+    })
+
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 320, clientY: 180 }))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', altKey: true }))
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.classes()).toContain('fl-radial-menu--floating')
+    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-floating-x: 320px')
+    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-floating-y: 180px')
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(2)
+    wrapper.unmount()
+  })
+
+  it('does not trigger shortcut from editable targets', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: createItems(2),
+        mode: 'floating',
+        shortcut: 'Alt+W'
+      }
+    })
+    const input = document.createElement('input')
+    document.body.appendChild(input)
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', altKey: true, bubbles: true }))
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(0)
+    input.remove()
+    wrapper.unmount()
+  })
+})
