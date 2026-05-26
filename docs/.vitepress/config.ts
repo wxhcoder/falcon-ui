@@ -47,7 +47,8 @@ export default defineConfig({
             { text: 'FlInputSearch', link: '/components/input-search' },
             { text: 'FlInputNumber', link: '/components/input-number' },
             { text: 'FlTree', link: '/components/tree' },
-            { text: 'FlTable', link: '/components/table' }
+            { text: 'FlTable', link: '/components/table' },
+            { text: 'FlRadialMenu', link: '/components/radial-menu' }
           ]
         }
       ]

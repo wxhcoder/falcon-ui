@@ -616,6 +616,7 @@ import type {
   TreeData,
   TreeCheckEvent,
   TreeCheckedKeys,
+  TreeExpandedNode,
   TreeExpose,
   TreeKey,
   TreeInteractionEvent,
@@ -807,8 +808,7 @@ interface TreeEventRecord {
 const treeNodeProps: TreeNodeProps = {
   label: 'name',
   children: 'nodes',
-  isLeaf: 'leaf',
-  class: 'className'
+  isLeaf: 'leaf'
 }
 
 const treeData = reactive<TreeData[]>([
@@ -1869,7 +1869,11 @@ const handleTreeCheck = (checkedKeys: TreeCheckedKeys, event: TreeCheckEvent) =>
 /**
  * 演示 `node-expand` 事件，重点展示切换后的展开状态与节点层级信息。
  */
-const handleTreeNodeExpand = (data: TreeData, node: TreeNode, instance: TreeNodeInstance) => {
+const handleTreeNodeExpand = (
+  data: TreeData,
+  node: TreeExpandedNode,
+  instance: TreeNodeInstance
+) => {
   const summary = `${formatTreeNodeSummary(node)}, rawLabel=${readTreeLabel(data)}, expanded=${node.expanded}, instance=${instance ? 'ready' : 'null'}`
 
   treeNodeExpandCount.value += 1
@@ -1880,7 +1884,11 @@ const handleTreeNodeExpand = (data: TreeData, node: TreeNode, instance: TreeNode
 /**
  * 演示 `node-collapse` 事件，重点展示切换后的展开状态与节点层级信息。
  */
-const handleTreeNodeCollapse = (data: TreeData, node: TreeNode, instance: TreeNodeInstance) => {
+const handleTreeNodeCollapse = (
+  data: TreeData,
+  node: TreeExpandedNode,
+  instance: TreeNodeInstance
+) => {
   const summary = `${formatTreeNodeSummary(node)}, rawLabel=${readTreeLabel(data)}, expanded=${node.expanded}, instance=${instance ? 'ready' : 'null'}`
 
   treeNodeCollapseCount.value += 1

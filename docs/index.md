@@ -13,3 +13,4 @@ Falcon UI 是基于 Element Plus 的二次封装组件库。
 - `FlInput`
 - `FlSelect`
 - `FlInputNumber`
+- `FlRadialMenu`

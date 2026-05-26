@@ -1,0 +1,212 @@
+{
+  "component": "fl-radial-menu",
+  "description": "",
+  "events": [
+    {
+      "description": "",
+      "name": "active-change",
+      "signature": "(event: \"active-change\", item: FlRadialMenuItem | null): void",
+      "type": "[item: FlRadialMenuItem | null]"
+    },
+    {
+      "description": "",
+      "name": "close",
+      "signature": "(event: \"close\", reason: FlRadialMenuCloseReason): void",
+      "type": "[reason: FlRadialMenuCloseReason]"
+    },
+    {
+      "description": "",
+      "name": "more-close",
+      "signature": "(event: \"more-close\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "more-open",
+      "signature": "(event: \"more-open\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "",
+      "name": "open",
+      "signature": "(event: \"open\", reason: FlRadialMenuOpenReason): void",
+      "type": "[reason: FlRadialMenuOpenReason]"
+    },
+    {
+      "description": "",
+      "name": "select",
+      "signature": "(event: \"select\", item: FlRadialMenuItem, context: FlRadialMenuSelectContext): void",
+      "type": "[item: FlRadialMenuItem, context: FlRadialMenuSelectContext]"
+    },
+    {
+      "description": "",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", opened: boolean): void",
+      "type": "[opened: boolean]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "",
+      "name": "close",
+      "type": "(reason?: FlRadialMenuCloseReason | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "focus",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "open",
+      "type": "(options?: FlRadialMenuOpenOptions | undefined) => void"
+    },
+    {
+      "description": "",
+      "name": "toggle",
+      "type": "(options?: FlRadialMenuOpenOptions | undefined) => void"
+    }
+  ],
+  "props": [
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "centerIcon",
+      "required": false,
+      "type": "string | Component | undefined"
+    },
+    {
+      "default": "''",
+      "description": "",
+      "name": "centerLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "56",
+      "description": "",
+      "name": "centerSize",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "true",
+      "description": "",
+      "name": "closeOnSelect",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "[]",
+      "description": "",
+      "name": "items",
+      "required": false,
+      "type": "FlRadialMenuItem[] | undefined"
+    },
+    {
+      "default": "44",
+      "description": "",
+      "name": "itemSize",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "6",
+      "description": "",
+      "name": "maxRingItems",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'inline'",
+      "description": "",
+      "name": "mode",
+      "required": false,
+      "type": "FlRadialMenuMode | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "modelValue",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'bottom'",
+      "description": "",
+      "name": "moreDropdownPlacement",
+      "required": false,
+      "type": "FlRadialMenuDropdownPlacement | undefined"
+    },
+    {
+      "default": "'text-ellipsis'",
+      "description": "",
+      "name": "moreMode",
+      "required": false,
+      "type": "FlRadialMenuMoreMode | undefined"
+    },
+    {
+      "default": "'More'",
+      "description": "",
+      "name": "moreText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "96",
+      "description": "",
+      "name": "radius",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "",
+      "name": "shortcut",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "true",
+      "description": "",
+      "name": "shortcutEnabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "true",
+      "description": "",
+      "name": "teleport",
+      "required": false,
+      "type": "string | boolean | undefined"
+    },
+    {
+      "default": "'click'",
+      "description": "",
+      "name": "trigger",
+      "required": false,
+      "type": "FlRadialMenuTrigger | undefined"
+    },
+    {
+      "default": "2000",
+      "description": "",
+      "name": "zIndex",
+      "required": false,
+      "type": "number | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "",
+      "name": "center",
+      "type": "{}"
+    }
+  ]
+}
