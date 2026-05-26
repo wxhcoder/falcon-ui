@@ -200,3 +200,58 @@ describe('FlRadialMenu More dropdown and select', () => {
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
   })
 })
+
+describe('FlRadialMenu keyboard accessibility', () => {
+  it('moves focus with arrow keys and skips disabled items', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: [
+          { key: 'a', label: 'A' },
+          { key: 'b', label: 'B', disabled: true },
+          { key: 'c', label: 'C' }
+        ],
+        modelValue: true
+      }
+    })
+
+    const first = wrapper.get('[data-radial-menu-key="a"]')
+    await first.trigger('focus')
+    await first.trigger('keydown', { key: 'ArrowRight' })
+
+    expect(document.activeElement).toBe(wrapper.get('[data-radial-menu-key="c"]').element)
+    wrapper.unmount()
+  })
+
+  it('activates the focused item with Enter', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: createItems(2),
+        modelValue: true
+      }
+    })
+
+    const first = wrapper.get('[data-radial-menu-key="item-1"]')
+    await first.trigger('focus')
+    await first.trigger('keydown', { key: 'Enter' })
+
+    expect(wrapper.emitted('select')?.[0]?.[0]).toMatchObject({ key: 'item-1' })
+    wrapper.unmount()
+  })
+
+  it('closes on Escape', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: createItems(2),
+        modelValue: true
+      }
+    })
+
+    await wrapper.get('[role="menu"]').trigger('keydown', { key: 'Escape' })
+
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([false])
+    wrapper.unmount()
+  })
+})

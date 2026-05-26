@@ -19,7 +19,7 @@
       </slot>
     </button>
 
-    <div v-if="opened" :class="ns.e('panel')" role="menu">
+    <div v-if="opened" :class="ns.e('panel')" role="menu" @keydown="handleMenuKeydown">
       <svg v-if="sectorPath" :class="ns.e('sector')" viewBox="-140 -140 280 280" aria-hidden="true">
         <path :class="ns.e('sector-path')" :d="sectorPath" />
       </svg>
@@ -27,6 +27,7 @@
       <button
         v-for="(item, index) in ringItems"
         :key="item.key"
+        :ref="(element) => setRingButtonRef(element, index)"
         type="button"
         role="menuitem"
         :class="[
@@ -36,11 +37,14 @@
         ]"
         :style="getItemStyle(index)"
         :disabled="item.disabled"
+        :tabindex="item.disabled ? -1 : 0"
+        :aria-disabled="String(item.disabled === true)"
         :data-radial-menu-key="item.key"
         @mouseenter="setActiveRingIndex(index)"
         @focus="setActiveRingIndex(index)"
         @mouseleave="setActiveRingIndex(null)"
-        @click="activateItem(item, 'ring', index, $event)">
+        @click="activateItem(item, 'ring', index, $event)"
+        @keydown="handleRingKeydown($event, index)">
         <component :is="item.icon" v-if="item.icon && typeof item.icon !== 'string'" />
         <span v-else-if="item.icon" :class="ns.e('item-icon')">{{ item.icon }}</span>
         <span :class="ns.e('item-label')">{{ item.label }}</span>
@@ -63,12 +67,16 @@
         <button
           v-for="(item, index) in moreItems"
           :key="item.key"
+          :ref="(element) => setMoreButtonRef(element, index)"
           type="button"
           role="menuitem"
           :class="[ns.e('more-item'), ns.is('disabled', item.disabled === true)]"
           :disabled="item.disabled"
+          :tabindex="item.disabled ? -1 : 0"
+          :aria-disabled="String(item.disabled === true)"
           :data-radial-menu-more-key="item.key"
-          @click="activateItem(item, 'more', index, $event)">
+          @click="activateItem(item, 'more', index, $event)"
+          @keydown="handleMoreKeydown($event, index)">
           <span :class="ns.e('more-label')">{{ item.label }}</span>
           <span v-if="item.shortcut" :class="ns.e('shortcut')">{{ item.shortcut }}</span>
         </button>
@@ -78,10 +86,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, toRef, useTemplateRef } from 'vue'
+import {
+  computed,
+  nextTick,
+  ref,
+  toRef,
+  useTemplateRef,
+  watch,
+  type ComponentPublicInstance
+} from 'vue'
 import { useNamespace } from '@falcon-ui/utils'
 import { flRadialMenuEmits, flRadialMenuProps } from './radial-menu'
 import { splitRadialMenuItems } from './use-radial-menu-items'
+import { useRadialMenuKeyboard } from './use-radial-menu-keyboard'
 import { getRadialMenuItemLayout, getRadialMenuSectorPath } from './use-radial-menu-position'
 import { useRadialMenuState } from './use-radial-menu-state'
 import type { FlRadialMenuExpose, FlRadialMenuItem, FlRadialMenuOpenOptions } from './types'
@@ -96,6 +113,8 @@ const ns = useNamespace('radial-menu')
 const centerRef = useTemplateRef<HTMLButtonElement>('centerRef')
 const activeRingIndex = ref<number | null>(null)
 const moreOpened = ref(false)
+const ringButtonRefs = ref<HTMLButtonElement[]>([])
+const moreButtonRefs = ref<HTMLButtonElement[]>([])
 
 const splitItems = computed(() => splitRadialMenuItems(props.items, props.maxRingItems))
 const ringItems = computed(() => splitItems.value.ringItems)
@@ -167,6 +186,18 @@ const setActiveRingIndex = (index: number | null) => {
   emit('active-change', activeItem.value)
 }
 
+const setRingButtonRef = (element: Element | ComponentPublicInstance | null, index: number) => {
+  if (element instanceof HTMLButtonElement) {
+    ringButtonRefs.value[index] = element
+  }
+}
+
+const setMoreButtonRef = (element: Element | ComponentPublicInstance | null, index: number) => {
+  if (element instanceof HTMLButtonElement) {
+    moreButtonRefs.value[index] = element
+  }
+}
+
 const setMoreOpened = (nextOpened: boolean) => {
   moreOpened.value = nextOpened
   emit(nextOpened ? 'more-open' : 'more-close')
@@ -190,6 +221,37 @@ const activateItem = (
     close('select')
   }
 }
+
+const activateKeyboardItem = (event: KeyboardEvent) => {
+  const target = event.currentTarget
+  if (!(target instanceof HTMLElement)) {
+    return
+  }
+
+  target.click()
+}
+
+const { focusFirstAvailableRingItem, handleMenuKeydown, handleRingKeydown, handleMoreKeydown } =
+  useRadialMenuKeyboard({
+    ringItems,
+    moreItems,
+    ringRefs: ringButtonRefs,
+    moreRefs: moreButtonRefs,
+    closeMenu: () => close('escape'),
+    closeMore: () => {
+      moreOpened.value = false
+    },
+    activateFocused: activateKeyboardItem
+  })
+
+watch(opened, async (nextOpened) => {
+  if (!nextOpened) {
+    return
+  }
+
+  await nextTick()
+  focusFirstAvailableRingItem()
+})
 
 const handleCenterClick = () => {
   if (props.disabled || props.trigger !== 'click') {
