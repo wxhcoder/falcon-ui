@@ -80,7 +80,7 @@ export const flRadialMenuProps = {
     default: 44
   },
   teleport: {
-    type: [Boolean, String],
+    type: [Boolean, String] as unknown as PropType<boolean | string>,
     default: true
   },
   zIndex: {

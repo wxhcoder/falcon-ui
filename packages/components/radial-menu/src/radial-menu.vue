@@ -8,14 +8,18 @@
       ref="centerRef"
       type="button"
       :class="ns.e('center')"
-      :disabled="disabled"
-      :aria-expanded="String(opened)"
+      :disabled="props.disabled"
+      :aria-expanded="opened"
       aria-haspopup="menu"
       @click="handleCenterClick">
       <slot name="center">
-        <component :is="centerIcon" v-if="centerIcon && typeof centerIcon !== 'string'" />
-        <span v-else-if="centerIcon" :class="ns.e('center-icon')">{{ centerIcon }}</span>
-        <span v-if="centerLabel" :class="ns.e('center-label')">{{ centerLabel }}</span>
+        <component
+          :is="props.centerIcon"
+          v-if="props.centerIcon && typeof props.centerIcon !== 'string'" />
+        <span v-else-if="props.centerIcon" :class="ns.e('center-icon')">
+          {{ props.centerIcon }}
+        </span>
+        <span v-if="props.centerLabel" :class="ns.e('center-label')">{{ props.centerLabel }}</span>
       </slot>
     </button>
 
@@ -38,7 +42,7 @@
         :style="getItemStyle(index)"
         :disabled="item.disabled"
         :tabindex="item.disabled ? -1 : 0"
-        :aria-disabled="String(item.disabled === true)"
+        :aria-disabled="item.disabled === true"
         :data-radial-menu-key="item.key"
         @mouseenter="setActiveRingIndex(index)"
         @focus="setActiveRingIndex(index)"
@@ -55,14 +59,14 @@
         type="button"
         :class="ns.e('more')"
         aria-haspopup="menu"
-        :aria-expanded="String(moreOpened)"
+        :aria-expanded="moreOpened"
         @click="setMoreOpened(!moreOpened)">
         {{ moreLabel }}
       </button>
 
       <div
         v-if="moreOpened"
-        :class="[ns.e('more-dropdown'), ns.m(`more-${moreDropdownPlacement}`)]"
+        :class="[ns.e('more-dropdown'), ns.m(`more-${props.moreDropdownPlacement}`)]"
         role="menu">
         <button
           v-for="(item, index) in moreItems"
@@ -73,7 +77,7 @@
           :class="[ns.e('more-item'), ns.is('disabled', item.disabled === true)]"
           :disabled="item.disabled"
           :tabindex="item.disabled ? -1 : 0"
-          :aria-disabled="String(item.disabled === true)"
+          :aria-disabled="item.disabled === true"
           :data-radial-menu-more-key="item.key"
           @click="activateItem(item, 'more', index, $event)"
           @keydown="handleMoreKeydown($event, index)">
@@ -209,7 +213,11 @@ const setMoreButtonRef = (element: Element | ComponentPublicInstance | null, ind
 
 const setMoreOpened = (nextOpened: boolean) => {
   moreOpened.value = nextOpened
-  emit(nextOpened ? 'more-open' : 'more-close')
+  if (nextOpened) {
+    emit('more-open')
+  } else {
+    emit('more-close')
+  }
 }
 
 const activateItem = (

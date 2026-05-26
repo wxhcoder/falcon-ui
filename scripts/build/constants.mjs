@@ -59,6 +59,15 @@ const entryPoints = {
   'components/table/index': resolve(packagesDir, 'components/table/index.ts'),
   'components/table/src/table': resolve(packagesDir, 'components/table/src/table.ts'),
   'components/table/src/table.vue': resolve(packagesDir, 'components/table/src/table.vue'),
+  'components/radial-menu/index': resolve(packagesDir, 'components/radial-menu/index.ts'),
+  'components/radial-menu/src/radial-menu': resolve(
+    packagesDir,
+    'components/radial-menu/src/radial-menu.ts'
+  ),
+  'components/radial-menu/src/radial-menu.vue': resolve(
+    packagesDir,
+    'components/radial-menu/src/radial-menu.vue'
+  ),
   'utils/index': resolve(packagesDir, 'utils/index.ts'),
   'hooks/index': resolve(packagesDir, 'hooks/index.ts'),
   'icons/index': resolve(packagesDir, 'icons/index.ts')

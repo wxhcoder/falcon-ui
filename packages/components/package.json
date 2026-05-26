@@ -18,6 +18,7 @@
     "./barcode": "./barcode/index.ts",
     "./select": "./select/index.ts",
     "./tree": "./tree/index.ts",
+    "./radial-menu": "./radial-menu/index.ts",
     "./table": "./table/index.ts"
   },
   "scripts": {

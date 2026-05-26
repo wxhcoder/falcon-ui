@@ -7,6 +7,7 @@ import type {
   FlInputNumber,
   FlInputSearch,
   FlQrCode,
+  FlRadialMenu,
   FlSelect,
   FlTree,
   FlTable,
@@ -23,6 +24,7 @@ declare module 'vue' {
     FlInputSearch: typeof FlInputSearch
     FlInputNumber: typeof FlInputNumber
     FlQrCode: typeof FlQrCode
+    FlRadialMenu: typeof FlRadialMenu
     FlSelect: typeof FlSelect
     FlTree: typeof FlTree
     FlTable: typeof FlTable

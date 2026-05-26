@@ -57,6 +57,11 @@ const buildMeta = async () => {
         import: './esm/components/table/index.mjs',
         require: './cjs/components/table/index.cjs'
       },
+      './components/radial-menu': {
+        types: './types/components/radial-menu/index.d.ts',
+        import: './esm/components/radial-menu/index.mjs',
+        require: './cjs/components/radial-menu/index.cjs'
+      },
       './utils': {
         types: './types/utils/index.d.ts',
         import: './esm/utils/index.mjs',

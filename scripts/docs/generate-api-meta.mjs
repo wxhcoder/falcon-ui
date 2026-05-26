@@ -54,6 +54,10 @@ const targets = [
   {
     id: 'fl-table',
     filePath: path.resolve(rootDir, 'packages/components/table/src/table.vue')
+  },
+  {
+    id: 'fl-radial-menu',
+    filePath: path.resolve(rootDir, 'packages/components/radial-menu/src/radial-menu.vue')
   }
 ]
 
