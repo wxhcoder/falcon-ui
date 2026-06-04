@@ -1,5 +1,7 @@
 <template>
-  <FlRadialMenu :items="items" center-label="Menu" more-mode="text-ellipsis" />
+  <div class="radial-menu-demo-stage">
+    <FlRadialMenu :items="items" center-label="Menu" more-mode="text-ellipsis" />
+  </div>
 </template>
 
 <script setup lang="ts">

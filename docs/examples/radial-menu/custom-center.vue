@@ -1,9 +1,11 @@
 <template>
-  <FlRadialMenu :items="items">
-    <template #center>
-      <span class="radial-menu-custom-center">⌘</span>
-    </template>
-  </FlRadialMenu>
+  <div class="radial-menu-demo-stage">
+    <FlRadialMenu :items="items">
+      <template #center>
+        <span class="radial-menu-custom-center">⌘</span>
+      </template>
+    </FlRadialMenu>
+  </div>
 </template>
 
 <script setup lang="ts">

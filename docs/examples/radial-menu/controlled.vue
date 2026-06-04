@@ -1,5 +1,5 @@
 <template>
-  <div class="radial-menu-controlled-demo">
+  <div class="radial-menu-demo-stage radial-menu-controlled-demo">
     <button type="button" @click="opened = !opened">Toggle</button>
     <FlRadialMenu v-model="opened" trigger="manual" :items="items" center-label="Manual" />
   </div>
@@ -19,8 +19,12 @@ const items: FlRadialMenuItem[] = [
 
 <style scoped>
 .radial-menu-controlled-demo {
-  display: flex;
-  align-items: center;
-  gap: 24px;
+  position: relative;
+}
+
+.radial-menu-controlled-demo button {
+  position: absolute;
+  top: 16px;
+  left: 16px;
 }
 </style>

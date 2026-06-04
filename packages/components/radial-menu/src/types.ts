@@ -16,6 +16,8 @@ export type FlRadialMenuMode = 'inline' | 'floating'
 export type FlRadialMenuTrigger = 'click' | 'hover' | 'manual'
 export type FlRadialMenuMoreMode = 'ellipsis' | 'text' | 'text-ellipsis'
 export type FlRadialMenuDropdownPlacement = 'bottom' | 'top'
+export type FlRadialMenuSize = 'large' | 'medium' | 'small'
+export type FlRadialMenuItemType = 'square' | 'circle'
 export type FlRadialMenuOpenReason = 'click' | 'hover' | 'manual' | 'shortcut'
 export type FlRadialMenuCloseReason =
   | 'click-outside'

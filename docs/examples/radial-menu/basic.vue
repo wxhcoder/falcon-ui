@@ -1,5 +1,7 @@
 <template>
-  <FlRadialMenu :items="items" center-label="Tools" @select="handleSelect" />
+  <div class="radial-menu-demo-stage">
+    <FlRadialMenu :items="items" center-label="Tools" @select="handleSelect" />
+  </div>
 </template>
 
 <script setup lang="ts">

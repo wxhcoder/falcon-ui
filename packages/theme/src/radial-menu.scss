@@ -5,6 +5,7 @@
   --fl-radial-menu-track-color: var(--el-border-color-lighter);
   --fl-radial-menu-active-bg-color: var(--el-color-primary-light-9);
   --fl-radial-menu-active-ring-color: var(--el-color-primary-light-5);
+  --fl-radial-menu-border-width: 2px;
   --fl-radial-menu-duration: 180ms;
   --fl-radial-menu-easing: cubic-bezier(0.2, 0, 0, 1);
 
@@ -24,7 +25,7 @@
     justify-content: center;
     width: var(--fl-radial-menu-center-size);
     height: var(--fl-radial-menu-center-size);
-    border: 2px solid var(--fl-radial-menu-primary-color);
+    border: var(--fl-radial-menu-border-width) solid var(--fl-radial-menu-primary-color);
     border-radius: 50%;
     background: var(--el-bg-color);
     color: var(--fl-radial-menu-primary-color);
@@ -47,18 +48,6 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-
-    &::before {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: calc(var(--fl-radial-menu-radius) * 2);
-      height: calc(var(--fl-radial-menu-radius) * 2);
-      border: 2px solid var(--fl-radial-menu-track-color);
-      border-radius: 50%;
-      content: '';
-      transform: translate(-50%, -50%);
-    }
   }
 
   @include bem.e(sector) {
@@ -72,8 +61,21 @@
     transform: translate(-50%, -50%);
   }
 
+  @include bem.e(track) {
+    fill: none;
+    stroke: var(--fl-radial-menu-track-color);
+    stroke-width: var(--fl-radial-menu-border-width);
+  }
+
   @include bem.e(sector-path) {
     fill: color-mix(in srgb, var(--fl-radial-menu-primary-color) 14%, transparent);
+  }
+
+  @include bem.e(track-active) {
+    fill: none;
+    stroke: var(--fl-radial-menu-primary-color);
+    stroke-linecap: butt;
+    stroke-width: var(--fl-radial-menu-border-width);
   }
 
   @include bem.e(item) {
@@ -86,7 +88,7 @@
     justify-content: center;
     width: var(--fl-radial-menu-item-size);
     height: var(--fl-radial-menu-item-size);
-    border: 1px solid var(--el-border-color-light);
+    border: var(--fl-radial-menu-border-width) solid var(--el-border-color-light);
     border-radius: 12px;
     background: var(--el-bg-color);
     box-shadow: var(--el-box-shadow-light);
@@ -116,19 +118,62 @@
     }
   }
 
+  @include bem.m(item-square) {
+    #{bem.selector('radial-menu', 'item')} {
+      border-radius: 12px;
+    }
+  }
+
+  @include bem.m(item-circle) {
+    #{bem.selector('radial-menu', 'item')} {
+      border-radius: 50%;
+    }
+  }
+
   @include bem.e(item-label) {
     position: absolute;
-    top: 50%;
-    left: calc(100% + 8px);
-    max-width: 120px;
-    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    height: 24px;
+    padding: 0 9px;
     border-radius: 999px;
     background: var(--el-fill-color-light);
+    box-sizing: border-box;
     color: var(--el-text-color-primary);
     font-size: 12px;
     line-height: 1;
     white-space: nowrap;
-    transform: translateY(-50%);
+
+    @include bem.m(tip-left) {
+      top: 50%;
+      right: calc(100% + 8px);
+      transform: translateY(-50%);
+    }
+
+    @include bem.m(tip-right) {
+      top: 50%;
+      left: calc(100% + 8px);
+      transform: translateY(-50%);
+    }
+
+    @include bem.m(tip-top) {
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @include bem.m(tip-bottom) {
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @include bem.m(hidden-by-more) {
+      opacity: 0;
+      pointer-events: none;
+    }
   }
 
   @include bem.e(more) {
@@ -136,6 +181,9 @@
     top: calc(50% + var(--fl-radial-menu-radius) + 18px);
     left: 50%;
     z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 6px 12px;
     border: 0;
     border-radius: 999px;
@@ -144,6 +192,7 @@
     cursor: pointer;
     pointer-events: auto;
     transform: translateX(-50%);
+    white-space: nowrap;
   }
 
   @include bem.e(more-dropdown) {

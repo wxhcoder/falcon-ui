@@ -1,6 +1,6 @@
 <template>
-  <div class="radial-menu-shortcut-demo">
-    <p>Move the mouse inside this area, then press Alt + W.</p>
+  <div class="radial-menu-demo-stage radial-menu-shortcut-demo">
+    <p>Press Alt + W.</p>
     <FlRadialMenu mode="floating" shortcut="Alt+W" :items="items" center-label="+" />
   </div>
 </template>
@@ -17,8 +17,23 @@ const items: FlRadialMenuItem[] = [
 
 <style scoped>
 .radial-menu-shortcut-demo {
-  min-height: 240px;
-  padding: 24px;
+  position: relative;
   border: 1px dashed var(--el-border-color);
+}
+
+.radial-menu-shortcut-demo p {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  margin: 0;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+}
+
+.radial-menu-shortcut-demo :deep(.fl-radial-menu--floating) {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
 }
 </style>

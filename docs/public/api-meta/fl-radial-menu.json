@@ -83,7 +83,7 @@
       "type": "string | undefined"
     },
     {
-      "default": "56",
+      "default": "-",
       "description": "",
       "name": "centerSize",
       "required": false,
@@ -111,11 +111,18 @@
       "type": "FlRadialMenuItem[] | undefined"
     },
     {
-      "default": "44",
+      "default": "-",
       "description": "",
       "name": "itemSize",
       "required": false,
       "type": "number | undefined"
+    },
+    {
+      "default": "'square'",
+      "description": "",
+      "name": "itemType",
+      "required": false,
+      "type": "FlRadialMenuItemType | undefined"
     },
     {
       "default": "6",
@@ -160,7 +167,7 @@
       "type": "string | undefined"
     },
     {
-      "default": "96",
+      "default": "-",
       "description": "",
       "name": "radius",
       "required": false,
@@ -179,6 +186,13 @@
       "name": "shortcutEnabled",
       "required": false,
       "type": "boolean | undefined"
+    },
+    {
+      "default": "'large'",
+      "description": "",
+      "name": "size",
+      "required": false,
+      "type": "FlRadialMenuSize | undefined"
     },
     {
       "default": "true",

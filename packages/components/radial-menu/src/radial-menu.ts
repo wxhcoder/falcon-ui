@@ -3,12 +3,38 @@ import type {
   FlRadialMenuCloseReason,
   FlRadialMenuDropdownPlacement,
   FlRadialMenuItem,
+  FlRadialMenuItemType,
   FlRadialMenuMode,
   FlRadialMenuMoreMode,
   FlRadialMenuOpenReason,
   FlRadialMenuSelectContext,
+  FlRadialMenuSize,
   FlRadialMenuTrigger
 } from './types'
+
+export const radialMenuSizePresets: Record<
+  FlRadialMenuSize,
+  { radius: number; centerSize: number; itemSize: number }
+> = {
+  large: {
+    radius: 96,
+    centerSize: 56,
+    itemSize: 44
+  },
+  medium: {
+    radius: 80,
+    centerSize: 48,
+    itemSize: 36
+  },
+  small: {
+    radius: 64,
+    centerSize: 40,
+    itemSize: 32
+  }
+}
+
+const radialMenuSizes = Object.keys(radialMenuSizePresets) as FlRadialMenuSize[]
+const radialMenuItemTypes: FlRadialMenuItemType[] = ['square', 'circle']
 
 export const flRadialMenuProps = {
   items: {
@@ -67,17 +93,24 @@ export const flRadialMenuProps = {
     type: String as PropType<FlRadialMenuDropdownPlacement>,
     default: 'bottom'
   },
+  size: {
+    type: String as PropType<FlRadialMenuSize>,
+    default: 'large',
+    validator: (value: string) => radialMenuSizes.includes(value as FlRadialMenuSize)
+  },
   radius: {
-    type: Number,
-    default: 96
+    type: Number
   },
   centerSize: {
-    type: Number,
-    default: 56
+    type: Number
   },
   itemSize: {
-    type: Number,
-    default: 44
+    type: Number
+  },
+  itemType: {
+    type: String as PropType<FlRadialMenuItemType>,
+    default: 'square',
+    validator: (value: string) => radialMenuItemTypes.includes(value as FlRadialMenuItemType)
   },
   teleport: {
     type: [Boolean, String] as unknown as PropType<boolean | string>,
@@ -110,10 +143,12 @@ export type {
   FlRadialMenuDropdownPlacement,
   FlRadialMenuExpose,
   FlRadialMenuItem,
+  FlRadialMenuItemType,
   FlRadialMenuMode,
   FlRadialMenuMoreMode,
   FlRadialMenuOpenOptions,
   FlRadialMenuOpenReason,
   FlRadialMenuSelectContext,
+  FlRadialMenuSize,
   FlRadialMenuTrigger
 } from './types'

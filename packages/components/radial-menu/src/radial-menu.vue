@@ -24,8 +24,10 @@
     </button>
 
     <div v-if="opened" :class="ns.e('panel')" role="menu" @keydown="handleMenuKeydown">
-      <svg v-if="sectorPath" :class="ns.e('sector')" viewBox="-140 -140 280 280" aria-hidden="true">
-        <path :class="ns.e('sector-path')" :d="sectorPath" />
+      <svg :class="ns.e('sector')" viewBox="-140 -140 280 280" aria-hidden="true">
+        <circle :class="ns.e('track')" cx="0" cy="0" :r="resolvedRadius" />
+        <path v-if="sectorPath" :class="ns.e('sector-path')" :d="sectorPath" />
+        <path v-if="activeTrackPath" :class="ns.e('track-active')" :d="activeTrackPath" />
       </svg>
 
       <button
@@ -51,7 +53,7 @@
         @keydown="handleRingKeydown($event, index)">
         <component :is="item.icon" v-if="item.icon && typeof item.icon !== 'string'" />
         <span v-else-if="item.icon" :class="ns.e('item-icon')">{{ item.icon }}</span>
-        <span :class="ns.e('item-label')">{{ item.label }}</span>
+        <span :class="getItemLabelClass(index)">{{ item.label }}</span>
       </button>
 
       <button
@@ -100,10 +102,15 @@ import {
   type ComponentPublicInstance
 } from 'vue'
 import { useNamespace } from '@falcon-ui/utils'
-import { flRadialMenuEmits, flRadialMenuProps } from './radial-menu'
+import { flRadialMenuEmits, flRadialMenuProps, radialMenuSizePresets } from './radial-menu'
 import { splitRadialMenuItems } from './use-radial-menu-items'
 import { useRadialMenuKeyboard } from './use-radial-menu-keyboard'
-import { getRadialMenuItemLayout, getRadialMenuSectorPath } from './use-radial-menu-position'
+import {
+  getRadialMenuItemLayout,
+  getRadialMenuSectorPath,
+  getRadialMenuTrackArcPath,
+  getRadialMenuTipPlacement
+} from './use-radial-menu-position'
 import { useRadialMenuShortcut } from './use-radial-menu-shortcut'
 import { useRadialMenuState } from './use-radial-menu-state'
 import type { FlRadialMenuExpose, FlRadialMenuItem, FlRadialMenuOpenOptions } from './types'
@@ -124,9 +131,14 @@ const moreButtonRefs = ref<HTMLButtonElement[]>([])
 const splitItems = computed(() => splitRadialMenuItems(props.items, props.maxRingItems))
 const ringItems = computed(() => splitItems.value.ringItems)
 const moreItems = computed(() => splitItems.value.moreItems)
+const sizePreset = computed(() => radialMenuSizePresets[props.size])
+const resolvedRadius = computed(() => props.radius ?? sizePreset.value.radius)
+const resolvedCenterSize = computed(() => props.centerSize ?? sizePreset.value.centerSize)
+const resolvedItemSize = computed(() => props.itemSize ?? sizePreset.value.itemSize)
 const activeItem = computed(() =>
   activeRingIndex.value === null ? null : (ringItems.value[activeRingIndex.value] ?? null)
 )
+const sectorInnerRadius = computed(() => resolvedCenterSize.value / 2 + 8)
 const sectorPath = computed(() => {
   if (activeRingIndex.value === null || ringItems.value.length === 0) {
     return ''
@@ -135,8 +147,20 @@ const sectorPath = computed(() => {
   return getRadialMenuSectorPath({
     activeIndex: activeRingIndex.value,
     count: ringItems.value.length,
-    innerRadius: props.centerSize / 2 + 8,
-    outerRadius: props.radius + props.itemSize / 2 + 14
+    innerRadius: sectorInnerRadius.value,
+    outerRadius: resolvedRadius.value
+  })
+})
+const activeTrackPath = computed(() => {
+  if (activeRingIndex.value === null || ringItems.value.length === 0) {
+    return ''
+  }
+
+  return getRadialMenuTrackArcPath({
+    activeIndex: activeRingIndex.value,
+    count: ringItems.value.length,
+    radius: resolvedRadius.value,
+    innerRadius: sectorInnerRadius.value
   })
 })
 
@@ -155,31 +179,48 @@ useRadialMenuShortcut({
 const rootClass = computed(() => [
   ns.b(),
   ns.m(props.mode),
+  ns.m(props.size),
+  ns.m(`item-${props.itemType}`),
   ns.is('opened', opened.value),
   ns.is('disabled', props.disabled)
 ])
 
 const rootStyle = computed(() => ({
-  '--fl-radial-menu-radius': `${props.radius}px`,
-  '--fl-radial-menu-center-size': `${props.centerSize}px`,
-  '--fl-radial-menu-item-size': `${props.itemSize}px`,
+  '--fl-radial-menu-radius': `${resolvedRadius.value}px`,
+  '--fl-radial-menu-center-size': `${resolvedCenterSize.value}px`,
+  '--fl-radial-menu-item-size': `${resolvedItemSize.value}px`,
   '--fl-radial-menu-floating-x': `${floatingX.value ?? (typeof window === 'undefined' ? 0 : window.innerWidth / 2)}px`,
   '--fl-radial-menu-floating-y': `${floatingY.value ?? (typeof window === 'undefined' ? 0 : window.innerHeight / 2)}px`,
   '--fl-radial-menu-z-index': String(props.zIndex)
 }))
 
-const getItemStyle = (index: number) => {
-  const layout = getRadialMenuItemLayout({
+const getItemLayout = (index: number) =>
+  getRadialMenuItemLayout({
     count: ringItems.value.length,
     index,
-    radius: props.radius
+    radius: resolvedRadius.value
   })
+
+const getItemStyle = (index: number) => {
+  const layout = getItemLayout(index)
 
   return {
     '--fl-radial-menu-item-x': `${layout.x}px`,
     '--fl-radial-menu-item-y': `${layout.y}px`,
     '--fl-radial-menu-item-index': String(index)
   }
+}
+
+const getItemLabelClass = (index: number) => {
+  const placement = getRadialMenuTipPlacement(getItemLayout(index))
+
+  return [
+    ns.e('item-label'),
+    ns.em('item-label', `tip-${placement}`),
+    moreItems.value.length > 0 && placement === 'bottom'
+      ? ns.em('item-label', 'hidden-by-more')
+      : ''
+  ]
 }
 
 const moreLabel = computed(() => {

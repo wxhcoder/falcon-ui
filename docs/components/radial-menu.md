@@ -3,6 +3,9 @@
 数据驱动的径向工具菜单。默认展示中心圆，打开后以环形布局展示最多 6 个操作项，
 超过 6 个的操作项进入 More 下拉菜单。
 
+默认尺寸为 `large`，可通过 `size="medium"` 或 `size="small"` 使用更紧凑的预设。
+需要精细控制时，`radius`、`centerSize`、`itemSize` 会覆盖当前尺寸预设。
+
 ## 基础用法
 
 ::: demo radial-menu/basic
@@ -26,6 +29,11 @@
 ## 受控模式
 
 ::: demo radial-menu/controlled
+:::
+
+## 圆形菜单项
+
+::: demo radial-menu/item-type
 :::
 
 ## API

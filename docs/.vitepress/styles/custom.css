@@ -12,3 +12,12 @@
   display: grid;
   gap: 10px;
 }
+
+.radial-menu-demo-stage {
+  display: grid;
+  place-items: center;
+  min-height: 340px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 24px;
+}
