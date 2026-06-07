@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h } from 'vue'
+import { h, nextTick } from 'vue'
+import { ElConfigProvider } from 'element-plus'
 import { FlRadialMenuItem as RadialMenuItemComponent } from '..'
 import RadialMenu from '../src/radial-menu.vue'
 import { flRadialMenuProps } from '../src/radial-menu'
@@ -21,6 +22,11 @@ type RadialMenuTrackArcPathHelper = (options: {
 
 type RadialMenuItemTypeProp = {
   default: string
+  validator?: (value: string) => boolean
+}
+
+type RadialMenuSizeProp = {
+  default?: string
   validator?: (value: string) => boolean
 }
 
@@ -47,6 +53,23 @@ const getOuterArcSignature = (path: string, radius: number) => {
 
   return match?.slice(1)
 }
+
+const mountWithGlobalSize = (size: 'large' | 'default' | 'small', radialMenuProps = {}) =>
+  mount({
+    render: () =>
+      h(
+        ElConfigProvider,
+        { size },
+        {
+          default: () =>
+            h(RadialMenu, {
+              items: createItems(3),
+              modelValue: true,
+              ...radialMenuProps
+            })
+        }
+      )
+  })
 
 describe('radial menu helpers', () => {
   it('filters hidden items and limits ring items to six', () => {
@@ -202,7 +225,7 @@ describe('FlRadialMenu basic ring display', () => {
     expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(0)
   })
 
-  it('uses large size by default and supports medium and small presets', async () => {
+  it('uses size classes without writing size variables inline', async () => {
     const wrapper = mount(RadialMenu, {
       props: {
         items: createItems(2)
@@ -210,43 +233,51 @@ describe('FlRadialMenu basic ring display', () => {
     })
 
     expect(wrapper.classes()).toContain('fl-radial-menu--large')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-radius: 96px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-center-size: 56px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-size: 44px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-half-size: 22px')
+    expect(wrapper.classes()).not.toContain('fl-radial-menu--medium')
+    expect(wrapper.classes()).not.toContain('fl-radial-menu--small')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-radius')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-center-size')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-item-size')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-item-half-size')
 
     await wrapper.setProps({ size: 'medium' })
 
     expect(wrapper.classes()).toContain('fl-radial-menu--medium')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-radius: 80px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-center-size: 48px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-size: 36px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-half-size: 18px')
+    expect(wrapper.classes()).not.toContain('fl-radial-menu--large')
+    expect(wrapper.classes()).not.toContain('fl-radial-menu--small')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-radius')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-center-size')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-item-size')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-item-half-size')
 
     await wrapper.setProps({ size: 'small' })
 
     expect(wrapper.classes()).toContain('fl-radial-menu--small')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-radius: 64px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-center-size: 40px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-size: 32px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-half-size: 16px')
+    expect(wrapper.classes()).not.toContain('fl-radial-menu--large')
+    expect(wrapper.classes()).not.toContain('fl-radial-menu--medium')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-radius')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-center-size')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-item-size')
+    expect(wrapper.attributes('style')).not.toContain('--fl-radial-menu-item-half-size')
   })
 
-  it('lets numeric geometry props override the selected size preset', () => {
-    const wrapper = mount(RadialMenu, {
-      props: {
-        items: createItems(2),
-        size: 'small',
-        radius: 120,
-        centerSize: 58,
-        itemSize: 46
-      }
-    })
+  it('validates size values and does not expose numeric geometry props', () => {
+    const radialMenuProps = flRadialMenuProps as typeof flRadialMenuProps & {
+      size?: RadialMenuSizeProp
+      radius?: unknown
+      centerSize?: unknown
+      itemSize?: unknown
+    }
 
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-radius: 120px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-center-size: 58px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-size: 46px')
-    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-half-size: 23px')
+    expect(radialMenuProps.size?.default).toBeUndefined()
+    expect(radialMenuProps.size?.validator?.('large')).toBe(true)
+    expect(radialMenuProps.size?.validator?.('medium')).toBe(true)
+    expect(radialMenuProps.size?.validator?.('small')).toBe(true)
+    expect(radialMenuProps.size?.validator?.('default')).toBe(false)
+    expect(radialMenuProps.size?.validator?.('mini')).toBe(false)
+    expect(radialMenuProps.radius).toBeUndefined()
+    expect(radialMenuProps.centerSize).toBeUndefined()
+    expect(radialMenuProps.itemSize).toBeUndefined()
   })
 
   it('uses square item type by default and supports circle item type', async () => {
@@ -517,6 +548,18 @@ describe('FlRadialMenu styles and active sector', () => {
     expect(scssSource.match(/stroke-width: var\(--fl-radial-menu-border-width\)/g)).toHaveLength(2)
   })
 
+  it('defines all size variables in SCSS size modifiers', () => {
+    const scssSource = readProjectFile('packages/theme/src/radial-menu.scss')
+
+    expect(scssSource).toContain('@include bem.m(large)')
+    expect(scssSource).toContain('@include bem.m(medium)')
+    expect(scssSource).toContain('@include bem.m(small)')
+    expect(scssSource).not.toContain('@include bem.m($size)')
+    expect(scssSource).not.toContain('.fl-radial-menu--large')
+    expect(scssSource).not.toContain('.fl-radial-menu--medium')
+    expect(scssSource).not.toContain('.fl-radial-menu--small')
+  })
+
   it('keeps item tip labels single-line with content-driven height', () => {
     const scssSource = readProjectFile('packages/theme/src/radial-menu.scss')
     const labelBlock =
@@ -596,6 +639,71 @@ describe('FlRadialMenu styles and active sector', () => {
     await wrapper.find('[data-radial-menu-index="item-1"]').trigger('mouseenter')
 
     expect(wrapper.find('.fl-radial-menu__sector-path').attributes('d')).toContain('A 96 96')
+  })
+
+  it('uses selected size geometry for active sector paths', async () => {
+    const sizeCases = [
+      { size: 'medium', radius: 80, innerRadius: 32 },
+      { size: 'small', radius: 64, innerRadius: 28 }
+    ] as const
+
+    for (const { size, radius, innerRadius } of sizeCases) {
+      const wrapper = mount(RadialMenu, {
+        props: {
+          items: createItems(3),
+          modelValue: true,
+          size
+        }
+      })
+
+      await wrapper.find('[data-radial-menu-index="item-1"]').trigger('mouseenter')
+
+      expect(wrapper.find('.fl-radial-menu__sector-path').attributes('d')).toContain(
+        `A ${radius} ${radius}`
+      )
+      expect(wrapper.find('.fl-radial-menu__track-active').attributes('d')).toBe(
+        getTrackArcPathHelper()?.({
+          activeIndex: 0,
+          count: 3,
+          radius,
+          innerRadius
+        })
+      )
+    }
+  })
+
+  it('uses Element Plus global size when size prop is omitted', async () => {
+    const wrapper = mountWithGlobalSize('small')
+    const radialMenu = wrapper.getComponent(RadialMenu)
+
+    expect(radialMenu.classes()).toContain('fl-radial-menu--small')
+
+    await radialMenu.find('[data-radial-menu-index="item-1"]').trigger('mouseenter')
+
+    expect(radialMenu.find('.fl-radial-menu__sector-path').attributes('d')).toContain('A 64 64')
+  })
+
+  it('maps Element Plus default global size to medium', async () => {
+    const wrapper = mountWithGlobalSize('default')
+    const radialMenu = wrapper.getComponent(RadialMenu)
+
+    expect(radialMenu.classes()).toContain('fl-radial-menu--medium')
+
+    await radialMenu.find('[data-radial-menu-index="item-1"]').trigger('mouseenter')
+
+    expect(radialMenu.find('.fl-radial-menu__sector-path').attributes('d')).toContain('A 80 80')
+  })
+
+  it('lets explicit size prop override Element Plus global size', async () => {
+    const wrapper = mountWithGlobalSize('large', { size: 'small' })
+    const radialMenu = wrapper.getComponent(RadialMenu)
+
+    expect(radialMenu.classes()).toContain('fl-radial-menu--small')
+    expect(radialMenu.classes()).not.toContain('fl-radial-menu--large')
+
+    await radialMenu.find('[data-radial-menu-index="item-1"]').trigger('mouseenter')
+
+    expect(radialMenu.find('.fl-radial-menu__sector-path').attributes('d')).toContain('A 64 64')
   })
 
   it('renders the base track while opened', () => {
@@ -734,6 +842,79 @@ describe('FlRadialMenu More dropdown and select', () => {
     expect(wrapper.emitted('select')).toHaveLength(1)
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
   })
+
+  it('closes an uncontrolled menu after clicking outside', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: createItems(2)
+      }
+    })
+
+    await wrapper.get('.fl-radial-menu__center').trigger('click')
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(2)
+
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    await nextTick()
+
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(0)
+    wrapper.unmount()
+  })
+
+  it('keeps the menu open when pointerdown happens inside More content', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: createItems(8)
+      }
+    })
+
+    await wrapper.get('.fl-radial-menu__center').trigger('click')
+    await wrapper.get('.fl-radial-menu__more').trigger('click')
+    expect(wrapper.findAll('.fl-radial-menu__more-item')).toHaveLength(2)
+
+    wrapper
+      .get('[data-radial-menu-more-index="item-7"]')
+      .element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    await nextTick()
+
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(8)
+    expect(wrapper.findAll('.fl-radial-menu__more-item')).toHaveLength(2)
+    wrapper.unmount()
+  })
+
+  it('emits model updates when clicking outside a controlled menu', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: createItems(2),
+        modelValue: true
+      }
+    })
+
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    await nextTick()
+
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([false])
+    wrapper.unmount()
+  })
+
+  it('emits model updates when clicking outside a manually triggered controlled menu', async () => {
+    const wrapper = mount(RadialMenu, {
+      attachTo: document.body,
+      props: {
+        items: createItems(2),
+        modelValue: true,
+        trigger: 'manual'
+      }
+    })
+
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    await nextTick()
+
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([false])
+    wrapper.unmount()
+  })
 })
 
 describe('FlRadialMenu keyboard accessibility', () => {
@@ -847,7 +1028,8 @@ describe('FlRadialMenu docs examples', () => {
       'custom-center.vue',
       'floating-shortcut.vue',
       'item-type.vue',
-      'more.vue'
+      'more.vue',
+      'size.vue'
     ]
     const customCss = readProjectFile('docs/.vitepress/styles/custom.css')
 
@@ -880,5 +1062,18 @@ describe('FlRadialMenu docs examples', () => {
     expect(docsSource).toContain('radial-menu/item-type')
     expect(basicSource).not.toContain('item-type=')
     expect(itemTypeSource).toContain('item-type="circle"')
+  })
+
+  it('documents explicit radial menu sizes without exposing default as a prop value', () => {
+    const docsSource = readProjectFile('docs/components/radial-menu.md')
+    const sizeSource = readProjectFile('docs/examples/radial-menu/size.vue')
+
+    expect(docsSource).toContain('radial-menu/size')
+    expect(sizeSource).toContain('size="large"')
+    expect(sizeSource).toContain('size="medium"')
+    expect(sizeSource).toContain('size="small"')
+    expect(sizeSource).not.toContain('size="default"')
+    expect(sizeSource).toContain('column-gap: 200px')
+    expect(sizeSource).toContain('row-gap: 220px')
   })
 })

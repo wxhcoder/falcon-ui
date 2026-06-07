@@ -1,5 +1,12 @@
 @use './mixins/bem.scss' as bem;
 
+@mixin radial-menu-size($radius, $center-size, $item-size, $item-half-size) {
+  --fl-radial-menu-radius: #{$radius};
+  --fl-radial-menu-center-size: #{$center-size};
+  --fl-radial-menu-item-size: #{$item-size};
+  --fl-radial-menu-item-half-size: #{$item-half-size};
+}
+
 @include bem.b(radial-menu) {
   --fl-radial-menu-primary-color: var(--el-color-primary);
   --fl-radial-menu-track-color: var(--el-border-color-lighter);
@@ -8,6 +15,18 @@
   --fl-radial-menu-border-width: 2px;
   --fl-radial-menu-duration: 180ms;
   --fl-radial-menu-easing: cubic-bezier(0.2, 0, 0, 1);
+
+  @include bem.m(large) {
+    @include radial-menu-size(96px, 56px, 44px, 22px);
+  }
+
+  @include bem.m(medium) {
+    @include radial-menu-size(80px, 48px, 36px, 18px);
+  }
+
+  @include bem.m(small) {
+    @include radial-menu-size(64px, 40px, 32px, 16px);
+  }
 
   position: relative;
   z-index: var(--fl-radial-menu-z-index);

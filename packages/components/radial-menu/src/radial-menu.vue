@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="rootRef"
     :class="rootClass"
     :style="rootStyle"
     @mouseenter="handleMouseEnter"
@@ -107,6 +108,7 @@ import {
   computed,
   isVNode,
   nextTick,
+  onBeforeUnmount,
   ref,
   toRef,
   useSlots,
@@ -118,8 +120,9 @@ import {
   type VNode,
   type VNodeArrayChildren
 } from 'vue'
+import { useGlobalSize } from 'element-plus'
 import { useNamespace } from '@falcon-ui/utils'
-import { flRadialMenuEmits, flRadialMenuProps, radialMenuSizePresets } from './radial-menu'
+import { flRadialMenuEmits, flRadialMenuProps } from './radial-menu'
 import { normalizeRadialMenuItems, splitRadialMenuItems } from './use-radial-menu-items'
 import { useRadialMenuKeyboard } from './use-radial-menu-keyboard'
 import {
@@ -134,7 +137,8 @@ import type {
   FlRadialMenuExpose,
   FlRadialMenuOpenOptions,
   FlRadialMenuResolvableItem,
-  FlRadialMenuResolvedItem
+  FlRadialMenuResolvedItem,
+  FlRadialMenuSize
 } from './types'
 
 defineOptions({
@@ -149,12 +153,40 @@ defineSlots<{
 }>()
 const ns = useNamespace('radial-menu')
 const slots = useSlots()
+const rootRef = useTemplateRef<HTMLDivElement>('rootRef')
 const centerRef = useTemplateRef<HTMLButtonElement>('centerRef')
 const activeRingIndex = ref<number | null>(null)
 const moreOpened = ref(false)
 const ringButtonRefs = ref<HTMLButtonElement[]>([])
 const moreButtonRefs = ref<HTMLButtonElement[]>([])
 const warnedMessages = new Set<string>()
+const globalSize = useGlobalSize()
+const radialMenuGeometryBySize = {
+  large: {
+    radius: 96,
+    centerSize: 56
+  },
+  medium: {
+    radius: 80,
+    centerSize: 48
+  },
+  small: {
+    radius: 64,
+    centerSize: 40
+  }
+} satisfies Record<FlRadialMenuSize, { radius: number; centerSize: number }>
+
+const mapGlobalSize = (size: '' | 'default' | 'large' | 'small'): FlRadialMenuSize => {
+  if (size === 'large' || size === 'small') {
+    return size
+  }
+
+  if (size === 'default') {
+    return 'medium'
+  }
+
+  return 'large'
+}
 
 const warnRadialMenu = (message: string) => {
   if (warnedMessages.has(message)) {
@@ -240,10 +272,10 @@ const resolvedItems = computed(() =>
 const splitItems = computed(() => splitRadialMenuItems(resolvedItems.value, props.maxRingItems))
 const ringItems = computed(() => splitItems.value.ringItems)
 const moreItems = computed(() => splitItems.value.moreItems)
-const sizePreset = computed(() => radialMenuSizePresets[props.size])
-const resolvedRadius = computed(() => props.radius ?? sizePreset.value.radius)
-const resolvedCenterSize = computed(() => props.centerSize ?? sizePreset.value.centerSize)
-const resolvedItemSize = computed(() => props.itemSize ?? sizePreset.value.itemSize)
+const resolvedSize = computed(() => props.size ?? mapGlobalSize(globalSize.value))
+const sizeGeometry = computed(() => radialMenuGeometryBySize[resolvedSize.value])
+const resolvedRadius = computed(() => sizeGeometry.value.radius)
+const resolvedCenterSize = computed(() => sizeGeometry.value.centerSize)
 const activeItem = computed(() =>
   activeRingIndex.value === null ? null : (ringItems.value[activeRingIndex.value] ?? null)
 )
@@ -288,17 +320,13 @@ useRadialMenuShortcut({
 const rootClass = computed(() => [
   ns.b(),
   ns.m(props.mode),
-  ns.m(props.size),
+  ns.m(resolvedSize.value),
   ns.m(`item-${props.itemType}`),
   ns.is('opened', opened.value),
   ns.is('disabled', props.disabled)
 ])
 
 const rootStyle = computed(() => ({
-  '--fl-radial-menu-radius': `${resolvedRadius.value}px`,
-  '--fl-radial-menu-center-size': `${resolvedCenterSize.value}px`,
-  '--fl-radial-menu-item-size': `${resolvedItemSize.value}px`,
-  '--fl-radial-menu-item-half-size': `${resolvedItemSize.value / 2}px`,
   '--fl-radial-menu-floating-x': `${floatingX.value ?? (typeof window === 'undefined' ? 0 : window.innerWidth / 2)}px`,
   '--fl-radial-menu-floating-y': `${floatingY.value ?? (typeof window === 'undefined' ? 0 : window.innerHeight / 2)}px`,
   '--fl-radial-menu-z-index': String(props.zIndex)
@@ -375,6 +403,41 @@ const setMoreOpened = (nextOpened: boolean) => {
   }
 }
 
+let isDocumentPointerdownBound = false
+
+const removeDocumentPointerdown = () => {
+  if (!isDocumentPointerdownBound || typeof document === 'undefined') {
+    return
+  }
+
+  document.removeEventListener('pointerdown', handleDocumentPointerdown)
+  isDocumentPointerdownBound = false
+}
+
+const addDocumentPointerdown = () => {
+  if (isDocumentPointerdownBound || typeof document === 'undefined') {
+    return
+  }
+
+  document.addEventListener('pointerdown', handleDocumentPointerdown)
+  isDocumentPointerdownBound = true
+}
+
+const handleDocumentPointerdown = (event: PointerEvent) => {
+  const { target } = event
+
+  if (!(target instanceof Node)) {
+    return
+  }
+
+  if (rootRef.value?.contains(target)) {
+    return
+  }
+
+  moreOpened.value = false
+  close('click-outside')
+}
+
 const activateItem = (
   item: FlRadialMenuResolvedItem,
   source: 'ring' | 'more',
@@ -424,6 +487,20 @@ watch(opened, async (nextOpened) => {
   await nextTick()
   focusFirstAvailableRingItem()
 })
+
+watch(
+  opened,
+  (nextOpened) => {
+    if (nextOpened) {
+      addDocumentPointerdown()
+    } else {
+      removeDocumentPointerdown()
+    }
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(removeDocumentPointerdown)
 
 const handleCenterClick = () => {
   if (props.disabled || props.trigger !== 'click') {
