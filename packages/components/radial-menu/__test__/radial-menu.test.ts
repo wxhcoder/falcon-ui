@@ -1,13 +1,15 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { h } from 'vue'
+import { FlRadialMenuItem as RadialMenuItemComponent } from '..'
 import RadialMenu from '../src/radial-menu.vue'
 import { flRadialMenuProps } from '../src/radial-menu'
 import { splitRadialMenuItems } from '../src/use-radial-menu-items'
 import * as radialMenuPosition from '../src/use-radial-menu-position'
 import { getRadialMenuItemLayout, getRadialMenuSectorPath } from '../src/use-radial-menu-position'
-import type { FlRadialMenuItem } from '../src/types'
+import type { FlRadialMenuItemData } from '../src/types'
 
 type RadialMenuTrackArcPathHelper = (options: {
   activeIndex: number
@@ -22,9 +24,9 @@ type RadialMenuItemTypeProp = {
   validator?: (value: string) => boolean
 }
 
-const createItems = (count: number): FlRadialMenuItem[] =>
+const createItems = (count: number): FlRadialMenuItemData[] =>
   Array.from({ length: count }, (_, index) => ({
-    key: `item-${index + 1}`,
+    index: `item-${index + 1}`,
     label: `Item ${index + 1}`
   }))
 
@@ -50,16 +52,16 @@ describe('radial menu helpers', () => {
   it('filters hidden items and limits ring items to six', () => {
     const items = [
       ...createItems(3),
-      { key: 'hidden', label: 'Hidden', hidden: true },
+      { index: 'hidden', label: 'Hidden', hidden: true },
       ...createItems(5).map((item) => ({
         ...item,
-        key: `extra-${item.key}`
+        index: `extra-${item.index}`
       }))
     ]
 
     const result = splitRadialMenuItems(items, 10)
 
-    expect(result.visibleItems.map((item) => item.key)).not.toContain('hidden')
+    expect(result.visibleItems.map((item) => item.index)).not.toContain('hidden')
     expect(result.ringItems).toHaveLength(6)
     expect(result.moreItems).toHaveLength(2)
   })
@@ -167,7 +169,7 @@ describe('FlRadialMenu basic ring display', () => {
 
     expect(wrapper.classes()).toContain('is-opened')
     expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(3)
-    expect(wrapper.find('[data-radial-menu-key="item-1"]').attributes('style')).toContain(
+    expect(wrapper.find('[data-radial-menu-index="item-1"]').attributes('style')).toContain(
       '--fl-radial-menu-item-x'
     )
   })
@@ -211,6 +213,7 @@ describe('FlRadialMenu basic ring display', () => {
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-radius: 96px')
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-center-size: 56px')
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-size: 44px')
+    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-half-size: 22px')
 
     await wrapper.setProps({ size: 'medium' })
 
@@ -218,6 +221,7 @@ describe('FlRadialMenu basic ring display', () => {
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-radius: 80px')
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-center-size: 48px')
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-size: 36px')
+    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-half-size: 18px')
 
     await wrapper.setProps({ size: 'small' })
 
@@ -225,6 +229,7 @@ describe('FlRadialMenu basic ring display', () => {
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-radius: 64px')
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-center-size: 40px')
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-size: 32px')
+    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-half-size: 16px')
   })
 
   it('lets numeric geometry props override the selected size preset', () => {
@@ -241,6 +246,7 @@ describe('FlRadialMenu basic ring display', () => {
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-radius: 120px')
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-center-size: 58px')
     expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-size: 46px')
+    expect(wrapper.attributes('style')).toContain('--fl-radial-menu-item-half-size: 23px')
   })
 
   it('uses square item type by default and supports circle item type', async () => {
@@ -272,6 +278,220 @@ describe('FlRadialMenu basic ring display', () => {
   })
 })
 
+describe('FlRadialMenu item child API and index semantics', () => {
+  const PropIcon = () => h('span', { class: 'prop-icon' }, 'prop icon')
+  const SlotIcon = () => h('span', { class: 'slot-icon' }, 'slot icon')
+
+  it('renders FlRadialMenuItem children as ring items in slot order', () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () => [
+          h(RadialMenuItemComponent, { index: 'copy', label: 'Copy' }),
+          h(RadialMenuItemComponent, { index: 'paste', label: 'Paste' })
+        ]
+      }
+    })
+
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(2)
+    expect(wrapper.get('[data-radial-menu-index="copy"]').text()).toContain('Copy')
+    expect(wrapper.get('[data-radial-menu-index="paste"]').text()).toContain('Paste')
+  })
+
+  it('renders icon slot before the icon prop on child items', () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () =>
+          h(
+            RadialMenuItemComponent,
+            { index: 'brush', label: 'Brush', icon: PropIcon },
+            {
+              icon: () => h(SlotIcon)
+            }
+          )
+      }
+    })
+
+    expect(wrapper.find('.slot-icon').exists()).toBe(true)
+    expect(wrapper.find('.prop-icon').exists()).toBe(false)
+  })
+
+  it('renders the label slot before the label prop on child items', () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () =>
+          h(
+            RadialMenuItemComponent,
+            { index: 'brush', label: 'Brush prop' },
+            {
+              label: () => h('span', { class: 'slot-label' }, 'Brush slot')
+            }
+          )
+      }
+    })
+
+    const label = wrapper.get('[data-radial-menu-index="brush"] .fl-radial-menu__item-label')
+
+    expect(label.find('.slot-label').exists()).toBe(true)
+    expect(label.text()).toBe('Brush slot')
+    expect(label.text()).not.toContain('Brush prop')
+  })
+
+  it('falls back to the label prop when child items have no label slot', () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () => h(RadialMenuItemComponent, { index: 'text', label: 'Text prop' })
+      }
+    })
+
+    expect(wrapper.get('[data-radial-menu-index="text"] .fl-radial-menu__item-label').text()).toBe(
+      'Text prop'
+    )
+  })
+
+  it('renders the same label slot in the More dropdown and keeps aria labels stable', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () =>
+          Array.from({ length: 7 }, (_, index) =>
+            h(
+              RadialMenuItemComponent,
+              { index: `item-${index + 1}`, label: `Item ${index + 1}` },
+              {
+                label: () => h('span', { class: `slot-label-${index + 1}` }, `Slot ${index + 1}`)
+              }
+            )
+          )
+      }
+    })
+
+    expect(wrapper.get('[data-radial-menu-index="item-1"]').attributes('aria-label')).toBe('Item 1')
+
+    await wrapper.get('.fl-radial-menu__more').trigger('click')
+
+    const moreItem = wrapper.get('[data-radial-menu-more-index="item-7"]')
+    expect(moreItem.attributes('aria-label')).toBe('Item 7')
+    expect(moreItem.get('.fl-radial-menu__more-label .slot-label-7').text()).toBe('Slot 7')
+  })
+
+  it('keeps the prop label in select payload when rendering a label slot', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () =>
+          h(
+            RadialMenuItemComponent,
+            { index: 'rename', label: 'Rename prop' },
+            {
+              label: () => h('span', { class: 'slot-label' }, 'Rename slot')
+            }
+          )
+      }
+    })
+
+    await wrapper.get('[data-radial-menu-index="rename"]').trigger('click')
+
+    expect(wrapper.emitted('select')?.[0]).toEqual([
+      'rename',
+      ['rename'],
+      expect.objectContaining({ index: 'rename', label: 'Rename prop' }),
+      expect.objectContaining({ source: 'ring', index: 0 })
+    ])
+  })
+
+  it('emits select with Element Plus Menu style index and indexPath', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () => h(RadialMenuItemComponent, { index: 'delete', label: 'Delete' })
+      }
+    })
+
+    await wrapper.get('[data-radial-menu-index="delete"]').trigger('click')
+
+    expect(wrapper.emitted('select')?.[0]).toEqual([
+      'delete',
+      ['delete'],
+      expect.objectContaining({ index: 'delete', label: 'Delete' }),
+      expect.objectContaining({ source: 'ring', index: 0 })
+    ])
+  })
+
+  it('uses the item index instead of the Vue vnode key for menu selection', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () =>
+          h(RadialMenuItemComponent, { key: 'vue-diff-key', index: 'menu-index', label: 'Copy' })
+      }
+    })
+
+    await wrapper.get('[data-radial-menu-index="menu-index"]').trigger('click')
+
+    expect(wrapper.emitted('select')?.[0]?.[0]).toBe('menu-index')
+    expect(wrapper.emitted('select')?.[0]?.[0]).not.toBe('vue-diff-key')
+  })
+
+  it('keeps legacy items prop key as a compatibility fallback', async () => {
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: [{ key: 'legacy-key', label: 'Legacy' }],
+        modelValue: true
+      }
+    })
+
+    await wrapper.get('[data-radial-menu-index="legacy-key"]').trigger('click')
+
+    expect(wrapper.emitted('select')?.[0]?.[0]).toBe('legacy-key')
+    expect(wrapper.emitted('select')?.[0]?.[1]).toEqual(['legacy-key'])
+  })
+
+  it('warns and skips slot items with missing or duplicate indexes', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const wrapper = mount(RadialMenu, {
+      props: {
+        modelValue: true
+      },
+      slots: {
+        default: () => [
+          h(RadialMenuItemComponent, { label: 'Missing' }),
+          h(RadialMenuItemComponent, { index: 'same', label: 'First' }),
+          h(RadialMenuItemComponent, { index: 'same', label: 'Second' })
+        ]
+      }
+    })
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('Missing required prop: "index"'))
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('Duplicate item index detected: same')
+    )
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(1)
+
+    warn.mockRestore()
+  })
+})
+
 describe('FlRadialMenu styles and active sector', () => {
   it('uses Falcon BEM helpers in Vue and SCSS sources', () => {
     const vueSource = readProjectFile('packages/components/radial-menu/src/radial-menu.vue')
@@ -297,18 +517,22 @@ describe('FlRadialMenu styles and active sector', () => {
     expect(scssSource.match(/stroke-width: var\(--fl-radial-menu-border-width\)/g)).toHaveLength(2)
   })
 
-  it('keeps item tip labels single-line and aligned with the default Element Plus tag sizing', () => {
+  it('keeps item tip labels single-line with content-driven height', () => {
     const scssSource = readProjectFile('packages/theme/src/radial-menu.scss')
+    const labelBlock =
+      scssSource.match(/@include bem\.e\(item-label\) \{[\s\S]*?\n {2}\}/)?.[0] ?? ''
 
     expect(scssSource).not.toContain('max-width: 120px')
-    expect(scssSource).toContain('width: max-content')
-    expect(scssSource).toContain('height: 24px')
-    expect(scssSource).toContain('padding: 0 9px')
-    expect(scssSource).toContain('font-size: 12px')
-    expect(scssSource).toContain('line-height: 1')
-    expect(scssSource).toContain('display: inline-flex')
-    expect(scssSource).toContain('align-items: center')
-    expect(scssSource).toContain('white-space: nowrap')
+    expect(labelBlock).toContain('width: max-content')
+    expect(labelBlock).not.toMatch(/\n\s+height:/)
+    expect(labelBlock).toContain('padding: 6px 10px')
+    expect(labelBlock).toContain('font-size: 12px')
+    expect(labelBlock).toContain('line-height: 1')
+    expect(labelBlock).toContain('display: inline-flex')
+    expect(labelBlock).toContain('align-items: center')
+    expect(labelBlock).toContain('white-space: nowrap')
+    expect(labelBlock.match(/calc\(100% \+ 10px\)/g) ?? []).toHaveLength(4)
+    expect(labelBlock).not.toContain('calc(100% + 8px)')
   })
 
   it('keeps the More trigger label on one line without fixed width', () => {
@@ -320,6 +544,21 @@ describe('FlRadialMenu styles and active sector', () => {
     expect(moreBlock).toContain('justify-content: center')
     expect(moreBlock).toContain('white-space: nowrap')
     expect(moreBlock).not.toMatch(/\n\s+width:/)
+    expect(moreBlock).toMatch(
+      /top:\s*calc\(\s*50% \+ var\(--fl-radial-menu-radius\) \+ var\(--fl-radial-menu-item-half-size\) \+ 10px\s*\)/
+    )
+    expect(moreBlock).not.toContain('+ 18px')
+  })
+
+  it('keeps the More dropdown below the More trigger after spacing it from ring items', () => {
+    const scssSource = readProjectFile('packages/theme/src/radial-menu.scss')
+    const dropdownBlock =
+      scssSource.match(/@include bem\.e\(more-dropdown\) \{[\s\S]*?\n {2}\}/)?.[0] ?? ''
+
+    expect(dropdownBlock).toMatch(
+      /top:\s*calc\(\s*50% \+ var\(--fl-radial-menu-radius\) \+ var\(--fl-radial-menu-item-half-size\) \+ 46px\s*\)/
+    )
+    expect(dropdownBlock).not.toContain('+ 54px')
   })
 
   it('hides item tip labels that would overlap the More trigger', () => {
@@ -338,12 +577,12 @@ describe('FlRadialMenu styles and active sector', () => {
       }
     })
 
-    await wrapper.find('[data-radial-menu-key="item-2"]').trigger('mouseenter')
+    await wrapper.find('[data-radial-menu-index="item-2"]').trigger('mouseenter')
 
-    expect(wrapper.find('[data-radial-menu-key="item-2"]').classes()).toContain('is-active')
+    expect(wrapper.find('[data-radial-menu-index="item-2"]').classes()).toContain('is-active')
     expect(wrapper.find('.fl-radial-menu__sector-path').exists()).toBe(true)
     expect(wrapper.find('.fl-radial-menu__track-active').exists()).toBe(true)
-    expect(wrapper.emitted('active-change')?.[0]?.[0]).toMatchObject({ key: 'item-2' })
+    expect(wrapper.emitted('active-change')?.[0]?.[0]).toMatchObject({ index: 'item-2' })
   })
 
   it('keeps the active sector inside the track radius', async () => {
@@ -354,7 +593,7 @@ describe('FlRadialMenu styles and active sector', () => {
       }
     })
 
-    await wrapper.find('[data-radial-menu-key="item-1"]').trigger('mouseenter')
+    await wrapper.find('[data-radial-menu-index="item-1"]').trigger('mouseenter')
 
     expect(wrapper.find('.fl-radial-menu__sector-path').attributes('d')).toContain('A 96 96')
   })
@@ -379,7 +618,7 @@ describe('FlRadialMenu styles and active sector', () => {
       }
     })
 
-    await wrapper.find('[data-radial-menu-key="item-2"]').trigger('mouseenter')
+    await wrapper.find('[data-radial-menu-index="item-2"]').trigger('mouseenter')
 
     expect(getRadialMenuTrackArcPath).toBeTypeOf('function')
     expect(wrapper.find('.fl-radial-menu__track-active').attributes('d')).toBe(
@@ -401,16 +640,16 @@ describe('FlRadialMenu styles and active sector', () => {
     })
 
     expect(
-      wrapper.get('[data-radial-menu-key="item-1"] .fl-radial-menu__item-label').classes()
+      wrapper.get('[data-radial-menu-index="item-1"] .fl-radial-menu__item-label').classes()
     ).toContain('fl-radial-menu__item-label--tip-top')
     expect(
-      wrapper.get('[data-radial-menu-key="item-2"] .fl-radial-menu__item-label').classes()
+      wrapper.get('[data-radial-menu-index="item-2"] .fl-radial-menu__item-label').classes()
     ).toContain('fl-radial-menu__item-label--tip-right')
     expect(
-      wrapper.get('[data-radial-menu-key="item-3"] .fl-radial-menu__item-label').classes()
+      wrapper.get('[data-radial-menu-index="item-3"] .fl-radial-menu__item-label').classes()
     ).toContain('fl-radial-menu__item-label--tip-bottom')
     expect(
-      wrapper.get('[data-radial-menu-key="item-4"] .fl-radial-menu__item-label').classes()
+      wrapper.get('[data-radial-menu-index="item-4"] .fl-radial-menu__item-label').classes()
     ).toContain('fl-radial-menu__item-label--tip-left')
   })
 
@@ -422,8 +661,8 @@ describe('FlRadialMenu styles and active sector', () => {
       }
     })
 
-    const bottomLabel = wrapper.get('[data-radial-menu-key="item-4"] .fl-radial-menu__item-label')
-    const topLabel = wrapper.get('[data-radial-menu-key="item-1"] .fl-radial-menu__item-label')
+    const bottomLabel = wrapper.get('[data-radial-menu-index="item-4"] .fl-radial-menu__item-label')
+    const topLabel = wrapper.get('[data-radial-menu-index="item-1"] .fl-radial-menu__item-label')
 
     expect(bottomLabel.classes()).toContain('fl-radial-menu__item-label--tip-bottom')
     expect(bottomLabel.classes()).toContain('fl-radial-menu__item-label--hidden-by-more')
@@ -438,7 +677,7 @@ describe('FlRadialMenu styles and active sector', () => {
       }
     })
 
-    const bottomLabel = wrapper.get('[data-radial-menu-key="item-3"] .fl-radial-menu__item-label')
+    const bottomLabel = wrapper.get('[data-radial-menu-index="item-3"] .fl-radial-menu__item-label')
 
     expect(bottomLabel.classes()).toContain('fl-radial-menu__item-label--tip-bottom')
     expect(bottomLabel.classes()).not.toContain('fl-radial-menu__item-label--hidden-by-more')
@@ -470,10 +709,14 @@ describe('FlRadialMenu More dropdown and select', () => {
       }
     })
 
-    await wrapper.get('[data-radial-menu-key="item-1"]').trigger('click')
+    await wrapper.get('[data-radial-menu-index="item-1"]').trigger('click')
 
-    expect(wrapper.emitted('select')?.[0]?.[0]).toMatchObject({ key: 'item-1' })
-    expect(wrapper.emitted('select')?.[0]?.[1]).toMatchObject({ source: 'ring', index: 0 })
+    expect(wrapper.emitted('select')?.[0]).toEqual([
+      'item-1',
+      ['item-1'],
+      expect.objectContaining({ index: 'item-1' }),
+      expect.objectContaining({ source: 'ring', index: 0 })
+    ])
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([false])
   })
 
@@ -486,7 +729,7 @@ describe('FlRadialMenu More dropdown and select', () => {
       }
     })
 
-    await wrapper.get('[data-radial-menu-key="item-1"]').trigger('click')
+    await wrapper.get('[data-radial-menu-index="item-1"]').trigger('click')
 
     expect(wrapper.emitted('select')).toHaveLength(1)
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
@@ -499,19 +742,19 @@ describe('FlRadialMenu keyboard accessibility', () => {
       attachTo: document.body,
       props: {
         items: [
-          { key: 'a', label: 'A' },
-          { key: 'b', label: 'B', disabled: true },
-          { key: 'c', label: 'C' }
+          { index: 'a', label: 'A' },
+          { index: 'b', label: 'B', disabled: true },
+          { index: 'c', label: 'C' }
         ],
         modelValue: true
       }
     })
 
-    const first = wrapper.get('[data-radial-menu-key="a"]')
+    const first = wrapper.get('[data-radial-menu-index="a"]')
     await first.trigger('focus')
     await first.trigger('keydown', { key: 'ArrowRight' })
 
-    expect(document.activeElement).toBe(wrapper.get('[data-radial-menu-key="c"]').element)
+    expect(document.activeElement).toBe(wrapper.get('[data-radial-menu-index="c"]').element)
     wrapper.unmount()
   })
 
@@ -524,11 +767,16 @@ describe('FlRadialMenu keyboard accessibility', () => {
       }
     })
 
-    const first = wrapper.get('[data-radial-menu-key="item-1"]')
+    const first = wrapper.get('[data-radial-menu-index="item-1"]')
     await first.trigger('focus')
     await first.trigger('keydown', { key: 'Enter' })
 
-    expect(wrapper.emitted('select')?.[0]?.[0]).toMatchObject({ key: 'item-1' })
+    expect(wrapper.emitted('select')?.[0]).toEqual([
+      'item-1',
+      ['item-1'],
+      expect.objectContaining({ index: 'item-1' }),
+      expect.objectContaining({ source: 'ring', index: 0 })
+    ])
     wrapper.unmount()
   })
 

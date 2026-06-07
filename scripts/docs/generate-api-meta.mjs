@@ -58,6 +58,10 @@ const targets = [
   {
     id: 'fl-radial-menu',
     filePath: path.resolve(rootDir, 'packages/components/radial-menu/src/radial-menu.vue')
+  },
+  {
+    id: 'fl-radial-menu-item',
+    filePath: path.resolve(rootDir, 'packages/components/radial-menu/src/radial-menu-item.vue')
   }
 ]
 

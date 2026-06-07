@@ -1,17 +1,25 @@
 <template>
   <div class="radial-menu-demo-stage radial-menu-shortcut-demo">
     <p>Press Alt + W.</p>
-    <FlRadialMenu mode="floating" shortcut="Alt+W" :items="items" center-label="+" />
+    <FlRadialMenu mode="floating" shortcut="Alt+W" center-label="+">
+      <FlRadialMenuItem
+        v-for="item in items"
+        :key="item.index"
+        :index="item.index"
+        :label="item.label"
+        :shortcut="item.shortcut" />
+    </FlRadialMenu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FlRadialMenu, type FlRadialMenuItem } from '../../../packages/components/radial-menu'
+import { FlRadialMenu, FlRadialMenuItem } from '../../../packages/components/radial-menu'
+import type { FlRadialMenuItemData as RadialMenuItem } from '../../../packages/components/radial-menu'
 
-const items: FlRadialMenuItem[] = [
-  { key: 'move', label: 'Move Tool', shortcut: 'V' },
-  { key: 'pen', label: 'Pen Tool', shortcut: 'P' },
-  { key: 'text', label: 'Text', shortcut: 'T' }
+const items: RadialMenuItem[] = [
+  { index: 'move', label: 'Move Tool', shortcut: 'V' },
+  { index: 'pen', label: 'Pen Tool', shortcut: 'P' },
+  { index: 'text', label: 'Text', shortcut: 'T' }
 ]
 </script>
 

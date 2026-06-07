@@ -1,0 +1,83 @@
+{
+  "component": "fl-radial-menu-item",
+  "description": "",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "closeOnSelect",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "divided",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "",
+      "name": "hidden",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "icon",
+      "required": false,
+      "type": "Component | undefined"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "index",
+      "required": true,
+      "type": "string"
+    },
+    {
+      "default": "-",
+      "description": "",
+      "name": "label",
+      "required": true,
+      "type": "string"
+    },
+    {
+      "default": "undefined",
+      "description": "",
+      "name": "meta",
+      "required": false,
+      "type": "Record<string, unknown> | undefined"
+    },
+    {
+      "default": "''",
+      "description": "",
+      "name": "shortcut",
+      "required": false,
+      "type": "string | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "",
+      "name": "icon",
+      "type": "any"
+    },
+    {
+      "description": "",
+      "name": "label",
+      "type": "any"
+    }
+  ]
+}

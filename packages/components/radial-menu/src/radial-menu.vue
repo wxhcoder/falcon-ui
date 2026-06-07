@@ -32,7 +32,7 @@
 
       <button
         v-for="(item, index) in ringItems"
-        :key="item.key"
+        :key="item.index"
         :ref="(element) => setRingButtonRef(element, index)"
         type="button"
         role="menuitem"
@@ -45,15 +45,22 @@
         :disabled="item.disabled"
         :tabindex="item.disabled ? -1 : 0"
         :aria-disabled="item.disabled === true"
-        :data-radial-menu-key="item.key"
+        :aria-label="item.label"
+        :data-radial-menu-index="item.index"
         @mouseenter="setActiveRingIndex(index)"
         @focus="setActiveRingIndex(index)"
         @mouseleave="setActiveRingIndex(null)"
         @click="activateItem(item, 'ring', index, $event)"
         @keydown="handleRingKeydown($event, index)">
-        <component :is="item.icon" v-if="item.icon && typeof item.icon !== 'string'" />
-        <span v-else-if="item.icon" :class="ns.e('item-icon')">{{ item.icon }}</span>
-        <span :class="getItemLabelClass(index)">{{ item.label }}</span>
+        <component
+          :is="getItemIcon(item)"
+          v-if="getItemIcon(item) && typeof getItemIcon(item) !== 'string'" />
+        <span v-else-if="getItemIcon(item)" :class="ns.e('item-icon')">
+          {{ getItemIcon(item) }}
+        </span>
+        <span :class="getItemLabelClass(index)">
+          <RadialMenuItemLabel :item="item" />
+        </span>
       </button>
 
       <button
@@ -72,7 +79,7 @@
         role="menu">
         <button
           v-for="(item, index) in moreItems"
-          :key="item.key"
+          :key="item.index"
           :ref="(element) => setMoreButtonRef(element, index)"
           type="button"
           role="menuitem"
@@ -80,10 +87,13 @@
           :disabled="item.disabled"
           :tabindex="item.disabled ? -1 : 0"
           :aria-disabled="item.disabled === true"
-          :data-radial-menu-more-key="item.key"
+          :aria-label="item.label"
+          :data-radial-menu-more-index="item.index"
           @click="activateItem(item, 'more', index, $event)"
           @keydown="handleMoreKeydown($event, index)">
-          <span :class="ns.e('more-label')">{{ item.label }}</span>
+          <span :class="ns.e('more-label')">
+            <RadialMenuItemLabel :item="item" />
+          </span>
           <span v-if="item.shortcut" :class="ns.e('shortcut')">{{ item.shortcut }}</span>
         </button>
       </div>
@@ -93,17 +103,24 @@
 
 <script setup lang="ts">
 import {
+  Fragment,
   computed,
+  isVNode,
   nextTick,
   ref,
   toRef,
+  useSlots,
   useTemplateRef,
   watch,
-  type ComponentPublicInstance
+  type Component,
+  type ComponentPublicInstance,
+  type Slot,
+  type VNode,
+  type VNodeArrayChildren
 } from 'vue'
 import { useNamespace } from '@falcon-ui/utils'
 import { flRadialMenuEmits, flRadialMenuProps, radialMenuSizePresets } from './radial-menu'
-import { splitRadialMenuItems } from './use-radial-menu-items'
+import { normalizeRadialMenuItems, splitRadialMenuItems } from './use-radial-menu-items'
 import { useRadialMenuKeyboard } from './use-radial-menu-keyboard'
 import {
   getRadialMenuItemLayout,
@@ -113,7 +130,12 @@ import {
 } from './use-radial-menu-position'
 import { useRadialMenuShortcut } from './use-radial-menu-shortcut'
 import { useRadialMenuState } from './use-radial-menu-state'
-import type { FlRadialMenuExpose, FlRadialMenuItem, FlRadialMenuOpenOptions } from './types'
+import type {
+  FlRadialMenuExpose,
+  FlRadialMenuOpenOptions,
+  FlRadialMenuResolvableItem,
+  FlRadialMenuResolvedItem
+} from './types'
 
 defineOptions({
   name: 'FlRadialMenu'
@@ -121,14 +143,101 @@ defineOptions({
 
 const props = defineProps(flRadialMenuProps)
 const emit = defineEmits(flRadialMenuEmits)
+defineSlots<{
+  default?: () => unknown
+  center?: () => unknown
+}>()
 const ns = useNamespace('radial-menu')
+const slots = useSlots()
 const centerRef = useTemplateRef<HTMLButtonElement>('centerRef')
 const activeRingIndex = ref<number | null>(null)
 const moreOpened = ref(false)
 const ringButtonRefs = ref<HTMLButtonElement[]>([])
 const moreButtonRefs = ref<HTMLButtonElement[]>([])
+const warnedMessages = new Set<string>()
 
-const splitItems = computed(() => splitRadialMenuItems(props.items, props.maxRingItems))
+const warnRadialMenu = (message: string) => {
+  if (warnedMessages.has(message)) {
+    return
+  }
+
+  warnedMessages.add(message)
+  console.warn(`[FlRadialMenu] ${message}`)
+}
+
+const flattenSlotVNodes = (children: VNodeArrayChildren): VNode[] => {
+  const vnodes: VNode[] = []
+
+  for (const child of children) {
+    if (Array.isArray(child)) {
+      vnodes.push(...flattenSlotVNodes(child as VNodeArrayChildren))
+      continue
+    }
+
+    if (!isVNode(child)) {
+      continue
+    }
+
+    if (child.type === Fragment && Array.isArray(child.children)) {
+      vnodes.push(...flattenSlotVNodes(child.children as VNodeArrayChildren))
+      continue
+    }
+
+    vnodes.push(child)
+  }
+
+  return vnodes
+}
+
+const isRadialMenuItemVNode = (vnode: VNode) =>
+  typeof vnode.type === 'object' && 'name' in vnode.type && vnode.type.name === 'FlRadialMenuItem'
+
+const readBooleanSlotProp = (value: unknown) => value === true || value === ''
+
+const readOptionalBooleanSlotProp = (value: unknown) =>
+  value === undefined ? undefined : readBooleanSlotProp(value)
+
+const readSlotItemSlots = (children: VNode['children']) => {
+  if (!children || Array.isArray(children) || typeof children !== 'object') {
+    return undefined
+  }
+
+  return children as Partial<Record<string, Slot>>
+}
+
+const readSlotItemProps = (vnode: VNode): FlRadialMenuResolvableItem => {
+  const vnodeProps = (vnode.props ?? {}) as Record<string, unknown>
+  const vnodeSlots = readSlotItemSlots(vnode.children)
+
+  return {
+    index: typeof vnodeProps.index === 'string' ? vnodeProps.index : undefined,
+    label: typeof vnodeProps.label === 'string' ? vnodeProps.label : '',
+    icon: vnodeProps.icon as Component | undefined,
+    shortcut: typeof vnodeProps.shortcut === 'string' ? vnodeProps.shortcut : undefined,
+    disabled: readBooleanSlotProp(vnodeProps.disabled),
+    hidden: readBooleanSlotProp(vnodeProps.hidden),
+    divided: readBooleanSlotProp(vnodeProps.divided),
+    closeOnSelect: readOptionalBooleanSlotProp(vnodeProps.closeOnSelect),
+    meta:
+      vnodeProps.meta && typeof vnodeProps.meta === 'object'
+        ? (vnodeProps.meta as Record<string, unknown>)
+        : undefined,
+    iconSlot: vnodeSlots?.icon,
+    labelSlot: vnodeSlots?.label
+  }
+}
+
+const slotItems = computed(() =>
+  flattenSlotVNodes(slots.default?.() ?? [])
+    .filter(isRadialMenuItemVNode)
+    .map(readSlotItemProps)
+)
+const resolvedItems = computed(() =>
+  normalizeRadialMenuItems(slotItems.value.length > 0 ? slotItems.value : props.items, {
+    warn: warnRadialMenu
+  })
+)
+const splitItems = computed(() => splitRadialMenuItems(resolvedItems.value, props.maxRingItems))
 const ringItems = computed(() => splitItems.value.ringItems)
 const moreItems = computed(() => splitItems.value.moreItems)
 const sizePreset = computed(() => radialMenuSizePresets[props.size])
@@ -189,10 +298,15 @@ const rootStyle = computed(() => ({
   '--fl-radial-menu-radius': `${resolvedRadius.value}px`,
   '--fl-radial-menu-center-size': `${resolvedCenterSize.value}px`,
   '--fl-radial-menu-item-size': `${resolvedItemSize.value}px`,
+  '--fl-radial-menu-item-half-size': `${resolvedItemSize.value / 2}px`,
   '--fl-radial-menu-floating-x': `${floatingX.value ?? (typeof window === 'undefined' ? 0 : window.innerWidth / 2)}px`,
   '--fl-radial-menu-floating-y': `${floatingY.value ?? (typeof window === 'undefined' ? 0 : window.innerHeight / 2)}px`,
   '--fl-radial-menu-z-index': String(props.zIndex)
 }))
+
+const getItemIcon = (item: FlRadialMenuResolvedItem) => item.iconSlot ?? item.icon
+const RadialMenuItemLabel = ({ item }: { item: FlRadialMenuResolvedItem }) =>
+  item.labelSlot?.() ?? item.label
 
 const getItemLayout = (index: number) =>
   getRadialMenuItemLayout({
@@ -262,7 +376,7 @@ const setMoreOpened = (nextOpened: boolean) => {
 }
 
 const activateItem = (
-  item: FlRadialMenuItem,
+  item: FlRadialMenuResolvedItem,
   source: 'ring' | 'more',
   index: number,
   event: MouseEvent | KeyboardEvent
@@ -271,7 +385,7 @@ const activateItem = (
     return
   }
 
-  emit('select', item, { source, index, event })
+  emit('select', item.index, [item.index], item, { source, index, event })
 
   const shouldClose = item.closeOnSelect ?? props.closeOnSelect
   if (shouldClose) {

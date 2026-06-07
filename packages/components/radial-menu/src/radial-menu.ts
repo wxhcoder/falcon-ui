@@ -2,11 +2,12 @@ import type { ExtractPublicPropTypes, PropType } from 'vue'
 import type {
   FlRadialMenuCloseReason,
   FlRadialMenuDropdownPlacement,
-  FlRadialMenuItem,
+  FlRadialMenuItemData,
   FlRadialMenuItemType,
   FlRadialMenuMode,
   FlRadialMenuMoreMode,
   FlRadialMenuOpenReason,
+  FlRadialMenuResolvedItem,
   FlRadialMenuSelectContext,
   FlRadialMenuSize,
   FlRadialMenuTrigger
@@ -38,7 +39,7 @@ const radialMenuItemTypes: FlRadialMenuItemType[] = ['square', 'circle']
 
 export const flRadialMenuProps = {
   items: {
-    type: Array as PropType<FlRadialMenuItem[]>,
+    type: Array as PropType<FlRadialMenuItemData[]>,
     default: () => []
   },
   mode: {
@@ -62,7 +63,7 @@ export const flRadialMenuProps = {
     default: true
   },
   centerIcon: {
-    type: [Object, String] as PropType<FlRadialMenuItem['icon']>,
+    type: [Object, String] as PropType<FlRadialMenuItemData['icon']>,
     default: undefined
   },
   centerLabel: {
@@ -126,9 +127,18 @@ export const flRadialMenuEmits = {
   'update:modelValue': (opened: boolean) => typeof opened === 'boolean',
   open: (reason: FlRadialMenuOpenReason) => typeof reason === 'string',
   close: (reason: FlRadialMenuCloseReason) => typeof reason === 'string',
-  select: (item: FlRadialMenuItem, context: FlRadialMenuSelectContext) =>
-    item !== undefined && context !== undefined,
-  'active-change': (item: FlRadialMenuItem | null) => item === null || item !== undefined,
+  select: (
+    index: string,
+    indexPath: string[],
+    item: FlRadialMenuResolvedItem,
+    context: FlRadialMenuSelectContext
+  ) =>
+    typeof index === 'string' &&
+    Array.isArray(indexPath) &&
+    indexPath.every((path) => typeof path === 'string') &&
+    item !== undefined &&
+    context !== undefined,
+  'active-change': (item: FlRadialMenuResolvedItem | null) => item === null || item !== undefined,
   'more-open': () => true,
   'more-close': () => true
 } as const
@@ -142,12 +152,14 @@ export type {
   FlRadialMenuCloseReason,
   FlRadialMenuDropdownPlacement,
   FlRadialMenuExpose,
-  FlRadialMenuItem,
+  FlRadialMenuItemData,
   FlRadialMenuItemType,
   FlRadialMenuMode,
   FlRadialMenuMoreMode,
   FlRadialMenuOpenOptions,
   FlRadialMenuOpenReason,
+  FlRadialMenuResolvableItem,
+  FlRadialMenuResolvedItem,
   FlRadialMenuSelectContext,
   FlRadialMenuSize,
   FlRadialMenuTrigger

@@ -1,20 +1,27 @@
 <template>
   <div class="radial-menu-demo-stage">
-    <FlRadialMenu :items="items">
+    <FlRadialMenu>
       <template #center>
-        <span class="radial-menu-custom-center">⌘</span>
+        <span class="radial-menu-custom-center">+</span>
       </template>
+      <FlRadialMenuItem
+        v-for="item in items"
+        :key="item.index"
+        :index="item.index"
+        :label="item.label"
+        :disabled="item.disabled" />
     </FlRadialMenu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FlRadialMenu, type FlRadialMenuItem } from '../../../packages/components/radial-menu'
+import { FlRadialMenu, FlRadialMenuItem } from '../../../packages/components/radial-menu'
+import type { FlRadialMenuItemData as RadialMenuItem } from '../../../packages/components/radial-menu'
 
-const items: FlRadialMenuItem[] = [
-  { key: 'copy', label: 'Copy' },
-  { key: 'paste', label: 'Paste' },
-  { key: 'delete', label: 'Delete', disabled: true }
+const items: RadialMenuItem[] = [
+  { index: 'copy', label: 'Copy' },
+  { index: 'paste', label: 'Paste' },
+  { index: 'delete', label: 'Delete', disabled: true }
 ]
 </script>
 

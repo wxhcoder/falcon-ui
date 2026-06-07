@@ -1,20 +1,27 @@
 <template>
   <div class="radial-menu-demo-stage">
-    <FlRadialMenu :items="items" center-label="Menu" more-mode="text-ellipsis" />
+    <FlRadialMenu center-label="Menu" more-mode="text-ellipsis">
+      <FlRadialMenuItem
+        v-for="item in items"
+        :key="item.index"
+        :index="item.index"
+        :label="item.label" />
+    </FlRadialMenu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { FlRadialMenu, type FlRadialMenuItem } from '../../../packages/components/radial-menu'
+import { FlRadialMenu, FlRadialMenuItem } from '../../../packages/components/radial-menu'
+import type { FlRadialMenuItemData as RadialMenuItem } from '../../../packages/components/radial-menu'
 
-const items: FlRadialMenuItem[] = [
-  { key: 'move', label: 'Move' },
-  { key: 'frame', label: 'Frame' },
-  { key: 'pen', label: 'Pen' },
-  { key: 'text', label: 'Text' },
-  { key: 'comment', label: 'Comment' },
-  { key: 'objects', label: 'Objects' },
-  { key: 'actions', label: 'Actions' },
-  { key: 'settings', label: 'Settings' }
+const items: RadialMenuItem[] = [
+  { index: 'move', label: 'Move' },
+  { index: 'frame', label: 'Frame' },
+  { index: 'pen', label: 'Pen' },
+  { index: 'text', label: 'Text' },
+  { index: 'comment', label: 'Comment' },
+  { index: 'objects', label: 'Objects' },
+  { index: 'actions', label: 'Actions' },
+  { index: 'settings', label: 'Settings' }
 ]
 </script>

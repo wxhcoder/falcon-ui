@@ -1,7 +1,8 @@
-import type { Component } from 'vue'
+import type { Component, Slot } from 'vue'
 
-export interface FlRadialMenuItem {
-  key: string | number
+export interface FlRadialMenuItemData {
+  index?: string
+  key?: string | number
   label: string
   icon?: Component | string
   shortcut?: string
@@ -10,6 +11,22 @@ export interface FlRadialMenuItem {
   divided?: boolean
   closeOnSelect?: boolean
   meta?: Record<string, unknown>
+}
+
+export interface FlRadialMenuResolvableItem extends FlRadialMenuItemData {
+  iconSlot?: Slot
+  labelSlot?: Slot
+}
+
+export interface FlRadialMenuResolvedItem extends Omit<
+  FlRadialMenuResolvableItem,
+  'index' | 'key' | 'icon'
+> {
+  index: string
+  key?: string | number
+  icon?: Component | string
+  iconSlot?: Slot
+  labelSlot?: Slot
 }
 
 export type FlRadialMenuMode = 'inline' | 'floating'

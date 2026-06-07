@@ -1,9 +1,9 @@
 import type { Ref } from 'vue'
-import type { FlRadialMenuItem } from './types'
+import type { FlRadialMenuResolvedItem } from './types'
 
 export interface UseRadialMenuKeyboardOptions {
-  ringItems: Ref<FlRadialMenuItem[]>
-  moreItems: Ref<FlRadialMenuItem[]>
+  ringItems: Ref<FlRadialMenuResolvedItem[]>
+  moreItems: Ref<FlRadialMenuResolvedItem[]>
   ringRefs: Ref<HTMLButtonElement[]>
   moreRefs: Ref<HTMLButtonElement[]>
   closeMenu: () => void
@@ -12,7 +12,7 @@ export interface UseRadialMenuKeyboardOptions {
 }
 
 const findNextEnabledIndex = (
-  items: FlRadialMenuItem[],
+  items: FlRadialMenuResolvedItem[],
   currentIndex: number,
   direction: 1 | -1
 ) => {

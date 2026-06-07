@@ -136,8 +136,7 @@
     align-items: center;
     justify-content: center;
     width: max-content;
-    height: 24px;
-    padding: 0 9px;
+    padding: 6px 10px;
     border-radius: 999px;
     background: var(--el-fill-color-light);
     box-sizing: border-box;
@@ -148,24 +147,24 @@
 
     @include bem.m(tip-left) {
       top: 50%;
-      right: calc(100% + 8px);
+      right: calc(100% + 10px);
       transform: translateY(-50%);
     }
 
     @include bem.m(tip-right) {
       top: 50%;
-      left: calc(100% + 8px);
+      left: calc(100% + 10px);
       transform: translateY(-50%);
     }
 
     @include bem.m(tip-top) {
-      bottom: calc(100% + 8px);
+      bottom: calc(100% + 10px);
       left: 50%;
       transform: translateX(-50%);
     }
 
     @include bem.m(tip-bottom) {
-      top: calc(100% + 8px);
+      top: calc(100% + 10px);
       left: 50%;
       transform: translateX(-50%);
     }
@@ -178,7 +177,7 @@
 
   @include bem.e(more) {
     position: absolute;
-    top: calc(50% + var(--fl-radial-menu-radius) + 18px);
+    top: calc(50% + var(--fl-radial-menu-radius) + var(--fl-radial-menu-item-half-size) + 10px);
     left: 50%;
     z-index: 3;
     display: inline-flex;
@@ -197,7 +196,7 @@
 
   @include bem.e(more-dropdown) {
     position: absolute;
-    top: calc(50% + var(--fl-radial-menu-radius) + 54px);
+    top: calc(50% + var(--fl-radial-menu-radius) + var(--fl-radial-menu-item-half-size) + 46px);
     left: 50%;
     z-index: 4;
     display: inline-flex;

@@ -10,6 +10,7 @@ import {
   FlInputSearch,
   FlQrCode,
   FlRadialMenu,
+  FlRadialMenuItem,
   FlSelect,
   FlTable
 } from '..'
@@ -62,6 +63,7 @@ describe('@falcon-ui/components exports', () => {
     app.use(FlQrCode)
     app.use(FlBarcode)
     app.use(FlRadialMenu)
+    app.use(FlRadialMenuItem)
     app.use(FlSelect)
     app.use(FlTable)
 
@@ -75,6 +77,7 @@ describe('@falcon-ui/components exports', () => {
     expect(app.component).toHaveBeenCalledWith('FlQrCode', FlQrCode)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
     expect(app.component).toHaveBeenCalledWith('FlRadialMenu', FlRadialMenu)
+    expect(app.component).toHaveBeenCalledWith('FlRadialMenuItem', FlRadialMenuItem)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
   })
 })

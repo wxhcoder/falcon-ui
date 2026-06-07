@@ -5,8 +5,8 @@
     {
       "description": "",
       "name": "active-change",
-      "signature": "(event: \"active-change\", item: FlRadialMenuItem | null): void",
-      "type": "[item: FlRadialMenuItem | null]"
+      "signature": "(event: \"active-change\", item: FlRadialMenuResolvedItem | null): void",
+      "type": "[item: FlRadialMenuResolvedItem | null]"
     },
     {
       "description": "",
@@ -35,8 +35,8 @@
     {
       "description": "",
       "name": "select",
-      "signature": "(event: \"select\", item: FlRadialMenuItem, context: FlRadialMenuSelectContext): void",
-      "type": "[item: FlRadialMenuItem, context: FlRadialMenuSelectContext]"
+      "signature": "(event: \"select\", index: string, indexPath: string[], item: FlRadialMenuResolvedItem, context: FlRadialMenuSelectContext): void",
+      "type": "[index: string, indexPath: string[], item: FlRadialMenuResolvedItem, context: FlRadialMenuSelectContext]"
     },
     {
       "description": "",
@@ -108,7 +108,7 @@
       "description": "",
       "name": "items",
       "required": false,
-      "type": "FlRadialMenuItem[] | undefined"
+      "type": "FlRadialMenuItemData[] | undefined"
     },
     {
       "default": "-",
@@ -220,7 +220,12 @@
     {
       "description": "",
       "name": "center",
-      "type": "{}"
+      "type": "any"
+    },
+    {
+      "description": "",
+      "name": "default",
+      "type": "any"
     }
   ]
 }

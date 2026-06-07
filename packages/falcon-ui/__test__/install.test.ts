@@ -8,6 +8,7 @@ import FalconUI, {
   FlInputNumber,
   FlInputSearch,
   FlRadialMenu,
+  FlRadialMenuItem,
   FlSelect,
   FlTable,
   FlTableEditor,
@@ -47,6 +48,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
     expect(app.component).toHaveBeenCalledWith('FlRadialMenu', FlRadialMenu)
+    expect(app.component).toHaveBeenCalledWith('FlRadialMenuItem', FlRadialMenuItem)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
     expect(app.component).toHaveBeenCalledWith('FlTableEditor', FlTableEditor)
@@ -67,6 +69,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
     expect(app.component).toHaveBeenCalledWith('FlRadialMenu', FlRadialMenu)
+    expect(app.component).toHaveBeenCalledWith('FlRadialMenuItem', FlRadialMenuItem)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
     expect(app.component).toHaveBeenCalledWith('FlTableEditor', FlTableEditor)

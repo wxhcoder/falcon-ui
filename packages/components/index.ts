@@ -114,19 +114,23 @@ export type {
   TreeShowLineOptions,
   TreeStyles
 } from './tree'
-export { FlRadialMenu } from './radial-menu'
+export { FlRadialMenu, FlRadialMenuItem } from './radial-menu'
 export type {
   FlRadialMenuCloseReason,
   FlRadialMenuDropdownPlacement,
   FlRadialMenuEmits,
   FlRadialMenuExpose,
-  FlRadialMenuItem,
+  FlRadialMenuItemData,
   FlRadialMenuMode,
   FlRadialMenuMoreMode,
   FlRadialMenuOpenOptions,
   FlRadialMenuOpenReason,
   FlRadialMenuProps,
+  FlRadialMenuResolvableItem,
+  FlRadialMenuResolvedItem,
   FlRadialMenuSelectContext,
+  FlRadialMenuSize,
+  FlRadialMenuItemType,
   FlRadialMenuTrigger,
   RadialMenuEmits,
   RadialMenuProps

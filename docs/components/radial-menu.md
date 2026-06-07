@@ -36,6 +36,11 @@
 ::: demo radial-menu/item-type
 :::
 
+## Label Slot
+
+::: demo radial-menu/label-slot
+:::
+
 ## API
 
 ### Props
@@ -53,3 +58,11 @@
 ### Exposes
 
 <VpApiTable source="/api-meta/fl-radial-menu.json" section="exposes" />
+
+### FlRadialMenuItem Props
+
+<VpApiTable source="/api-meta/fl-radial-menu-item.json" section="props" />
+
+### FlRadialMenuItem Slots
+
+<VpApiTable source="/api-meta/fl-radial-menu-item.json" section="slots" />
