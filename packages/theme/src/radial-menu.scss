@@ -7,6 +7,26 @@
   --fl-radial-menu-item-half-size: #{$item-half-size};
 }
 
+@keyframes fl-radial-menu-track-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fl-radial-menu-more-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 @include bem.b(radial-menu) {
   --fl-radial-menu-primary-color: var(--el-color-primary);
   --fl-radial-menu-track-color: var(--el-border-color-lighter);
@@ -15,6 +35,7 @@
   --fl-radial-menu-border-width: 2px;
   --fl-radial-menu-duration: 180ms;
   --fl-radial-menu-easing: cubic-bezier(0.2, 0, 0, 1);
+  --fl-radial-menu-more-enter-delay: 0ms;
 
   @include bem.m(large) {
     @include radial-menu-size(96px, 56px, 44px, 22px);
@@ -124,6 +145,7 @@
       opacity var(--fl-radial-menu-duration) var(--fl-radial-menu-easing),
       border-color var(--fl-radial-menu-duration) var(--fl-radial-menu-easing),
       color var(--fl-radial-menu-duration) var(--fl-radial-menu-easing);
+    will-change: transform, opacity;
 
     @include bem.when(active) {
       border-color: var(--fl-radial-menu-primary-color);
@@ -268,8 +290,40 @@
     opacity: 0.6;
   }
 
+  @include bem.when(entering) {
+    #{bem.selector('radial-menu', 'track')} {
+      animation: fl-radial-menu-track-fade-in 120ms var(--fl-radial-menu-easing) both;
+    }
+
+    #{bem.selector('radial-menu', 'item')},
+    #{bem.selector('radial-menu', 'more')} {
+      pointer-events: none;
+    }
+
+    #{bem.selector('radial-menu', 'item')} {
+      opacity: 0;
+      transform: translate(calc(-50% - var(--fl-radial-menu-radius)), -50%) scale(0.86);
+    }
+
+    #{bem.selector('radial-menu', 'more')} {
+      opacity: 0;
+      animation: fl-radial-menu-more-fade-in var(--fl-radial-menu-duration)
+        var(--fl-radial-menu-easing) var(--fl-radial-menu-more-enter-delay) both;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     @include bem.e(item) {
+      animation: none;
+      transition: none;
+    }
+
+    @include bem.e(track) {
+      animation: none;
+    }
+
+    @include bem.e(more) {
+      animation: none;
       transition: none;
     }
   }

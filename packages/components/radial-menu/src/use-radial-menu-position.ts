@@ -27,17 +27,67 @@ export interface RadialMenuTrackArcPathOptions {
   startAngle?: number
 }
 
+export interface RadialMenuClockwiseArcPointsOptions {
+  radius: number
+  targetAngle: number
+  startAngle?: number
+  steps?: number
+}
+
+export interface RadialMenuClockwiseEntryOrderOptions {
+  startAngle?: number
+}
+
 export type RadialMenuTipPlacement = 'left' | 'right' | 'top' | 'bottom'
 
 const toRadians = (degree: number) => (degree * Math.PI) / 180
+const normalizeCircleCoordinate = (value: number) => (Math.abs(value) < 0.001 ? 0 : value)
+
+export const normalizeRadialMenuAngle = (angle: number) => {
+  const normalized = angle % 360
+
+  return normalized < 0 ? normalized + 360 : normalized
+}
 
 const pointOnCircle = (radius: number, angle: number) => {
   const radians = toRadians(angle)
 
   return {
-    x: Math.cos(radians) * radius,
-    y: Math.sin(radians) * radius
+    x: normalizeCircleCoordinate(Math.cos(radians) * radius),
+    y: normalizeCircleCoordinate(Math.sin(radians) * radius)
   }
+}
+
+export const getRadialMenuClockwiseArcPoints = ({
+  radius,
+  targetAngle,
+  startAngle = 0,
+  steps = 7
+}: RadialMenuClockwiseArcPointsOptions) => {
+  const safeSteps = Math.max(Math.floor(steps), 2)
+  const normalizedStartAngle = normalizeRadialMenuAngle(startAngle)
+  const clockwiseSweep = normalizeRadialMenuAngle(targetAngle - normalizedStartAngle)
+
+  return Array.from({ length: safeSteps }, (_, index) => {
+    const progress = index / (safeSteps - 1)
+
+    return pointOnCircle(radius, normalizedStartAngle + clockwiseSweep * progress)
+  })
+}
+
+export const getRadialMenuClockwiseEntryOrder = (
+  layouts: Array<Pick<RadialMenuItemLayout, 'angle'>>,
+  { startAngle = 0 }: RadialMenuClockwiseEntryOrderOptions = {}
+) => {
+  const normalizedStartAngle = normalizeRadialMenuAngle(startAngle)
+
+  return layouts
+    .map((layout, index) => ({
+      index,
+      distance: normalizeRadialMenuAngle(layout.angle - normalizedStartAngle)
+    }))
+    .sort((current, next) => next.distance - current.distance || current.index - next.index)
+    .map(({ index }) => index)
 }
 
 const getRadialMenuActiveAngles = ({

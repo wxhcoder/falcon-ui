@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { h, nextTick } from 'vue'
 import { ElConfigProvider } from 'element-plus'
@@ -30,6 +30,31 @@ type RadialMenuSizeProp = {
   validator?: (value: string) => boolean
 }
 
+type RadialMenuEntryPoint = {
+  x: number
+  y: number
+}
+
+type RadialMenuEntryAnimationHelpers = typeof radialMenuPosition & {
+  getRadialMenuClockwiseEntryOrder?: (
+    layouts: Array<Pick<radialMenuPosition.RadialMenuItemLayout, 'angle'>>,
+    options?: { startAngle?: number }
+  ) => number[]
+  getRadialMenuClockwiseArcPoints?: (options: {
+    radius: number
+    targetAngle: number
+    startAngle?: number
+    steps?: number
+  }) => RadialMenuEntryPoint[]
+  normalizeRadialMenuAngle?: (angle: number) => number
+}
+
+type RadialMenuAnimateCall = {
+  element: HTMLElement
+  keyframes: Keyframe[] | PropertyIndexedKeyframes
+  options: KeyframeAnimationOptions
+}
+
 const createItems = (count: number): FlRadialMenuItemData[] =>
   Array.from({ length: count }, (_, index) => ({
     index: `item-${index + 1}`,
@@ -45,6 +70,95 @@ const getTrackArcPathHelper = () =>
       getRadialMenuTrackArcPath?: RadialMenuTrackArcPathHelper
     }
   ).getRadialMenuTrackArcPath
+
+const getEntryAnimationHelpers = () => radialMenuPosition as RadialMenuEntryAnimationHelpers
+
+const restoreFns: Array<() => void> = []
+
+afterEach(() => {
+  for (const restore of restoreFns.splice(0)) {
+    restore()
+  }
+
+  vi.restoreAllMocks()
+})
+
+const mockElementAnimate = () => {
+  const animateCalls: RadialMenuAnimateCall[] = []
+  const originalAnimate = HTMLElement.prototype.animate
+  const hadOwnAnimate = Object.prototype.hasOwnProperty.call(HTMLElement.prototype, 'animate')
+  const animateMock = vi.fn(function (
+    this: HTMLElement,
+    keyframes: Keyframe[] | PropertyIndexedKeyframes,
+    options?: number | KeyframeAnimationOptions
+  ) {
+    animateCalls.push({
+      element: this,
+      keyframes,
+      options: typeof options === 'number' ? { duration: options } : (options ?? {})
+    })
+
+    return {
+      cancel: vi.fn(),
+      finished: Promise.resolve()
+    } as unknown as Animation
+  })
+
+  Object.defineProperty(HTMLElement.prototype, 'animate', {
+    configurable: true,
+    value: animateMock
+  })
+
+  restoreFns.push(() => {
+    if (hadOwnAnimate) {
+      Object.defineProperty(HTMLElement.prototype, 'animate', {
+        configurable: true,
+        value: originalAnimate
+      })
+    } else {
+      delete (HTMLElement.prototype as Partial<HTMLElement>).animate
+    }
+  })
+
+  return { animateCalls, animateMock }
+}
+
+const stubReducedMotion = (matches: boolean) => {
+  const originalMatchMedia = window.matchMedia
+  const hadMatchMedia = Object.prototype.hasOwnProperty.call(window, 'matchMedia')
+
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: vi.fn((query: string) => ({
+      matches,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn()
+    }))
+  })
+
+  restoreFns.push(() => {
+    if (hadMatchMedia) {
+      Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        writable: true,
+        value: originalMatchMedia
+      })
+    } else {
+      delete (window as Partial<Window>).matchMedia
+    }
+  })
+}
+
+const flushRadialMenuEntry = async () => {
+  await nextTick()
+  await nextTick()
+}
 
 const getOuterArcSignature = (path: string, radius: number) => {
   const match = path.match(
@@ -164,6 +278,48 @@ describe('radial menu helpers', () => {
         innerRadius: 36
       })
     ).toBe('')
+  })
+
+  it('normalizes radial menu angles to a clockwise 0-360 range', () => {
+    const { normalizeRadialMenuAngle } = getEntryAnimationHelpers()
+
+    expect(normalizeRadialMenuAngle).toBeTypeOf('function')
+    expect(normalizeRadialMenuAngle?.(-90)).toBe(270)
+    expect(normalizeRadialMenuAngle?.(360)).toBe(0)
+    expect(normalizeRadialMenuAngle?.(450)).toBe(90)
+  })
+
+  it('creates clockwise entry arc points from the left side to the target angle', () => {
+    const { getRadialMenuClockwiseArcPoints } = getEntryAnimationHelpers()
+
+    expect(getRadialMenuClockwiseArcPoints).toBeTypeOf('function')
+
+    const points =
+      getRadialMenuClockwiseArcPoints?.({
+        radius: 96,
+        startAngle: 180,
+        targetAngle: -90,
+        steps: 5
+      }) ?? []
+
+    expect(points).toHaveLength(5)
+    expect(points[0]).toEqual({ x: -96, y: 0 })
+    expect(Math.round(points.at(-1)?.x ?? NaN)).toBe(0)
+    expect(Math.round(points.at(-1)?.y ?? NaN)).toBe(-96)
+  })
+
+  it('orders entry delays by farthest clockwise distance from the left side first', () => {
+    const { getRadialMenuClockwiseEntryOrder } = getEntryAnimationHelpers()
+    const layouts = Array.from({ length: 4 }, (_, index) =>
+      getRadialMenuItemLayout({
+        count: 4,
+        index,
+        radius: 96
+      })
+    )
+
+    expect(getRadialMenuClockwiseEntryOrder).toBeTypeOf('function')
+    expect(getRadialMenuClockwiseEntryOrder?.(layouts, { startAngle: 180 })).toEqual([2, 1, 0, 3])
   })
 })
 
@@ -523,6 +679,132 @@ describe('FlRadialMenu item child API and index semantics', () => {
   })
 })
 
+describe('FlRadialMenu entry animation', () => {
+  it('animates ring items from the left side along the clockwise track on click open', async () => {
+    stubReducedMotion(false)
+    const { animateCalls, animateMock } = mockElementAnimate()
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(4)
+      }
+    })
+
+    await wrapper.get('.fl-radial-menu__center').trigger('click')
+    await flushRadialMenuEntry()
+
+    expect(animateMock).toHaveBeenCalledTimes(4)
+
+    const firstItemCall = animateCalls.find(
+      ({ element }) => element.dataset.radialMenuIndex === 'item-1'
+    )
+    const keyframes = firstItemCall?.keyframes as Keyframe[]
+
+    expect(keyframes[0].transform).toContain('-96px')
+    expect(keyframes[0].transform).toContain('0px')
+    expect(keyframes.at(-1)?.transform).toContain('-96px')
+  })
+
+  it('stagger-delays ring items by farthest clockwise distance from the left side first', async () => {
+    stubReducedMotion(false)
+    const { animateCalls } = mockElementAnimate()
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(4)
+      }
+    })
+
+    await wrapper.get('.fl-radial-menu__center').trigger('click')
+    await flushRadialMenuEntry()
+
+    const delayByIndex = new Map(
+      animateCalls.map(({ element, options }) => [
+        element.dataset.radialMenuIndex,
+        options.delay ?? 0
+      ])
+    )
+
+    expect(delayByIndex.get('item-3')).toBe(120)
+    expect(delayByIndex.get('item-2')).toBe(210)
+    expect(delayByIndex.get('item-1')).toBe(300)
+    expect(delayByIndex.get('item-4')).toBe(390)
+    expect(delayByIndex.get('item-3')).toBeLessThan(delayByIndex.get('item-2') ?? 0)
+    expect(delayByIndex.get('item-2')).toBeLessThan(delayByIndex.get('item-1') ?? 0)
+    expect(delayByIndex.get('item-1')).toBeLessThan(delayByIndex.get('item-4') ?? 0)
+  })
+
+  it('uses longer entry durations for farther clockwise travel distances', async () => {
+    stubReducedMotion(false)
+    const { animateCalls } = mockElementAnimate()
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(4)
+      }
+    })
+
+    await wrapper.get('.fl-radial-menu__center').trigger('click')
+    await flushRadialMenuEntry()
+
+    const durationByIndex = new Map(
+      animateCalls.map(({ element, options }) => [
+        element.dataset.radialMenuIndex,
+        options.duration ?? 0
+      ])
+    )
+
+    expect(durationByIndex.get('item-3')).toBe(560)
+    expect(durationByIndex.get('item-2')).toBe(520)
+    expect(durationByIndex.get('item-1')).toBe(480)
+    expect(durationByIndex.get('item-4')).toBe(440)
+    expect(durationByIndex.get('item-3')).toBeGreaterThan(durationByIndex.get('item-2') ?? 0)
+    expect(durationByIndex.get('item-2')).toBeGreaterThan(durationByIndex.get('item-1') ?? 0)
+    expect(durationByIndex.get('item-1')).toBeGreaterThan(durationByIndex.get('item-4') ?? 0)
+  })
+
+  it('uses the same entry animation when opened by hover and controlled modelValue', async () => {
+    stubReducedMotion(false)
+    const { animateMock } = mockElementAnimate()
+    const hoverWrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(2),
+        trigger: 'hover'
+      }
+    })
+
+    await hoverWrapper.trigger('mouseenter')
+    await flushRadialMenuEntry()
+
+    expect(animateMock).toHaveBeenCalledTimes(2)
+
+    const controlledWrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(2),
+        modelValue: false
+      }
+    })
+
+    await controlledWrapper.setProps({ modelValue: true })
+    await flushRadialMenuEntry()
+
+    expect(animateMock).toHaveBeenCalledTimes(4)
+  })
+
+  it('skips WAAPI entry animation when reduced motion is preferred', async () => {
+    stubReducedMotion(true)
+    const { animateMock } = mockElementAnimate()
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(3)
+      }
+    })
+
+    await wrapper.get('.fl-radial-menu__center').trigger('click')
+    await flushRadialMenuEntry()
+
+    expect(wrapper.findAll('[role="menuitem"]')).toHaveLength(3)
+    expect(animateMock).not.toHaveBeenCalled()
+  })
+})
+
 describe('FlRadialMenu styles and active sector', () => {
   it('uses Falcon BEM helpers in Vue and SCSS sources', () => {
     const vueSource = readProjectFile('packages/components/radial-menu/src/radial-menu.vue')
@@ -546,6 +828,19 @@ describe('FlRadialMenu styles and active sector', () => {
       'border: var(--fl-radial-menu-border-width) solid var(--el-border-color-light)'
     )
     expect(scssSource.match(/stroke-width: var\(--fl-radial-menu-border-width\)/g)).toHaveLength(2)
+  })
+
+  it('defines entry animation hooks for track, ring items, More trigger, and reduced motion', () => {
+    const scssSource = readProjectFile('packages/theme/src/radial-menu.scss')
+
+    expect(scssSource).toContain('@keyframes fl-radial-menu-track-fade-in')
+    expect(scssSource).toContain('animation: fl-radial-menu-track-fade-in')
+    expect(scssSource).toContain('--fl-radial-menu-more-enter-delay')
+    expect(scssSource).toContain('@include bem.when(entering)')
+    expect(scssSource).toContain('translate(calc(-50% - var(--fl-radial-menu-radius)), -50%)')
+    expect(scssSource).toContain('will-change: transform, opacity')
+    expect(scssSource).toContain('@media (prefers-reduced-motion: reduce)')
+    expect(scssSource).toContain('animation: none')
   })
 
   it('defines all size variables in SCSS size modifiers', () => {

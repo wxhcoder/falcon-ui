@@ -126,10 +126,13 @@ import { flRadialMenuEmits, flRadialMenuProps } from './radial-menu'
 import { normalizeRadialMenuItems, splitRadialMenuItems } from './use-radial-menu-items'
 import { useRadialMenuKeyboard } from './use-radial-menu-keyboard'
 import {
+  getRadialMenuClockwiseArcPoints,
+  getRadialMenuClockwiseEntryOrder,
   getRadialMenuItemLayout,
   getRadialMenuSectorPath,
   getRadialMenuTrackArcPath,
-  getRadialMenuTipPlacement
+  getRadialMenuTipPlacement,
+  normalizeRadialMenuAngle
 } from './use-radial-menu-position'
 import { useRadialMenuShortcut } from './use-radial-menu-shortcut'
 import { useRadialMenuState } from './use-radial-menu-state'
@@ -140,6 +143,12 @@ import type {
   FlRadialMenuResolvedItem,
   FlRadialMenuSize
 } from './types'
+
+type RadialMenuEntryKeyframe = {
+  offset: number
+  opacity: number
+  transform: string
+}
 
 defineOptions({
   name: 'FlRadialMenu'
@@ -157,10 +166,18 @@ const rootRef = useTemplateRef<HTMLDivElement>('rootRef')
 const centerRef = useTemplateRef<HTMLButtonElement>('centerRef')
 const activeRingIndex = ref<number | null>(null)
 const moreOpened = ref(false)
+const isEntryAnimating = ref(false)
 const ringButtonRefs = ref<HTMLButtonElement[]>([])
 const moreButtonRefs = ref<HTMLButtonElement[]>([])
 const warnedMessages = new Set<string>()
 const globalSize = useGlobalSize()
+const radialMenuEntryTrackDelay = 120
+const radialMenuEntryItemMinDuration = 440
+const radialMenuEntryItemMaxDuration = 600
+const radialMenuEntryItemStagger = 90
+const radialMenuEntryArcSteps = 9
+const radialMenuEntryStartAngle = 180
+const radialMenuEntryEasing = 'cubic-bezier(0.2, 0, 0, 1)'
 const radialMenuGeometryBySize = {
   large: {
     radius: 96,
@@ -323,13 +340,15 @@ const rootClass = computed(() => [
   ns.m(resolvedSize.value),
   ns.m(`item-${props.itemType}`),
   ns.is('opened', opened.value),
+  ns.is('entering', isEntryAnimating.value),
   ns.is('disabled', props.disabled)
 ])
 
 const rootStyle = computed(() => ({
   '--fl-radial-menu-floating-x': `${floatingX.value ?? (typeof window === 'undefined' ? 0 : window.innerWidth / 2)}px`,
   '--fl-radial-menu-floating-y': `${floatingY.value ?? (typeof window === 'undefined' ? 0 : window.innerHeight / 2)}px`,
-  '--fl-radial-menu-z-index': String(props.zIndex)
+  '--fl-radial-menu-z-index': String(props.zIndex),
+  '--fl-radial-menu-more-enter-delay': `${radialMenuEntryTrackDelay + Math.max(ringItems.value.length - 1, 0) * radialMenuEntryItemStagger}ms`
 }))
 
 const getItemIcon = (item: FlRadialMenuResolvedItem) => item.iconSlot ?? item.icon
@@ -342,6 +361,25 @@ const getItemLayout = (index: number) =>
     index,
     radius: resolvedRadius.value
   })
+
+const formatEntryCoordinate = (value: number) => {
+  const rounded = Math.abs(value) < 0.001 ? 0 : Number(value.toFixed(3))
+
+  return `${rounded}px`
+}
+
+const getEntryTransform = (x: number, y: number, scale = 1) =>
+  `translate(calc(-50% + ${formatEntryCoordinate(x)}), calc(-50% + ${formatEntryCoordinate(y)})) scale(${scale})`
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const canUseWebAnimations = () =>
+  typeof HTMLElement !== 'undefined' && typeof HTMLElement.prototype.animate === 'function'
+
+const canAnimateElement = (element: HTMLElement) => typeof element.animate === 'function'
 
 const getItemStyle = (index: number) => {
   const layout = getItemLayout(index)
@@ -385,12 +423,16 @@ const setActiveRingIndex = (index: number | null) => {
 const setRingButtonRef = (element: Element | ComponentPublicInstance | null, index: number) => {
   if (element instanceof HTMLButtonElement) {
     ringButtonRefs.value[index] = element
+  } else {
+    delete ringButtonRefs.value[index]
   }
 }
 
 const setMoreButtonRef = (element: Element | ComponentPublicInstance | null, index: number) => {
   if (element instanceof HTMLButtonElement) {
     moreButtonRefs.value[index] = element
+  } else {
+    delete moreButtonRefs.value[index]
   }
 }
 
@@ -479,12 +521,143 @@ const { focusFirstAvailableRingItem, handleMenuKeydown, handleRingKeydown, handl
     activateFocused: activateKeyboardItem
   })
 
+let entryAnimations: Animation[] = []
+let entryAnimationToken = 0
+let entryFinishTimer: ReturnType<typeof setTimeout> | undefined
+
+const clearEntryFinishTimer = () => {
+  if (entryFinishTimer === undefined) {
+    return
+  }
+
+  clearTimeout(entryFinishTimer)
+  entryFinishTimer = undefined
+}
+
+const cancelEntryAnimations = () => {
+  entryAnimationToken += 1
+  clearEntryFinishTimer()
+
+  for (const animation of entryAnimations) {
+    animation.cancel()
+  }
+
+  entryAnimations = []
+  isEntryAnimating.value = false
+}
+
+const finishEntryAnimations = (token: number) => {
+  if (token !== entryAnimationToken) {
+    return
+  }
+
+  clearEntryFinishTimer()
+
+  for (const animation of entryAnimations) {
+    animation.cancel()
+  }
+
+  entryAnimations = []
+  isEntryAnimating.value = false
+}
+
+const getEntryOrderByIndex = () => {
+  const layouts = ringItems.value.map((_, index) => getItemLayout(index))
+  const entryOrder = getRadialMenuClockwiseEntryOrder(layouts, {
+    startAngle: radialMenuEntryStartAngle
+  })
+
+  return new Map(entryOrder.map((itemIndex, orderIndex) => [itemIndex, orderIndex]))
+}
+
+const getRingItemEntryDistance = (index: number) =>
+  normalizeRadialMenuAngle(getItemLayout(index).angle - radialMenuEntryStartAngle)
+
+const getRingItemEntryDuration = (index: number) => {
+  const distanceRatio = Math.min(getRingItemEntryDistance(index), 360) / 360
+
+  return (
+    radialMenuEntryItemMinDuration +
+    (radialMenuEntryItemMaxDuration - radialMenuEntryItemMinDuration) * distanceRatio
+  )
+}
+
+const getRingItemEntryKeyframes = (index: number): RadialMenuEntryKeyframe[] => {
+  const layout = getItemLayout(index)
+  const finalOpacity = ringItems.value[index]?.disabled ? 0.5 : 1
+  const points = getRadialMenuClockwiseArcPoints({
+    radius: resolvedRadius.value,
+    startAngle: radialMenuEntryStartAngle,
+    targetAngle: layout.angle,
+    steps: radialMenuEntryArcSteps
+  })
+
+  return points.map((point, pointIndex) => ({
+    offset: pointIndex / (points.length - 1),
+    opacity: pointIndex === 0 ? 0 : finalOpacity,
+    transform: getEntryTransform(point.x, point.y, pointIndex === 0 ? 0.86 : 1)
+  }))
+}
+
+const playEntryAnimations = () => {
+  if (prefersReducedMotion() || ringItems.value.length === 0) {
+    isEntryAnimating.value = false
+    return
+  }
+
+  const ringButtons = ringButtonRefs.value.slice(0, ringItems.value.length)
+  const entryOrderByIndex = getEntryOrderByIndex()
+  const animations: Animation[] = []
+  let maxEntryEndTime = 0
+
+  ringButtons.forEach((button, index) => {
+    if (!button || !canAnimateElement(button)) {
+      return
+    }
+
+    const orderIndex = entryOrderByIndex.get(index) ?? index
+    const delay = radialMenuEntryTrackDelay + orderIndex * radialMenuEntryItemStagger
+    const duration = getRingItemEntryDuration(index)
+    const animation = button.animate(getRingItemEntryKeyframes(index), {
+      delay,
+      duration,
+      easing: radialMenuEntryEasing,
+      fill: 'both'
+    })
+
+    maxEntryEndTime = Math.max(maxEntryEndTime, delay + duration)
+    animations.push(animation)
+  })
+
+  if (animations.length === 0) {
+    isEntryAnimating.value = false
+    return
+  }
+
+  entryAnimationToken += 1
+  const token = entryAnimationToken
+
+  entryAnimations = animations
+  isEntryAnimating.value = true
+  entryFinishTimer = setTimeout(() => finishEntryAnimations(token), Math.ceil(maxEntryEndTime) + 40)
+}
+
 watch(opened, async (nextOpened) => {
+  cancelEntryAnimations()
+
   if (!nextOpened) {
     return
   }
 
+  isEntryAnimating.value =
+    canUseWebAnimations() && !prefersReducedMotion() && ringItems.value.length > 0
+
   await nextTick()
+  if (!opened.value) {
+    return
+  }
+
+  playEntryAnimations()
   focusFirstAvailableRingItem()
 })
 
@@ -500,7 +673,10 @@ watch(
   { immediate: true }
 )
 
-onBeforeUnmount(removeDocumentPointerdown)
+onBeforeUnmount(() => {
+  removeDocumentPointerdown()
+  cancelEntryAnimations()
+})
 
 const handleCenterClick = () => {
   if (props.disabled || props.trigger !== 'click') {
