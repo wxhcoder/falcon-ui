@@ -1,59 +1,66 @@
 <template>
   <div class="radial-menu-demo-stage radial-menu-size-demo">
-    <FlRadialMenu size="large" center-label="Large">
+    <FlRadialMenu size="large">
+      <template #center>
+        <ElIcon :size="16">
+          <Eleme />
+        </ElIcon>
+      </template>
       <FlRadialMenuItem
         v-for="item in items"
         :key="item.index"
         :index="item.index"
         :label="item.label">
         <template #icon>
-          <span>{{ iconMap[item.index] }}</span>
+          <ElIcon :size="16">
+            <component :is="item.icon" />
+          </ElIcon>
         </template>
       </FlRadialMenuItem>
     </FlRadialMenu>
 
-    <FlRadialMenu size="medium" center-label="Medium">
+    <FlRadialMenu size="medium">
+      <template #center>
+        <ElIcon :size="16">
+          <Eleme />
+        </ElIcon>
+      </template>
       <FlRadialMenuItem
         v-for="item in items"
         :key="item.index"
         :index="item.index"
         :label="item.label">
         <template #icon>
-          <span>{{ iconMap[item.index] }}</span>
+          <ElIcon :size="16">
+            <component :is="item.icon" />
+          </ElIcon>
         </template>
       </FlRadialMenuItem>
     </FlRadialMenu>
 
-    <FlRadialMenu size="small" center-label="Small">
+    <FlRadialMenu size="small" :center-icon="Tools">
       <FlRadialMenuItem
         v-for="item in items"
         :key="item.index"
         :index="item.index"
-        :label="item.label">
-        <template #icon>
-          <span>{{ iconMap[item.index] }}</span>
-        </template>
-      </FlRadialMenuItem>
+        :icon="item.icon"
+        :label="item.label" />
     </FlRadialMenu>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ElIcon } from 'element-plus'
+import { Crop, EditPen, Eleme, Rank, Tickets, Tools } from '@element-plus/icons-vue'
 import { FlRadialMenu, FlRadialMenuItem } from '../../../packages/components/radial-menu'
 import type { FlRadialMenuItemData as RadialMenuItem } from '../../../packages/components/radial-menu'
 
 const items: RadialMenuItem[] = [
-  { index: 'move', label: 'Move' },
-  { index: 'frame', label: 'Frame' },
-  { index: 'pen', label: 'Pen' },
-  { index: 'text', label: 'Text' }
+  { index: 'move', label: 'Move', icon: Rank },
+  { index: 'frame', label: 'Frame', icon: Crop },
+  { index: 'pen', label: 'Pen', icon: EditPen },
+  { index: 'text', label: 'Text', icon: Tickets }
 ]
-const iconMap: Record<string, string> = {
-  move: 'V',
-  frame: '#',
-  pen: 'P',
-  text: 'T'
-}
 </script>
 
 <style scoped>

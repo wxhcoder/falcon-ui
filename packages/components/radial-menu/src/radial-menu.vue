@@ -92,8 +92,17 @@
           :data-radial-menu-more-index="item.index"
           @click="activateItem(item, 'more', index, $event)"
           @keydown="handleMoreKeydown($event, index)">
-          <span :class="ns.e('more-label')">
-            <RadialMenuItemLabel :item="item" />
+          <span :class="ns.e('more-content')">
+            <component
+              :is="getItemIcon(item)"
+              v-if="getItemIcon(item) && typeof getItemIcon(item) !== 'string'"
+              :class="ns.e('more-icon')" />
+            <span v-else-if="getItemIcon(item)" :class="ns.e('more-icon')">
+              {{ getItemIcon(item) }}
+            </span>
+            <span :class="ns.e('more-label')">
+              <RadialMenuItemLabel :item="item" />
+            </span>
           </span>
           <span v-if="item.shortcut" :class="ns.e('shortcut')">{{ item.shortcut }}</span>
         </button>

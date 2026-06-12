@@ -2,31 +2,35 @@
   <div class="radial-menu-demo-stage">
     <FlRadialMenu>
       <template #center>
-        <span class="radial-menu-custom-center">+</span>
+        <ElIcon :size="16">
+          <Eleme />
+        </ElIcon>
       </template>
       <FlRadialMenuItem
         v-for="item in items"
         :key="item.index"
         :index="item.index"
         :label="item.label"
-        :disabled="item.disabled" />
+        :disabled="item.disabled">
+        <template #icon>
+          <ElIcon :size="16">
+            <component :is="item.icon" />
+          </ElIcon>
+        </template>
+      </FlRadialMenuItem>
     </FlRadialMenu>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ElIcon } from 'element-plus'
+import { CopyDocument, Delete, DocumentCopy, Eleme } from '@element-plus/icons-vue'
 import { FlRadialMenu, FlRadialMenuItem } from '../../../packages/components/radial-menu'
 import type { FlRadialMenuItemData as RadialMenuItem } from '../../../packages/components/radial-menu'
 
 const items: RadialMenuItem[] = [
-  { index: 'copy', label: 'Copy' },
-  { index: 'paste', label: 'Paste' },
-  { index: 'delete', label: 'Delete', disabled: true }
+  { index: 'copy', label: 'Copy', icon: CopyDocument },
+  { index: 'paste', label: 'Paste', icon: DocumentCopy },
+  { index: 'delete', label: 'Delete', icon: Delete, disabled: true }
 ]
 </script>
-
-<style scoped>
-.radial-menu-custom-center {
-  font-size: 20px;
-}
-</style>

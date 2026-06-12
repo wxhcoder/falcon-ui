@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h, nextTick } from 'vue'
+import { h, markRaw, nextTick } from 'vue'
 import { ElConfigProvider } from 'element-plus'
 import { FlRadialMenuItem as RadialMenuItemComponent } from '..'
 import RadialMenu from '../src/radial-menu.vue'
@@ -1102,6 +1102,24 @@ describe('FlRadialMenu More dropdown and select', () => {
     await wrapper.get('.fl-radial-menu__more').trigger('click')
 
     expect(wrapper.findAll('.fl-radial-menu__more-item')).toHaveLength(2)
+  })
+
+  it('renders overflow item icons in the More dropdown', async () => {
+    const IconComponent = markRaw({
+      name: 'OverflowItemIcon',
+      render: () => h('svg', { class: 'overflow-item-icon' })
+    })
+    const wrapper = mount(RadialMenu, {
+      props: {
+        items: createItems(8).map((item) => ({ ...item, icon: IconComponent })),
+        modelValue: true
+      }
+    })
+
+    await wrapper.get('.fl-radial-menu__more').trigger('click')
+
+    expect(wrapper.findAll('.fl-radial-menu__more-icon')).toHaveLength(2)
+    expect(wrapper.findAll('.overflow-item-icon')).toHaveLength(8)
   })
 
   it('emits select and closes after choosing a ring item', async () => {
