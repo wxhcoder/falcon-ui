@@ -1,12 +1,22 @@
 <svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="1" y="1" width="246" height="142" rx="10" fill="#1E2430" stroke="#3A4352" />
-  <rect x="40" y="50" width="168" height="44" rx="8" fill="#111722" stroke="#4E5A6C" />
-  <rect x="56" y="66" width="86" height="12" rx="3" fill="#2A3342" />
-  <rect x="152" y="58" width="42" height="28" rx="6" fill="#263043" />
-  <circle cx="167" cy="72" r="6.5" stroke="#A8C3FF" stroke-width="2" />
-  <path d="M171.5 76.5L177 82" stroke="#A8C3FF" stroke-width="2" stroke-linecap="round" />
-  <rect x="182" y="58" width="1.5" height="28" fill="#465264" />
-  <rect x="64" y="62" width="2" height="20" rx="1" fill="#76A5FF">
-    <animate attributeName="opacity" values="1;0;1" dur="1.3s" repeatCount="indefinite" />
-  </rect>
+  <title>FlInputSearch SVG preview</title>
+  <rect x="36" y="54" width="176" height="36" rx="4" fill="#9AA1AA" />
+  <rect x="36" y="54" width="176" height="36" rx="4" fill="url(#fl-input-search-gray-gloss)" />
+  <rect x="36" y="54" width="176" height="36" rx="4" stroke="#BCC3CB" stroke-opacity="0.34" />
+  <rect x="53" y="65" width="84" height="14" rx="3" fill="#0083FF" />
+  <path d="M151.5 60V84" stroke="#6F7781" />
+  <circle cx="177" cy="70" r="7" stroke="#0083FF" />
+  <path d="M182 75L190 83" stroke="#0083FF" stroke-linecap="round" />
+  <defs>
+    <linearGradient
+      id="fl-input-search-gray-gloss"
+      x1="36"
+      y1="54"
+      x2="212"
+      y2="90"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B5BCC4" stop-opacity="0.48" />
+      <stop offset="1" stop-color="#69717B" stop-opacity="0.18" />
+    </linearGradient>
+  </defs>
 </svg>

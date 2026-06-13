@@ -1,10 +1,11 @@
-<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="40" y="52" width="240" height="44" rx="10" fill="#FFFFFF" stroke="#DDE3EE" stroke-width="2" />
-  <rect x="40" y="98" width="240" height="58" rx="10" fill="#FFFFFF" stroke="#DDE3EE" stroke-width="2" />
-  <path d="M226 69L240 82L254 69" stroke="#7A879C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-  <rect x="58" y="112" width="102" height="12" rx="6" fill="#DCE8FF" />
-  <rect x="58" y="132" width="74" height="10" rx="5" fill="#EAF1FF" />
-  <rect x="174" y="112" width="88" height="12" rx="6" fill="#EAF1FF" />
-  <rect x="174" y="132" width="52" height="10" rx="5" fill="#EAF1FF" />
+<svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>FlSelect SVG preview</title>
+  <rect x="45" y="38" width="158" height="34" rx="4" fill="#9AA1AA" />
+  <rect x="45" y="38" width="158" height="34" rx="4" stroke="#BCC3CB" stroke-opacity="0.34" />
+  <rect x="60" y="50" width="68" height="10" rx="3" fill="#0083FF" />
+  <path d="M179 51L185 57L191 51" stroke="#515860" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="57" y="82" width="134" height="32" rx="4" stroke="#8C929B" />
+  <rect x="70" y="92" width="50" height="8" rx="3" fill="#9AA1AA" />
+  <rect x="136" y="92" width="30" height="8" rx="3" fill="#0083FF" />
+  <path d="M57.5 106H190.5" stroke="#6F7781" />
 </svg>
-

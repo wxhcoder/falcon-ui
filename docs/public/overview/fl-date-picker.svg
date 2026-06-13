@@ -1,15 +1,14 @@
-<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="24" y="26" width="272" height="128" rx="14" fill="#FFFFFF" stroke="#DDE3EE" stroke-width="2" />
-  <rect x="24" y="26" width="272" height="30" rx="14" fill="#F5F8FF" />
-  <path d="M88 26V18M232 26V18" stroke="#5B6C8D" stroke-width="4" stroke-linecap="round" />
-  <rect x="44" y="72" width="48" height="30" rx="6" fill="#EAF1FF" />
-  <rect x="100" y="72" width="48" height="30" rx="6" fill="#EAF1FF" />
-  <rect x="156" y="72" width="48" height="30" rx="6" fill="#DCE8FF" />
-  <rect x="212" y="72" width="48" height="30" rx="6" fill="#EAF1FF" />
-  <rect x="44" y="110" width="48" height="30" rx="6" fill="#EAF1FF" />
-  <rect x="100" y="110" width="48" height="30" rx="6" fill="#EAF1FF" />
-  <rect x="156" y="110" width="48" height="30" rx="6" fill="#EAF1FF" />
-  <rect x="212" y="110" width="48" height="30" rx="6" fill="#EAF1FF" />
-  <circle cx="180" cy="87" r="8" fill="#4E6BFF" />
+<svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>FlDatePicker SVG preview</title>
+  <rect x="35" y="38" width="178" height="34" rx="4" fill="#9AA1AA" />
+  <rect x="35" y="38" width="178" height="34" rx="4" stroke="#BCC3CB" stroke-opacity="0.34" />
+  <rect x="52" y="50" width="70" height="10" rx="3" fill="#0083FF" />
+  <rect x="176" y="47" width="18" height="16" rx="3" stroke="#515860" />
+  <path d="M176 52H194" stroke="#515860" />
+  <rect x="70" y="84" width="108" height="34" rx="4" stroke="#8C929B" />
+  <path d="M70.5 95H177.5" stroke="#6F7781" />
+  <rect x="83" y="103" width="10" height="7" rx="2" fill="#9AA1AA" />
+  <rect x="107" y="103" width="10" height="7" rx="2" fill="#0083FF" />
+  <rect x="131" y="103" width="10" height="7" rx="2" fill="#9AA1AA" />
+  <rect x="155" y="103" width="10" height="7" rx="2" fill="#0083FF" />
 </svg>
-

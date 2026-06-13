@@ -1,16 +1,29 @@
-<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="40" y="30" width="240" height="120" rx="12" fill="#FFFFFF" stroke="#DDE3EE" stroke-width="2" />
-  <rect x="40" y="30" width="240" height="30" rx="12" fill="#EAF1FF" />
-  <path d="M40 60H280" stroke="#DDE3EE" stroke-width="2" />
-  <path d="M110 30V150" stroke="#DDE3EE" stroke-width="2" />
-  <path d="M190 30V150" stroke="#DDE3EE" stroke-width="2" />
-  <rect x="50" y="70" width="50" height="12" rx="6" fill="#DCE8FF" />
-  <rect x="120" y="70" width="60" height="12" rx="6" fill="#EAF1FF" />
-  <rect x="200" y="70" width="70" height="12" rx="6" fill="#DCE8FF" />
-  <rect x="50" y="95" width="50" height="12" rx="6" fill="#EAF1FF" />
-  <rect x="120" y="95" width="60" height="12" rx="6" fill="#DCE8FF" />
-  <rect x="200" y="95" width="70" height="12" rx="6" fill="#EAF1FF" />
-  <rect x="50" y="120" width="50" height="12" rx="6" fill="#DCE8FF" />
-  <rect x="120" y="120" width="60" height="12" rx="6" fill="#EAF1FF" />
-  <rect x="200" y="120" width="70" height="12" rx="6" fill="#DCE8FF" />
+<svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>FlTable SVG preview</title>
+  <rect x="31" y="36" width="186" height="72" rx="4" stroke="#8C929B" />
+  <path d="M31.5 61H216.5" stroke="#8C929B" />
+  <path d="M93 36.5V107.5" stroke="#6F7781" />
+  <path d="M155 36.5V107.5" stroke="#6F7781" />
+  <path d="M35 36h178c2.2 0 4 1.8 4 4v21H31V40c0-2.2 1.8-4 4-4Z" fill="#0083FF" />
+  <path
+    d="M35 36h178c2.2 0 4 1.8 4 4v21H31V40c0-2.2 1.8-4 4-4Z"
+    fill="url(#fl-table-blue-gloss)" />
+  <rect x="46" y="70.5" width="32" height="8" rx="3" fill="#9AA1AA" />
+  <rect x="108" y="70.5" width="32" height="8" rx="3" fill="#9AA1AA" fill-opacity="0.74" />
+  <rect x="170" y="70.5" width="32" height="8" rx="3" fill="#9AA1AA" />
+  <rect x="46" y="90.5" width="32" height="8" rx="3" fill="#0083FF" />
+  <rect x="108" y="90.5" width="32" height="8" rx="3" fill="#9AA1AA" />
+  <rect x="170" y="90.5" width="32" height="8" rx="3" fill="#0083FF" />
+  <defs>
+    <linearGradient
+      id="fl-table-blue-gloss"
+      x1="31"
+      y1="36"
+      x2="217"
+      y2="61"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1E96FF" stop-opacity="0.42" />
+      <stop offset="1" stop-color="#0068C8" stop-opacity="0.18" />
+    </linearGradient>
+  </defs>
 </svg>

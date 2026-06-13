@@ -1,13 +1,22 @@
 <svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="1" y="1" width="246" height="142" rx="10" fill="#1E2430" stroke="#3A4352" />
-  <rect x="52" y="52" width="144" height="40" rx="7" fill="#111722" stroke="#4E5A6C" />
-  <rect x="52" y="52" width="102" height="40" rx="7" fill="#111722" />
-  <rect x="152" y="52" width="44" height="40" rx="0" fill="#252E3D" />
-  <path d="M174 63L180 70H168L174 63Z" fill="#8CB2FF" />
-  <path d="M174 81L168 74H180L174 81Z" fill="#8CB2FF" />
-  <rect x="154" y="52" width="1.5" height="40" fill="#465264" />
-  <path d="M81.3 79V65.9H83.2V77.2H88.7V79H81.3Z" fill="#C9D8FF" />
-  <path d="M92.8 79.2C90.7 79.2 89.2 77.8 89.2 75.5V75.4C89.2 73.1 90.8 71.7 92.8 71.7C94.9 71.7 96.4 73.1 96.4 75.4V75.5C96.4 77.8 94.9 79.2 92.8 79.2ZM92.8 77.6C93.9 77.6 94.6 76.8 94.6 75.5V75.4C94.6 74.1 93.9 73.3 92.8 73.3C91.7 73.3 91 74.2 91 75.4V75.5C91 76.8 91.7 77.6 92.8 77.6Z" fill="#C9D8FF" />
-  <path d="M100.9 79.2C98.8 79.2 97.2 77.8 97.2 75.5V75.4C97.2 73.1 98.8 71.7 100.9 71.7C103 71.7 104.5 73.1 104.5 75.4V75.5C104.5 77.8 103 79.2 100.9 79.2ZM100.9 77.6C102 77.6 102.7 76.8 102.7 75.5V75.4C102.7 74.1 102 73.3 100.9 73.3C99.8 73.3 99 74.2 99 75.4V75.5C99 76.8 99.8 77.6 100.9 77.6Z" fill="#C9D8FF" />
-  <path d="M108.8 79.2C107.1 79.2 105.9 78.2 105.8 76.5H107.6C107.7 77.2 108.2 77.6 108.9 77.6C109.7 77.6 110.2 77.1 110.2 76.4C110.2 75.6 109.6 75.2 108.8 75.2H107.9V73.8H108.7C109.4 73.8 109.9 73.4 109.9 72.7C109.9 72 109.5 71.6 108.8 71.6C108.1 71.6 107.6 72 107.5 72.7H105.8C105.9 71 107.1 70 108.8 70C110.7 70 111.7 71 111.7 72.4C111.7 73.4 111.2 74 110.4 74.3C111.4 74.6 112 75.4 112 76.5C112 78.1 110.8 79.2 108.8 79.2Z" fill="#C9D8FF" />
+  <title>FlInputNumber SVG preview</title>
+  <rect x="38" y="54" width="172" height="36" rx="4" fill="#9AA1AA" />
+  <rect x="38" y="54" width="172" height="36" rx="4" fill="url(#fl-input-number-gray-gloss)" />
+  <rect x="38" y="54" width="172" height="36" rx="4" stroke="#BCC3CB" stroke-opacity="0.34" />
+  <rect x="56" y="65" width="62" height="14" rx="3" fill="#0083FF" />
+  <path d="M146.5 54V90" stroke="#6F7781" />
+  <path d="M178 65L184 59L190 65" stroke="#515860" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M178 79L184 85L190 79" stroke="#515860" stroke-linecap="round" stroke-linejoin="round" />
+  <defs>
+    <linearGradient
+      id="fl-input-number-gray-gloss"
+      x1="38"
+      y1="54"
+      x2="210"
+      y2="90"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B5BCC4" stop-opacity="0.48" />
+      <stop offset="1" stop-color="#69717B" stop-opacity="0.18" />
+    </linearGradient>
+  </defs>
 </svg>

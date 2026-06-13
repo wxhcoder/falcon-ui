@@ -1,0 +1,34 @@
+<svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>FlRadialMenu SVG preview</title>
+  <circle cx="124" cy="72" r="15" fill="#0083FF" />
+  <circle cx="124" cy="72" r="15" fill="url(#fl-radial-menu-center-gloss)" />
+  <circle cx="124" cy="72" r="44" stroke="#8C929B" />
+  <path d="M124 28V52" stroke="#6F7781" />
+  <path d="M124 92V116" stroke="#6F7781" />
+  <path d="M80 72H104" stroke="#6F7781" />
+  <path d="M144 72H168" stroke="#6F7781" />
+  <path d="M92.9 40.9L109.9 57.9" stroke="#6F7781" />
+  <path d="M138.1 86.1L155.1 103.1" stroke="#6F7781" />
+  <path d="M138.1 57.9L155.1 40.9" stroke="#6F7781" />
+  <path d="M92.9 103.1L109.9 86.1" stroke="#6F7781" />
+  <rect x="118" y="17" width="12" height="12" rx="4" fill="#0083FF" />
+  <rect x="118" y="115" width="12" height="12" rx="4" fill="#9AA1AA" />
+  <rect x="69" y="66" width="12" height="12" rx="4" fill="#9AA1AA" />
+  <rect x="167" y="66" width="12" height="12" rx="4" fill="#0083FF" />
+  <rect x="84" y="32" width="12" height="12" rx="4" fill="#9AA1AA" />
+  <rect x="152" y="32" width="12" height="12" rx="4" fill="#0083FF" />
+  <rect x="84" y="100" width="12" height="12" rx="4" fill="#0083FF" />
+  <rect x="152" y="100" width="12" height="12" rx="4" fill="#9AA1AA" />
+  <defs>
+    <linearGradient
+      id="fl-radial-menu-center-gloss"
+      x1="109"
+      y1="57"
+      x2="139"
+      y2="87"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1E96FF" stop-opacity="0.44" />
+      <stop offset="1" stop-color="#0068C8" stop-opacity="0.18" />
+    </linearGradient>
+  </defs>
+</svg>

@@ -64,6 +64,14 @@ export const overviewComponents: readonly OverviewItem[] = [
     icon: '/overview/fl-tree.svg'
   },
   {
+    name: 'FlRadialMenu',
+    title: 'Radial Menu',
+    group: 'interaction',
+    link: '/components/radial-menu',
+    description: '径向菜单组件，支持环形操作、更多项和快捷打开。',
+    icon: '/overview/fl-radial-menu.svg'
+  },
+  {
     name: 'FlInput',
     title: 'Input',
     group: 'form',
