@@ -45,10 +45,6 @@
             <div class="falcon-overview-card__preview">
               <img :src="withBase(item.icon)" :alt="`${item.name} 预览图`" loading="lazy" />
             </div>
-            <div class="falcon-overview-card__footer">
-              <span class="falcon-overview-card__name">{{ item.name }}</span>
-              <span class="falcon-overview-card__description">{{ item.description }}</span>
-            </div>
           </a>
         </div>
       </section>
@@ -101,6 +97,9 @@ const hasResults = computed(() => filteredGroups.value.length > 0)
 }
 
 .falcon-overview__search {
+  position: sticky;
+  top: calc(var(--vp-nav-height, 64px) + 8px);
+  z-index: 19;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -108,6 +107,7 @@ const hasResults = computed(() => filteredGroups.value.length > 0)
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
   background: var(--vp-c-bg-soft);
+  box-shadow: 0 8px 18px rgb(0 0 0 / 8%);
   padding: 0 12px;
   transition: border-color 0.2s ease;
 }
@@ -236,34 +236,17 @@ const hasResults = computed(() => filteredGroups.value.length > 0)
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 126px;
+  min-height: 168px;
+  padding: 18px 16px;
   background: linear-gradient(140deg, rgb(89 103 122 / 22%), rgb(50 57 69 / 12%));
 }
 
 .falcon-overview-card__preview img {
-  width: 124px;
-  height: 72px;
+  display: block;
+  width: 184px;
+  max-width: 100%;
+  height: auto;
   object-fit: contain;
-}
-
-.falcon-overview-card__footer {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px 12px;
-}
-
-.falcon-overview-card__name {
-  color: var(--vp-c-text-1);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.falcon-overview-card__description {
-  color: var(--vp-c-text-2);
-  font-size: 12px;
-  line-height: 1.5;
 }
 
 .falcon-overview__empty {
