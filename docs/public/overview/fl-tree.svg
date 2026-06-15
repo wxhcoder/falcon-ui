@@ -1,27 +1,61 @@
 <svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
   <title>FlTree SVG preview</title>
-  <path d="M78 48H112" stroke="#6F7781" />
-  <path d="M112 48V100" stroke="#6F7781" />
-  <path d="M112 74H142" stroke="#6F7781" />
-  <path d="M112 100H142" stroke="#6F7781" />
-  <rect x="46" y="32" width="32" height="32" rx="4" fill="#0083FF" />
-  <rect x="46" y="32" width="32" height="32" rx="4" fill="url(#fl-tree-root-gloss)" />
-  <rect x="142" y="58" width="64" height="32" rx="4" fill="#9AA1AA" />
-  <rect x="142" y="58" width="64" height="32" rx="4" stroke="#BCC3CB" stroke-opacity="0.32" />
-  <rect x="142" y="84" width="64" height="32" rx="4" fill="#9AA1AA" fill-opacity="0.62" />
-  <rect x="142" y="84" width="64" height="32" rx="4" stroke="#8C929B" stroke-opacity="0.6" />
-  <rect x="156" y="70" width="32" height="8" rx="3" fill="#0083FF" />
-  <rect x="156" y="96" width="26" height="8" rx="3" fill="#6F7781" />
-  <defs>
-    <linearGradient
-      id="fl-tree-root-gloss"
-      x1="46"
-      y1="32"
-      x2="78"
-      y2="64"
-      gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1E96FF" stop-opacity="0.44" />
-      <stop offset="1" stop-color="#0068C8" stop-opacity="0.18" />
-    </linearGradient>
-  </defs>
+  <path d="M85 72V94" stroke="#515860" />
+  <path d="M85 94H111" stroke="#515860" />
+  <path d="M95 102V124" stroke="#515860" />
+  <path d="M95 124H121" stroke="#515860" />
+  <path d="M52 29L60 41L68 29Z" fill="#BCC3CB" />
+  <rect x="76" y="26" width="16" height="16" rx="3" fill="#0083FF" />
+  <path
+    d="M80 34L83 37L88 30"
+    stroke="#F6FAFF"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round" />
+  <rect x="106" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="114" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="122" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="130" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="138" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="146" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="154" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="162" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="170" y="24" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <path d="M77 59L85 71L93 59Z" fill="#BCC3CB" />
+  <rect x="101" y="56" width="16" height="16" rx="3" stroke="#515860" />
+  <path
+    d="M105 64L108 67L113 60"
+    stroke="#6F7781"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round" />
+  <rect x="131" y="54" width="4" height="20" rx="1" fill="#515860" />
+  <rect x="139" y="54" width="4" height="20" rx="1" fill="#515860" />
+  <rect x="147" y="54" width="4" height="20" rx="1" fill="#515860" />
+  <rect x="155" y="54" width="4" height="20" rx="1" fill="#515860" />
+  <rect x="163" y="54" width="4" height="20" rx="1" fill="#515860" />
+  <rect x="171" y="54" width="4" height="20" rx="1" fill="#515860" />
+  <rect x="179" y="54" width="4" height="20" rx="1" fill="#515860" />
+  <rect x="111" y="86" width="16" height="16" rx="3" stroke="#515860" />
+  <rect x="141" y="84" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="149" y="84" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="157" y="84" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="165" y="84" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="173" y="84" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="181" y="84" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="189" y="84" width="4" height="20" rx="1" fill="#F6FAFF" />
+  <rect x="121" y="116" width="16" height="16" rx="3" fill="#0083FF" />
+  <path
+    d="M125 124L128 127L133 120"
+    stroke="#F6FAFF"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round" />
+  <rect x="151" y="114" width="4" height="20" rx="1" fill="#0083FF" />
+  <rect x="159" y="114" width="4" height="20" rx="1" fill="#0083FF" />
+  <rect x="167" y="114" width="4" height="20" rx="1" fill="#0083FF" />
+  <rect x="175" y="114" width="4" height="20" rx="1" fill="#0083FF" />
+  <rect x="183" y="114" width="4" height="20" rx="1" fill="#0083FF" />
+  <rect x="191" y="114" width="4" height="20" rx="1" fill="#0083FF" />
+  <rect x="199" y="114" width="4" height="20" rx="1" fill="#0083FF" />
 </svg>

@@ -1,11 +1,34 @@
 <svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
   <title>FlSelect SVG preview</title>
-  <rect x="45" y="38" width="158" height="34" rx="4" fill="#9AA1AA" />
-  <rect x="45" y="38" width="158" height="34" rx="4" stroke="#BCC3CB" stroke-opacity="0.34" />
-  <rect x="60" y="50" width="68" height="10" rx="3" fill="#0083FF" />
-  <path d="M179 51L185 57L191 51" stroke="#515860" stroke-linecap="round" stroke-linejoin="round" />
-  <rect x="57" y="82" width="134" height="32" rx="4" stroke="#8C929B" />
-  <rect x="70" y="92" width="50" height="8" rx="3" fill="#9AA1AA" />
-  <rect x="136" y="92" width="30" height="8" rx="3" fill="#0083FF" />
-  <path d="M57.5 106H190.5" stroke="#6F7781" />
+  <rect x="32" y="24" width="184" height="34" rx="4" fill="#171A1E" />
+  <rect x="32" y="24" width="184" height="34" rx="4" fill="url(#fl-select-shell)" />
+  <rect x="32" y="24" width="184" height="34" rx="4" stroke="#0083FF" />
+  <text
+    x="42"
+    y="41"
+    dominant-baseline="middle"
+    fill="#4EA8FF"
+    font-size="18"
+    font-weight="500"
+    letter-spacing="0">
+    Select
+  </text>
+  <path d="M196 43L201 38L206 43" stroke="#4EA8FF" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="32" y="68" width="184" height="58" rx="4" fill="#171A1E" />
+  <rect x="32" y="68" width="184" height="58" rx="4" stroke="#555A61" />
+  <rect x="47" y="80" width="66" height="8" rx="4" fill="#4EA8FF" />
+  <rect x="47" y="93" width="66" height="8" rx="4" fill="#6F7781" />
+  <rect x="47" y="106" width="66" height="8" rx="4" fill="#6F7781" />
+  <defs>
+    <linearGradient
+      id="fl-select-shell"
+      x1="32"
+      y1="24"
+      x2="216"
+      y2="58"
+      gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2A3038" stop-opacity=".44" />
+      <stop offset="1" stop-color="#0E1115" stop-opacity=".16" />
+    </linearGradient>
+  </defs>
 </svg>

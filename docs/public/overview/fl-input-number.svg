@@ -1,22 +1,29 @@
 <svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
   <title>FlInputNumber SVG preview</title>
-  <rect x="38" y="54" width="172" height="36" rx="4" fill="#9AA1AA" />
-  <rect x="38" y="54" width="172" height="36" rx="4" fill="url(#fl-input-number-gray-gloss)" />
-  <rect x="38" y="54" width="172" height="36" rx="4" stroke="#BCC3CB" stroke-opacity="0.34" />
-  <rect x="56" y="65" width="62" height="14" rx="3" fill="#0083FF" />
-  <path d="M146.5 54V90" stroke="#6F7781" />
-  <path d="M178 65L184 59L190 65" stroke="#515860" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M178 79L184 85L190 79" stroke="#515860" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="32" y="54" width="184" height="36" rx="4" fill="#171A1E" />
+  <rect x="32" y="54" width="184" height="36" rx="4" fill="url(#fl-input-number-shell)" />
+  <rect x="32" y="54" width="184" height="36" rx="4" stroke="#0083FF" />
+  <text
+    x="42"
+    y="72"
+    text-anchor="start"
+    dominant-baseline="middle"
+    fill="#0083FF"
+    font-size="18"
+    font-weight="700"
+    letter-spacing="0">
+    128
+  </text>
   <defs>
     <linearGradient
-      id="fl-input-number-gray-gloss"
-      x1="38"
+      id="fl-input-number-shell"
+      x1="32"
       y1="54"
-      x2="210"
+      x2="216"
       y2="90"
       gradientUnits="userSpaceOnUse">
-      <stop stop-color="#B5BCC4" stop-opacity="0.48" />
-      <stop offset="1" stop-color="#69717B" stop-opacity="0.18" />
+      <stop stop-color="#2A3038" stop-opacity=".48" />
+      <stop offset="1" stop-color="#0E1115" stop-opacity=".18" />
     </linearGradient>
   </defs>
 </svg>
