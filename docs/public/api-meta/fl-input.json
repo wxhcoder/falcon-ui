@@ -1,87 +1,87 @@
 {
   "component": "fl-input",
-  "description": "",
+  "description": "文本输入组件，用来输入普通文字，支持清空、图标、错误态、表格内显示和调试事件。",
   "events": [
     {
-      "description": "",
+      "description": "输入框失去焦点时触发。",
       "name": "blur",
       "signature": "(event: \"blur\", evt: FocusEvent): void",
       "type": "[evt: FocusEvent]"
     },
     {
-      "description": "",
+      "description": "绑定值确认变化时触发。",
       "name": "change",
       "signature": "(event: \"change\", value: string, evt?: Event | undefined): void",
       "type": "[value: string, evt?: Event | undefined]"
     },
     {
-      "description": "",
+      "description": "点击清空按钮清掉内容时触发。",
       "name": "clear",
       "signature": "(event: \"clear\", evt: MouseEvent | undefined): void",
       "type": "[evt: MouseEvent | undefined]"
     },
     {
-      "description": "",
+      "description": "中文等组合输入结束时触发。",
       "name": "compositionend",
       "signature": "(event: \"compositionend\", evt: CompositionEvent): void",
       "type": "[evt: CompositionEvent]"
     },
     {
-      "description": "",
+      "description": "中文等组合输入开始时触发。",
       "name": "compositionstart",
       "signature": "(event: \"compositionstart\", evt: CompositionEvent): void",
       "type": "[evt: CompositionEvent]"
     },
     {
-      "description": "",
+      "description": "中文等组合输入内容更新时触发。",
       "name": "compositionupdate",
       "signature": "(event: \"compositionupdate\", evt: CompositionEvent): void",
       "type": "[evt: CompositionEvent]"
     },
     {
-      "description": "输入值变化时触发，携带当前值与字符长度。",
+      "description": "输入值变化时触发，会带上当前值和字符长度。",
       "name": "custom-input",
       "signature": "(event: \"custom-input\", payload: FlInputCustomPayload): void",
       "type": "[payload: FlInputCustomPayload]"
     },
     {
-      "description": "开启 debugMode 后在 custom-input 之后触发。",
+      "description": "开启调试模式后，在自定义输入事件之后触发。",
       "name": "debug-event",
       "signature": "(event: \"debug-event\", payload: FlInputDebugPayload): void",
       "type": "[payload: FlInputDebugPayload]"
     },
     {
-      "description": "",
+      "description": "输入框获得焦点时触发。",
       "name": "focus",
       "signature": "(event: \"focus\", evt: FocusEvent): void",
       "type": "[evt: FocusEvent]"
     },
     {
-      "description": "",
+      "description": "用户正在输入时触发。",
       "name": "input",
       "signature": "(event: \"input\", value: string): void",
       "type": "[value: string]"
     },
     {
-      "description": "",
+      "description": "按下键盘按键时触发。",
       "name": "keydown",
       "signature": "(event: \"keydown\", evt: Event | KeyboardEvent): void",
       "type": "[evt: Event | KeyboardEvent]"
     },
     {
-      "description": "",
+      "description": "鼠标移入组件时触发。",
       "name": "mouseenter",
       "signature": "(event: \"mouseenter\", evt: MouseEvent): void",
       "type": "[evt: MouseEvent]"
     },
     {
-      "description": "",
+      "description": "鼠标移出组件时触发。",
       "name": "mouseleave",
       "signature": "(event: \"mouseleave\", evt: MouseEvent): void",
       "type": "[evt: MouseEvent]"
     },
     {
-      "description": "",
+      "description": "请求外部同步双向绑定值。",
       "name": "update:modelValue",
       "signature": "(event: \"update:modelValue\", value: string): void",
       "type": "[value: string]"
@@ -89,57 +89,57 @@
   ],
   "exposes": [
     {
-      "description": "",
+      "description": "让内部输入框失去焦点。",
       "name": "blur",
       "type": "() => void | undefined"
     },
     {
-      "description": "",
+      "description": "清空内部输入框的内容。",
       "name": "clear",
       "type": "(evt?: MouseEvent | undefined) => void"
     },
     {
-      "description": "",
+      "description": "让内部可聚焦元素获得焦点。",
       "name": "focus",
       "type": "() => void | undefined"
     },
     {
-      "description": "",
+      "description": "获取内部输入框元素。",
       "name": "input",
       "type": "HTMLInputElement | undefined"
     },
     {
-      "description": "",
+      "description": "读取当前是否处在中文等组合输入中。",
       "name": "isComposing",
       "type": "boolean"
     },
     {
-      "description": "FlInput 额外暴露的示例方法，可用于联调验证。",
+      "description": "调用组件内置示例方法。",
       "name": "myMethod",
       "type": "() => void"
     },
     {
-      "description": "FlInput 额外暴露的示例数值，用于文档演示与调试。",
+      "description": "读取组件内置示例值。",
       "name": "myValue",
       "type": "number"
     },
     {
-      "description": "",
+      "description": "重新计算多行输入框高度。",
       "name": "resizeTextarea",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "选中内部输入框里的文字。",
       "name": "select",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "获取内部多行输入框元素。",
       "name": "textarea",
       "type": "HTMLTextAreaElement | undefined"
     },
     {
-      "description": "",
+      "description": "读取内部多行输入框计算后的样式。",
       "name": "textareaStyle",
       "type": "StyleValue"
     }
@@ -147,252 +147,252 @@
   "props": [
     {
       "default": "-",
-      "description": "",
+      "description": "设置无障碍名称，方便读屏软件识别。",
       "name": "ariaLabel",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置浏览器自动填充方式。",
       "name": "autocomplete",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否在页面加载后自动获得焦点。",
       "name": "autofocus",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "多行输入时是否自动撑开高度，也可以传入配置。",
       "name": "autosize",
       "required": false,
       "type": "InputAutoSize | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示清空按钮。",
       "name": "clearable",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置清空按钮图标。",
       "name": "clearIcon",
       "required": false,
       "type": "IconPropType | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置外层容器的无障碍角色。",
       "name": "containerRole",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "''",
-      "description": "调试事件标签，在开启调试模式后会随 `debug-event` 一起抛出。",
+      "description": "调试事件标签，开启调试模式后会一起抛出。",
       "name": "debugLabel",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "false",
-      "description": "是否开启调试事件派发，开启后每次输入都会触发调试事件。",
+      "description": "是否开启调试输入事件，开启后输入时会额外通知外部。",
       "name": "debugMode",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否禁用组件。",
       "name": "disabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "指定输入框所属表单。",
       "name": "form",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "显示前把值格式化成想看的样子。",
       "name": "formatter",
       "required": false,
       "type": "((value: string) => string) | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置组件或内部输入框的编号。",
       "name": "id",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "提示移动端使用哪种键盘。",
       "name": "inputmode",
       "required": false,
       "type": "\"text\" | \"search\" | \"email\" | \"tel\" | \"url\" | \"none\" | \"numeric\" | \"decimal\" | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "给内部输入框追加行内样式。",
       "name": "inputStyle",
       "required": false,
       "type": "StyleValue"
     },
     {
       "default": "false",
-      "description": "是否进入错误态。开启后会触发错误样式并清空输入值。",
+      "description": "是否显示错误状态。",
       "name": "isError",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "是否用于表格单元格内输入场景。开启后会使用表格样式。",
+      "description": "是否按表格单元格场景显示。",
       "name": "isTable",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "限制最多可输入多少个字符。",
       "name": "maxlength",
       "required": false,
       "type": "string | number | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "限制最少需要输入多少个字符。",
       "name": "minlength",
       "required": false,
       "type": "string | number | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "接收双向绑定修饰符。",
       "name": "modelModifiers",
       "required": false,
       "type": "InputModelModifiers | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "输入框当前绑定的值。",
       "name": "modelValue",
       "required": false,
       "type": "string | number | null | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置表单字段名。",
       "name": "name",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "输入后把显示内容转换成真实值。",
       "name": "parser",
       "required": false,
       "type": "((value: string) => string) | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置输入为空时的提示文字。",
       "name": "placeholder",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置前缀图标。",
       "name": "prefixIcon",
       "required": false,
       "type": "IconPropType | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否只读。",
       "name": "readonly",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置多行输入框是否允许拖拽改变大小。",
       "name": "resize",
       "required": false,
       "type": "\"none\" | \"both\" | \"horizontal\" | \"vertical\" | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置多行输入框默认行数。",
       "name": "rows",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示密码可见切换按钮。",
       "name": "showPassword",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示字数统计。",
       "name": "showWordLimit",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置组件尺寸。",
       "name": "size",
       "required": false,
       "type": "\"\" | \"default\" | \"small\" | \"large\" | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置后缀图标。",
       "name": "suffixIcon",
       "required": false,
       "type": "IconPropType | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置键盘切换焦点的顺序。",
       "name": "tabindex",
       "required": false,
       "type": "string | number | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置输入框类型，比如文本、密码或多行文本。",
       "name": "type",
       "required": false,
       "type": "InputType | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "值变化时是否触发表单校验。",
       "name": "validateEvent",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置字数统计显示位置。",
       "name": "wordLimitPosition",
       "required": false,
       "type": "\"inside\" | \"outside\" | undefined"
@@ -400,27 +400,27 @@
   ],
   "slots": [
     {
-      "description": "",
+      "description": "自定义输入框后置内容。",
       "name": "append",
       "type": "{}"
     },
     {
-      "description": "",
+      "description": "自定义密码可见切换图标。",
       "name": "password-icon",
       "type": "{ visible: boolean; }"
     },
     {
-      "description": "",
+      "description": "自定义输入框前缀内容。",
       "name": "prefix",
       "type": "{}"
     },
     {
-      "description": "",
+      "description": "自定义输入框前置内容。",
       "name": "prepend",
       "type": "{}"
     },
     {
-      "description": "",
+      "description": "自定义输入框后缀内容。",
       "name": "suffix",
       "type": "{}"
     }

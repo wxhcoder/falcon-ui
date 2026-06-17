@@ -1,15 +1,15 @@
 {
   "component": "fl-input-search",
-  "description": "",
+  "description": "业务搜索输入框，用来输入关键词、回车检索并把唯一结果回填。",
   "events": [
     {
-      "description": "清空值时触发，携带清空原因。",
+      "description": "清空值时触发，会说明为什么被清空。",
       "name": "clear",
       "signature": "(event: \"clear\", payload: FlInputSearchClearPayload): void",
       "type": "[payload: FlInputSearchClearPayload]"
     },
     {
-      "description": "需要外部接管弹窗时触发。",
+      "description": "需要外部打开选择弹窗时触发。",
       "name": "openDialog",
       "signature": "(event: \"openDialog\", payload: FlInputSearchOpenDialogPayload): void",
       "type": "[payload: FlInputSearchOpenDialogPayload]"
@@ -21,19 +21,19 @@
       "type": "[payload: FlInputSearchSearchErrorPayload]"
     },
     {
-      "description": "回车检索唯一结果并完成回填时触发。",
+      "description": "回车检索到唯一结果并完成回填时触发。",
       "name": "selection-commit",
       "signature": "(event: \"selection-commit\", payload: FlInputSearchSelectionCommitPayload): void",
       "type": "[payload: FlInputSearchSelectionCommitPayload]"
     },
     {
-      "description": "显示标签值变化时触发。",
+      "description": "请求外部同步显示文字。",
       "name": "update:label",
       "signature": "(event: \"update:label\", value: string): void",
       "type": "[value: string]"
     },
     {
-      "description": "绑定值变化时触发。",
+      "description": "请求外部同步真实绑定值。",
       "name": "update:modelValue",
       "signature": "(event: \"update:modelValue\", value: FlInputSearchValue): void",
       "type": "[value: FlInputSearchValue]"
@@ -41,17 +41,17 @@
   ],
   "exposes": [
     {
-      "description": "",
+      "description": "让内部输入框失去焦点。",
       "name": "blur",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "清空当前真实值和显示文字。",
       "name": "clear",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "让内部输入框获得焦点。",
       "name": "focus",
       "type": "() => void"
     }
@@ -66,63 +66,63 @@
     },
     {
       "default": "true",
-      "description": "Blur 时未确认输入是否强制清空。",
+      "description": "失去焦点时，如果输入还没有确认，是否自动清空。",
       "name": "clearOnBlurUnconfirmed",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "是否禁用输入。",
+      "description": "是否禁用组件。",
       "name": "disabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "undefined",
-      "description": "回车检索方法。",
+      "description": "回车检索时调用的查询方法。",
       "name": "fetchApi",
       "required": false,
       "type": "FlInputSearchFetchApi | undefined"
     },
     {
       "default": "false",
-      "description": "是否进入错误态。",
+      "description": "是否显示错误状态。",
       "name": "isError",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "是否用于表格单元格输入。",
+      "description": "是否按表格单元格场景显示。",
       "name": "isTable",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "''",
-      "description": "输入框显示值（业务标签）。",
+      "description": "输入框里显示给用户看的业务名称。",
       "name": "label",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "外部结果映射方法，统一映射到 value/label。",
+      "description": "把外部查询结果整理成组件需要的值和显示文字。",
       "name": "mapResult",
       "required": true,
       "type": "FlInputSearchMapResult"
     },
     {
       "default": "null",
-      "description": "绑定值，通常为业务实体 ID。",
+      "description": "真实绑定值，通常是业务数据的唯一标识。",
       "name": "modelValue",
       "required": false,
       "type": "string | number | null | undefined"
     },
     {
       "default": "''",
-      "description": "占位提示文案。",
+      "description": "设置输入为空时的提示文字。",
       "name": "placeholder",
       "required": false,
       "type": "string | undefined"

@@ -1,45 +1,45 @@
 {
   "component": "fl-radial-menu",
-  "description": "",
+  "description": "径向菜单组件，用来围绕中心按钮展开一组操作，也支持更多菜单和快捷键。",
   "events": [
     {
-      "description": "",
+      "description": "当前高亮菜单项变化时触发。",
       "name": "active-change",
       "signature": "(event: \"active-change\", item: FlRadialMenuResolvedItem | null): void",
       "type": "[item: FlRadialMenuResolvedItem | null]"
     },
     {
-      "description": "",
+      "description": "菜单关闭时触发。",
       "name": "close",
       "signature": "(event: \"close\", reason: FlRadialMenuCloseReason): void",
       "type": "[reason: FlRadialMenuCloseReason]"
     },
     {
-      "description": "",
+      "description": "更多菜单关闭时触发。",
       "name": "more-close",
       "signature": "(event: \"more-close\"): void",
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "更多菜单打开时触发。",
       "name": "more-open",
       "signature": "(event: \"more-open\"): void",
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "菜单打开时触发。",
       "name": "open",
       "signature": "(event: \"open\", reason: FlRadialMenuOpenReason): void",
       "type": "[reason: FlRadialMenuOpenReason]"
     },
     {
-      "description": "",
+      "description": "选择某个菜单项时触发。",
       "name": "select",
       "signature": "(event: \"select\", index: string, indexPath: string[], item: FlRadialMenuResolvedItem, context: FlRadialMenuSelectContext): void",
       "type": "[index: string, indexPath: string[], item: FlRadialMenuResolvedItem, context: FlRadialMenuSelectContext]"
     },
     {
-      "description": "",
+      "description": "请求外部同步菜单打开状态。",
       "name": "update:modelValue",
       "signature": "(event: \"update:modelValue\", opened: boolean): void",
       "type": "[opened: boolean]"
@@ -47,22 +47,22 @@
   ],
   "exposes": [
     {
-      "description": "",
+      "description": "主动关闭菜单。",
       "name": "close",
       "type": "(reason?: FlRadialMenuCloseReason | undefined) => void"
     },
     {
-      "description": "",
+      "description": "让中心按钮获得焦点。",
       "name": "focus",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "主动打开菜单。",
       "name": "open",
       "type": "(options?: FlRadialMenuOpenOptions | undefined) => void"
     },
     {
-      "description": "",
+      "description": "在打开和关闭之间切换菜单。",
       "name": "toggle",
       "type": "(options?: FlRadialMenuOpenOptions | undefined) => void"
     }
@@ -70,126 +70,126 @@
   "props": [
     {
       "default": "undefined",
-      "description": "",
+      "description": "设置中心按钮图标。",
       "name": "centerIcon",
       "required": false,
       "type": "string | Component | undefined"
     },
     {
       "default": "''",
-      "description": "",
+      "description": "设置中心按钮的辅助说明文字。",
       "name": "centerLabel",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "true",
-      "description": "",
+      "description": "选择菜单项后是否自动关闭菜单。",
       "name": "closeOnSelect",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "",
+      "description": "是否禁用组件。",
       "name": "disabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "[]",
-      "description": "",
+      "description": "设置菜单项列表。",
       "name": "items",
       "required": false,
       "type": "FlRadialMenuItemData[] | undefined"
     },
     {
       "default": "'square'",
-      "description": "",
+      "description": "设置菜单项按钮的视觉类型。",
       "name": "itemType",
       "required": false,
       "type": "FlRadialMenuItemType | undefined"
     },
     {
       "default": "6",
-      "description": "",
+      "description": "最多有多少个菜单项直接显示在圆环上。",
       "name": "maxRingItems",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "'inline'",
-      "description": "",
+      "description": "设置菜单使用普通布局还是悬浮布局。",
       "name": "mode",
       "required": false,
       "type": "FlRadialMenuMode | undefined"
     },
     {
       "default": "undefined",
-      "description": "",
+      "description": "控制菜单当前是否打开。",
       "name": "modelValue",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "'bottom'",
-      "description": "",
+      "description": "设置更多菜单弹出位置。",
       "name": "moreDropdownPlacement",
       "required": false,
       "type": "FlRadialMenuDropdownPlacement | undefined"
     },
     {
       "default": "'text-ellipsis'",
-      "description": "",
+      "description": "设置超出项如何显示成更多入口。",
       "name": "moreMode",
       "required": false,
       "type": "FlRadialMenuMoreMode | undefined"
     },
     {
       "default": "'More'",
-      "description": "",
+      "description": "设置更多入口的文字。",
       "name": "moreText",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "''",
-      "description": "",
+      "description": "设置打开或关闭菜单的快捷键。",
       "name": "shortcut",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "true",
-      "description": "",
+      "description": "是否启用快捷键。",
       "name": "shortcutEnabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "undefined",
-      "description": "",
+      "description": "设置组件尺寸。",
       "name": "size",
       "required": false,
       "type": "FlRadialMenuSize | undefined"
     },
     {
       "default": "true",
-      "description": "",
+      "description": "是否把菜单弹层挂到页面其他位置。",
       "name": "teleport",
       "required": false,
       "type": "string | boolean | undefined"
     },
     {
       "default": "'click'",
-      "description": "",
+      "description": "设置点击或悬停触发菜单。",
       "name": "trigger",
       "required": false,
       "type": "FlRadialMenuTrigger | undefined"
     },
     {
       "default": "2000",
-      "description": "",
+      "description": "设置弹层层级。",
       "name": "zIndex",
       "required": false,
       "type": "number | undefined"
@@ -197,12 +197,12 @@
   ],
   "slots": [
     {
-      "description": "",
+      "description": "自定义中心按钮内容。",
       "name": "center",
       "type": "any"
     },
     {
-      "description": "",
+      "description": "通过子菜单项组件自定义菜单项。",
       "name": "default",
       "type": "any"
     }

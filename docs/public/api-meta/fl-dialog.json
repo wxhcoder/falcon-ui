@@ -1,57 +1,57 @@
 {
   "component": "fl-dialog",
-  "description": "",
+  "description": "对话框组件，用来展示弹窗内容，并内置标题、底部按钮、全屏和关闭控制。",
   "events": [
     {
-      "description": "点击内置取消动作时触发。",
+      "description": "点击内置取消按钮时触发。",
       "name": "cancel",
       "signature": "(event: \"cancel\"): void",
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "对话框开始关闭时触发。",
       "name": "close",
       "signature": "(event: \"close\"): void",
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "对话框关闭后焦点回到触发位置时触发。",
       "name": "closeAutoFocus",
       "signature": "(event: \"closeAutoFocus\"): void",
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "对话框关闭动画结束后触发。",
       "name": "closed",
       "signature": "(event: \"closed\"): void",
       "type": "[]"
     },
     {
-      "description": "点击内置确认动作时触发。",
+      "description": "点击内置确认按钮时触发。",
       "name": "confirm",
       "signature": "(event: \"confirm\"): void",
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "对话框开始打开时触发。",
       "name": "open",
       "signature": "(event: \"open\"): void",
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "对话框打开后焦点进入弹窗时触发。",
       "name": "openAutoFocus",
       "signature": "(event: \"openAutoFocus\"): void",
       "type": "[]"
     },
     {
-      "description": "",
+      "description": "对话框打开动画结束后触发。",
       "name": "opened",
       "signature": "(event: \"opened\"): void",
       "type": "[]"
     },
     {
-      "description": "对话框显示状态发生变化时触发。",
+      "description": "请求外部同步对话框显示状态。",
       "name": "update:modelValue",
       "signature": "(event: \"update:modelValue\", value: boolean): void",
       "type": "[value: boolean]"
@@ -59,32 +59,32 @@
   ],
   "exposes": [
     {
-      "description": "以编程方式关闭当前对话框。",
+      "description": "主动关闭对话框。",
       "name": "closeDialog",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "获取对话框内容区域引用。",
       "name": "dialogContentRef",
       "type": "any"
     },
     {
-      "description": "",
+      "description": "按组件内部规则执行关闭对话框。",
       "name": "handleClose",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "重置对话框拖拽后的位置。",
       "name": "resetPosition",
       "type": "() => void"
     },
     {
-      "description": "以编程方式切换对话框全屏模式。",
+      "description": "切换对话框全屏状态。",
       "name": "toggleFullscreen",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "读取组件当前是否显示。",
       "name": "visible",
       "type": "boolean"
     }
@@ -92,259 +92,259 @@
   "props": [
     {
       "default": "-",
-      "description": "",
+      "description": "是否让对话框在可视区域中间显示。",
       "name": "alignCenter",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "指定弹层要挂载到哪个页面节点。",
       "name": "appendTo",
       "required": false,
       "type": "string | HTMLElement | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否把弹层直接挂到页面主体下。",
       "name": "appendToBody",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置无障碍标题层级。",
       "name": "ariaLevel",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "关闭前的拦截函数，可用来阻止关闭。",
       "name": "beforeClose",
       "required": false,
       "type": "DialogBeforeCloseFn | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "给对话框内容区追加样式类。",
       "name": "bodyClass",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "undefined",
-      "description": "对话框主体区域固定高度，传入数字时按像素处理。",
+      "description": "设置对话框内容区高度。",
       "name": "bodyHeight",
       "required": false,
       "type": "string | number | undefined"
     },
     {
       "default": "false",
-      "description": "是否禁用默认页脚中的取消按钮。",
+      "description": "是否禁用底部取消按钮。",
       "name": "cancelDisabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "'取消'",
-      "description": "默认页脚取消按钮文案。",
+      "description": "设置底部取消按钮文字。",
       "name": "cancelText",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否让头部和底部内容居中。",
       "name": "center",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置延迟关闭的时间。",
       "name": "closeDelay",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置关闭按钮图标。",
       "name": "closeIcon",
       "required": false,
       "type": "IconPropType | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "点击遮罩层时是否关闭。",
       "name": "closeOnClickModal",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "按下退出键时是否关闭。",
       "name": "closeOnPressEscape",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "是否禁用默认页脚中的确认按钮。",
+      "description": "是否禁用底部确认按钮。",
       "name": "confirmDisabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "'确认'",
-      "description": "默认页脚确认按钮文案。",
+      "description": "设置底部确认按钮文字。",
       "name": "confirmText",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "关闭后是否销毁内部内容。",
       "name": "destroyOnClose",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否允许拖拽移动对话框。",
       "name": "draggable",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "给对话框底部追加样式类。",
       "name": "footerClass",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否让对话框全屏显示。",
       "name": "fullscreen",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置头部标题的无障碍层级。",
       "name": "headerAriaLevel",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "给对话框头部追加样式类。",
       "name": "headerClass",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "打开后是否锁住页面滚动。",
       "name": "lockScroll",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示遮罩层。",
       "name": "modal",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "给遮罩层追加样式类。",
       "name": "modalClass",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "遮罩层是否允许鼠标事件穿透。",
       "name": "modalPenetrable",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "通过 v-model 控制对话框显示状态。",
+      "description": "通过双向绑定控制对话框是否显示。",
       "name": "modelValue",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置延迟打开的时间。",
       "name": "openDelay",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "内容超出时是否允许对话框继续拖动。",
       "name": "overflow",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示关闭按钮。",
       "name": "showClose",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "true",
-      "description": "是否渲染默认页脚操作区。",
+      "description": "是否显示底部操作区。",
       "name": "showFooter",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置标题文字。",
       "name": "title",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置对话框距离顶部的位置。",
       "name": "top",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置打开和关闭时使用的动画名。",
       "name": "transition",
       "required": false,
       "type": "DialogTransition | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否把键盘焦点限制在对话框内部。",
       "name": "trapFocus",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置宽度。",
       "name": "width",
       "required": false,
       "type": "string | number | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置弹层层级。",
       "name": "zIndex",
       "required": false,
       "type": "number | undefined"
@@ -352,22 +352,22 @@
   ],
   "slots": [
     {
-      "description": "",
+      "description": "自定义对话框主体内容。",
       "name": "default",
       "type": "{}"
     },
     {
-      "description": "",
+      "description": "自定义对话框底部操作区。",
       "name": "footer",
       "type": "{}"
     },
     {
-      "description": "",
+      "description": "自定义对话框头部区域。",
       "name": "header",
       "type": "{ close: () => void; titleId: string; titleClass: string; }"
     },
     {
-      "description": "",
+      "description": "自定义对话框标题内容。",
       "name": "title",
       "type": "{}"
     }

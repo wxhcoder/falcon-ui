@@ -1,138 +1,138 @@
 {
   "component": "fl-barcode",
-  "description": "",
+  "description": "一维码组件，用来把业务编号、商品码等内容生成条码。",
   "events": [],
   "exposes": [],
   "props": [
     {
       "default": "'#ffffff'",
-      "description": "Background color.",
+      "description": "设置背景颜色。",
       "name": "backgroundColor",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "'#000000'",
-      "description": "Bar color.",
+      "description": "设置条码线条和文字颜色。",
       "name": "color",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "true",
-      "description": "Whether to display readable text.",
+      "description": "是否把文字显示在条码下方。",
       "name": "displayValue",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "'monospace'",
-      "description": "Text font family.",
+      "description": "设置条码文字使用的字体。",
       "name": "font",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "''",
-      "description": "Text font style flags.",
+      "description": "设置条码文字是否加粗或倾斜。",
       "name": "fontOptions",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "20",
-      "description": "Text font size.",
+      "description": "设置条码文字大小。",
       "name": "fontSize",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "'CODE128'",
-      "description": "Supported barcode format.",
+      "description": "设置一维码编码格式。",
       "name": "format",
       "required": false,
       "type": "\"CODE128\" | \"CODE39\" | \"EAN13\" | \"EAN8\" | \"UPCA\" | \"UPCE\" | undefined"
     },
     {
       "default": "100",
-      "description": "Barcode height.",
+      "description": "设置高度。",
       "name": "height",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "10",
-      "description": "Global margin around the barcode.",
+      "description": "设置四周留白。",
       "name": "margin",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "undefined",
-      "description": "Overrides the bottom margin when provided.",
+      "description": "设置底部留白。",
       "name": "marginBottom",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "undefined",
-      "description": "Overrides the left margin when provided.",
+      "description": "设置左侧留白。",
       "name": "marginLeft",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "undefined",
-      "description": "Overrides the right margin when provided.",
+      "description": "设置右侧留白。",
       "name": "marginRight",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "undefined",
-      "description": "Overrides the top margin when provided.",
+      "description": "设置顶部留白。",
       "name": "marginTop",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "''",
-      "description": "Custom text. Falls back to value when empty.",
+      "description": "设置条码下方显示的文字，不填就显示编码内容。",
       "name": "text",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "'center'",
-      "description": "Text alignment.",
+      "description": "设置条码文字的水平对齐方式。",
       "name": "textAlign",
       "required": false,
       "type": "\"right\" | \"left\" | \"center\" | undefined"
     },
     {
       "default": "2",
-      "description": "Distance between barcode bars and text.",
+      "description": "设置条码和文字之间的距离。",
       "name": "textMargin",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "'bottom'",
-      "description": "Text position.",
+      "description": "设置文字显示在条码上方还是下方。",
       "name": "textPosition",
       "required": false,
       "type": "\"top\" | \"bottom\" | undefined"
     },
     {
       "default": "''",
-      "description": "Barcode payload.",
+      "description": "设置要生成条码的内容。",
       "name": "value",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "2",
-      "description": "Width of each bar.",
+      "description": "设置单条条码线的宽度。",
       "name": "width",
       "required": false,
       "type": "number | undefined"

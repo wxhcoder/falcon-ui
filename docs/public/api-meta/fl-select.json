@@ -1,30 +1,30 @@
 {
   "component": "fl-select",
-  "description": "",
+  "description": "选择器组件，用来从下拉选项中选择值，并支持错误态和表格内显示。",
   "events": [],
   "exposes": [
     {
-      "description": "",
+      "description": "让内部输入框失去焦点。",
       "name": "blur",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "让内部可聚焦元素获得焦点。",
       "name": "focus",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "手动触发选择器的清空动作。",
       "name": "handleClearClick",
       "type": "((event: Event) => void) | undefined"
     },
     {
-      "description": "",
+      "description": "读取当前选中项显示出来的文字。",
       "name": "selectedLabel",
       "type": "string | string[] | undefined"
     },
     {
-      "description": "",
+      "description": "打开或关闭选择器下拉面板。",
       "name": "toggleMenu",
       "type": "((event?: Event | undefined) => void) | undefined"
     }
@@ -32,14 +32,14 @@
   "props": [
     {
       "default": "false",
-      "description": "是否进入错误态。",
+      "description": "是否显示错误状态。",
       "name": "isError",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "是否用于表格单元格内选择场景。",
+      "description": "是否按表格单元格场景显示。",
       "name": "isTable",
       "required": false,
       "type": "boolean | undefined"
