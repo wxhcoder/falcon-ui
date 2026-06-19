@@ -14,7 +14,7 @@ import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import '@falcon-ui/theme/index.scss'
 
-const toDemoComponentName = (demoPath: string) => {
+const toDemoComponentName = (demoPath: string, locale: 'en' | 'root') => {
   const safeName = demoPath
     .replaceAll('.vue', '')
     .split(/[\\/.-]/g)
@@ -22,7 +22,7 @@ const toDemoComponentName = (demoPath: string) => {
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join('')
 
-  return `DocsDemo${safeName}`
+  return `${locale === 'en' ? 'DocsEnDemo' : 'DocsDemo'}${safeName}`
 }
 
 const theme: Theme = {
@@ -43,13 +43,18 @@ const theme: Theme = {
     app.component('VpApiTable', VpApiTable)
     app.component('OverviewGrid', OverviewGrid)
 
-    const demoModules = import.meta.glob('../../examples/**/*.vue', {
-      eager: true
-    }) as Record<string, { default: Component }>
+    const demoModules = import.meta.glob(
+      ['../../examples/**/*.vue', '../../en/examples/**/*.vue'],
+      {
+        eager: true
+      }
+    ) as Record<string, { default: Component }>
 
     for (const [modulePath, mod] of Object.entries(demoModules)) {
-      const relativePath = modulePath.replace(/^.*\/examples\//, '').replaceAll('\\', '/')
-      const componentName = toDemoComponentName(relativePath)
+      const normalizedModulePath = modulePath.replaceAll('\\', '/')
+      const locale = normalizedModulePath.includes('/en/examples/') ? 'en' : 'root'
+      const relativePath = normalizedModulePath.replace(/^.*\/examples\//, '')
+      const componentName = toDemoComponentName(relativePath, locale)
       app.component(componentName, mod.default)
     }
   }

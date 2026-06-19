@@ -6,7 +6,8 @@ import { createChecker } from 'vue-component-meta'
 const currentDir = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(currentDir, '../..')
 const tsconfigPath = path.resolve(rootDir, 'tsconfig.docs.json')
-const outputDir = path.resolve(rootDir, 'docs/public/api-meta')
+const rootOutputDir = path.resolve(rootDir, 'docs/public/api-meta')
+const englishOutputDir = path.resolve(rootDir, 'docs/public/en/api-meta')
 
 const toProjectLineEndings = (content) => content.replace(/\n/g, '\r\n')
 
@@ -587,30 +588,586 @@ const customDescriptionOverrides = {
   }
 }
 
-const resolveDescription = (componentId, section, name, description) => {
-  const customOverride = customDescriptionOverrides[componentId]?.[section]?.[name]
+const englishSharedDescriptionOverrides = {
+  events: {
+    blur: 'Emitted when the input loses focus.',
+    change: 'Emitted when the confirmed bound value changes.',
+    clear: 'Emitted when the clear button removes the value.',
+    click: 'Emitted when the component is clicked.',
+    close: 'Emitted when the component closes.',
+    closed: 'Emitted after the close transition finishes.',
+    closeAutoFocus: 'Emitted when focus returns to the trigger after closing.',
+    compositionend: 'Emitted when IME composition ends.',
+    compositionstart: 'Emitted when IME composition starts.',
+    compositionupdate: 'Emitted when IME composition updates.',
+    focus: 'Emitted when the input receives focus.',
+    input: 'Emitted while the user is typing.',
+    keydown: 'Emitted when a keyboard key is pressed.',
+    mouseenter: 'Emitted when the pointer enters the component.',
+    mouseleave: 'Emitted when the pointer leaves the component.',
+    open: 'Emitted when the component opens.',
+    opened: 'Emitted after the open transition finishes.',
+    openAutoFocus: 'Emitted when focus enters the component after opening.',
+    'update:modelValue': 'Requests external synchronization of the bound value.'
+  },
+  exposes: {
+    blur: 'Blur the inner input.',
+    clear: 'Clear the inner input value.',
+    clearFilter: 'Clear table filters.',
+    clearSelection: 'Clear selected table rows.',
+    clearSort: 'Clear table sorting.',
+    close: 'Close the component programmatically.',
+    closeDialog: 'Close the dialog programmatically.',
+    debugKind: 'Marks this exposed value as coming from the button component for debugging.',
+    dialogContentRef: 'Returns the dialog content reference.',
+    doLayout: 'Recalculate table column widths and layout.',
+    focus: 'Focus the inner focusable element.',
+    getSelectionRows: 'Return the currently selected table rows.',
+    handleClearClick: 'Trigger the select clear action manually.',
+    handleClose: 'Close the dialog using the component internal rules.',
+    input: 'Return the inner input element.',
+    isComposing: 'Read whether the component is currently handling IME composition.',
+    myMethod: 'Call the built-in example method.',
+    myValue: 'Read the built-in example value.',
+    open: 'Open the component programmatically.',
+    resetPosition: 'Reset the dialog position after dragging.',
+    resizeTextarea: 'Recalculate textarea height.',
+    scrollTo: 'Scroll to a position or node.',
+    select: 'Select the text inside the inner input.',
+    selectedLabel: 'Read the label displayed for the selected option.',
+    setCurrentRow: 'Set the current highlighted table row.',
+    setScrollLeft: 'Set the horizontal table scroll position.',
+    setScrollTop: 'Set the vertical table scroll position.',
+    shouldAddSpace: 'Return whether button text should automatically insert spacing.',
+    sort: 'Sort the table by the specified column.',
+    textarea: 'Return the inner textarea element.',
+    textareaStyle: 'Read the computed style for the inner textarea.',
+    toggle: 'Toggle between open and closed states.',
+    toggleAllSelection: 'Toggle table select-all state.',
+    toggleFullscreen: 'Toggle dialog fullscreen state.',
+    toggleMenu: 'Open or close the select dropdown panel.',
+    toggleRowExpansion: 'Toggle expansion for the specified row.',
+    toggleRowSelection: 'Toggle selection for the specified row.',
+    visible: 'Read whether the component is currently visible.'
+  },
+  props: {
+    alignCenter: 'Whether to center the dialog in the viewport.',
+    appendTo: 'Target page node where the overlay should mount.',
+    appendToBody: 'Whether to mount the overlay directly under document body.',
+    ariaLabel: 'Accessible name for assistive technologies.',
+    ariaLevel: 'Accessible heading level.',
+    arrowControl: 'Whether to switch time using arrow buttons.',
+    autocomplete: 'Browser autocomplete behavior.',
+    autofocus: 'Whether to focus automatically after page load.',
+    automaticDropdown: 'Whether to open the option panel on focus.',
+    autosize: 'Whether multiline input auto-expands, or an autosize configuration.',
+    backgroundColor: 'Background color.',
+    beforeClose: 'Interceptor called before closing; return false to prevent closing.',
+    bodyClass: 'Additional class for the dialog body.',
+    bodyHeight: 'Dialog body height.',
+    cancelDisabled: 'Whether the footer cancel button is disabled.',
+    cancelText: 'Footer cancel button text.',
+    cellClassName: 'Additional class for date cells.',
+    center: 'Whether header and footer content are centered.',
+    clearable: 'Whether to show the clear button.',
+    clearIcon: 'Clear button icon.',
+    closeDelay: 'Delay before closing.',
+    closeIcon: 'Close button icon.',
+    closeOnClickModal: 'Whether clicking the mask closes the overlay.',
+    closeOnPressEscape: 'Whether pressing Escape closes the overlay.',
+    color: 'Primary color.',
+    confirmDisabled: 'Whether the footer confirm button is disabled.',
+    confirmText: 'Footer confirm button text.',
+    containerRole: 'Accessible role for the wrapper element.',
+    dark: 'Whether to use styles for dark backgrounds.',
+    dateFormat: 'Date display format inside the panel.',
+    defaultTime: 'Default time applied when selecting a date.',
+    defaultValue: 'Default date used when the panel opens.',
+    destroyOnClose: 'Whether to destroy inner content after closing.',
+    disabled: 'Whether the component is disabled.',
+    disabledDate: 'Predicate for disabled dates.',
+    disabledHours: 'Predicate for disabled hours.',
+    disabledMinutes: 'Predicate for disabled minutes.',
+    disabledSeconds: 'Predicate for disabled seconds.',
+    draggable: 'Whether the dialog can be dragged.',
+    editable: 'Whether the input can be edited directly.',
+    emptyValues: 'Values treated as empty.',
+    endPlaceholder: 'Placeholder for the range end input.',
+    fallbackPlacements: 'Fallback placements when the overlay does not fit.',
+    footerClass: 'Additional class for the dialog footer.',
+    form: 'Associated form name.',
+    format: 'Displayed value format.',
+    formatter: 'Format the value before display.',
+    fullscreen: 'Whether the dialog is fullscreen.',
+    headerAriaLevel: 'Accessible heading level for the header.',
+    headerClass: 'Additional class for the dialog header.',
+    height: 'Height.',
+    icon: 'Icon.',
+    id: 'ID for the component or inner input.',
+    inputmode: 'Hint for which mobile keyboard to use.',
+    inputStyle: 'Inline style added to the inner input.',
+    isError: 'Whether to show the error state.',
+    isRange: 'Whether the current picker is a range picker.',
+    isTable: 'Whether to render for a table-cell scenario.',
+    lockScroll: 'Whether to lock page scrolling after opening.',
+    margin: 'Outer margin.',
+    marginBottom: 'Bottom margin.',
+    marginLeft: 'Left margin.',
+    marginRight: 'Right margin.',
+    marginTop: 'Top margin.',
+    maxlength: 'Maximum number of characters.',
+    minlength: 'Minimum number of characters.',
+    modal: 'Whether to show a mask.',
+    modalClass: 'Additional class for the mask.',
+    modalPenetrable: 'Whether pointer events can pass through the mask.',
+    modelModifiers: 'Two-way binding modifiers.',
+    modelValue: 'Bound value.',
+    name: 'Form field name.',
+    openDelay: 'Delay before opening.',
+    overflow: 'Whether overflowing content still allows dialog dragging.',
+    parser: 'Convert displayed input into the real value.',
+    placeholder: 'Placeholder shown when the input is empty.',
+    placement: 'Overlay placement.',
+    popperClass: 'Additional class for the overlay.',
+    popperOptions: 'Advanced overlay options.',
+    popperStyle: 'Inline style for the overlay.',
+    precision: 'Number of decimal places to keep.',
+    prefixIcon: 'Prefix icon.',
+    rangeSeparator: 'Separator between range start and end.',
+    readonly: 'Whether the input is read-only.',
+    resize: 'Whether a textarea can be resized by dragging.',
+    rows: 'Default textarea row count.',
+    saveOnBlur: 'Whether to save the current input on blur.',
+    shortcuts: 'Shortcut options in the date picker panel.',
+    showClose: 'Whether to show the close button.',
+    showConfirm: 'Whether to show the confirm button.',
+    showFooter: 'Whether to show the footer actions.',
+    showNow: 'Whether to show the Now shortcut.',
+    showPassword: 'Whether to show the password visibility toggle.',
+    showWeekNumber: 'Whether to show week numbers.',
+    showWordLimit: 'Whether to show the character counter.',
+    size: 'Component size.',
+    startPlaceholder: 'Placeholder for the range start input.',
+    suffixIcon: 'Suffix icon.',
+    tabindex: 'Keyboard tab order.',
+    timeFormat: 'Time display format inside the panel.',
+    title: 'Title text.',
+    top: 'Distance from the top of the viewport.',
+    transition: 'Transition name used for opening and closing.',
+    trapFocus: 'Whether keyboard focus is trapped inside the dialog.',
+    type: 'Component type; see the Type column for supported values.',
+    unlinkPanels: 'Whether range picker panels switch months independently.',
+    validateEvent: 'Whether value changes trigger form validation.',
+    value: 'Value displayed or generated by the component.',
+    valueFormat: 'Format used for the emitted bound value.',
+    valueOnClear: 'Value written back after clearing.',
+    width: 'Width.',
+    wordLimitPosition: 'Position of the character counter.',
+    zIndex: 'Overlay z-index.'
+  },
+  slots: {
+    append: 'Custom input append content.',
+    center: 'Custom center button content.',
+    default: 'Custom default content.',
+    footer: 'Custom footer content.',
+    header: 'Custom header content.',
+    icon: 'Custom icon content.',
+    label: 'Custom label content.',
+    loading: 'Custom loading icon.',
+    'password-icon': 'Custom password visibility icon.',
+    prefix: 'Custom input prefix content.',
+    prepend: 'Custom input prepend content.',
+    suffix: 'Custom input suffix content.',
+    title: 'Custom title content.'
+  }
+}
+
+const englishCustomDescriptionOverrides = {
+  'fl-barcode': {
+    component: {
+      '': 'Barcode component that renders business identifiers and product codes.'
+    },
+    props: {
+      color: 'Color for barcode lines and text.',
+      displayValue: 'Whether to display text below the barcode.',
+      font: 'Font used for barcode text.',
+      fontOptions: 'Whether barcode text is bold or italic.',
+      fontSize: 'Barcode text size.',
+      format: 'Barcode encoding format.',
+      text: 'Text displayed below the barcode; defaults to the encoded value.',
+      textAlign: 'Horizontal alignment for barcode text.',
+      textMargin: 'Spacing between the barcode and text.',
+      textPosition: 'Whether text appears above or below the barcode.',
+      value: 'Value to encode into a barcode.',
+      width: 'Width of a single barcode line.'
+    }
+  },
+  'fl-button': {
+    component: {
+      '': 'Button component used to trigger page actions, with loading, disabled, icon and debug-click support.'
+    },
+    props: {
+      autoInsertSpace: 'Whether to automatically insert spacing between two Chinese characters.',
+      bg: 'Whether text buttons include a background color.',
+      circle: 'Whether to render as a circular button.',
+      dashed: 'Whether to show a dashed border.',
+      debugLabel: 'Debug event label emitted when debug mode is enabled.',
+      debugMode: 'Whether to emit an additional debug event on every click.',
+      link: 'Whether to render with link-button styling.',
+      loading: 'Whether to show loading state.',
+      loadingIcon: 'Loading icon.',
+      nativeType: 'Native button submit type.',
+      plain: 'Whether to use plain button styling.',
+      round: 'Whether to render as a rounded button.',
+      tag: 'Tag used to render the button.',
+      text: 'Whether to render as a text button.',
+      type: 'Visual button type.'
+    },
+    events: {
+      click: 'Emitted when the button is clicked.',
+      'debug-click': 'Emitted in addition to click when debug mode is enabled.'
+    },
+    slots: {
+      default: 'Custom button text or content.',
+      icon: 'Custom icon on the left side of the button.',
+      loading: 'Custom loading icon.'
+    }
+  },
+  'fl-date-picker': {
+    component: {
+      '': 'Date picker component for dates, times and ranges, with error and table-cell states.'
+    },
+    props: {
+      type: 'Picker type, such as date, datetime or date range.'
+    }
+  },
+  'fl-dialog': {
+    component: {
+      '': 'Dialog component with built-in title, footer buttons, fullscreen and close controls.'
+    },
+    props: {
+      modelValue: 'Controls whether the dialog is visible.'
+    },
+    events: {
+      cancel: 'Emitted when the built-in cancel button is clicked.',
+      close: 'Emitted when the dialog starts closing.',
+      closed: 'Emitted after the dialog close transition finishes.',
+      closeAutoFocus: 'Emitted when focus returns after the dialog closes.',
+      confirm: 'Emitted when the built-in confirm button is clicked.',
+      open: 'Emitted when the dialog starts opening.',
+      opened: 'Emitted after the dialog open transition finishes.',
+      openAutoFocus: 'Emitted when focus enters the dialog after opening.',
+      'update:modelValue': 'Requests external synchronization of dialog visibility.'
+    },
+    slots: {
+      default: 'Custom dialog body content.',
+      footer: 'Custom dialog footer actions.',
+      header: 'Custom dialog header area.',
+      title: 'Custom dialog title content.'
+    }
+  },
+  'fl-input': {
+    component: {
+      '': 'Text input component for plain text, with clear, icon, error, table and debug support.'
+    },
+    props: {
+      debugLabel: 'Debug event label emitted when debug mode is enabled.',
+      debugMode: 'Whether to emit additional debug events while typing.',
+      modelValue: 'Current bound input value.',
+      type: 'Input type, such as text, password or textarea.'
+    },
+    events: {
+      'custom-input': 'Emitted when the input value changes, with current value and length.',
+      'debug-event': 'Emitted after the custom input event when debug mode is enabled.'
+    }
+  },
+  'fl-input-search': {
+    component: {
+      '': 'Business search input for keywords, Enter search and single-result backfill.'
+    },
+    props: {
+      clearOnBlurUnconfirmed: 'Whether to clear unconfirmed input on blur.',
+      fetchApi: 'Query function called when pressing Enter.',
+      label: 'Business label displayed inside the input.',
+      mapResult: 'Maps external query results into the value and label required by the component.',
+      modelValue: 'Real bound value, usually a unique business identifier.'
+    },
+    events: {
+      clear: 'Emitted when the value is cleared, including the clear reason.',
+      openDialog: 'Emitted when external code should open a selection dialog.',
+      'search-error': 'Emitted when Enter search fails.',
+      'selection-commit': 'Emitted when a single Enter-search result is committed.',
+      'update:label': 'Requests external synchronization of the displayed label.',
+      'update:modelValue': 'Requests external synchronization of the real bound value.'
+    },
+    exposes: {
+      blur: 'Blur the inner input.',
+      clear: 'Clear the current value and display label.',
+      focus: 'Focus the inner input.'
+    }
+  },
+  'fl-input-number': {
+    component: {
+      '': 'Numeric input component with precision handling, formatting and error state support.'
+    },
+    props: {
+      isFormat: 'Whether to format the number after blur.',
+      modelValue: 'Current numeric value; emits only numbers or empty values.',
+      precisionMode: 'How to handle excess decimal places: round, truncate or error.',
+      strictErrorPlaceholder: 'Placeholder shown when strict precision mode fails.',
+      type: 'Input type; usually kept as text.'
+    },
+    events: {
+      'custom-input': 'Emitted when the input changes, with raw text and parsed number.',
+      'strict-error': 'Emitted when strict mode detects too many decimal places.',
+      'update:isError': 'Requests external synchronization of the internal error state.'
+    }
+  },
+  'fl-qr-code': {
+    component: {
+      '': 'QR code component that renders strings as QR codes with color, size and center icon options.'
+    },
+    props: {
+      color: 'Dark module color for the QR code.',
+      errorCorrectionLevel: 'QR error correction level; higher levels tolerate more occlusion.',
+      iconBackgroundColor: 'Background color behind the center icon.',
+      iconBorderRadius: 'Center icon background corner radius in pixels.',
+      iconSize: 'Center icon size in pixels.',
+      iconSrc: 'Center icon URL.',
+      padding: 'Padding between the QR content and outer edge, in pixels.',
+      size: 'Overall QR code display size in pixels.',
+      type: 'QR rendering mode: canvas or SVG.',
+      value: 'Content encoded into the QR code.'
+    }
+  },
+  'fl-radial-menu': {
+    component: {
+      '': 'Radial menu component that expands actions around a center button, with overflow and shortcut support.'
+    },
+    props: {
+      centerIcon: 'Center button icon.',
+      centerLabel: 'Accessible label for the center button.',
+      closeOnSelect: 'Whether selecting an item closes the menu automatically.',
+      items: 'Menu item list.',
+      itemType: 'Visual type for menu item buttons.',
+      maxRingItems: 'Maximum number of items displayed directly on the ring.',
+      mode: 'Whether the menu uses inline or floating layout.',
+      modelValue: 'Controls whether the menu is open.',
+      moreDropdownPlacement: 'Placement of the overflow menu.',
+      moreMode: 'How overflow items are exposed through the more entry.',
+      moreText: 'Text for the more entry.',
+      shortcut: 'Keyboard shortcut used to open or close the menu.',
+      shortcutEnabled: 'Whether the keyboard shortcut is enabled.',
+      teleport: 'Whether the menu overlay is mounted elsewhere in the page.',
+      trigger: 'Whether click or hover opens the menu.'
+    },
+    events: {
+      'active-change': 'Emitted when the active menu item changes.',
+      close: 'Emitted when the menu closes.',
+      'more-close': 'Emitted when the overflow menu closes.',
+      'more-open': 'Emitted when the overflow menu opens.',
+      open: 'Emitted when the menu opens.',
+      select: 'Emitted when a menu item is selected.',
+      'update:modelValue': 'Requests external synchronization of menu open state.'
+    },
+    slots: {
+      center: 'Custom center button content.',
+      default: 'Declare custom menu items with child item components.'
+    },
+    exposes: {
+      close: 'Close the menu programmatically.',
+      focus: 'Focus the center button.',
+      open: 'Open the menu programmatically.',
+      toggle: 'Toggle the menu between open and closed.'
+    }
+  },
+  'fl-radial-menu-item': {
+    component: {
+      '': 'Radial menu item component used inside the radial menu to declare one action.'
+    },
+    props: {
+      closeOnSelect: 'Whether selecting this item closes the whole menu.',
+      divided: 'Whether to show a separator in the overflow menu.',
+      hidden: 'Whether this menu item is hidden.',
+      index: 'Unique menu item identifier.',
+      label: 'Displayed menu item label.',
+      meta: 'Business data carried with the menu item.',
+      shortcut: 'Shortcut hint displayed for the menu item.'
+    },
+    slots: {
+      icon: 'Custom menu item icon.',
+      label: 'Custom menu item label.'
+    }
+  },
+  'fl-select': {
+    component: {
+      '': 'Select component for choosing from dropdown options, with error and table-cell states.'
+    }
+  },
+  'fl-tree': {
+    component: {
+      '': 'Tree component for hierarchical data with expansion, selection, checking, async loading, drag and keyboard support.'
+    },
+    props: {
+      allowDrag: 'Predicate that decides whether a node can be dragged.',
+      allowDrop: 'Predicate that decides whether a node can be dropped at the target position.',
+      accordion: 'Whether only one sibling branch can stay expanded under the same parent.',
+      autoExpandParent: 'Whether controlled expansion automatically expands parent nodes.',
+      checkable: 'Whether to show node checkboxes.',
+      checkedKeys: 'Controlled checked node keys; strict mode also accepts a full checked state.',
+      checkStrictly: 'Whether parent and child checked states are independent.',
+      classNames: 'Extra classes for tree parts, as an object or function.',
+      data: 'Tree data source; every node needs a unique key.',
+      defaultCheckedKeys: 'Initially checked keys in uncontrolled mode.',
+      defaultExpandAll: 'Whether to expand all expandable nodes initially.',
+      defaultExpandedKeys: 'Initially expanded keys in uncontrolled mode.',
+      defaultExpandParent: 'Whether default expanded nodes also expand their ancestors.',
+      defaultSelectedKeys: 'Initially selected keys in uncontrolled mode.',
+      disabledCheckboxKeys: 'Keys whose checkboxes are disabled but still visible.',
+      disabledKeys: 'Keys whose nodes are fully disabled.',
+      draggable: 'Whether to enable internal node drag sorting.',
+      expandedKeys: 'Controlled expanded node keys.',
+      filterTreeNode: 'Predicate for highlighted filter matches.',
+      hiddenCheckboxKeys: 'Keys whose checkboxes are hidden without affecting child checking.',
+      loadData: 'Async loader called when expanding an unloaded non-leaf node.',
+      loadedKeys: 'Controlled record of loaded node keys.',
+      multiple: 'Whether multiple nodes can be selected.',
+      nodeClassName: 'Extra class for individual node wrappers.',
+      props: 'Field mapping for node title, children and leaf flags.',
+      selectable: 'Whether nodes can enter the selection flow.',
+      selectedKeys: 'Controlled selected node keys.',
+      showLine: 'Whether to show connector lines; object form can control leaf icons.',
+      styles: 'Inline styles for tree parts, as an object or function.',
+      switcherIcon: 'Icon style for the expand toggle.',
+      switcherLoadingIcon: 'Icon component for async loading toggles.',
+      unselectableKeys:
+        'Keys that cannot be selected but can still expand, check or emit other events.'
+    },
+    events: {
+      check: 'Emitted after node checkbox state changes, with latest checked result and details.',
+      dblclick: 'Emitted when the node content area is double-clicked.',
+      expand: 'Emitted after node expansion changes, with the latest expanded result.',
+      load: 'Emitted after async node loading completes.',
+      'node-click': 'Emitted when the node content area is clicked.',
+      'node-collapse': 'Emitted when a node collapses.',
+      'node-drag-end': 'Emitted when node dragging ends.',
+      'node-drag-enter': 'Emitted when dragging enters a node drop area.',
+      'node-drag-leave': 'Emitted when dragging leaves a node drop area.',
+      'node-drag-over': 'Emitted while dragging over a node drop area.',
+      'node-drag-start': 'Emitted when node dragging starts.',
+      'node-drop': 'Emitted after a node is dropped successfully.',
+      'node-expand': 'Emitted when a node expands.',
+      'right-click': 'Emitted when the node content area is right-clicked.',
+      select: 'Emitted after node selection state changes.',
+      'update:checkedKeys': 'Requests external synchronization of checked nodes.',
+      'update:expandedKeys': 'Requests external synchronization of expanded nodes.',
+      'update:loadedKeys': 'Requests external synchronization of loaded nodes.',
+      'update:selectedKeys': 'Requests external synchronization of selected nodes.'
+    },
+    exposes: {
+      scrollTo: 'Scroll to the currently rendered and visible node.'
+    },
+    slots: {
+      default: 'Custom node content; replaces only the area to the right of toggle and checkbox.'
+    }
+  },
+  'fl-table': {
+    component: {
+      '': 'Table component for list data with selection enhancements, cell change tracking, row dragging and column dragging.'
+    },
+    props: {
+      data: 'Table data source.',
+      selectionRowClick: 'Whether clicking a row toggles selection when a selection column exists.',
+      selectionSingle: 'Whether multi-select mode is limited to one selected row.',
+      enableCellProxyIntercept: 'Whether cell data write interception is enabled.',
+      isEdit: 'Whether editable-cell mode is enabled.',
+      crossHighlight: 'Whether clicking a cell highlights the row and column.',
+      cellProxyMaxDepth: 'Maximum depth for cell data write tracking.',
+      rowDraggable: 'Whether row dragging is enabled.',
+      columnDraggable: 'Whether column dragging is enabled.',
+      rowDragHandleColumnIndex: 'Column index containing the row drag handle.',
+      rowKeyField: 'Field used as the row key in event callbacks.'
+    },
+    events: {
+      'selection-row-toggle': 'Emitted when row click or selection changes toggle selected state.',
+      'selection-single-conflict':
+        'Emitted when single-select constraints conflict with native multi-select behavior.',
+      'cell-change': 'Emitted when a cell field write is detected.',
+      'row-drag-start': 'Emitted when row dragging starts.',
+      'row-drag-end': 'Emitted when row dragging ends.',
+      'row-order-change': 'Emitted when row order changes.',
+      'column-drag-start': 'Emitted when column dragging starts.',
+      'column-drag-end': 'Emitted when column dragging ends.',
+      'column-order-change': 'Emitted when column order changes.'
+    },
+    slots: {
+      default: 'Table column content slot.',
+      append: 'Additional table footer content slot.',
+      empty: 'Empty-state content slot.'
+    }
+  }
+}
+
+const englishDefaultValueOverrides = {
+  "'取消'": "'Cancel'",
+  "'确认'": "'Confirm'",
+  "'精度不对'": "'Invalid precision'"
+}
+
+const localeConfigs = {
+  zh: {
+    customOverrides: customDescriptionOverrides,
+    outputDir: rootOutputDir,
+    sharedOverrides: sharedDescriptionOverrides
+  },
+  en: {
+    customOverrides: englishCustomDescriptionOverrides,
+    outputDir: englishOutputDir,
+    sharedOverrides: englishSharedDescriptionOverrides
+  }
+}
+
+const resolveDescription = (componentId, section, name, description, locale) => {
+  const localeConfig = localeConfigs[locale]
+  const customOverride = localeConfig.customOverrides[componentId]?.[section]?.[name]
   if (customOverride) {
     return normalizeText(customOverride)
   }
 
-  const sharedOverride = sharedDescriptionOverrides[section]?.[name]
+  const sharedOverride = localeConfig.sharedOverrides[section]?.[name]
   if (sharedOverride) {
     return normalizeText(sharedOverride)
   }
 
   const normalizedDescription = normalizeText(description)
-  if (hasChineseText(normalizedDescription)) {
+  if (locale === 'zh' && hasChineseText(normalizedDescription)) {
+    return normalizedDescription
+  }
+  if (locale === 'en' && normalizedDescription && !hasChineseText(normalizedDescription)) {
     return normalizedDescription
   }
   return ''
 }
 
-const toApiMeta = (componentId, meta) => ({
+const resolveDefaultValue = (value, locale) => {
+  const normalizedValue = value ?? '-'
+  if (locale !== 'en') {
+    return normalizedValue
+  }
+
+  if (englishDefaultValueOverrides[normalizedValue]) {
+    return englishDefaultValueOverrides[normalizedValue]
+  }
+
+  return hasChineseText(normalizedValue) ? '-' : normalizedValue
+}
+
+const toApiMeta = (componentId, meta, locale) => ({
   component: meta.name || componentId,
-  description: resolveDescription(componentId, 'component', '', meta.description),
+  description: resolveDescription(componentId, 'component', '', meta.description, locale),
   events: meta.events
     .map((item) => ({
-      description: resolveDescription(componentId, 'events', item.name, item.description),
+      description: resolveDescription(componentId, 'events', item.name, item.description, locale),
       name: item.name,
       signature: item.signature,
       type: item.type
@@ -618,7 +1175,7 @@ const toApiMeta = (componentId, meta) => ({
     .sort((a, b) => a.name.localeCompare(b.name)),
   exposes: meta.exposed
     .map((item) => ({
-      description: resolveDescription(componentId, 'exposes', item.name, item.description),
+      description: resolveDescription(componentId, 'exposes', item.name, item.description, locale),
       name: item.name,
       type: item.type
     }))
@@ -626,8 +1183,8 @@ const toApiMeta = (componentId, meta) => ({
   props: meta.props
     .filter((item) => !item.global)
     .map((item) => ({
-      default: item.default ?? '-',
-      description: resolveDescription(componentId, 'props', item.name, item.description),
+      default: resolveDefaultValue(item.default, locale),
+      description: resolveDescription(componentId, 'props', item.name, item.description, locale),
       name: item.name,
       required: item.required,
       type: item.type
@@ -635,7 +1192,7 @@ const toApiMeta = (componentId, meta) => ({
     .sort((a, b) => a.name.localeCompare(b.name)),
   slots: meta.slots
     .map((item) => ({
-      description: resolveDescription(componentId, 'slots', item.name, item.description),
+      description: resolveDescription(componentId, 'slots', item.name, item.description, locale),
       name: item.name,
       type: item.type
     }))
@@ -647,20 +1204,24 @@ const generate = () => {
     forceUseTs: true
   })
 
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true })
+  for (const { outputDir } of Object.values(localeConfigs)) {
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true })
+    }
   }
 
   for (const target of targets) {
     const meta = checker.getComponentMeta(target.filePath)
-    const output = toApiMeta(target.id, meta)
-    const outputPath = path.resolve(outputDir, `${target.id}.json`)
-    fs.writeFileSync(
-      outputPath,
-      toProjectLineEndings(`${JSON.stringify(output, null, 2)}\n`),
-      'utf8'
-    )
-    process.stdout.write(`[docs:api] generated ${path.relative(rootDir, outputPath)}\n`)
+    for (const [locale, { outputDir }] of Object.entries(localeConfigs)) {
+      const output = toApiMeta(target.id, meta, locale)
+      const outputPath = path.resolve(outputDir, `${target.id}.json`)
+      fs.writeFileSync(
+        outputPath,
+        toProjectLineEndings(`${JSON.stringify(output, null, 2)}\n`),
+        'utf8'
+      )
+      process.stdout.write(`[docs:api:${locale}] generated ${path.relative(rootDir, outputPath)}\n`)
+    }
   }
 }
 

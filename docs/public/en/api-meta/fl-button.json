@@ -1,0 +1,196 @@
+{
+  "component": "fl-button",
+  "description": "Button component used to trigger page actions, with loading, disabled, icon and debug-click support.",
+  "events": [
+    {
+      "description": "Emitted when the button is clicked.",
+      "name": "click",
+      "signature": "(event: \"click\", evt: MouseEvent): void",
+      "type": "[evt: MouseEvent]"
+    },
+    {
+      "description": "Emitted in addition to click when debug mode is enabled.",
+      "name": "debug-click",
+      "signature": "(event: \"debug-click\", payload: FlButtonDebugPayload): void",
+      "type": "[payload: FlButtonDebugPayload]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "Marks this exposed value as coming from the button component for debugging.",
+      "name": "debugKind",
+      "type": "string"
+    },
+    {
+      "description": "Return whether button text should automatically insert spacing.",
+      "name": "shouldAddSpace",
+      "type": "boolean"
+    }
+  ],
+  "props": [
+    {
+      "default": "-",
+      "description": "Whether to focus automatically after page load.",
+      "name": "autofocus",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to automatically insert spacing between two Chinese characters.",
+      "name": "autoInsertSpace",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether text buttons include a background color.",
+      "name": "bg",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to render as a circular button.",
+      "name": "circle",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Primary color.",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to use styles for dark backgrounds.",
+      "name": "dark",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show a dashed border.",
+      "name": "dashed",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Debug event label emitted when debug mode is enabled.",
+      "name": "debugLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to emit an additional debug event on every click.",
+      "name": "debugMode",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the component is disabled.",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Icon.",
+      "name": "icon",
+      "required": false,
+      "type": "IconPropType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to render with link-button styling.",
+      "name": "link",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show loading state.",
+      "name": "loading",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Loading icon.",
+      "name": "loadingIcon",
+      "required": false,
+      "type": "IconPropType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Native button submit type.",
+      "name": "nativeType",
+      "required": false,
+      "type": "\"button\" | \"submit\" | \"reset\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to use plain button styling.",
+      "name": "plain",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to render as a rounded button.",
+      "name": "round",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Component size.",
+      "name": "size",
+      "required": false,
+      "type": "\"\" | \"default\" | \"small\" | \"large\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Tag used to render the button.",
+      "name": "tag",
+      "required": false,
+      "type": "string | Component | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to render as a text button.",
+      "name": "text",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Visual button type.",
+      "name": "type",
+      "required": false,
+      "type": "\"\" | \"text\" | \"default\" | \"primary\" | \"success\" | \"warning\" | \"info\" | \"danger\" | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "Custom button text or content.",
+      "name": "default",
+      "type": "{}"
+    },
+    {
+      "description": "Custom icon on the left side of the button.",
+      "name": "icon",
+      "type": "{}"
+    },
+    {
+      "description": "Custom loading icon.",
+      "name": "loading",
+      "type": "{}"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 <template>
   <section class="vp-api-table">
-    <div v-if="loading" class="vp-api-table__status">API 加载中...</div>
+    <div v-if="loading" class="vp-api-table__status">{{ texts.loading }}</div>
     <div v-else-if="errorMessage" class="vp-api-table__status vp-api-table__status--error">
       {{ errorMessage }}
     </div>
@@ -8,11 +8,11 @@
       <table v-if="section === 'props'">
         <thead>
           <tr>
-            <th>名称</th>
-            <th>类型</th>
-            <th>默认值</th>
-            <th>必填</th>
-            <th>说明</th>
+            <th>{{ texts.name }}</th>
+            <th>{{ texts.type }}</th>
+            <th>{{ texts.default }}</th>
+            <th>{{ texts.required }}</th>
+            <th>{{ texts.description }}</th>
           </tr>
         </thead>
         <tbody>
@@ -26,7 +26,7 @@
             <td>
               <code>{{ item.default }}</code>
             </td>
-            <td>{{ item.required ? '是' : '否' }}</td>
+            <td>{{ item.required ? texts.yes : texts.no }}</td>
             <td>{{ item.description || '-' }}</td>
           </tr>
         </tbody>
@@ -35,10 +35,10 @@
       <table v-else-if="section === 'events'">
         <thead>
           <tr>
-            <th>名称</th>
-            <th>签名</th>
-            <th>类型</th>
-            <th>说明</th>
+            <th>{{ texts.name }}</th>
+            <th>{{ texts.signature }}</th>
+            <th>{{ texts.type }}</th>
+            <th>{{ texts.description }}</th>
           </tr>
         </thead>
         <tbody>
@@ -60,9 +60,9 @@
       <table v-else-if="section === 'slots'">
         <thead>
           <tr>
-            <th>名称</th>
-            <th>类型</th>
-            <th>说明</th>
+            <th>{{ texts.name }}</th>
+            <th>{{ texts.type }}</th>
+            <th>{{ texts.description }}</th>
           </tr>
         </thead>
         <tbody>
@@ -81,9 +81,9 @@
       <table v-else>
         <thead>
           <tr>
-            <th>名称</th>
-            <th>类型</th>
-            <th>说明</th>
+            <th>{{ texts.name }}</th>
+            <th>{{ texts.type }}</th>
+            <th>{{ texts.description }}</th>
           </tr>
         </thead>
         <tbody>
@@ -106,7 +106,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useData, withBase } from 'vitepress'
 
 type ApiMeta = {
   component: string
@@ -149,31 +150,68 @@ const props = withDefaults(
 const loading = ref(false)
 const errorMessage = ref('')
 const meta = ref<ApiMeta | null>(null)
+const { localeIndex } = useData()
+
+const isEnglish = computed(() => localeIndex.value === 'en')
+const texts = computed(() =>
+  isEnglish.value
+    ? {
+        default: 'Default',
+        description: 'Description',
+        loading: 'Loading API...',
+        name: 'Name',
+        no: 'No',
+        required: 'Required',
+        signature: 'Signature',
+        type: 'Type',
+        unknownError: 'Unknown error',
+        yes: 'Yes'
+      }
+    : {
+        default: '默认值',
+        description: '说明',
+        loading: 'API 加载中...',
+        name: '名称',
+        no: '否',
+        required: '必填',
+        signature: '签名',
+        type: '类型',
+        unknownError: '未知错误',
+        yes: '是'
+      }
+)
+
+const localizedSource = computed(() => {
+  if (!isEnglish.value || !props.source.startsWith('/api-meta/')) {
+    return props.source
+  }
+
+  return `/en${props.source}`
+})
 
 const loadMeta = async () => {
   loading.value = true
   errorMessage.value = ''
   try {
-    const response = await fetch(props.source)
+    const response = await fetch(withBase(localizedSource.value))
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`)
     }
     meta.value = (await response.json()) as ApiMeta
   } catch (error) {
-    const message = error instanceof Error ? error.message : '未知错误'
-    errorMessage.value = `API 数据读取失败：${message}`
+    const message = error instanceof Error ? error.message : texts.value.unknownError
+    errorMessage.value = isEnglish.value
+      ? `Failed to load API data: ${message}`
+      : `API 数据读取失败：${message}`
     meta.value = null
   } finally {
     loading.value = false
   }
 }
 
-watch(
-  () => props.source,
-  () => {
-    void loadMeta()
-  }
-)
+watch(localizedSource, () => {
+  void loadMeta()
+})
 
 onMounted(() => {
   void loadMeta()

@@ -1,0 +1,428 @@
+{
+  "component": "fl-input",
+  "description": "Text input component for plain text, with clear, icon, error, table and debug support.",
+  "events": [
+    {
+      "description": "Emitted when the input loses focus.",
+      "name": "blur",
+      "signature": "(event: \"blur\", evt: FocusEvent): void",
+      "type": "[evt: FocusEvent]"
+    },
+    {
+      "description": "Emitted when the confirmed bound value changes.",
+      "name": "change",
+      "signature": "(event: \"change\", value: string, evt?: Event | undefined): void",
+      "type": "[value: string, evt?: Event | undefined]"
+    },
+    {
+      "description": "Emitted when the clear button removes the value.",
+      "name": "clear",
+      "signature": "(event: \"clear\", evt: MouseEvent | undefined): void",
+      "type": "[evt: MouseEvent | undefined]"
+    },
+    {
+      "description": "Emitted when IME composition ends.",
+      "name": "compositionend",
+      "signature": "(event: \"compositionend\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "Emitted when IME composition starts.",
+      "name": "compositionstart",
+      "signature": "(event: \"compositionstart\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "Emitted when IME composition updates.",
+      "name": "compositionupdate",
+      "signature": "(event: \"compositionupdate\", evt: CompositionEvent): void",
+      "type": "[evt: CompositionEvent]"
+    },
+    {
+      "description": "Emitted when the input value changes, with current value and length.",
+      "name": "custom-input",
+      "signature": "(event: \"custom-input\", payload: FlInputCustomPayload): void",
+      "type": "[payload: FlInputCustomPayload]"
+    },
+    {
+      "description": "Emitted after the custom input event when debug mode is enabled.",
+      "name": "debug-event",
+      "signature": "(event: \"debug-event\", payload: FlInputDebugPayload): void",
+      "type": "[payload: FlInputDebugPayload]"
+    },
+    {
+      "description": "Emitted when the input receives focus.",
+      "name": "focus",
+      "signature": "(event: \"focus\", evt: FocusEvent): void",
+      "type": "[evt: FocusEvent]"
+    },
+    {
+      "description": "Emitted while the user is typing.",
+      "name": "input",
+      "signature": "(event: \"input\", value: string): void",
+      "type": "[value: string]"
+    },
+    {
+      "description": "Emitted when a keyboard key is pressed.",
+      "name": "keydown",
+      "signature": "(event: \"keydown\", evt: Event | KeyboardEvent): void",
+      "type": "[evt: Event | KeyboardEvent]"
+    },
+    {
+      "description": "Emitted when the pointer enters the component.",
+      "name": "mouseenter",
+      "signature": "(event: \"mouseenter\", evt: MouseEvent): void",
+      "type": "[evt: MouseEvent]"
+    },
+    {
+      "description": "Emitted when the pointer leaves the component.",
+      "name": "mouseleave",
+      "signature": "(event: \"mouseleave\", evt: MouseEvent): void",
+      "type": "[evt: MouseEvent]"
+    },
+    {
+      "description": "Requests external synchronization of the bound value.",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", value: string): void",
+      "type": "[value: string]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "Blur the inner input.",
+      "name": "blur",
+      "type": "() => void | undefined"
+    },
+    {
+      "description": "Clear the inner input value.",
+      "name": "clear",
+      "type": "(evt?: MouseEvent | undefined) => void"
+    },
+    {
+      "description": "Focus the inner focusable element.",
+      "name": "focus",
+      "type": "() => void | undefined"
+    },
+    {
+      "description": "Return the inner input element.",
+      "name": "input",
+      "type": "HTMLInputElement | undefined"
+    },
+    {
+      "description": "Read whether the component is currently handling IME composition.",
+      "name": "isComposing",
+      "type": "boolean"
+    },
+    {
+      "description": "Call the built-in example method.",
+      "name": "myMethod",
+      "type": "() => void"
+    },
+    {
+      "description": "Read the built-in example value.",
+      "name": "myValue",
+      "type": "number"
+    },
+    {
+      "description": "Recalculate textarea height.",
+      "name": "resizeTextarea",
+      "type": "() => void"
+    },
+    {
+      "description": "Select the text inside the inner input.",
+      "name": "select",
+      "type": "() => void"
+    },
+    {
+      "description": "Return the inner textarea element.",
+      "name": "textarea",
+      "type": "HTMLTextAreaElement | undefined"
+    },
+    {
+      "description": "Read the computed style for the inner textarea.",
+      "name": "textareaStyle",
+      "type": "StyleValue"
+    }
+  ],
+  "props": [
+    {
+      "default": "-",
+      "description": "Accessible name for assistive technologies.",
+      "name": "ariaLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Browser autocomplete behavior.",
+      "name": "autocomplete",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to focus automatically after page load.",
+      "name": "autofocus",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether multiline input auto-expands, or an autosize configuration.",
+      "name": "autosize",
+      "required": false,
+      "type": "InputAutoSize | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show the clear button.",
+      "name": "clearable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Clear button icon.",
+      "name": "clearIcon",
+      "required": false,
+      "type": "IconPropType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Accessible role for the wrapper element.",
+      "name": "containerRole",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Debug event label emitted when debug mode is enabled.",
+      "name": "debugLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to emit additional debug events while typing.",
+      "name": "debugMode",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the component is disabled.",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Associated form name.",
+      "name": "form",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Format the value before display.",
+      "name": "formatter",
+      "required": false,
+      "type": "((value: string) => string) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "ID for the component or inner input.",
+      "name": "id",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Hint for which mobile keyboard to use.",
+      "name": "inputmode",
+      "required": false,
+      "type": "\"text\" | \"search\" | \"email\" | \"tel\" | \"url\" | \"none\" | \"numeric\" | \"decimal\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Inline style added to the inner input.",
+      "name": "inputStyle",
+      "required": false,
+      "type": "StyleValue"
+    },
+    {
+      "default": "false",
+      "description": "Whether to show the error state.",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to render for a table-cell scenario.",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Maximum number of characters.",
+      "name": "maxlength",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Minimum number of characters.",
+      "name": "minlength",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Two-way binding modifiers.",
+      "name": "modelModifiers",
+      "required": false,
+      "type": "InputModelModifiers | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Current bound input value.",
+      "name": "modelValue",
+      "required": false,
+      "type": "string | number | null | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Form field name.",
+      "name": "name",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Convert displayed input into the real value.",
+      "name": "parser",
+      "required": false,
+      "type": "((value: string) => string) | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Placeholder shown when the input is empty.",
+      "name": "placeholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Prefix icon.",
+      "name": "prefixIcon",
+      "required": false,
+      "type": "IconPropType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the input is read-only.",
+      "name": "readonly",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether a textarea can be resized by dragging.",
+      "name": "resize",
+      "required": false,
+      "type": "\"none\" | \"both\" | \"horizontal\" | \"vertical\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Default textarea row count.",
+      "name": "rows",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show the password visibility toggle.",
+      "name": "showPassword",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show the character counter.",
+      "name": "showWordLimit",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Component size.",
+      "name": "size",
+      "required": false,
+      "type": "\"\" | \"default\" | \"small\" | \"large\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Suffix icon.",
+      "name": "suffixIcon",
+      "required": false,
+      "type": "IconPropType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Keyboard tab order.",
+      "name": "tabindex",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Input type, such as text, password or textarea.",
+      "name": "type",
+      "required": false,
+      "type": "InputType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether value changes trigger form validation.",
+      "name": "validateEvent",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Position of the character counter.",
+      "name": "wordLimitPosition",
+      "required": false,
+      "type": "\"inside\" | \"outside\" | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "Custom input append content.",
+      "name": "append",
+      "type": "{}"
+    },
+    {
+      "description": "Custom password visibility icon.",
+      "name": "password-icon",
+      "type": "{ visible: boolean; }"
+    },
+    {
+      "description": "Custom input prefix content.",
+      "name": "prefix",
+      "type": "{}"
+    },
+    {
+      "description": "Custom input prepend content.",
+      "name": "prepend",
+      "type": "{}"
+    },
+    {
+      "description": "Custom input suffix content.",
+      "name": "suffix",
+      "type": "{}"
+    }
+  ]
+}

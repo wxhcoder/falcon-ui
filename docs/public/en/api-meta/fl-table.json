@@ -1,0 +1,200 @@
+{
+  "component": "fl-table",
+  "description": "Table component for list data with selection enhancements, cell change tracking, row dragging and column dragging.",
+  "events": [
+    {
+      "description": "Emitted when a cell field write is detected.",
+      "name": "cell-change",
+      "signature": "(event: \"cell-change\", payload: CellChangeEvent): void",
+      "type": "[payload: CellChangeEvent]"
+    },
+    {
+      "description": "Emitted when column dragging ends.",
+      "name": "column-drag-end",
+      "signature": "(event: \"column-drag-end\", payload: ColumnDragEvent): void",
+      "type": "[payload: ColumnDragEvent]"
+    },
+    {
+      "description": "Emitted when column dragging starts.",
+      "name": "column-drag-start",
+      "signature": "(event: \"column-drag-start\", payload: ColumnDragEvent): void",
+      "type": "[payload: ColumnDragEvent]"
+    },
+    {
+      "description": "Emitted when column order changes.",
+      "name": "column-order-change",
+      "signature": "(event: \"column-order-change\", payload: ColumnOrderChangeEvent): void",
+      "type": "[payload: ColumnOrderChangeEvent]"
+    },
+    {
+      "description": "Emitted when row dragging ends.",
+      "name": "row-drag-end",
+      "signature": "(event: \"row-drag-end\", payload: RowDragEvent): void",
+      "type": "[payload: RowDragEvent]"
+    },
+    {
+      "description": "Emitted when row dragging starts.",
+      "name": "row-drag-start",
+      "signature": "(event: \"row-drag-start\", payload: RowDragEvent): void",
+      "type": "[payload: RowDragEvent]"
+    },
+    {
+      "description": "Emitted when row order changes.",
+      "name": "row-order-change",
+      "signature": "(event: \"row-order-change\", payload: RowOrderChangeEvent): void",
+      "type": "[payload: RowOrderChangeEvent]"
+    },
+    {
+      "description": "Emitted when row click or selection changes toggle selected state.",
+      "name": "selection-row-toggle",
+      "signature": "(event: \"selection-row-toggle\", payload: SelectionRowToggleEvent): void",
+      "type": "[payload: SelectionRowToggleEvent]"
+    },
+    {
+      "description": "Emitted when single-select constraints conflict with native multi-select behavior.",
+      "name": "selection-single-conflict",
+      "signature": "(event: \"selection-single-conflict\", payload: SelectionSingleConflictEvent): void",
+      "type": "[payload: SelectionSingleConflictEvent]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "Clear table filters.",
+      "name": "clearFilter",
+      "type": "(columnKeys?: string | string[] | undefined) => void"
+    },
+    {
+      "description": "Clear selected table rows.",
+      "name": "clearSelection",
+      "type": "() => void"
+    },
+    {
+      "description": "Clear table sorting.",
+      "name": "clearSort",
+      "type": "() => void"
+    },
+    {
+      "description": "Recalculate table column widths and layout.",
+      "name": "doLayout",
+      "type": "() => void"
+    },
+    {
+      "description": "Return the currently selected table rows.",
+      "name": "getSelectionRows",
+      "type": "() => RowData[]"
+    },
+    {
+      "description": "Scroll to a position or node.",
+      "name": "scrollTo",
+      "type": "{ (options: ScrollToOptions): void; (xCoord: number, yCoord?: number | undefined): void; }"
+    },
+    {
+      "description": "Set the current highlighted table row.",
+      "name": "setCurrentRow",
+      "type": "(row?: RowData | undefined) => void"
+    },
+    {
+      "description": "Set the horizontal table scroll position.",
+      "name": "setScrollLeft",
+      "type": "(left: number) => void"
+    },
+    {
+      "description": "Set the vertical table scroll position.",
+      "name": "setScrollTop",
+      "type": "(top: number) => void"
+    },
+    {
+      "description": "Sort the table by the specified column.",
+      "name": "sort",
+      "type": "(prop: string, order: \"ascending\" | \"descending\" | null) => void"
+    },
+    {
+      "description": "Toggle table select-all state.",
+      "name": "toggleAllSelection",
+      "type": "() => void"
+    },
+    {
+      "description": "Toggle expansion for the specified row.",
+      "name": "toggleRowExpansion",
+      "type": "(row: RowData, expanded?: boolean | undefined) => void"
+    },
+    {
+      "description": "Toggle selection for the specified row.",
+      "name": "toggleRowSelection",
+      "type": "(row: RowData, selected?: boolean | undefined, ignoreSelectable?: boolean | undefined) => void"
+    }
+  ],
+  "props": [
+    {
+      "default": "4",
+      "description": "Maximum depth for cell data write tracking.",
+      "name": "cellProxyMaxDepth",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether column dragging is enabled.",
+      "name": "columnDraggable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether clicking a cell highlights the row and column.",
+      "name": "crossHighlight",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "[]",
+      "description": "Table data source.",
+      "name": "data",
+      "required": false,
+      "type": "RowData[] | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether editable-cell mode is enabled.",
+      "name": "isEdit",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether row dragging is enabled.",
+      "name": "rowDraggable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "0",
+      "description": "Column index containing the row drag handle.",
+      "name": "rowDragHandleColumnIndex",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'id'",
+      "description": "Field used as the row key in event callbacks.",
+      "name": "rowKeyField",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether clicking a row toggles selection when a selection column exists.",
+      "name": "selectionRowClick",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether multi-select mode is limited to one selected row.",
+      "name": "selectionSingle",
+      "required": false,
+      "type": "boolean | undefined"
+    }
+  ],
+  "slots": []
+}

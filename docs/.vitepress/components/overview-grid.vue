@@ -1,6 +1,6 @@
 <template>
   <section class="falcon-overview vp-raw">
-    <p class="falcon-overview__description">所有已发布组件的快速入口。</p>
+    <p class="falcon-overview__description">{{ texts.description }}</p>
 
     <label class="falcon-overview__search" for="falcon-overview-search">
       <span class="falcon-overview__search-icon" aria-hidden="true">
@@ -20,13 +20,13 @@
         type="search"
         autocomplete="off"
         spellcheck="false"
-        placeholder="搜索组件" />
+        :placeholder="texts.searchPlaceholder" />
     </label>
 
     <template v-if="hasResults">
       <section v-for="group in filteredGroups" :key="group.key" class="falcon-overview__group">
         <header class="falcon-overview__group-header">
-          <h2 class="falcon-overview__group-title">{{ group.title }}</h2>
+          <h2 class="falcon-overview__group-title">{{ group.localizedTitle }}</h2>
           <span class="falcon-overview__group-count">{{ group.items.length }}</span>
         </header>
 
@@ -35,38 +35,60 @@
             v-for="item in group.items"
             :key="item.name"
             class="falcon-overview-card"
-            :href="withBase(item.link)">
+            :href="withBase(toLocalizedLink(item.link))">
             <div class="falcon-overview-card__header">
-              <span class="falcon-overview-card__title">{{ item.title }}</span>
+              <span class="falcon-overview-card__title">{{ localizedItemTitle(item) }}</span>
               <span v-if="item.version" class="falcon-overview-card__version">{{
                 item.version
               }}</span>
             </div>
             <div class="falcon-overview-card__preview">
-              <img :src="withBase(item.icon)" :alt="`${item.name} 预览图`" loading="lazy" />
+              <img
+                :src="withBase(item.icon)"
+                :alt="`${item.name} ${texts.previewAltSuffix}`"
+                loading="lazy" />
             </div>
           </a>
         </div>
       </section>
     </template>
 
-    <p v-else class="falcon-overview__empty">未找到匹配组件，请调整关键词后重试。</p>
+    <p v-else class="falcon-overview__empty">{{ texts.empty }}</p>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { withBase } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 import { overviewComponentGroups, overviewComponents } from '../data/overview-components'
+import type { OverviewItem } from '../data/overview-components'
 
 const keyword = ref('')
+const { localeIndex } = useData()
 
+const isEnglish = computed(() => localeIndex.value === 'en')
 const normalizedKeyword = computed(() => keyword.value.trim().toLowerCase())
+const texts = computed(() =>
+  isEnglish.value
+    ? {
+        description: 'Quick entry points for all published components.',
+        empty: 'No matching components. Try another keyword.',
+        previewAltSuffix: 'preview',
+        searchPlaceholder: 'Search components'
+      }
+    : {
+        description: '所有已发布组件的快速入口。',
+        empty: '未找到匹配组件，请调整关键词后重试。',
+        previewAltSuffix: '预览图',
+        searchPlaceholder: '搜索组件'
+      }
+)
 
 const filteredGroups = computed(() =>
   overviewComponentGroups
     .map((group) => ({
       ...group,
+      localizedTitle: isEnglish.value ? group.titleEn : group.title,
       items: overviewComponents.filter((item) => {
         if (item.group !== group.key) {
           return false
@@ -76,7 +98,9 @@ const filteredGroups = computed(() =>
           return true
         }
 
-        const searchableText = `${item.name} ${item.title} ${item.description}`.toLowerCase()
+        const title = localizedItemTitle(item)
+        const description = isEnglish.value ? item.descriptionEn : item.description
+        const searchableText = `${item.name} ${title} ${description}`.toLowerCase()
         return searchableText.includes(normalizedKeyword.value)
       })
     }))
@@ -84,6 +108,8 @@ const filteredGroups = computed(() =>
 )
 
 const hasResults = computed(() => filteredGroups.value.length > 0)
+const localizedItemTitle = (item: OverviewItem) => (isEnglish.value ? item.titleEn : item.title)
+const toLocalizedLink = (link: string) => (isEnglish.value ? `/en${link}` : link)
 </script>
 
 <style scoped>

@@ -1,0 +1,132 @@
+{
+  "component": "fl-input-search",
+  "description": "Business search input for keywords, Enter search and single-result backfill.",
+  "events": [
+    {
+      "description": "Emitted when the value is cleared, including the clear reason.",
+      "name": "clear",
+      "signature": "(event: \"clear\", payload: FlInputSearchClearPayload): void",
+      "type": "[payload: FlInputSearchClearPayload]"
+    },
+    {
+      "description": "Emitted when external code should open a selection dialog.",
+      "name": "openDialog",
+      "signature": "(event: \"openDialog\", payload: FlInputSearchOpenDialogPayload): void",
+      "type": "[payload: FlInputSearchOpenDialogPayload]"
+    },
+    {
+      "description": "Emitted when Enter search fails.",
+      "name": "search-error",
+      "signature": "(event: \"search-error\", payload: FlInputSearchSearchErrorPayload): void",
+      "type": "[payload: FlInputSearchSearchErrorPayload]"
+    },
+    {
+      "description": "Emitted when a single Enter-search result is committed.",
+      "name": "selection-commit",
+      "signature": "(event: \"selection-commit\", payload: FlInputSearchSelectionCommitPayload): void",
+      "type": "[payload: FlInputSearchSelectionCommitPayload]"
+    },
+    {
+      "description": "Requests external synchronization of the displayed label.",
+      "name": "update:label",
+      "signature": "(event: \"update:label\", value: string): void",
+      "type": "[value: string]"
+    },
+    {
+      "description": "Requests external synchronization of the real bound value.",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", value: FlInputSearchValue): void",
+      "type": "[value: FlInputSearchValue]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "Blur the inner input.",
+      "name": "blur",
+      "type": "() => void"
+    },
+    {
+      "description": "Clear the current value and display label.",
+      "name": "clear",
+      "type": "() => void"
+    },
+    {
+      "description": "Focus the inner input.",
+      "name": "focus",
+      "type": "() => void"
+    }
+  ],
+  "props": [
+    {
+      "default": "false",
+      "description": "Whether to show the clear button.",
+      "name": "clearable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether to clear unconfirmed input on blur.",
+      "name": "clearOnBlurUnconfirmed",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether the component is disabled.",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Query function called when pressing Enter.",
+      "name": "fetchApi",
+      "required": false,
+      "type": "FlInputSearchFetchApi | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to show the error state.",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to render for a table-cell scenario.",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Business label displayed inside the input.",
+      "name": "label",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Maps external query results into the value and label required by the component.",
+      "name": "mapResult",
+      "required": true,
+      "type": "FlInputSearchMapResult"
+    },
+    {
+      "default": "null",
+      "description": "Real bound value, usually a unique business identifier.",
+      "name": "modelValue",
+      "required": false,
+      "type": "string | number | null | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Placeholder shown when the input is empty.",
+      "name": "placeholder",
+      "required": false,
+      "type": "string | undefined"
+    }
+  ],
+  "slots": []
+}

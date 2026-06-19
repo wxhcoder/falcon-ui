@@ -1,0 +1,360 @@
+{
+  "component": "fl-tree",
+  "description": "Tree component for hierarchical data with expansion, selection, checking, async loading, drag and keyboard support.",
+  "events": [
+    {
+      "description": "Emitted after node checkbox state changes, with latest checked result and details.",
+      "name": "check",
+      "signature": "(event: \"check\", checkedKeys: TreeCheckedKeys, event: TreeCheckEvent): void",
+      "type": "[checkedKeys: TreeCheckedKeys, event: TreeCheckEvent]"
+    },
+    {
+      "description": "Emitted when the node content area is double-clicked.",
+      "name": "dblclick",
+      "signature": "(event: \"dblclick\", data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent): void",
+      "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent]"
+    },
+    {
+      "description": "Emitted after node expansion changes, with the latest expanded result.",
+      "name": "expand",
+      "signature": "(event: \"expand\", event: TreeExpandEvent): void",
+      "type": "[event: TreeExpandEvent]"
+    },
+    {
+      "description": "Emitted after async node loading completes.",
+      "name": "load",
+      "signature": "(event: \"load\", loadedKeys: TreeKey[], event: TreeLoadEvent): void",
+      "type": "[loadedKeys: TreeKey[], event: TreeLoadEvent]"
+    },
+    {
+      "description": "Emitted when the node content area is clicked.",
+      "name": "node-click",
+      "signature": "(event: \"node-click\", data: TreeData, node: TreeNode, component: TreeNodeInstance, event: TreeInteractionEvent): void",
+      "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: TreeInteractionEvent]"
+    },
+    {
+      "description": "Emitted when a node collapses.",
+      "name": "node-collapse",
+      "signature": "(event: \"node-collapse\", data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance): void",
+      "type": "[data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance]"
+    },
+    {
+      "description": "Emitted when node dragging ends.",
+      "name": "node-drag-end",
+      "signature": "(event: \"node-drag-end\", draggingNode: TreeNode, dropNode: TreeNode | null, dropType: TreeNodeDropType, event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode | null, dropType: TreeNodeDropType, event: DragEvent]"
+    },
+    {
+      "description": "Emitted when dragging enters a node drop area.",
+      "name": "node-drag-enter",
+      "signature": "(event: \"node-drag-enter\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
+    },
+    {
+      "description": "Emitted when dragging leaves a node drop area.",
+      "name": "node-drag-leave",
+      "signature": "(event: \"node-drag-leave\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
+    },
+    {
+      "description": "Emitted while dragging over a node drop area.",
+      "name": "node-drag-over",
+      "signature": "(event: \"node-drag-over\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
+    },
+    {
+      "description": "Emitted when node dragging starts.",
+      "name": "node-drag-start",
+      "signature": "(event: \"node-drag-start\", node: TreeNode, event: DragEvent): void",
+      "type": "[node: TreeNode, event: DragEvent]"
+    },
+    {
+      "description": "Emitted after a node is dropped successfully.",
+      "name": "node-drop",
+      "signature": "(event: \"node-drop\", draggingNode: TreeNode, dropNode: TreeNode, dropType: \"before\" | \"after\" | \"inner\", event: DragEvent): void",
+      "type": "[draggingNode: TreeNode, dropNode: TreeNode, dropType: \"before\" | \"after\" | \"inner\", event: DragEvent]"
+    },
+    {
+      "description": "Emitted when a node expands.",
+      "name": "node-expand",
+      "signature": "(event: \"node-expand\", data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance): void",
+      "type": "[data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance]"
+    },
+    {
+      "description": "Emitted when the node content area is right-clicked.",
+      "name": "right-click",
+      "signature": "(event: \"right-click\", data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent): void",
+      "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent]"
+    },
+    {
+      "description": "Emitted after node selection state changes.",
+      "name": "select",
+      "signature": "(event: \"select\", selectedKeys: TreeKey[], event: TreeSelectEvent): void",
+      "type": "[selectedKeys: TreeKey[], event: TreeSelectEvent]"
+    },
+    {
+      "description": "Requests external synchronization of checked nodes.",
+      "name": "update:checkedKeys",
+      "signature": "(event: \"update:checkedKeys\", value: TreeCheckedKeys): void",
+      "type": "[value: TreeCheckedKeys]"
+    },
+    {
+      "description": "Requests external synchronization of expanded nodes.",
+      "name": "update:expandedKeys",
+      "signature": "(event: \"update:expandedKeys\", value: TreeKey[]): void",
+      "type": "[value: TreeKey[]]"
+    },
+    {
+      "description": "Requests external synchronization of loaded nodes.",
+      "name": "update:loadedKeys",
+      "signature": "(event: \"update:loadedKeys\", value: TreeKey[]): void",
+      "type": "[value: TreeKey[]]"
+    },
+    {
+      "description": "Requests external synchronization of selected nodes.",
+      "name": "update:selectedKeys",
+      "signature": "(event: \"update:selectedKeys\", value: TreeKey[]): void",
+      "type": "[value: TreeKey[]]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "Scroll to the currently rendered and visible node.",
+      "name": "scrollTo",
+      "type": "(options: TreeScrollToOptions) => void"
+    }
+  ],
+  "props": [
+    {
+      "default": "false",
+      "description": "Whether only one sibling branch can stay expanded under the same parent.",
+      "name": "accordion",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Predicate that decides whether a node can be dragged.",
+      "name": "allowDrag",
+      "required": false,
+      "type": "TreeAllowDrag | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Predicate that decides whether a node can be dropped at the target position.",
+      "name": "allowDrop",
+      "required": false,
+      "type": "TreeAllowDrop | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether controlled expansion automatically expands parent nodes.",
+      "name": "autoExpandParent",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to show node checkboxes.",
+      "name": "checkable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Controlled checked node keys; strict mode also accepts a full checked state.",
+      "name": "checkedKeys",
+      "required": false,
+      "type": "TreeCheckedKeys | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether parent and child checked states are independent.",
+      "name": "checkStrictly",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Extra classes for tree parts, as an object or function.",
+      "name": "classNames",
+      "required": false,
+      "type": "TreeClassNames | undefined"
+    },
+    {
+      "default": "[]",
+      "description": "Tree data source; every node needs a unique key.",
+      "name": "data",
+      "required": false,
+      "type": "TreeData[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Initially checked keys in uncontrolled mode.",
+      "name": "defaultCheckedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to expand all expandable nodes initially.",
+      "name": "defaultExpandAll",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Initially expanded keys in uncontrolled mode.",
+      "name": "defaultExpandedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether default expanded nodes also expand their ancestors.",
+      "name": "defaultExpandParent",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Initially selected keys in uncontrolled mode.",
+      "name": "defaultSelectedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Keys whose checkboxes are disabled but still visible.",
+      "name": "disabledCheckboxKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Keys whose nodes are fully disabled.",
+      "name": "disabledKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to enable internal node drag sorting.",
+      "name": "draggable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Controlled expanded node keys.",
+      "name": "expandedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Predicate for highlighted filter matches.",
+      "name": "filterTreeNode",
+      "required": false,
+      "type": "TreeFilterTreeNode | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Keys whose checkboxes are hidden without affecting child checking.",
+      "name": "hiddenCheckboxKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Async loader called when expanding an unloaded non-leaf node.",
+      "name": "loadData",
+      "required": false,
+      "type": "TreeLoadData | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Controlled record of loaded node keys.",
+      "name": "loadedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether multiple nodes can be selected.",
+      "name": "multiple",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Extra class for individual node wrappers.",
+      "name": "nodeClassName",
+      "required": false,
+      "type": "TreeNodeClassName | undefined"
+    },
+    {
+      "default": "{ ...treeNodePropsDefaults }",
+      "description": "Field mapping for node title, children and leaf flags.",
+      "name": "props",
+      "required": false,
+      "type": "TreeNodeProps | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether nodes can enter the selection flow.",
+      "name": "selectable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Controlled selected node keys.",
+      "name": "selectedKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to show connector lines; object form can control leaf icons.",
+      "name": "showLine",
+      "required": false,
+      "type": "TreeShowLine | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Inline styles for tree parts, as an object or function.",
+      "name": "styles",
+      "required": false,
+      "type": "TreeStyles | undefined"
+    },
+    {
+      "default": "'arrow'",
+      "description": "Icon style for the expand toggle.",
+      "name": "switcherIcon",
+      "required": false,
+      "type": "TreeSwitcherIconMode | undefined"
+    },
+    {
+      "default": "Loading",
+      "description": "Icon component for async loading toggles.",
+      "name": "switcherLoadingIcon",
+      "required": false,
+      "type": "TreeSwitcherLoadingIcon | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Keys that cannot be selected but can still expand, check or emit other events.",
+      "name": "unselectableKeys",
+      "required": false,
+      "type": "TreeKey[] | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "Custom node content; replaces only the area to the right of toggle and checkbox.",
+      "name": "default",
+      "type": "{ node: TreeNode; data: TreeData; }"
+    }
+  ]
+}

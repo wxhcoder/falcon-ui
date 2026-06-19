@@ -1,0 +1,86 @@
+{
+  "component": "fl-qr-code",
+  "description": "QR code component that renders strings as QR codes with color, size and center icon options.",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "'#ffffff'",
+      "description": "Background color.",
+      "name": "backgroundColor",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'#000000'",
+      "description": "Dark module color for the QR code.",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'M'",
+      "description": "QR error correction level; higher levels tolerate more occlusion.",
+      "name": "errorCorrectionLevel",
+      "required": false,
+      "type": "\"M\" | \"L\" | \"Q\" | \"H\" | undefined"
+    },
+    {
+      "default": "'#ffffff'",
+      "description": "Background color behind the center icon.",
+      "name": "iconBackgroundColor",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "4",
+      "description": "Center icon background corner radius in pixels.",
+      "name": "iconBorderRadius",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "24",
+      "description": "Center icon size in pixels.",
+      "name": "iconSize",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Center icon URL.",
+      "name": "iconSrc",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "12",
+      "description": "Padding between the QR content and outer edge, in pixels.",
+      "name": "padding",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "100",
+      "description": "Overall QR code display size in pixels.",
+      "name": "size",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'canvas'",
+      "description": "QR rendering mode: canvas or SVG.",
+      "name": "type",
+      "required": false,
+      "type": "\"canvas\" | \"svg\" | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Content encoded into the QR code.",
+      "name": "value",
+      "required": false,
+      "type": "string | undefined"
+    }
+  ],
+  "slots": []
+}
