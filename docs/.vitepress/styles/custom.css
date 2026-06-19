@@ -72,6 +72,7 @@
 }
 
 .navbar-wrapper .search {
+  flex: 0 0 auto;
   min-width: 180px;
 }
 

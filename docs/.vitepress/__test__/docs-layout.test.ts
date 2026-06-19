@@ -58,6 +58,20 @@ describe('docs Element Plus-style layout', () => {
     expect(customStyleSource).toContain('.toc-wrapper')
   })
 
+  it('keeps the global search button beside the guide nav item', () => {
+    const layoutSource = readText('docs/.vitepress/theme/layout.vue')
+    const customStyleSource = readText('docs/.vitepress/styles/custom.css')
+
+    const searchIndex = layoutSource.indexOf('<VPNavBarSearch class="search" />')
+    const menuIndex = layoutSource.indexOf('<VPNavBarMenu class="menu" />')
+
+    expect(searchIndex).toBeGreaterThan(-1)
+    expect(menuIndex).toBeGreaterThan(searchIndex)
+    expect(customStyleSource).toMatch(
+      /\.navbar-wrapper \.search\s*\{[^}]*flex:\s*0 0 auto;/u
+    )
+  })
+
   it('does not render a blank wide-screen toc when a page has no outline', () => {
     const layoutSource = readText('docs/.vitepress/theme/layout.vue')
     const customStyleSource = readText('docs/.vitepress/styles/custom.css')
