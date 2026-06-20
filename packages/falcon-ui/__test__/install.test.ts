@@ -12,6 +12,7 @@ import FalconUI, {
   FlSelect,
   FlTable,
   FlTableEditor,
+  FlTreeSelect,
   HolderOutlined,
   MinusSquareOutlined,
   PlusSquareOutlined,
@@ -52,6 +53,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
     expect(app.component).toHaveBeenCalledWith('FlTableEditor', FlTableEditor)
+    expect(app.component).toHaveBeenCalledWith('FlTreeSelect', FlTreeSelect)
     expect(app.component).not.toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
     expect(app.component).not.toHaveBeenCalledWith('MinusSquareOutlined', MinusSquareOutlined)
     expect(app.component).not.toHaveBeenCalledWith('HolderOutlined', HolderOutlined)
@@ -73,6 +75,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
     expect(app.component).toHaveBeenCalledWith('FlTableEditor', FlTableEditor)
+    expect(app.component).toHaveBeenCalledWith('FlTreeSelect', FlTreeSelect)
     expect(app.component).not.toHaveBeenCalledWith('PlusSquareOutlined', PlusSquareOutlined)
     expect(app.component).not.toHaveBeenCalledWith('MinusSquareOutlined', MinusSquareOutlined)
     expect(app.component).not.toHaveBeenCalledWith('HolderOutlined', HolderOutlined)

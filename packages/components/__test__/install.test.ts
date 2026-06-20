@@ -12,7 +12,8 @@ import {
   FlRadialMenu,
   FlRadialMenuItem,
   FlSelect,
-  FlTable
+  FlTable,
+  FlTreeSelect
 } from '..'
 
 type AppMock = App & {
@@ -66,6 +67,7 @@ describe('@falcon-ui/components exports', () => {
     app.use(FlRadialMenuItem)
     app.use(FlSelect)
     app.use(FlTable)
+    app.use(FlTreeSelect)
 
     expect(app.component).toHaveBeenCalledWith('FlBarcode', FlBarcode)
     expect(app.component).toHaveBeenCalledWith('FlButton', FlButton)
@@ -79,5 +81,6 @@ describe('@falcon-ui/components exports', () => {
     expect(app.component).toHaveBeenCalledWith('FlRadialMenu', FlRadialMenu)
     expect(app.component).toHaveBeenCalledWith('FlRadialMenuItem', FlRadialMenuItem)
     expect(app.component).toHaveBeenCalledWith('FlTable', FlTable)
+    expect(app.component).toHaveBeenCalledWith('FlTreeSelect', FlTreeSelect)
   })
 })

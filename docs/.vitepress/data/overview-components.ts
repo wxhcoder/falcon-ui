@@ -96,6 +96,17 @@ export const overviewComponents: readonly OverviewItem[] = [
     icon: '/overview/fl-select.svg'
   },
   {
+    name: 'FlTreeSelect',
+    title: 'Tree Select',
+    titleEn: 'Tree Select',
+    group: 'form',
+    link: '/components/tree-select',
+    description: '树选择器组件，支持层级选择、错误态、表格态与默认可清空。',
+    descriptionEn:
+      'Tree select component with hierarchy, error state, table mode and clearable defaults.',
+    icon: '/overview/fl-tree-select.svg'
+  },
+  {
     name: 'FlDatePicker',
     title: 'Date Picker',
     group: 'form',

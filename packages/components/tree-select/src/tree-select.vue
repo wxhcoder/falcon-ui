@@ -1,21 +1,21 @@
 <template>
-  <component :is="h(ElSelect, { ...mergedSelectAttrs, ref: changeRef }, slots)" />
+  <component :is="h(ElTreeSelect, { ...mergedTreeSelectAttrs, ref: changeRef }, slots)" />
 </template>
 
 <script lang="ts" setup>
-import { ElSelect } from 'element-plus'
+import { ElTreeSelect } from 'element-plus'
 import { computed, h, useAttrs, useSlots } from 'vue'
 import { useClearableState, useMergedAttrs, useMergedExpose } from '@falcon-ui/hooks'
-import type { FlSelectExpose } from './select'
-import { flSelectEmits, flSelectProps } from './select'
+import type { TreeSelectExpose } from './tree-select'
+import { treeSelectEmits, treeSelectProps } from './tree-select'
 
 defineOptions({
-  name: 'FlSelect',
+  name: 'FlTreeSelect',
   inheritAttrs: false
 })
 
-const props = defineProps(flSelectProps)
-defineEmits(flSelectEmits)
+const props = defineProps(treeSelectProps)
+defineEmits(treeSelectEmits)
 const attrs = useAttrs()
 const slots = useSlots()
 const rawAttrs = attrs as Record<string, unknown>
@@ -23,7 +23,7 @@ const rawAttrs = attrs as Record<string, unknown>
 const { changeRef } = useMergedExpose({})
 const { mergedAttrs } = useMergedAttrs({
   attrs: rawAttrs,
-  block: 'select',
+  block: 'tree-select',
   listenerName: 'onChange'
 })
 
@@ -35,11 +35,11 @@ const { resolveClearable } = useClearableState({
   resolveClearValue: () => (isMultipleMode() ? [] : undefined)
 })
 
-const mergedSelectAttrs = computed(() => ({
+const mergedTreeSelectAttrs = computed(() => ({
   ...mergedAttrs.value,
   clearable: resolveClearable(),
   class: [mergedAttrs.value.class, { 'is-error': props.isError, 'is-table': props.isTable }]
 }))
 
-defineExpose({} as FlSelectExpose)
+defineExpose({} as TreeSelectExpose)
 </script>

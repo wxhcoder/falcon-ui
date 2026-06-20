@@ -1,0 +1,45 @@
+@use './mixins/bem.scss' as bem;
+@use './ep-vars.scss' as ep-var;
+@use 'element-plus/theme-chalk/src/mixins/_var.scss' as ep-var-mixin;
+@use 'element-plus/theme-chalk/src/select.scss';
+@use 'element-plus/theme-chalk/src/tree.scss';
+@use 'element-plus/theme-chalk/src/tree-select.scss';
+
+@include bem.b(tree-select) {
+  @include ep-var-mixin.set-component-css-var('select', ep-var.$select);
+
+  &.el-select .el-select__wrapper {
+    border-radius: var(--fl-radius-sm);
+  }
+
+  &.is-error .el-select__wrapper,
+  &.is-error .el-select__wrapper:hover,
+  &.is-error .el-select__wrapper.is-focused {
+    box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+  }
+
+  &.is-error .el-select__placeholder.is-transparent,
+  &.is-error .el-select__selected-item,
+  &.is-error .el-select__input {
+    color: var(--el-color-danger);
+  }
+
+  &.is-table .el-select__wrapper,
+  &.is-table .el-select__wrapper:hover,
+  &.is-table .el-select__wrapper.is-focused {
+    background-color: transparent;
+    box-shadow: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &.is-table .el-select__placeholder {
+    left: 0;
+  }
+
+  &.is-table.is-error .el-select__wrapper,
+  &.is-table.is-error .el-select__wrapper:hover,
+  &.is-table.is-error .el-select__wrapper.is-focused {
+    box-shadow: none;
+  }
+}

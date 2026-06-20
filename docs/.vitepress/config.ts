@@ -44,6 +44,7 @@ export default defineConfig({
             { text: 'FlQrCode', link: '/components/qr-code' },
             { text: 'FlBarcode', link: '/components/barcode' },
             { text: 'FlSelect', link: '/components/select' },
+            { text: 'FlTreeSelect', link: '/components/tree-select' },
             { text: 'FlInputSearch', link: '/components/input-search' },
             { text: 'FlInputNumber', link: '/components/input-number' },
             { text: 'FlTree', link: '/components/tree' },

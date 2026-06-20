@@ -24,6 +24,10 @@ const targets = [
     filePath: path.resolve(rootDir, 'packages/components/select/src/select.vue')
   },
   {
+    id: 'fl-tree-select',
+    filePath: path.resolve(rootDir, 'packages/components/tree-select/src/tree-select.vue')
+  },
+  {
     id: 'fl-input-search',
     filePath: path.resolve(rootDir, 'packages/components/input-search/src/input-search.vue')
   },
@@ -84,6 +88,11 @@ const customDescriptionOverrides = {
     events: {
       'custom-input': '输入值变化时触发，携带当前值与字符长度。',
       'debug-event': '开启 debugMode 后在 custom-input 之后触发。'
+    }
+  },
+  'fl-tree-select': {
+    component: {
+      '': '树选择器组件，用于从层级数据中选择值，支持错误态和表格内样式。'
     }
   },
   'fl-input-search': {

@@ -11,6 +11,7 @@ import type {
   FlRadialMenuItem,
   FlSelect,
   FlTree,
+  FlTreeSelect,
   FlTable,
   FlTableEditor
 } from '@falcon-ui/components'
@@ -29,6 +30,7 @@ declare module 'vue' {
     FlRadialMenuItem: typeof FlRadialMenuItem
     FlSelect: typeof FlSelect
     FlTree: typeof FlTree
+    FlTreeSelect: typeof FlTreeSelect
     FlTable: typeof FlTable
     FlTableEditor: typeof FlTableEditor
   }

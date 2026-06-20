@@ -12,6 +12,7 @@ import {
   FlRadialMenuItem,
   FlSelect,
   FlTree,
+  FlTreeSelect,
   FlTable,
   FlTableEditor
 } from '@falcon-ui/components'
@@ -34,6 +35,7 @@ const components = [
   FlRadialMenuItem,
   FlSelect,
   FlTree,
+  FlTreeSelect,
   FlTable,
   FlTableEditor
 ] as const

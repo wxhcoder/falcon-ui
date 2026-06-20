@@ -3,8 +3,8 @@
     <h2 class="page-title">Components</h2>
     <p class="page-desc">
       Element Plus passthrough wrappers plus code display components: FlButton, FlInput,
-      FlDatePicker, FlQrCode, FlBarcode, FlSelect, FlInputSearch, FlInputNumber, FlTable, FlDialog
-      and shared icon exports.
+      FlDatePicker, FlQrCode, FlBarcode, FlSelect, FlTreeSelect, FlInputSearch, FlInputNumber,
+      FlTable, FlDialog and shared icon exports.
     </p>
     <article class="card demo-card">
       <h3>Icons</h3>
@@ -247,6 +247,33 @@
       <p class="demo-result">State: error={{ selectError }}, table={{ selectTable }}</p>
     </article>
 
+    <article class="card demo-card">
+      <h3>FlTreeSelect</h3>
+      <div class="demo-row">
+        <FlTreeSelect
+          v-model="treeSelectValue"
+          :data="treeSelectOptions"
+          placeholder="Choose a department"
+          style="width: 260px" />
+      </div>
+      <div class="demo-row">
+        <FlTreeSelect
+          v-model="treeSelectValue"
+          :data="treeSelectOptions"
+          :is-error="treeSelectError"
+          :is-table="treeSelectTable"
+          placeholder="Choose a department"
+          style="width: 260px" />
+        <FlButton @click="treeSelectError = !treeSelectError">
+          Toggle isError: {{ treeSelectError ? 'on' : 'off' }}
+        </FlButton>
+        <FlButton @click="treeSelectTable = !treeSelectTable">
+          Toggle isTable: {{ treeSelectTable ? 'on' : 'off' }}
+        </FlButton>
+      </div>
+      <p class="demo-result">Tree selected value: {{ treeSelectValue || '(empty)' }}</p>
+      <p class="demo-result">State: error={{ treeSelectError }}, table={{ treeSelectTable }}</p>
+    </article>
     <article class="card demo-card">
       <h3>FlTree</h3>
       <div class="demo-row">
@@ -662,6 +689,9 @@ const panelResultSize = ref(0)
 const selectValue = ref('')
 const selectError = ref(false)
 const selectTable = ref(false)
+const treeSelectValue = ref('frontend')
+const treeSelectError = ref(false)
+const treeSelectTable = ref(false)
 const numberValue = ref<number | null>(null)
 const roundValue = ref<number | null>(null)
 const fixedValue = ref<number | null>(null)
@@ -762,6 +792,18 @@ const selectOptions = [
   { label: 'Shanghai', value: 'shanghai' },
   { label: 'Beijing', value: 'beijing' },
   { label: 'Shenzhen', value: 'shenzhen' }
+]
+
+const treeSelectOptions = [
+  {
+    value: 'engineering',
+    label: 'Engineering',
+    children: [
+      { label: 'Frontend', value: 'frontend' },
+      { label: 'Backend', value: 'backend' }
+    ]
+  },
+  { label: 'Design', value: 'design' }
 ]
 const barcodeFormats = ['CODE128', 'CODE39', 'EAN13', 'EAN8', 'UPCA', 'UPCE'] as const
 

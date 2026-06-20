@@ -1,0 +1,49 @@
+{
+  "component": "fl-tree-select",
+  "description": "树选择器组件，用于从层级数据中选择值，支持错误态和表格内样式。",
+  "events": [],
+  "exposes": [
+    {
+      "description": "",
+      "name": "blur",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "focus",
+      "type": "() => void"
+    },
+    {
+      "description": "",
+      "name": "selectedLabel",
+      "type": "string | string[] | undefined"
+    },
+    {
+      "description": "",
+      "name": "selectRef",
+      "type": "SelectInstance"
+    },
+    {
+      "description": "",
+      "name": "treeRef",
+      "type": "TreeInstance"
+    }
+  ],
+  "props": [
+    {
+      "default": "false",
+      "description": "是否进入错误态。",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否用于表格单元格内树选择场景。",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    }
+  ],
+  "slots": []
+}

@@ -63,6 +63,8 @@ export type {
   SelectExpose,
   SelectProps
 } from './select'
+export { FlTreeSelect } from './tree-select'
+export type { TreeSelectEmits, TreeSelectExpose, TreeSelectProps } from './tree-select'
 export { FlTree } from './tree'
 export type {
   TreeClassNames,
