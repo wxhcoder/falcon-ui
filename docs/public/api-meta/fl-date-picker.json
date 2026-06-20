@@ -1,15 +1,15 @@
 {
   "component": "fl-date-picker",
-  "description": "",
+  "description": "日期选择组件，用来选择日期、时间或日期范围，并支持错误态和表格内显示。",
   "events": [
     {
-      "description": "",
+      "description": "请求外部同步双向绑定值。",
       "name": "update:modelValue",
       "signature": "(event: \"update:modelValue\", _value: FlDatePickerValue): void",
       "type": "[_value: FlDatePickerValue]"
     },
     {
-      "description": "",
+      "description": "请求外部同步双向绑定值。",
       "name": "update:modelValue",
       "signature": "(event: \"update:modelValue\", ...args: any[]): void",
       "type": "any[]"
@@ -19,336 +19,336 @@
   "props": [
     {
       "default": "-",
-      "description": "",
+      "description": "设置无障碍名称，方便读屏软件识别。",
       "name": "ariaLabel",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否用箭头按钮切换时间。",
       "name": "arrowControl",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "聚焦后是否自动打开选择面板。",
       "name": "automaticDropdown",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "给日期单元格追加样式类。",
       "name": "cellClassName",
       "required": false,
       "type": "Function | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示清空按钮。",
       "name": "clearable",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置清空按钮图标。",
       "name": "clearIcon",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置日期在面板里的显示格式。",
       "name": "dateFormat",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "选择日期时默认带上的时间。",
       "name": "defaultTime",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | ((new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "面板打开时默认定位到的日期。",
       "name": "defaultValue",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | ((new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否禁用组件。",
       "name": "disabled",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "禁用哪些日期的判断函数。",
       "name": "disabledDate",
       "required": false,
       "type": "Function | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "禁用哪些小时的判断函数。",
       "name": "disabledHours",
       "required": false,
       "type": "GetDisabledHours | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "禁用哪些分钟的判断函数。",
       "name": "disabledMinutes",
       "required": false,
       "type": "GetDisabledMinutes | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "禁用哪些秒的判断函数。",
       "name": "disabledSeconds",
       "required": false,
       "type": "GetDisabledSeconds | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否允许直接在输入框里编辑。",
       "name": "editable",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "指定哪些值按空值处理。",
       "name": "emptyValues",
       "required": false,
       "type": "unknown[] | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置范围结束输入框的占位提示。",
       "name": "endPlaceholder",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "弹层放不下时可尝试的备用位置。",
       "name": "fallbackPlacements",
       "required": false,
       "type": "Placement[] | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置显示出来的格式。",
       "name": "format",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置组件或内部输入框的编号。",
       "name": "id",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | ((new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "false",
-      "description": "Whether the component is in error state.",
+      "description": "是否显示错误状态。",
       "name": "isError",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "当前是否是范围选择。",
       "name": "isRange",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "Whether the component is used in a table-cell context.",
+      "description": "是否按表格单元格场景显示。",
       "name": "isTable",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "null",
-      "description": "Bound value. Keeps the wrapper on explicit v-model contract.",
+      "description": "设置双向绑定的值。",
       "name": "modelValue",
       "required": false,
       "type": "((string | number | string[] | Date | number[] | Date[]) & ModelValueType) | null | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置表单字段名。",
       "name": "name",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | ((new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置输入为空时的提示文字。",
       "name": "placeholder",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置弹层出现的位置。",
       "name": "placement",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => \"auto\" | \"auto-start\" | \"auto-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | \"top-start\" | \"top-end\" | \"bottom-start\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\") | (() => Placement) | ((new (...args: any[]) => \"auto\" | \"auto-start\" | \"auto-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | \"top-start\" | \"top-end\" | \"bottom-start\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\") | (() => Placement) | null)[], Placement, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "给弹层追加样式类。",
       "name": "popperClass",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | (() => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | ((new (...args: any[]) => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | (() => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置弹层的高级参数。",
       "name": "popperOptions",
       "required": false,
       "type": "Partial<Options> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "给弹层追加行内样式。",
       "name": "popperStyle",
       "required": false,
       "type": "StyleValue"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置前缀图标。",
       "name": "prefixIcon",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置范围起止之间的分隔文字。",
       "name": "rangeSeparator",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否只读。",
       "name": "readonly",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "失去焦点时是否保存当前输入。",
       "name": "saveOnBlur",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置日期选择面板里的快捷选项。",
       "name": "shortcuts",
       "required": false,
       "type": "unknown[] | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示确认按钮。",
       "name": "showConfirm",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示底部操作区。",
       "name": "showFooter",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示“此刻”快捷按钮。",
       "name": "showNow",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "是否显示周序号。",
       "name": "showWeekNumber",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置组件尺寸。",
       "name": "size",
       "required": false,
       "type": "EpPropMergeType<StringConstructor, \"\" | \"default\" | \"small\" | \"large\", never> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置范围开始输入框的占位提示。",
       "name": "startPlaceholder",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置键盘切换焦点的顺序。",
       "name": "tabindex",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => string | number) | (() => string | number) | ((new (...args: any[]) => string | number) | (() => string | number) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置时间在面板里的显示格式。",
       "name": "timeFormat",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置选择类型，比如日期、日期时间或日期范围。",
       "name": "type",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => \"date\" | \"year\" | \"months\" | \"years\" | \"month\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType) | ((new (...args: any[]) => \"date\" | \"year\" | \"months\" | \"years\" | \"month\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType) | null)[], unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "范围选择时，左右面板是否各自切换月份。",
       "name": "unlinkPanels",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "值变化时是否触发表单校验。",
       "name": "validateEvent",
       "required": false,
       "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置绑定值输出时的格式。",
       "name": "valueFormat",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "设置清空后写回的值。",
       "name": "valueOnClear",
       "required": false,
       "type": "EpPropMergeType<(new (...args: any[]) => string | number | boolean | Function) | (() => string | number | boolean | Function | null) | ((new (...args: any[]) => string | number | boolean | Function) | (() => string | number | boolean | Function | null) | null)[], unknown, unknown> | undefined"

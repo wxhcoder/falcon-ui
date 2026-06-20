@@ -1,68 +1,68 @@
 {
   "component": "fl-radial-menu-item",
-  "description": "",
+  "description": "径向菜单项组件，只放在径向菜单里，用来声明一个具体操作。",
   "events": [],
   "exposes": [],
   "props": [
     {
       "default": "undefined",
-      "description": "",
+      "description": "选中这个菜单项后是否关闭整个菜单。",
       "name": "closeOnSelect",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "",
+      "description": "是否禁用组件。",
       "name": "disabled",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "",
+      "description": "是否在更多菜单里显示分隔线。",
       "name": "divided",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "",
+      "description": "是否隐藏这个菜单项。",
       "name": "hidden",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "undefined",
-      "description": "",
+      "description": "设置图标。",
       "name": "icon",
       "required": false,
       "type": "Component | undefined"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "菜单项的唯一标识。",
       "name": "index",
       "required": true,
       "type": "string"
     },
     {
       "default": "-",
-      "description": "",
+      "description": "菜单项显示出来的文字。",
       "name": "label",
       "required": true,
       "type": "string"
     },
     {
       "default": "undefined",
-      "description": "",
+      "description": "随菜单项一起携带的业务数据。",
       "name": "meta",
       "required": false,
       "type": "Record<string, unknown> | undefined"
     },
     {
       "default": "''",
-      "description": "",
+      "description": "菜单项显示的快捷键提示。",
       "name": "shortcut",
       "required": false,
       "type": "string | undefined"
@@ -70,12 +70,12 @@
   ],
   "slots": [
     {
-      "description": "",
+      "description": "自定义菜单项图标。",
       "name": "icon",
       "type": "any"
     },
     {
-      "description": "",
+      "description": "自定义菜单项文字。",
       "name": "label",
       "type": "any"
     }

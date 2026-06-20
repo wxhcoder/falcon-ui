@@ -13,8 +13,8 @@
         <button
           type="button"
           class="vp-demo__action"
-          :aria-label="copied ? '已复制' : '复制代码'"
-          :title="copied ? '已复制' : '复制代码'"
+          :aria-label="copied ? texts.copied : texts.copyCode"
+          :title="copied ? texts.copied : texts.copyCode"
           @click="copyCode">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -24,8 +24,8 @@
         <button
           type="button"
           class="vp-demo__action"
-          :aria-label="expanded ? '收起代码' : '查看代码'"
-          :title="expanded ? '收起代码' : '查看代码'"
+          :aria-label="expanded ? texts.hideCode : texts.viewCode"
+          :title="expanded ? texts.hideCode : texts.viewCode"
           @click="toggleExpanded">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -44,10 +44,10 @@
       <button
         type="button"
         class="vp-demo__collapse"
-        :aria-label="expanded ? '收起面板' : '展开代码'"
-        :title="expanded ? '收起面板' : '展开代码'"
+        :aria-label="expanded ? texts.collapsePanel : texts.expandCode"
+        :title="expanded ? texts.collapsePanel : texts.expandCode"
         @click="toggleExpanded">
-        <span>{{ expanded ? '收起面板' : '展开代码' }}</span>
+        <span>{{ expanded ? texts.collapsePanel : texts.expandCode }}</span>
         <svg viewBox="0 0 24 24" aria-hidden="true" :class="{ 'is-expanded': expanded }">
           <path d="m12 15.4-6-6L7.4 8l4.6 4.6L16.6 8 18 9.4l-6 6z" />
         </svg>
@@ -58,6 +58,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useData } from 'vitepress'
 
 const props = withDefaults(
   defineProps<{
@@ -73,6 +74,27 @@ const props = withDefaults(
 
 const expanded = ref(false)
 const copied = ref(false)
+const { localeIndex } = useData()
+
+const texts = computed(() =>
+  localeIndex.value === 'en'
+    ? {
+        collapsePanel: 'Collapse panel',
+        copied: 'Copied',
+        copyCode: 'Copy code',
+        expandCode: 'Expand code',
+        hideCode: 'Hide code',
+        viewCode: 'View code'
+      }
+    : {
+        collapsePanel: '收起面板',
+        copied: '已复制',
+        copyCode: '复制代码',
+        expandCode: '展开代码',
+        hideCode: '收起代码',
+        viewCode: '查看代码'
+      }
+)
 
 const decodeBase64 = (value: string) => {
   const runtimeBuffer = (

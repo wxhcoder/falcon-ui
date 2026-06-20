@@ -1,0 +1,375 @@
+{
+  "component": "fl-dialog",
+  "description": "Dialog component with built-in title, footer buttons, fullscreen and close controls.",
+  "events": [
+    {
+      "description": "Emitted when the built-in cancel button is clicked.",
+      "name": "cancel",
+      "signature": "(event: \"cancel\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "Emitted when the dialog starts closing.",
+      "name": "close",
+      "signature": "(event: \"close\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "Emitted when focus returns after the dialog closes.",
+      "name": "closeAutoFocus",
+      "signature": "(event: \"closeAutoFocus\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "Emitted after the dialog close transition finishes.",
+      "name": "closed",
+      "signature": "(event: \"closed\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "Emitted when the built-in confirm button is clicked.",
+      "name": "confirm",
+      "signature": "(event: \"confirm\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "Emitted when the dialog starts opening.",
+      "name": "open",
+      "signature": "(event: \"open\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "Emitted when focus enters the dialog after opening.",
+      "name": "openAutoFocus",
+      "signature": "(event: \"openAutoFocus\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "Emitted after the dialog open transition finishes.",
+      "name": "opened",
+      "signature": "(event: \"opened\"): void",
+      "type": "[]"
+    },
+    {
+      "description": "Requests external synchronization of dialog visibility.",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", value: boolean): void",
+      "type": "[value: boolean]"
+    }
+  ],
+  "exposes": [
+    {
+      "description": "Close the dialog programmatically.",
+      "name": "closeDialog",
+      "type": "() => void"
+    },
+    {
+      "description": "Returns the dialog content reference.",
+      "name": "dialogContentRef",
+      "type": "any"
+    },
+    {
+      "description": "Close the dialog using the component internal rules.",
+      "name": "handleClose",
+      "type": "() => void"
+    },
+    {
+      "description": "Reset the dialog position after dragging.",
+      "name": "resetPosition",
+      "type": "() => void"
+    },
+    {
+      "description": "Toggle dialog fullscreen state.",
+      "name": "toggleFullscreen",
+      "type": "() => void"
+    },
+    {
+      "description": "Read whether the component is currently visible.",
+      "name": "visible",
+      "type": "boolean"
+    }
+  ],
+  "props": [
+    {
+      "default": "-",
+      "description": "Whether to center the dialog in the viewport.",
+      "name": "alignCenter",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Target page node where the overlay should mount.",
+      "name": "appendTo",
+      "required": false,
+      "type": "string | HTMLElement | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to mount the overlay directly under document body.",
+      "name": "appendToBody",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Accessible heading level.",
+      "name": "ariaLevel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Interceptor called before closing; return false to prevent closing.",
+      "name": "beforeClose",
+      "required": false,
+      "type": "DialogBeforeCloseFn | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Additional class for the dialog body.",
+      "name": "bodyClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Dialog body height.",
+      "name": "bodyHeight",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether the footer cancel button is disabled.",
+      "name": "cancelDisabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'Cancel'",
+      "description": "Footer cancel button text.",
+      "name": "cancelText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether header and footer content are centered.",
+      "name": "center",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Delay before closing.",
+      "name": "closeDelay",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Close button icon.",
+      "name": "closeIcon",
+      "required": false,
+      "type": "IconPropType | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether clicking the mask closes the overlay.",
+      "name": "closeOnClickModal",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether pressing Escape closes the overlay.",
+      "name": "closeOnPressEscape",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether the footer confirm button is disabled.",
+      "name": "confirmDisabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'Confirm'",
+      "description": "Footer confirm button text.",
+      "name": "confirmText",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to destroy inner content after closing.",
+      "name": "destroyOnClose",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the dialog can be dragged.",
+      "name": "draggable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Additional class for the dialog footer.",
+      "name": "footerClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the dialog is fullscreen.",
+      "name": "fullscreen",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Accessible heading level for the header.",
+      "name": "headerAriaLevel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Additional class for the dialog header.",
+      "name": "headerClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to lock page scrolling after opening.",
+      "name": "lockScroll",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show a mask.",
+      "name": "modal",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Additional class for the mask.",
+      "name": "modalClass",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether pointer events can pass through the mask.",
+      "name": "modalPenetrable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Controls whether the dialog is visible.",
+      "name": "modelValue",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Delay before opening.",
+      "name": "openDelay",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether overflowing content still allows dialog dragging.",
+      "name": "overflow",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show the close button.",
+      "name": "showClose",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether to show the footer actions.",
+      "name": "showFooter",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Title text.",
+      "name": "title",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Distance from the top of the viewport.",
+      "name": "top",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Transition name used for opening and closing.",
+      "name": "transition",
+      "required": false,
+      "type": "DialogTransition | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether keyboard focus is trapped inside the dialog.",
+      "name": "trapFocus",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Width.",
+      "name": "width",
+      "required": false,
+      "type": "string | number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Overlay z-index.",
+      "name": "zIndex",
+      "required": false,
+      "type": "number | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "Custom dialog body content.",
+      "name": "default",
+      "type": "{}"
+    },
+    {
+      "description": "Custom dialog footer actions.",
+      "name": "footer",
+      "type": "{}"
+    },
+    {
+      "description": "Custom dialog header area.",
+      "name": "header",
+      "type": "{ close: () => void; titleId: string; titleClass: string; }"
+    },
+    {
+      "description": "Custom dialog title content.",
+      "name": "title",
+      "type": "{}"
+    }
+  ]
+}

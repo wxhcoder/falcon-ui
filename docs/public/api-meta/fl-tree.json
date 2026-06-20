@@ -1,81 +1,81 @@
 {
   "component": "fl-tree",
-  "description": "自研树组件，用于展示层级数据并承载展开、选择、勾选、异步加载、拖拽、键盘导航和滚动定位等交互。",
+  "description": "树组件，用来展示层级数据，并支持展开、选择、勾选、异步加载、拖拽和键盘操作。",
   "events": [
     {
-      "description": "节点复选框勾选状态变化后触发，回传最新勾选结果和事件详情。",
+      "description": "节点复选框勾选状态变化后触发，会带上最新勾选结果和详情。",
       "name": "check",
       "signature": "(event: \"check\", checkedKeys: TreeCheckedKeys, event: TreeCheckEvent): void",
       "type": "[checkedKeys: TreeCheckedKeys, event: TreeCheckEvent]"
     },
     {
-      "description": "节点内容区被双击时触发，回传节点数据、节点对象、组件实例和鼠标事件。",
+      "description": "双击节点内容区时触发。",
       "name": "dblclick",
       "signature": "(event: \"dblclick\", data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent): void",
       "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent]"
     },
     {
-      "description": "节点展开状态切换后触发，回传当前节点展开结果和最新展开键集合。",
+      "description": "节点展开状态切换后触发，会带上最新展开结果。",
       "name": "expand",
       "signature": "(event: \"expand\", event: TreeExpandEvent): void",
       "type": "[event: TreeExpandEvent]"
     },
     {
-      "description": "节点异步加载完成后触发，回传最新已加载键集合和加载事件详情。",
+      "description": "节点异步加载完成后触发。",
       "name": "load",
       "signature": "(event: \"load\", loadedKeys: TreeKey[], event: TreeLoadEvent): void",
       "type": "[loadedKeys: TreeKey[], event: TreeLoadEvent]"
     },
     {
-      "description": "节点内容区被点击时触发，回传节点数据、节点对象、组件实例和交互事件。",
+      "description": "点击节点内容区时触发。",
       "name": "node-click",
       "signature": "(event: \"node-click\", data: TreeData, node: TreeNode, component: TreeNodeInstance, event: TreeInteractionEvent): void",
       "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: TreeInteractionEvent]"
     },
     {
-      "description": "节点被收起时触发，回传节点数据、带展开状态的节点对象和组件实例。",
+      "description": "节点被收起时触发。",
       "name": "node-collapse",
       "signature": "(event: \"node-collapse\", data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance): void",
       "type": "[data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance]"
     },
     {
-      "description": "节点拖拽结束时触发，回传拖拽源、目标节点、投放类型和拖拽事件。",
+      "description": "节点拖拽结束时触发。",
       "name": "node-drag-end",
       "signature": "(event: \"node-drag-end\", draggingNode: TreeNode, dropNode: TreeNode | null, dropType: TreeNodeDropType, event: DragEvent): void",
       "type": "[draggingNode: TreeNode, dropNode: TreeNode | null, dropType: TreeNodeDropType, event: DragEvent]"
     },
     {
-      "description": "拖拽进入节点落点区域时触发，回传拖拽源、目标节点和拖拽事件。",
+      "description": "拖拽进入某个节点投放区域时触发。",
       "name": "node-drag-enter",
       "signature": "(event: \"node-drag-enter\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
       "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
     },
     {
-      "description": "拖拽离开节点落点区域时触发，回传拖拽源、目标节点和拖拽事件。",
+      "description": "拖拽离开某个节点投放区域时触发。",
       "name": "node-drag-leave",
       "signature": "(event: \"node-drag-leave\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
       "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
     },
     {
-      "description": "拖拽悬停在节点落点区域时触发，回传拖拽源、目标节点和拖拽事件。",
+      "description": "拖拽悬停在某个节点投放区域时触发。",
       "name": "node-drag-over",
       "signature": "(event: \"node-drag-over\", draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent): void",
       "type": "[draggingNode: TreeNode, dropNode: TreeNode, event: DragEvent]"
     },
     {
-      "description": "节点开始拖拽时触发，回传拖拽源节点和拖拽事件。",
+      "description": "节点开始拖拽时触发。",
       "name": "node-drag-start",
       "signature": "(event: \"node-drag-start\", node: TreeNode, event: DragEvent): void",
       "type": "[node: TreeNode, event: DragEvent]"
     },
     {
-      "description": "节点成功投放时触发，回传拖拽源、目标节点、投放类型和拖拽事件。",
+      "description": "节点成功投放时触发。",
       "name": "node-drop",
       "signature": "(event: \"node-drop\", draggingNode: TreeNode, dropNode: TreeNode, dropType: \"before\" | \"after\" | \"inner\", event: DragEvent): void",
       "type": "[draggingNode: TreeNode, dropNode: TreeNode, dropType: \"before\" | \"after\" | \"inner\", event: DragEvent]"
     },
     {
-      "description": "节点被展开时触发，回传节点数据、带展开状态的节点对象和组件实例。",
+      "description": "节点被展开时触发。",
       "name": "node-expand",
       "signature": "(event: \"node-expand\", data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance): void",
       "type": "[data: TreeData, node: TreeExpandedNode, instance: TreeNodeInstance]"
@@ -87,31 +87,31 @@
       "type": "[data: TreeData, node: TreeNode, component: TreeNodeInstance, event: MouseEvent]"
     },
     {
-      "description": "节点选中状态变化后触发，回传最新选中 key 集合和事件详情。",
+      "description": "节点选中状态变化后触发。",
       "name": "select",
       "signature": "(event: \"select\", selectedKeys: TreeKey[], event: TreeSelectEvent): void",
       "type": "[selectedKeys: TreeKey[], event: TreeSelectEvent]"
     },
     {
-      "description": "请求外部同步当前勾选键集合。",
+      "description": "请求外部同步当前勾选的节点。",
       "name": "update:checkedKeys",
       "signature": "(event: \"update:checkedKeys\", value: TreeCheckedKeys): void",
       "type": "[value: TreeCheckedKeys]"
     },
     {
-      "description": "请求外部同步当前展开键集合。",
+      "description": "请求外部同步当前展开的节点。",
       "name": "update:expandedKeys",
       "signature": "(event: \"update:expandedKeys\", value: TreeKey[]): void",
       "type": "[value: TreeKey[]]"
     },
     {
-      "description": "请求外部同步当前已完成异步加载的节点 key 集合。",
+      "description": "请求外部同步当前已加载完成的节点。",
       "name": "update:loadedKeys",
       "signature": "(event: \"update:loadedKeys\", value: TreeKey[]): void",
       "type": "[value: TreeKey[]]"
     },
     {
-      "description": "请求外部同步当前选中键集合。",
+      "description": "请求外部同步当前选中的节点。",
       "name": "update:selectedKeys",
       "signature": "(event: \"update:selectedKeys\", value: TreeKey[]): void",
       "type": "[value: TreeKey[]]"
@@ -119,7 +119,7 @@
   ],
   "exposes": [
     {
-      "description": "滚动定位到当前已渲染且可见的节点；非法 key、折叠子树或未渲染节点不会产生效果。",
+      "description": "滚动定位到当前已经渲染且可见的节点。",
       "name": "scrollTo",
       "type": "(options: TreeScrollToOptions) => void"
     }
@@ -134,21 +134,21 @@
     },
     {
       "default": "-",
-      "description": "节点拖拽源拦截函数，返回 false 时当前节点不可被拖拽。",
+      "description": "判断节点能不能被拖拽，返回否定结果就不能拖。",
       "name": "allowDrag",
       "required": false,
       "type": "TreeAllowDrag | undefined"
     },
     {
       "default": "-",
-      "description": "节点投放位置拦截函数，返回 false 时当前拖拽节点不可投放到该位置。",
+      "description": "判断节点能不能放到目标位置，返回否定结果就不能放。",
       "name": "allowDrop",
       "required": false,
       "type": "TreeAllowDrop | undefined"
     },
     {
       "default": "false",
-      "description": "受控展开时，是否根据 expandedKeys 自动补齐祖先节点展开。",
+      "description": "受控展开时，是否自动展开这些节点的父级。",
       "name": "autoExpandParent",
       "required": false,
       "type": "boolean | undefined"
@@ -162,7 +162,7 @@
     },
     {
       "default": "-",
-      "description": "受控勾选键集合；严格模式下也可传入 checked 与 halfChecked 对象。",
+      "description": "受控勾选的节点键值列表，严格模式下也可传完整勾选状态。",
       "name": "checkedKeys",
       "required": false,
       "type": "TreeCheckedKeys | undefined"
@@ -176,21 +176,21 @@
     },
     {
       "default": "-",
-      "description": "按语义化 DOM 挂点注入 class，支持对象或函数形式。",
+      "description": "给树的不同位置追加样式类，支持对象或函数。",
       "name": "classNames",
       "required": false,
       "type": "TreeClassNames | undefined"
     },
     {
       "default": "[]",
-      "description": "树形数据源，每个节点必须提供唯一 key。",
+      "description": "树形数据源，每个节点都要有唯一键值。",
       "name": "data",
       "required": false,
       "type": "TreeData[] | undefined"
     },
     {
       "default": "-",
-      "description": "非受控模式下初始化勾选的节点 key 集合。",
+      "description": "非受控模式下，默认勾选哪些节点。",
       "name": "defaultCheckedKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
@@ -204,7 +204,7 @@
     },
     {
       "default": "-",
-      "description": "非受控模式下初始化展开的节点 key 集合。",
+      "description": "非受控模式下，默认展开哪些节点。",
       "name": "defaultExpandedKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
@@ -218,21 +218,21 @@
     },
     {
       "default": "-",
-      "description": "非受控模式下初始化选中的节点 key 集合。",
+      "description": "非受控模式下，默认选中哪些节点。",
       "name": "defaultSelectedKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
     },
     {
       "default": "-",
-      "description": "禁用复选框交互的节点 key 集合，不会隐藏复选框。",
+      "description": "哪些节点的复选框不可点，但复选框仍然显示。",
       "name": "disabledCheckboxKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
     },
     {
       "default": "-",
-      "description": "整体禁用的节点 key 集合，禁用后节点不可选择且复选框不可交互。",
+      "description": "哪些节点整体禁用，禁用后不能选择或勾选。",
       "name": "disabledKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
@@ -246,21 +246,21 @@
     },
     {
       "default": "-",
-      "description": "受控展开的节点 key 集合。",
+      "description": "受控展开的节点键值列表。",
       "name": "expandedKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
     },
     {
       "default": "-",
-      "description": "节点过滤命中函数，返回 true 时节点进入过滤高亮态。",
+      "description": "判断节点是否命中过滤条件，命中后会高亮。",
       "name": "filterTreeNode",
       "required": false,
       "type": "TreeFilterTreeNode | undefined"
     },
     {
       "default": "-",
-      "description": "隐藏复选框的节点 key 集合，不阻断子孙节点勾选。",
+      "description": "哪些节点隐藏复选框，但不影响子节点勾选。",
       "name": "hiddenCheckboxKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
@@ -274,7 +274,7 @@
     },
     {
       "default": "-",
-      "description": "受控记录已完成异步加载的节点 key 集合。",
+      "description": "受控记录哪些节点已经完成异步加载。",
       "name": "loadedKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
@@ -288,14 +288,14 @@
     },
     {
       "default": "-",
-      "description": "节点外壳 class 回调，接收 { node, data } 并返回 Vue class 绑定值。",
+      "description": "给单个节点外层追加样式类。",
       "name": "nodeClassName",
       "required": false,
       "type": "TreeNodeClassName | undefined"
     },
     {
       "default": "{ ...treeNodePropsDefaults }",
-      "description": "树节点字段映射配置，用于指定 label、children 和 isLeaf 字段名。",
+      "description": "树节点字段映射配置，用来指定标题、子节点和叶子节点字段。",
       "name": "props",
       "required": false,
       "type": "TreeNodeProps | undefined"
@@ -309,7 +309,7 @@
     },
     {
       "default": "-",
-      "description": "受控选中的节点 key 集合。",
+      "description": "受控选中的节点键值列表。",
       "name": "selectedKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
@@ -323,14 +323,14 @@
     },
     {
       "default": "-",
-      "description": "按语义化 DOM 挂点注入内联样式，支持对象或函数形式。",
+      "description": "给树的不同位置追加行内样式，支持对象或函数。",
       "name": "styles",
       "required": false,
       "type": "TreeStyles | undefined"
     },
     {
       "default": "'arrow'",
-      "description": "展开器图标模式，支持 arrow、plus-minus 和 folder。",
+      "description": "设置展开按钮的图标样式。",
       "name": "switcherIcon",
       "required": false,
       "type": "TreeSwitcherIconMode | undefined"
@@ -344,7 +344,7 @@
     },
     {
       "default": "-",
-      "description": "不可选中的节点 key 集合，节点仍可展开、勾选或触发其他交互。",
+      "description": "哪些节点不可选中，但仍可展开、勾选或触发其他操作。",
       "name": "unselectableKeys",
       "required": false,
       "type": "TreeKey[] | undefined"
@@ -352,7 +352,7 @@
   ],
   "slots": [
     {
-      "description": "自定义节点内容区插槽，参数为 { node, data }；仅接管 switcher / checkbox 右侧内容。",
+      "description": "自定义节点内容区，只替换展开按钮和复选框右侧的内容。",
       "name": "default",
       "type": "{ node: TreeNode; data: TreeData; }"
     }

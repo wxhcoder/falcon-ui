@@ -1,9 +1,9 @@
 {
   "component": "fl-table",
-  "description": "基于 Element Plus ElTable 的二次封装，提供默认样式、多选增强、Proxy 变更劫持与行列拖拽能力。",
+  "description": "表格组件，用来展示列表数据，并支持选择增强、单元格变更监听、行拖拽和列拖拽。",
   "events": [
     {
-      "description": "代理数据检测到单元格字段写入时触发。",
+      "description": "检测到单元格字段被改写时触发。",
       "name": "cell-change",
       "signature": "(event: \"cell-change\", payload: CellChangeEvent): void",
       "type": "[payload: CellChangeEvent]"
@@ -59,67 +59,67 @@
   ],
   "exposes": [
     {
-      "description": "",
+      "description": "清空表格筛选条件。",
       "name": "clearFilter",
       "type": "(columnKeys?: string | string[] | undefined) => void"
     },
     {
-      "description": "",
+      "description": "清空表格当前选中的行。",
       "name": "clearSelection",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "清空表格排序状态。",
       "name": "clearSort",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "让表格重新计算列宽和布局。",
       "name": "doLayout",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "获取表格当前选中的行数据。",
       "name": "getSelectionRows",
       "type": "() => RowData[]"
     },
     {
-      "description": "",
+      "description": "滚动到指定位置或指定节点。",
       "name": "scrollTo",
       "type": "{ (options: ScrollToOptions): void; (xCoord: number, yCoord?: number | undefined): void; }"
     },
     {
-      "description": "",
+      "description": "设置表格当前高亮行。",
       "name": "setCurrentRow",
       "type": "(row?: RowData | undefined) => void"
     },
     {
-      "description": "",
+      "description": "设置表格横向滚动位置。",
       "name": "setScrollLeft",
       "type": "(left: number) => void"
     },
     {
-      "description": "",
+      "description": "设置表格纵向滚动位置。",
       "name": "setScrollTop",
       "type": "(top: number) => void"
     },
     {
-      "description": "",
+      "description": "按指定列触发表格排序。",
       "name": "sort",
       "type": "(prop: string, order: \"ascending\" | \"descending\" | null) => void"
     },
     {
-      "description": "",
+      "description": "切换表格全选状态。",
       "name": "toggleAllSelection",
       "type": "() => void"
     },
     {
-      "description": "",
+      "description": "切换指定行的展开状态。",
       "name": "toggleRowExpansion",
       "type": "(row: RowData, expanded?: boolean | undefined) => void"
     },
     {
-      "description": "",
+      "description": "切换指定行的选中状态。",
       "name": "toggleRowSelection",
       "type": "(row: RowData, selected?: boolean | undefined, ignoreSelectable?: boolean | undefined) => void"
     }
@@ -127,70 +127,70 @@
   "props": [
     {
       "default": "4",
-      "description": "Maximum proxy depth for nested row fields.",
+      "description": "单元格数据写入监听的最大层级。",
       "name": "cellProxyMaxDepth",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "true",
-      "description": "Enable column drag sorting.",
+      "description": "是否开启列拖拽。",
       "name": "columnDraggable",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "Extend clicked data cells with row and column cross highlight.",
+      "description": "点击单元格时，是否高亮同一行和同一列。",
       "name": "crossHighlight",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "[]",
-      "description": "Bound data source. Falls through to ElTable `data`.",
+      "description": "表格数据源。",
       "name": "data",
       "required": false,
       "type": "RowData[] | undefined"
     },
     {
       "default": "true",
-      "description": "Enable editable cell mode with proxy intercept for row field assignments.",
+      "description": "是否开启可编辑单元格模式。",
       "name": "isEdit",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "true",
-      "description": "Enable row drag sorting.",
+      "description": "是否开启行拖拽。",
       "name": "rowDraggable",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "0",
-      "description": "Which column index should act as row drag handle.",
+      "description": "行拖拽控制柄所在列索引。",
       "name": "rowDragHandleColumnIndex",
       "required": false,
       "type": "number | undefined"
     },
     {
       "default": "'id'",
-      "description": "Field name used as row key in emitted payload.",
+      "description": "事件回调中用于标识行主键的字段名。",
       "name": "rowKeyField",
       "required": false,
       "type": "string | undefined"
     },
     {
       "default": "true",
-      "description": "Enable row click to toggle selection when selection column exists.",
+      "description": "存在选择列时，是否支持点击行联动选中。",
       "name": "selectionRowClick",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "Restrict selection to one row in selection-table mode.",
+      "description": "多选模式下是否限制为仅能选中一行。",
       "name": "selectionSingle",
       "required": false,
       "type": "boolean | undefined"

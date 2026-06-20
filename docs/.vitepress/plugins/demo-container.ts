@@ -14,7 +14,7 @@ const normalizeDemoPath = (rawPath: string) => {
   return cleanedPath.endsWith('.vue') ? cleanedPath : `${cleanedPath}.vue`
 }
 
-const toComponentName = (demoPath: string) => {
+const toComponentName = (demoPath: string, locale: 'en' | 'root') => {
   const safeName = demoPath
     .replaceAll('.vue', '')
     .split(/[\\/.-]/g)
@@ -22,7 +22,7 @@ const toComponentName = (demoPath: string) => {
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join('')
 
-  return `DocsDemo${safeName}`
+  return `${locale === 'en' ? 'DocsEnDemo' : 'DocsDemo'}${safeName}`
 }
 
 const isWithinDirectory = (targetPath: string, rootPath: string) => {
@@ -31,13 +31,11 @@ const isWithinDirectory = (targetPath: string, rootPath: string) => {
 }
 
 export const useDemoContainer = (md: MarkdownIt, docsRoot: string) => {
-  const demosRoot = path.resolve(docsRoot, examplesDir)
-
   md.use(container, 'demo', {
     validate(params) {
       return demoInfoRE.test(params.trim())
     },
-    render(tokens, index) {
+    render(tokens, index, _options, env) {
       const token = tokens[index]
       if (token.nesting === -1) {
         return ''
@@ -51,6 +49,9 @@ export const useDemoContainer = (md: MarkdownIt, docsRoot: string) => {
         throw new Error('[docs:demo] Missing demo path.')
       }
 
+      const relativeMarkdownPath = String(env?.relativePath || '').replaceAll('\\', '/')
+      const locale = relativeMarkdownPath.startsWith('en/') ? 'en' : 'root'
+      const demosRoot = path.resolve(docsRoot, locale === 'en' ? 'en' : '.', examplesDir)
       const demoFilePath = path.resolve(demosRoot, demoPath)
       if (!isWithinDirectory(demoFilePath, demosRoot)) {
         throw new Error(`[docs:demo] Invalid demo path: ${demoPath}`)
@@ -61,10 +62,14 @@ export const useDemoContainer = (md: MarkdownIt, docsRoot: string) => {
 
       const code = fs.readFileSync(demoFilePath, 'utf8')
       const highlightedCode = highlightSourceCode(md, code, 'vue')
-      const componentName = toComponentName(demoPath)
+      const componentName = toComponentName(demoPath, locale)
       const normalizedPath = demoPath.replaceAll('\\', '/')
+      const sourcePath =
+        locale === 'en'
+          ? `docs/en/${examplesDir}/${normalizedPath}`
+          : `docs/${examplesDir}/${normalizedPath}`
 
-      return `<vp-demo demo-component="${componentName}" source-path="docs/${examplesDir}/${normalizedPath}" source-code="${encodeBase64(
+      return `<vp-demo demo-component="${componentName}" source-path="${sourcePath}" source-code="${encodeBase64(
         code
       )}" highlighted-code="${encodeBase64(highlightedCode)}" />`
     }

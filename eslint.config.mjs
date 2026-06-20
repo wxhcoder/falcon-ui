@@ -14,7 +14,8 @@ export default [
       '**/coverage/**',
       '**/.vite/**',
       '**/.cache/**',
-      '**/.pnpm-store/**'
+      '**/.pnpm-store/**',
+      '**/.codex/**'
     ]
   },
   {

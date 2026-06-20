@@ -1,0 +1,142 @@
+{
+  "component": "fl-barcode",
+  "description": "Barcode component that renders business identifiers and product codes.",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "'#ffffff'",
+      "description": "Background color.",
+      "name": "backgroundColor",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'#000000'",
+      "description": "Color for barcode lines and text.",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "true",
+      "description": "Whether to display text below the barcode.",
+      "name": "displayValue",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'monospace'",
+      "description": "Font used for barcode text.",
+      "name": "font",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Whether barcode text is bold or italic.",
+      "name": "fontOptions",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "20",
+      "description": "Barcode text size.",
+      "name": "fontSize",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'CODE128'",
+      "description": "Barcode encoding format.",
+      "name": "format",
+      "required": false,
+      "type": "\"CODE128\" | \"CODE39\" | \"EAN13\" | \"EAN8\" | \"UPCA\" | \"UPCE\" | undefined"
+    },
+    {
+      "default": "100",
+      "description": "Height.",
+      "name": "height",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "10",
+      "description": "Outer margin.",
+      "name": "margin",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Bottom margin.",
+      "name": "marginBottom",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Left margin.",
+      "name": "marginLeft",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Right margin.",
+      "name": "marginRight",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "undefined",
+      "description": "Top margin.",
+      "name": "marginTop",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Text displayed below the barcode; defaults to the encoded value.",
+      "name": "text",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'center'",
+      "description": "Horizontal alignment for barcode text.",
+      "name": "textAlign",
+      "required": false,
+      "type": "\"right\" | \"left\" | \"center\" | undefined"
+    },
+    {
+      "default": "2",
+      "description": "Spacing between the barcode and text.",
+      "name": "textMargin",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "'bottom'",
+      "description": "Whether text appears above or below the barcode.",
+      "name": "textPosition",
+      "required": false,
+      "type": "\"top\" | \"bottom\" | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Value to encode into a barcode.",
+      "name": "value",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "2",
+      "description": "Width of a single barcode line.",
+      "name": "width",
+      "required": false,
+      "type": "number | undefined"
+    }
+  ],
+  "slots": []
+}

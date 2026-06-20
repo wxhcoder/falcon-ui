@@ -1,0 +1,358 @@
+{
+  "component": "fl-date-picker",
+  "description": "Date picker component for dates, times and ranges, with error and table-cell states.",
+  "events": [
+    {
+      "description": "Requests external synchronization of the bound value.",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", _value: FlDatePickerValue): void",
+      "type": "[_value: FlDatePickerValue]"
+    },
+    {
+      "description": "Requests external synchronization of the bound value.",
+      "name": "update:modelValue",
+      "signature": "(event: \"update:modelValue\", ...args: any[]): void",
+      "type": "any[]"
+    }
+  ],
+  "exposes": [],
+  "props": [
+    {
+      "default": "-",
+      "description": "Accessible name for assistive technologies.",
+      "name": "ariaLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to switch time using arrow buttons.",
+      "name": "arrowControl",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to open the option panel on focus.",
+      "name": "automaticDropdown",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Additional class for date cells.",
+      "name": "cellClassName",
+      "required": false,
+      "type": "Function | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show the clear button.",
+      "name": "clearable",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Clear button icon.",
+      "name": "clearIcon",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Date display format inside the panel.",
+      "name": "dateFormat",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Default time applied when selecting a date.",
+      "name": "defaultTime",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | ((new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Default date used when the panel opens.",
+      "name": "defaultValue",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | ((new (...args: any[]) => Date | [Date, Date]) | (() => SingleOrRange<Date>) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the component is disabled.",
+      "name": "disabled",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Predicate for disabled dates.",
+      "name": "disabledDate",
+      "required": false,
+      "type": "Function | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Predicate for disabled hours.",
+      "name": "disabledHours",
+      "required": false,
+      "type": "GetDisabledHours | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Predicate for disabled minutes.",
+      "name": "disabledMinutes",
+      "required": false,
+      "type": "GetDisabledMinutes | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Predicate for disabled seconds.",
+      "name": "disabledSeconds",
+      "required": false,
+      "type": "GetDisabledSeconds | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the input can be edited directly.",
+      "name": "editable",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Values treated as empty.",
+      "name": "emptyValues",
+      "required": false,
+      "type": "unknown[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Placeholder for the range end input.",
+      "name": "endPlaceholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Fallback placements when the overlay does not fit.",
+      "name": "fallbackPlacements",
+      "required": false,
+      "type": "Placement[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Displayed value format.",
+      "name": "format",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "ID for the component or inner input.",
+      "name": "id",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | ((new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to show the error state.",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the current picker is a range picker.",
+      "name": "isRange",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to render for a table-cell scenario.",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "null",
+      "description": "Bound value.",
+      "name": "modelValue",
+      "required": false,
+      "type": "((string | number | string[] | Date | number[] | Date[]) & ModelValueType) | null | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Form field name.",
+      "name": "name",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | ((new (...args: any[]) => string | [string, string]) | (() => SingleOrRange<string>) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Placeholder shown when the input is empty.",
+      "name": "placeholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Overlay placement.",
+      "name": "placement",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => \"auto\" | \"auto-start\" | \"auto-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | \"top-start\" | \"top-end\" | \"bottom-start\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\") | (() => Placement) | ((new (...args: any[]) => \"auto\" | \"auto-start\" | \"auto-end\" | \"top\" | \"bottom\" | \"right\" | \"left\" | \"top-start\" | \"top-end\" | \"bottom-start\" | \"bottom-end\" | \"right-start\" | \"right-end\" | \"left-start\" | \"left-end\") | (() => Placement) | null)[], Placement, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Additional class for the overlay.",
+      "name": "popperClass",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | (() => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | ((new (...args: any[]) => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | (() => string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | { [x: string]: boolean; } | (string | any[] | { [x: string]: boolean; })[])[])[])[])[])[])[])[])[])[]) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Advanced overlay options.",
+      "name": "popperOptions",
+      "required": false,
+      "type": "Partial<Options> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Inline style for the overlay.",
+      "name": "popperStyle",
+      "required": false,
+      "type": "StyleValue"
+    },
+    {
+      "default": "-",
+      "description": "Prefix icon.",
+      "name": "prefixIcon",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | ((new (...args: any[]) => (string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) & {}) | (() => string | Component<any, any, any, ComputedOptions, MethodOptions, {}, any>) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Separator between range start and end.",
+      "name": "rangeSeparator",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether the input is read-only.",
+      "name": "readonly",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to save the current input on blur.",
+      "name": "saveOnBlur",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Shortcut options in the date picker panel.",
+      "name": "shortcuts",
+      "required": false,
+      "type": "unknown[] | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show the confirm button.",
+      "name": "showConfirm",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show the footer actions.",
+      "name": "showFooter",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show the Now shortcut.",
+      "name": "showNow",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether to show week numbers.",
+      "name": "showWeekNumber",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Component size.",
+      "name": "size",
+      "required": false,
+      "type": "EpPropMergeType<StringConstructor, \"\" | \"default\" | \"small\" | \"large\", never> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Placeholder for the range start input.",
+      "name": "startPlaceholder",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Keyboard tab order.",
+      "name": "tabindex",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | number) | (() => string | number) | ((new (...args: any[]) => string | number) | (() => string | number) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Time display format inside the panel.",
+      "name": "timeFormat",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Picker type, such as date, datetime or date range.",
+      "name": "type",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => \"date\" | \"year\" | \"months\" | \"years\" | \"month\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType) | ((new (...args: any[]) => \"date\" | \"year\" | \"months\" | \"years\" | \"month\" | \"dates\" | \"week\" | \"datetime\" | \"datetimerange\" | \"daterange\" | \"monthrange\" | \"yearrange\") | (() => DatePickerType) | null)[], unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether range picker panels switch months independently.",
+      "name": "unlinkPanels",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Whether value changes trigger form validation.",
+      "name": "validateEvent",
+      "required": false,
+      "type": "EpPropMergeType<BooleanConstructor, unknown, unknown> | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Format used for the emitted bound value.",
+      "name": "valueFormat",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Value written back after clearing.",
+      "name": "valueOnClear",
+      "required": false,
+      "type": "EpPropMergeType<(new (...args: any[]) => string | number | boolean | Function) | (() => string | number | boolean | Function | null) | ((new (...args: any[]) => string | number | boolean | Function) | (() => string | number | boolean | Function | null) | null)[], unknown, unknown> | undefined"
+    }
+  ],
+  "slots": []
+}

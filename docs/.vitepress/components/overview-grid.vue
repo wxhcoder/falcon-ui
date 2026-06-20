@@ -1,6 +1,6 @@
 <template>
   <section class="falcon-overview vp-raw">
-    <p class="falcon-overview__description">所有已发布组件的快速入口。</p>
+    <p class="falcon-overview__description">{{ texts.description }}</p>
 
     <label class="falcon-overview__search" for="falcon-overview-search">
       <span class="falcon-overview__search-icon" aria-hidden="true">
@@ -20,13 +20,13 @@
         type="search"
         autocomplete="off"
         spellcheck="false"
-        placeholder="搜索组件" />
+        :placeholder="texts.searchPlaceholder" />
     </label>
 
     <template v-if="hasResults">
       <section v-for="group in filteredGroups" :key="group.key" class="falcon-overview__group">
         <header class="falcon-overview__group-header">
-          <h2 class="falcon-overview__group-title">{{ group.title }}</h2>
+          <h2 class="falcon-overview__group-title">{{ group.localizedTitle }}</h2>
           <span class="falcon-overview__group-count">{{ group.items.length }}</span>
         </header>
 
@@ -35,42 +35,60 @@
             v-for="item in group.items"
             :key="item.name"
             class="falcon-overview-card"
-            :href="withBase(item.link)">
+            :href="withBase(toLocalizedLink(item.link))">
             <div class="falcon-overview-card__header">
-              <span class="falcon-overview-card__title">{{ item.title }}</span>
+              <span class="falcon-overview-card__title">{{ localizedItemTitle(item) }}</span>
               <span v-if="item.version" class="falcon-overview-card__version">{{
                 item.version
               }}</span>
             </div>
             <div class="falcon-overview-card__preview">
-              <img :src="withBase(item.icon)" :alt="`${item.name} 预览图`" loading="lazy" />
-            </div>
-            <div class="falcon-overview-card__footer">
-              <span class="falcon-overview-card__name">{{ item.name }}</span>
-              <span class="falcon-overview-card__description">{{ item.description }}</span>
+              <img
+                :src="withBase(item.icon)"
+                :alt="`${item.name} ${texts.previewAltSuffix}`"
+                loading="lazy" />
             </div>
           </a>
         </div>
       </section>
     </template>
 
-    <p v-else class="falcon-overview__empty">未找到匹配组件，请调整关键词后重试。</p>
+    <p v-else class="falcon-overview__empty">{{ texts.empty }}</p>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { withBase } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 import { overviewComponentGroups, overviewComponents } from '../data/overview-components'
+import type { OverviewItem } from '../data/overview-components'
 
 const keyword = ref('')
+const { localeIndex } = useData()
 
+const isEnglish = computed(() => localeIndex.value === 'en')
 const normalizedKeyword = computed(() => keyword.value.trim().toLowerCase())
+const texts = computed(() =>
+  isEnglish.value
+    ? {
+        description: 'Quick entry points for all published components.',
+        empty: 'No matching components. Try another keyword.',
+        previewAltSuffix: 'preview',
+        searchPlaceholder: 'Search components'
+      }
+    : {
+        description: '所有已发布组件的快速入口。',
+        empty: '未找到匹配组件，请调整关键词后重试。',
+        previewAltSuffix: '预览图',
+        searchPlaceholder: '搜索组件'
+      }
+)
 
 const filteredGroups = computed(() =>
   overviewComponentGroups
     .map((group) => ({
       ...group,
+      localizedTitle: isEnglish.value ? group.titleEn : group.title,
       items: overviewComponents.filter((item) => {
         if (item.group !== group.key) {
           return false
@@ -80,7 +98,9 @@ const filteredGroups = computed(() =>
           return true
         }
 
-        const searchableText = `${item.name} ${item.title} ${item.description}`.toLowerCase()
+        const title = localizedItemTitle(item)
+        const description = isEnglish.value ? item.descriptionEn : item.description
+        const searchableText = `${item.name} ${title} ${description}`.toLowerCase()
         return searchableText.includes(normalizedKeyword.value)
       })
     }))
@@ -88,6 +108,8 @@ const filteredGroups = computed(() =>
 )
 
 const hasResults = computed(() => filteredGroups.value.length > 0)
+const localizedItemTitle = (item: OverviewItem) => (isEnglish.value ? item.titleEn : item.title)
+const toLocalizedLink = (link: string) => (isEnglish.value ? `/en${link}` : link)
 </script>
 
 <style scoped>
@@ -101,6 +123,9 @@ const hasResults = computed(() => filteredGroups.value.length > 0)
 }
 
 .falcon-overview__search {
+  position: sticky;
+  top: calc(var(--vp-nav-height, 64px) + 8px);
+  z-index: 19;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -108,6 +133,7 @@ const hasResults = computed(() => filteredGroups.value.length > 0)
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
   background: var(--vp-c-bg-soft);
+  box-shadow: 0 8px 18px rgb(0 0 0 / 8%);
   padding: 0 12px;
   transition: border-color 0.2s ease;
 }
@@ -236,34 +262,17 @@ const hasResults = computed(() => filteredGroups.value.length > 0)
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 126px;
+  min-height: 168px;
+  padding: 18px 16px;
   background: linear-gradient(140deg, rgb(89 103 122 / 22%), rgb(50 57 69 / 12%));
 }
 
 .falcon-overview-card__preview img {
-  width: 124px;
-  height: 72px;
+  display: block;
+  width: 184px;
+  max-width: 100%;
+  height: auto;
   object-fit: contain;
-}
-
-.falcon-overview-card__footer {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px 12px;
-}
-
-.falcon-overview-card__name {
-  color: var(--vp-c-text-1);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.falcon-overview-card__description {
-  color: var(--vp-c-text-2);
-  font-size: 12px;
-  line-height: 1.5;
 }
 
 .falcon-overview__empty {

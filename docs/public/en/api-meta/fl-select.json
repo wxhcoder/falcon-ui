@@ -1,0 +1,49 @@
+{
+  "component": "fl-select",
+  "description": "Select component for choosing from dropdown options, with error and table-cell states.",
+  "events": [],
+  "exposes": [
+    {
+      "description": "Blur the inner input.",
+      "name": "blur",
+      "type": "() => void"
+    },
+    {
+      "description": "Focus the inner focusable element.",
+      "name": "focus",
+      "type": "() => void"
+    },
+    {
+      "description": "Trigger the select clear action manually.",
+      "name": "handleClearClick",
+      "type": "((event: Event) => void) | undefined"
+    },
+    {
+      "description": "Read the label displayed for the selected option.",
+      "name": "selectedLabel",
+      "type": "string | string[] | undefined"
+    },
+    {
+      "description": "Open or close the select dropdown panel.",
+      "name": "toggleMenu",
+      "type": "((event?: Event | undefined) => void) | undefined"
+    }
+  ],
+  "props": [
+    {
+      "default": "false",
+      "description": "Whether to show the error state.",
+      "name": "isError",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to render for a table-cell scenario.",
+      "name": "isTable",
+      "required": false,
+      "type": "boolean | undefined"
+    }
+  ],
+  "slots": []
+}
