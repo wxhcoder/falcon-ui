@@ -22,3 +22,4 @@ logs/
 docs/.vitepress/cache/
 .codex-chrome/
 .codex/*
+.superpowers/
