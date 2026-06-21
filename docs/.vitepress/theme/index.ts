@@ -8,6 +8,7 @@ import Layout from './layout.vue'
 import VpDemo from '../components/vp-demo.vue'
 import VpApiTable from '../components/vp-api-table.vue'
 import OverviewGrid from '../components/overview-grid.vue'
+import HomePage from '../components/HomePage.vue'
 import '../styles/vars.css'
 import '../styles/custom.css'
 import 'element-plus/dist/index.css'
@@ -42,6 +43,7 @@ const theme: Theme = {
     app.component('VpDemo', VpDemo)
     app.component('VpApiTable', VpApiTable)
     app.component('OverviewGrid', OverviewGrid)
+    app.component('HomePage', HomePage)
 
     const demoModules = import.meta.glob(
       ['../../examples/**/*.vue', '../../en/examples/**/*.vue'],

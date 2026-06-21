@@ -29,7 +29,7 @@
       <VPNavScreen :open="isScreenOpen" />
     </header>
 
-    <VPLocalNav :open="isSidebarOpen" @open-menu="openSidebar" />
+    <VPLocalNav v-if="!isHomepage" :open="isSidebarOpen" @open-menu="openSidebar" />
 
     <aside v-if="hasSidebar" id="VPSidebarNav" class="sidebar" :class="{ open: isSidebarOpen }">
       <nav class="sidebar-groups" aria-label="Sidebar Navigation">
@@ -43,7 +43,7 @@
           <Content
             class="vp-doc doc-content"
             :class="[pageName, theme.externalLinkIcon && 'external-link-icon-enabled']" />
-          <VPDocFooter />
+          <VPDocFooter v-if="!isHomepage" />
         </div>
 
         <aside v-if="hasOutline" class="toc-wrapper">
@@ -98,6 +98,7 @@ const logoSrc = computed(() =>
   typeof theme.value.logo === 'string' ? withBase(theme.value.logo) : ''
 )
 const hasOutline = computed(() => frontmatter.value.outline !== false)
+const isHomepage = computed(() => frontmatter.value.homepage === true)
 
 const closeScreen = () => {
   isScreenOpen.value = false
