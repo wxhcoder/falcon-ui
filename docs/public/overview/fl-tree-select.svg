@@ -1,19 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="248" height="144" viewBox="0 0 248 144" fill="none">
+<svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
   <title>FlTreeSelect SVG preview</title>
+  <rect x="32" y="24" width="184" height="34" rx="4" fill="#171A1E" />
+  <rect x="32" y="24" width="184" height="34" rx="4" fill="url(#fl-tree-select-shell)" />
+  <rect x="32" y="24" width="184" height="34" rx="4" stroke="#0083FF" />
+  <text x="42" y="41" dominant-baseline="middle" fill="#4EA8FF" font-size="16" font-weight="500">
+    Tree Select
+  </text>
+  <path d="M196 43L201 38L206 43" stroke="#4EA8FF" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="32" y="68" width="184" height="58" rx="4" fill="#171A1E" />
+  <rect x="32" y="68" width="184" height="58" rx="4" stroke="#555A61" />
+  <rect x="40" y="76" width="168" height="14" rx="3" fill="#0083FF" fill-opacity=".12" />
+  <path d="M47 82L50 85L53 82" stroke="#4EA8FF" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="61" cy="85" r="3" fill="#4EA8FF" />
+  <rect x="70" y="82" width="54" height="6" rx="3" fill="#4EA8FF" />
+  <path d="M61 97L64 100L67 97" stroke="#6F7781" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="75" cy="100" r="3" fill="#4EA8FF" />
+  <rect x="84" y="97" width="52" height="6" rx="3" fill="#6F7781" />
+  <circle cx="89" cy="115" r="3" fill="#6F7781" />
+  <rect x="98" y="112" width="60" height="6" rx="3" fill="#6F7781" />
   <defs>
-    <linearGradient id="treeSelectPreviewBlue" x1="44" y1="26" x2="204" y2="118" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#2563EB" />
-      <stop offset="1" stop-color="#60A5FA" />
+    <linearGradient id="fl-tree-select-shell" x1="32" y1="24" x2="216" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2A3038" stop-opacity=".44" />
+      <stop offset="1" stop-color="#0E1115" stop-opacity=".16" />
     </linearGradient>
   </defs>
-  <rect x="42" y="28" width="164" height="34" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="2" />
-  <text x="58" y="50" fill="#334155" font-family="Arial, sans-serif" font-size="13">Engineering / Frontend</text>
-  <path d="M187 42L193 48L199 42" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-  <rect x="42" y="70" width="164" height="48" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2" />
-  <circle cx="65" cy="88" r="4" fill="url(#treeSelectPreviewBlue)" />
-  <path d="M65 92V106M65 98H84M84 98V88M84 106H104" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" />
-  <circle cx="84" cy="88" r="4" fill="#2563EB" />
-  <circle cx="104" cy="106" r="4" fill="#60A5FA" />
-  <text x="96" y="92" fill="#334155" font-family="Arial, sans-serif" font-size="12">Frontend</text>
-  <text x="116" y="110" fill="#64748B" font-family="Arial, sans-serif" font-size="12">Backend</text>
 </svg>
