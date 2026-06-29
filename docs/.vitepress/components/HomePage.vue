@@ -61,7 +61,7 @@ const content = computed<HomeContent>(() =>
         description:
           'A focused component layer on top of Element Plus, built to keep real product interfaces consistent, composable, and quick to ship.',
         illustrationLabel:
-          'An exploded three-layer UI system illustration showing foundation, layout, and template layers connected by blue anchors',
+          'An exploded four-plane UI system illustration showing foundation, content, layout, and template layers connected by blue anchors',
         primaryAction: { label: 'Get started', link: '/en/guide/getting-started' },
         secondaryAction: { label: 'Browse components', link: '/en/components/index' }
       }
@@ -71,7 +71,7 @@ const content = computed<HomeContent>(() =>
         titleAccent: '更清晰有序。',
         description:
           '基于 Element Plus 的业务组件层，为真实产品界面提供一致、可组合且可快速交付的构建方式。',
-        illustrationLabel: '通过蓝色锚点连接的三层 UI 系统爆炸图，展示基础、布局和模板层级',
+        illustrationLabel: '通过蓝色锚点连接的四层 UI 系统爆炸图，展示基础、内容、布局和模板层级',
         primaryAction: { label: '开始使用', link: '/guide/getting-started' },
         secondaryAction: { label: '浏览组件', link: '/components/index' }
       }

@@ -1,569 +1,846 @@
 <template>
   <div class="home-exploded-illustration" role="img" :aria-label="label">
-    <span class="home-exploded-illustration__glow" aria-hidden="true" />
+    <svg
+      class="home-exploded-illustration__svg"
+      viewBox="0 0 1672 941"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true">
+      <defs>
+        <linearGradient id="homeExplodedPlaneSheen" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stop-color="var(--svg-sheen)" />
+          <stop offset="42%" stop-color="transparent" />
+        </linearGradient>
+        <linearGradient id="homeExplodedPreviewFill" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stop-color="var(--svg-preview-a)" />
+          <stop offset="100%" stop-color="var(--svg-preview-b)" />
+        </linearGradient>
+      </defs>
 
-    <div class="home-exploded-illustration__connectors" aria-hidden="true">
-      <span class="home-exploded-illustration__connector connector--left">
-        <span class="home-exploded-illustration__anchor anchor--template" />
-        <span class="home-exploded-illustration__anchor anchor--layout" />
-        <span class="home-exploded-illustration__anchor anchor--foundation" />
-        <span class="home-exploded-illustration__anchor anchor--base" />
-      </span>
-      <span class="home-exploded-illustration__connector connector--right">
-        <span class="home-exploded-illustration__anchor anchor--template" />
-        <span class="home-exploded-illustration__anchor anchor--layout" />
-        <span class="home-exploded-illustration__anchor anchor--foundation" />
-        <span class="home-exploded-illustration__anchor anchor--base" />
-      </span>
-    </div>
+      <g class="svg-scene">
+        <g v-for="plane in planes" :key="plane.name" class="svg-plane" :class="plane.className">
+          <polygon
+            class="svg-plane__panel"
+            :class="{ 'svg-plane__panel--strong': plane.strong }"
+            :points="plane.pointsValue" />
+          <polygon class="svg-plane__sheen" :points="plane.pointsValue" />
+          <g class="svg-plane__content" :transform="plane.transform">
+            <rect
+              v-for="cardItem in plane.cards"
+              :key="cardItem.key"
+              class="svg-card"
+              :x="cardItem.x"
+              :y="cardItem.y"
+              :width="cardItem.width"
+              :height="cardItem.height"
+              :rx="cardItem.rx"
+              :ry="cardItem.ry" />
 
-    <div class="home-exploded-illustration__stage" aria-hidden="true">
-      <section
-        class="home-exploded-illustration__layer layer--template"
-        aria-label="Template layer">
-        <div class="browser-bar">
-          <span class="browser-bar__mark" />
-          <span class="browser-bar__track" />
-          <span class="browser-bar__dot" />
-        </div>
-        <div class="template-layout">
-          <div class="template-layout__nav">
-            <span class="is-active" />
-            <span />
-            <span />
-            <span />
-          </div>
-          <div class="template-layout__content">
-            <p>Template</p>
-            <strong>Getting started</strong>
-            <span class="copy-line" />
-            <span class="copy-line is-short" />
-            <div class="template-layout__actions">
-              <i>Preview</i>
-              <i>Code</i>
-            </div>
-          </div>
-        </div>
-      </section>
+            <template v-if="plane.name === 'foundation'">
+              <text class="svg-layer-kicker" x="30" y="34">Foundation</text>
+              <text class="svg-label" x="30" y="62">Foundation</text>
+              <rect class="svg-swatch-square" x="30" y="86" width="40" height="40" rx="2" />
+              <rect class="svg-mini-token" x="30" y="154" width="52" height="30" rx="7" />
+              <rect class="svg-mini-token" x="100" y="154" width="52" height="30" rx="7" />
 
-      <section class="home-exploded-illustration__layer layer--layout" aria-label="Layout layer">
-        <article class="ui-card ui-card--navigation">
-          <p>Navigation</p>
-          <strong>Primary</strong>
-          <span />
-          <span class="is-short" />
-        </article>
-        <article class="ui-card ui-card--dialog">
-          <p>Dialog</p>
-          <b>Build title</b>
-          <span />
-          <span class="is-short" />
-          <small>Cancel <em>Confirm</em></small>
-        </article>
-        <article class="ui-card ui-card--table">
-          <p>Table</p>
-          <span class="table-row is-header" />
-          <span class="table-row" />
-          <span class="table-row" />
-          <span class="table-row" />
-        </article>
-      </section>
+              <text class="svg-layer-kicker" x="280" y="34">Tokens</text>
+              <text class="svg-label" x="280" y="62">Theme</text>
+              <rect class="svg-mini-token" x="280" y="154" width="54" height="30" rx="7" />
+              <rect class="svg-mini-token" x="352" y="154" width="54" height="30" rx="7" />
+              <text class="svg-token-text" x="307" y="174" text-anchor="middle">Aa</text>
+              <text class="svg-token-text" x="379" y="174" text-anchor="middle">R2</text>
 
-      <section
-        class="home-exploded-illustration__layer layer--foundation"
-        aria-label="Foundation layer">
-        <article class="token-card token-card--foundation">
-          <p>Foundation</p>
-          <div class="token-card__shapes"><i /><i /><i /></div>
-          <small><b>Aa</b><b>R8</b></small>
-        </article>
-        <article class="token-card token-card--theme">
-          <p>Theme</p>
-          <div class="token-card__swatches"><i /><i /><i /></div>
-        </article>
-        <article class="token-card token-card--form">
-          <p>Form controls</p>
-          <div class="token-card__controls"><i>✓</i><i /></div>
-          <span />
-        </article>
-      </section>
-    </div>
+              <text class="svg-layer-kicker" x="535" y="34">Controls</text>
+              <text class="svg-label" x="535" y="62">Form</text>
+              <rect class="svg-check" x="535" y="88" width="30" height="30" rx="5" />
+              <rect class="svg-toggle" x="655" y="89" width="58" height="29" rx="15" />
+              <rect class="svg-input" x="535" y="153" width="148" height="30" rx="5" />
+            </template>
+
+            <template v-else-if="plane.name === 'content'">
+              <text class="svg-layer-kicker" x="30" y="34">Content</text>
+              <text class="svg-label" x="30" y="62">Trees</text>
+              <g class="svg-tree">
+                <path d="M34 84h18v14H34z" />
+                <rect x="70" y="87" width="96" height="9" rx="5" />
+                <path d="M34 114h18v14H34z" />
+                <rect x="70" y="117" width="128" height="9" rx="5" />
+                <rect class="is-selected" x="26" y="141" width="320" height="28" rx="8" />
+                <path d="M34 148h18v14H34z" />
+                <text class="svg-blue-text" x="70" y="164">Atoms</text>
+                <path d="M34 180h18v14H34z" />
+                <rect x="70" y="183" width="112" height="9" rx="5" />
+              </g>
+
+              <text class="svg-layer-kicker" x="405" y="34">Preview</text>
+              <rect class="svg-preview" x="425" y="50" width="220" height="100" rx="4" ry="4" />
+              <path class="svg-preview-mountain" d="M454 131l67-60 44 42 29-25 66 43z" />
+              <circle class="svg-preview-sun" cx="594" cy="79" r="18" />
+              <rect class="svg-line" x="425" y="164" width="210" height="10" rx="5" />
+              <rect class="svg-line" x="445" y="184" width="170" height="10" rx="5" />
+            </template>
+
+            <template v-else-if="plane.name === 'components'">
+              <text class="svg-layer-kicker" x="30" y="34">Layout</text>
+              <text class="svg-label" x="30" y="62">Buttons</text>
+              <rect class="svg-button" x="30" y="82" width="128" height="34" rx="8" />
+              <text class="svg-button-text" x="94" y="104" text-anchor="middle">Primary</text>
+              <rect class="svg-chip" x="30" y="132" width="96" height="22" rx="10" />
+              <rect class="svg-chip" x="30" y="164" width="76" height="22" rx="10" />
+              <text class="svg-blue-text" x="166" y="184">+ Add</text>
+
+              <text class="svg-layer-kicker" x="280" y="34">Overlay</text>
+              <text class="svg-label" x="280" y="62">Dialog</text>
+              <text class="svg-caption" x="280" y="92">Dialog title</text>
+              <rect class="svg-line" x="280" y="108" width="150" height="9" rx="5" />
+              <rect class="svg-line" x="280" y="130" width="118" height="9" rx="5" />
+              <text class="svg-muted-text" x="292" y="176">Cancel</text>
+              <rect class="svg-button" x="405" y="153" width="78" height="30" rx="8" />
+              <text
+                class="svg-button-text svg-button-text--tiny"
+                x="444"
+                y="173"
+                text-anchor="middle">
+                Confirm
+              </text>
+
+              <text class="svg-layer-kicker" x="535" y="34">Data</text>
+              <text class="svg-label" x="535" y="62">Table</text>
+              <text class="svg-caption" x="535" y="92">Name</text>
+              <text class="svg-caption" x="605" y="92">Role</text>
+              <text class="svg-caption" x="666" y="92">Status</text>
+              <line class="svg-rule" x1="535" x2="730" y1="105" y2="105" />
+              <rect class="svg-line svg-line--cell" x="535" y="124" width="52" height="8" rx="4" />
+              <rect class="svg-line svg-line--cell" x="605" y="124" width="42" height="8" rx="4" />
+              <circle class="svg-status" cx="690" cy="128" r="5" />
+              <rect class="svg-line svg-line--cell" x="535" y="152" width="60" height="8" rx="4" />
+              <rect class="svg-line svg-line--cell" x="605" y="152" width="40" height="8" rx="4" />
+              <circle class="svg-status" cx="690" cy="156" r="5" />
+            </template>
+
+            <template v-else>
+              <text class="svg-layer-kicker" x="30" y="34">Template</text>
+              <path class="svg-logo" d="M95 58l22 12-22 12-22-12z" />
+              <rect class="svg-line svg-line--short" x="42" y="100" width="94" height="9" rx="5" />
+              <rect class="svg-line svg-line--short" x="34" y="128" width="112" height="9" rx="5" />
+              <rect
+                class="svg-chip svg-chip--soft"
+                x="32"
+                y="153"
+                width="116"
+                height="28"
+                rx="12" />
+
+              <g class="svg-toolbar">
+                <rect x="640" y="28" width="26" height="24" rx="5" />
+                <rect x="676" y="28" width="26" height="24" rx="5" />
+                <rect x="712" y="28" width="26" height="24" rx="5" />
+                <circle class="svg-mark" cx="548" cy="40" r="8" />
+              </g>
+              <text class="svg-title" x="230" y="64">Getting Started</text>
+              <rect class="svg-line" x="230" y="92" width="310" height="13" rx="7" />
+              <rect class="svg-line" x="230" y="120" width="410" height="18" rx="9" />
+              <rect class="svg-button" x="230" y="156" width="124" height="34" rx="8" />
+              <text class="svg-button-text" x="292" y="178" text-anchor="middle">Preview</text>
+              <rect class="svg-pill" x="374" y="156" width="108" height="34" rx="16" />
+              <text class="svg-pill-text" x="428" y="178" text-anchor="middle">Code</text>
+              <g class="svg-tools">
+                <rect x="520" y="158" width="36" height="30" rx="8" />
+                <rect x="570" y="158" width="36" height="30" rx="8" />
+                <rect class="is-active" x="620" y="158" width="36" height="30" rx="8" />
+              </g>
+            </template>
+          </g>
+          <g v-if="plane.name === 'foundation'" class="svg-foundation-glyphs" aria-hidden="true">
+            <path
+              v-for="glyph in foundationRoundGlyphs"
+              :key="glyph.key"
+              :class="glyph.className"
+              :d="glyph.d" />
+            <path
+              v-for="glyph in foundationPathGlyphs"
+              :key="glyph.key"
+              :class="glyph.className"
+              :d="glyph.d" />
+          </g>
+        </g>
+
+        <g class="svg-connectors" aria-hidden="true">
+          <g class="svg-connector svg-connector--left">
+            <line x1="400" x2="400" y1="120" y2="790" />
+            <circle cx="400" cy="120" r="9" />
+            <circle cx="400" cy="340" r="9" />
+            <circle cx="400" cy="560" r="9" />
+            <circle cx="400" cy="790" r="9" />
+          </g>
+          <g class="svg-connector svg-connector--center">
+            <line x1="1135" x2="1135" y1="180" y2="920" />
+            <circle cx="1135" cy="180" r="9" />
+            <circle cx="1135" cy="420" r="9" />
+            <circle cx="1135" cy="660" r="9" />
+            <circle cx="1135" cy="920" r="9" />
+          </g>
+          <g class="svg-connector svg-connector--right">
+            <line x1="1435" x2="1435" y1="60" y2="660" />
+            <circle cx="1435" cy="60" r="9" />
+            <circle cx="1435" cy="260" r="9" />
+            <circle cx="1435" cy="460" r="9" />
+            <circle cx="1435" cy="660" r="9" />
+          </g>
+        </g>
+      </g>
+    </svg>
   </div>
 </template>
 
 <script setup lang="ts">
+type PlaneName = 'foundation' | 'content' | 'components' | 'template'
+type Point = readonly [number, number]
+type PlanePoints = readonly [Point, Point, Point, Point]
+type Matrix = readonly [number, number, number, number, number, number]
+
+interface CardGeometry {
+  key: string
+  x: number
+  y: number
+  width: number
+  height: number
+  rx: number
+  ry: number
+}
+
+interface PlaneProjection {
+  matrix: Matrix
+  xScale: number
+  xUnit: Point
+}
+
+interface PlaneGlyphBasis {
+  projection: PlaneProjection
+  xUnit: Point
+  yUnit: Point
+  xScale: number
+  yScale: number
+}
+
+interface RoundGlyphGeometry {
+  key: string
+  className: string
+  d: string
+}
+
+interface PathGlyphGeometry {
+  key: string
+  className: string
+  d: string
+}
+
+interface PlaneGeometry {
+  name: PlaneName
+  className: string
+  points: PlanePoints
+  pointsValue: string
+  transform: string
+  cards: readonly CardGeometry[]
+  strong?: boolean
+}
+
+const planeSize = {
+  width: 760,
+  height: 220
+} as const
+const planePadding = 10
+const cardRadius = 4
+const cardHeight = planeSize.height - planePadding * 2
+const glyphDepthScale = 0.62
+const ellipseKappa = 0.552284749831
+const foundationPoints: PlanePoints = [
+  [700, 530],
+  [1435, 660],
+  [1135, 920],
+  [400, 790]
+]
+const contentPoints: PlanePoints = [
+  [700, 360],
+  [1435, 460],
+  [1135, 660],
+  [400, 560]
+]
+const componentsPoints: PlanePoints = [
+  [700, 180],
+  [1435, 260],
+  [1135, 420],
+  [400, 340]
+]
+const templatePoints: PlanePoints = [
+  [700, 0],
+  [1435, 60],
+  [1135, 180],
+  [400, 120]
+]
+
+const planeClassNames: Record<PlaneName, string> = {
+  foundation: 'svg-plane--foundation',
+  content: 'svg-plane--content',
+  components: 'svg-plane--components',
+  template: 'svg-plane--template'
+}
+
+const card = (key: string, x: number, width: number): CardGeometry => ({
+  key,
+  x,
+  y: planePadding,
+  width,
+  height: cardHeight,
+  rx: cardRadius,
+  ry: cardRadius
+})
+
+const formatMatrixNumber = (value: number) => Number(value.toFixed(9)).toString()
+const formatGlyphNumber = (value: number) => Number(value.toFixed(3))
+
+const pointsToString = (points: PlanePoints) => points.map(([x, y]) => `${x} ${y}`).join(' ')
+const formatPathPoint = ([x, y]: Point) => `${formatGlyphNumber(x)} ${formatGlyphNumber(y)}`
+
+const normalizeVector = ([x, y]: Point): Point => {
+  const length = Math.hypot(x, y)
+
+  return [x / length, y / length]
+}
+
+const createPlaneMatrix = (points: PlanePoints): Matrix => {
+  const [topLeft, topRight, , bottomLeft] = points
+
+  return [
+    (topRight[0] - topLeft[0]) / planeSize.width,
+    (topRight[1] - topLeft[1]) / planeSize.width,
+    (bottomLeft[0] - topLeft[0]) / planeSize.height,
+    (bottomLeft[1] - topLeft[1]) / planeSize.height,
+    topLeft[0],
+    topLeft[1]
+  ]
+}
+
+const createPlaneTransform = (points: PlanePoints) => {
+  const matrix = createPlaneMatrix(points)
+  return `matrix(${matrix.map(formatMatrixNumber).join(' ')})`
+}
+
+const createPlaneProjection = (points: PlanePoints): PlaneProjection => {
+  const matrix = createPlaneMatrix(points)
+  const [a, b] = matrix
+  const xScale = Math.hypot(a, b)
+  const xUnit: Point = [a / xScale, b / xScale]
+
+  return {
+    matrix,
+    xScale,
+    xUnit
+  }
+}
+
+const createPlaneGlyphBasis = (
+  projection: PlaneProjection,
+  depthScale = glyphDepthScale
+): PlaneGlyphBasis => {
+  const [, , c, d] = projection.matrix
+
+  return {
+    projection,
+    xUnit: projection.xUnit,
+    yUnit: normalizeVector([c, d]),
+    xScale: projection.xScale,
+    yScale: projection.xScale * depthScale
+  }
+}
+
+const projectPoint = (projection: PlaneProjection, x: number, y: number): Point => {
+  const [a, b, c, d, e, f] = projection.matrix
+
+  return [a * x + c * y + e, b * x + d * y + f]
+}
+
+const projectGlyphOffset = (basis: PlaneGlyphBasis, x: number, y: number): Point => [
+  x * basis.xUnit[0] * basis.xScale + y * basis.yUnit[0] * basis.yScale,
+  x * basis.xUnit[1] * basis.xScale + y * basis.yUnit[1] * basis.yScale
+]
+
+const projectGlyphPoint = (basis: PlaneGlyphBasis, center: Point, x: number, y: number): Point => {
+  const [offsetX, offsetY] = projectGlyphOffset(basis, x, y)
+
+  return [center[0] + offsetX, center[1] + offsetY]
+}
+
+const createRoundGlyph = (
+  basis: PlaneGlyphBasis,
+  key: string,
+  className: string,
+  x: number,
+  y: number,
+  radius: number
+): RoundGlyphGeometry => {
+  const center = projectPoint(basis.projection, x, y)
+  const start = projectGlyphPoint(basis, center, radius, 0)
+  const segments: readonly (readonly [Point, Point, Point])[] = [
+    [
+      [radius, radius * ellipseKappa],
+      [radius * ellipseKappa, radius],
+      [0, radius]
+    ],
+    [
+      [-radius * ellipseKappa, radius],
+      [-radius, radius * ellipseKappa],
+      [-radius, 0]
+    ],
+    [
+      [-radius, -radius * ellipseKappa],
+      [-radius * ellipseKappa, -radius],
+      [0, -radius]
+    ],
+    [
+      [radius * ellipseKappa, -radius],
+      [radius, -radius * ellipseKappa],
+      [radius, 0]
+    ]
+  ]
+  const commands = segments.map(([controlA, controlB, end]) => {
+    const controlPointA = projectGlyphPoint(basis, center, controlA[0], controlA[1])
+    const controlPointB = projectGlyphPoint(basis, center, controlB[0], controlB[1])
+    const endPoint = projectGlyphPoint(basis, center, end[0], end[1])
+
+    return `C${formatPathPoint(controlPointA)} ${formatPathPoint(controlPointB)} ${formatPathPoint(
+      endPoint
+    )}`
+  })
+
+  return {
+    key,
+    className,
+    d: [`M${formatPathPoint(start)}`, ...commands, 'z'].join(' ')
+  }
+}
+
+const createPathGlyph = (
+  basis: PlaneGlyphBasis,
+  key: string,
+  className: string,
+  vertices: readonly Point[]
+): PathGlyphGeometry => {
+  const center = vertices.reduce<Point>(
+    ([sumX, sumY], [x, y]) => [sumX + x / vertices.length, sumY + y / vertices.length],
+    [0, 0]
+  )
+  const projectedCenter = projectPoint(basis.projection, center[0], center[1])
+  const points = vertices.map(([x, y]) => {
+    const point = projectGlyphPoint(basis, projectedCenter, x - center[0], y - center[1])
+
+    return formatPathPoint(point)
+  })
+
+  return {
+    key,
+    className,
+    d: `M${points.join('L')}z`
+  }
+}
+
+const definePlane = (
+  name: PlaneName,
+  points: PlanePoints,
+  cards: readonly CardGeometry[],
+  strong = false
+): PlaneGeometry => ({
+  name,
+  className: planeClassNames[name],
+  points,
+  pointsValue: pointsToString(points),
+  transform: createPlaneTransform(points),
+  cards,
+  strong
+})
+
+const foundationProjection = createPlaneProjection(foundationPoints)
+const foundationGlyphBasis = createPlaneGlyphBasis(foundationProjection)
+const foundationRoundGlyphs = [
+  createRoundGlyph(foundationGlyphBasis, 'swatch-oval', 'svg-swatch-oval', 112, 106, 20),
+  createRoundGlyph(foundationGlyphBasis, 'theme-light', 'svg-theme-dot', 306, 108, 22),
+  createRoundGlyph(
+    foundationGlyphBasis,
+    'theme-dark',
+    'svg-theme-dot svg-theme-dot--dark',
+    366,
+    108,
+    22
+  ),
+  createRoundGlyph(
+    foundationGlyphBasis,
+    'theme-muted',
+    'svg-theme-dot svg-theme-dot--muted',
+    426,
+    108,
+    22
+  ),
+  createRoundGlyph(foundationGlyphBasis, 'form-radio', 'svg-radio', 613, 103, 15)
+] as const
+const foundationPathGlyphs = [
+  createPathGlyph(foundationGlyphBasis, 'swatch-triangle', 'svg-swatch-triangle', [
+    [169, 129],
+    [207, 74],
+    [229, 129]
+  ])
+] as const
+
+const planes = [
+  definePlane('foundation', foundationPoints, [
+    card('foundation-foundation', 10, 240),
+    card('foundation-theme', 260, 245),
+    card('foundation-form', 515, 235)
+  ]),
+  definePlane('content', contentPoints, [
+    card('content-tree', 10, 365),
+    card('content-preview', 385, 365)
+  ]),
+  definePlane('components', componentsPoints, [
+    card('components-button', 10, 240),
+    card('components-dialog', 260, 245),
+    card('components-table', 515, 235)
+  ]),
+  definePlane(
+    'template',
+    templatePoints,
+    [card('template-nav', 10, 170), card('template-main', 190, 560)],
+    true
+  )
+] as const
+
 withDefaults(
   defineProps<{
     label?: string
   }>(),
   {
-    label: 'A three-layer UI system illustration showing foundation, layout, and template layers'
+    label:
+      'A four-plane UI system illustration showing template, layout components, content, and foundation layers'
   }
 )
 </script>
 
 <style scoped>
 .home-exploded-illustration {
-  --illustration-blue: #165dff;
-  --illustration-blue-soft: #e1eaff;
-  --illustration-ink: #1a243d;
-  --illustration-muted: #8896b1;
-  --illustration-line: #dfe7f5;
-  --illustration-panel: rgb(255 255 255 / 92%);
-  --illustration-card: rgb(251 253 255 / 87%);
-  --illustration-shadow: 0 30px 58px rgb(53 82 129 / 13%);
+  --svg-blue: #174cff;
+  --svg-blue-strong: #123fff;
+  --svg-blue-soft: rgb(231 237 255 / 82%);
+  --svg-text: #111827;
+  --svg-muted: #687590;
+  --svg-line: #e5ebf6;
+  --svg-panel-light: rgb(255 255 255 / 88%);
+  --svg-card-light: rgb(252 254 255 / 84%);
+  --svg-panel-dark: rgb(17 25 42 / 88%);
+  --svg-card-dark: rgb(23 33 54 / 84%);
+  --svg-panel: var(--svg-panel-light);
+  --svg-card: var(--svg-card-light);
+  --svg-sheen: rgb(255 255 255 / 66%);
+  --svg-preview-a: rgb(239 244 252 / 86%);
+  --svg-preview-b: rgb(248 251 255 / 80%);
   position: relative;
-  isolation: isolate;
-  width: min(100%, 610px);
-  min-height: 540px;
+  display: grid;
+  width: min(100%, 720px);
+  min-height: clamp(430px, 48vw, 610px);
   margin-inline: auto;
-  font-family: 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  overflow: visible;
+  place-items: center;
 }
 
-.home-exploded-illustration__glow {
-  position: absolute;
-  top: 9%;
-  left: 13%;
-  z-index: -1;
-  width: 72%;
-  height: 78%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgb(22 93 255 / 14%), rgb(22 93 255 / 0%) 67%);
-  filter: blur(20px);
+.home-exploded-illustration__svg {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  overflow: visible;
 }
 
-.home-exploded-illustration__stage {
-  position: absolute;
-  inset: 10px 0 0;
-  transform: perspective(1500px) rotateX(51deg) rotateZ(-29deg) scale(0.78);
-  transform-origin: center 48%;
+.svg-plane {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
-.home-exploded-illustration__layer {
-  position: absolute;
-  left: 50%;
-  width: 520px;
-  border: 1px solid rgb(188 204 232 / 76%);
-  border-radius: 18px;
-  background: var(--illustration-panel);
-  box-shadow: var(--illustration-shadow);
-  overflow: hidden;
-  transform: translateX(-50%);
-  backdrop-filter: blur(12px);
+.svg-plane__panel {
+  fill: var(--svg-panel);
+  stroke: rgb(194 207 232 / 64%);
+  stroke-width: 1.2;
 }
 
-.layer--template {
-  top: 0;
-  height: 218px;
-  padding: 18px 20px;
-  animation: float-top 7s ease-in-out infinite;
+.svg-plane__panel--strong {
+  stroke: rgb(169 190 230 / 70%);
 }
 
-.layer--layout {
-  top: 238px;
-  display: grid;
-  grid-template-columns: 0.86fr 1fr 1.1fr;
-  gap: 13px;
-  height: 176px;
-  padding: 20px;
-  animation: float-middle 7s ease-in-out -2.3s infinite;
-}
-
-.layer--foundation {
-  top: 432px;
-  display: grid;
-  grid-template-columns: 1.08fr 0.9fr 1.02fr;
-  gap: 13px;
-  height: 180px;
-  padding: 20px;
-  animation: float-bottom 7s ease-in-out -4.6s infinite;
-}
-
-.home-exploded-illustration__connectors {
-  position: absolute;
-  inset: 74px 0 0;
-  z-index: 2;
+.svg-plane__sheen {
+  fill: url('#homeExplodedPlaneSheen');
   pointer-events: none;
 }
 
-.home-exploded-illustration__connector {
-  position: absolute;
-  display: block;
-  height: 396px;
-  border-left: 2px dashed rgb(22 93 255 / 42%);
+.svg-plane__content {
+  pointer-events: none;
 }
 
-.home-exploded-illustration__anchor {
-  position: absolute;
-  left: -6px;
-  width: 9px;
-  height: 9px;
-  border: 3px solid var(--illustration-blue);
-  border-radius: 50%;
-  background: var(--illustration-panel);
-  box-shadow: 0 0 0 3px rgb(22 93 255 / 9%);
-  transform: translateY(-50%);
+.svg-card {
+  fill: var(--svg-card);
+  stroke: rgb(220 229 244 / 82%);
+  stroke-width: 1.2;
 }
 
-.anchor--template {
-  top: 0;
+.svg-title,
+.svg-layer-kicker,
+.svg-label,
+.svg-caption,
+.svg-muted-text,
+.svg-blue-text,
+.svg-token-text {
+  font-family: 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-.anchor--layout {
-  top: 34%;
-}
-
-.anchor--foundation {
-  top: 68%;
-}
-
-.anchor--base {
-  top: 100%;
-}
-
-.connector--left {
-  left: 11%;
-}
-
-.connector--right {
-  right: 11%;
-}
-
-.browser-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 18px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--illustration-line);
-}
-
-.browser-bar__mark {
-  width: 11px;
-  height: 11px;
-  border: 3px solid var(--illustration-blue);
-  border-radius: 4px;
-  transform: rotate(45deg);
-}
-
-.browser-bar__track {
-  width: 68px;
-  height: 5px;
-  border-radius: 99px;
-  background: #e5ecf7;
-}
-
-.browser-bar__dot {
-  width: 6px;
-  height: 6px;
-  margin-left: auto;
-  border-radius: 50%;
-  background: #c3d0e8;
-}
-
-.template-layout {
-  display: grid;
-  grid-template-columns: 128px 1fr;
-  gap: 24px;
-  padding-top: 15px;
-}
-
-.template-layout__nav,
-.ui-card,
-.token-card {
-  border: 1px solid #e1e9f5;
-  border-radius: 10px;
-  background: var(--illustration-card);
-}
-
-.template-layout__nav {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-  padding: 13px;
-}
-
-.template-layout__nav span,
-.copy-line,
-.ui-card > span:not(.table-row),
-.token-card--form > span {
-  display: block;
-  height: 7px;
-  border-radius: 99px;
-  background: #e5ecf7;
-}
-
-.template-layout__nav .is-active {
-  background: var(--illustration-blue-soft);
-}
-
-.template-layout__nav .is-short,
-.copy-line.is-short,
-.ui-card > span.is-short {
-  width: 62%;
-}
-
-.template-layout__content {
-  display: grid;
-  align-content: start;
-  gap: 9px;
-  padding: 5px 6px;
-}
-
-.template-layout__content p,
-.ui-card p,
-.token-card p {
-  margin: 0;
-  color: var(--illustration-muted);
-  font-size: 8px;
+.svg-title {
+  fill: var(--svg-text);
+  font-size: 25px;
   font-weight: 760;
-  letter-spacing: 0.04em;
+}
+
+.svg-layer-kicker {
+  fill: var(--svg-muted);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.template-layout__content strong {
-  color: var(--illustration-ink);
-  font-size: 19px;
-  letter-spacing: -0.055em;
+.svg-label {
+  fill: var(--svg-text);
+  font-size: 15px;
+  font-weight: 760;
 }
 
-.template-layout__actions,
-.ui-card small,
-.token-card small,
-.token-card__shapes,
-.token-card__swatches,
-.token-card__controls {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.template-layout__actions {
-  margin-top: 4px;
-}
-
-.template-layout__actions i,
-.ui-card--navigation strong,
-.ui-card em {
-  display: inline-grid;
-  min-height: 22px;
-  place-items: center;
-  border-radius: 6px;
-  padding: 0 13px;
-  background: var(--illustration-blue);
-  color: #fff;
-  font-size: 8px;
-  font-style: normal;
+.svg-caption,
+.svg-token-text {
+  fill: var(--svg-text);
+  font-size: 12px;
   font-weight: 700;
-  box-shadow: 0 5px 10px rgb(22 93 255 / 24%);
 }
 
-.template-layout__actions i + i {
-  border: 1px solid #dce5f4;
-  background: #fff;
-  color: #687791;
-  box-shadow: none;
-}
-
-.ui-card,
-.token-card {
-  display: grid;
-  align-content: start;
-  gap: 9px;
-  min-width: 0;
-  padding: 13px;
-  box-shadow: 0 10px 18px rgb(45 69 107 / 7%);
-}
-
-.ui-card b {
-  color: var(--illustration-ink);
+.svg-muted-text {
+  fill: var(--svg-muted);
   font-size: 10px;
+  font-weight: 650;
 }
 
-.ui-card small {
-  justify-content: end;
-  color: var(--illustration-muted);
-  font-size: 7px;
+.svg-blue-text {
+  fill: var(--svg-blue);
+  font-size: 12px;
+  font-weight: 720;
 }
 
-.ui-card em {
-  min-height: 16px;
-  padding: 0 8px;
-  font-size: 7px;
+.svg-line,
+.svg-chip,
+.svg-pill,
+.svg-tools rect,
+.svg-toolbar rect,
+.svg-mini-token,
+.svg-input {
+  fill: var(--svg-line);
 }
 
-.table-row {
-  display: block;
-  height: 12px;
-  border-bottom: 1px solid #e5ecf7;
-  background: linear-gradient(
-    90deg,
-    transparent 16%,
-    #e5ecf7 16% 17%,
-    transparent 17% 48%,
-    #e5ecf7 48% 49%,
-    transparent 49% 78%,
-    #e5ecf7 78% 79%,
-    transparent 79%
-  );
+.svg-line--short {
+  fill: color-mix(in srgb, var(--svg-muted) 18%, transparent);
 }
 
-.table-row.is-header {
-  height: 15px;
-  border-radius: 5px 5px 0 0;
-  background-color: #edf3fc;
+.svg-line--cell {
+  fill: color-mix(in srgb, var(--svg-muted) 22%, transparent);
 }
 
-.token-card__shapes {
-  gap: 12px;
-  min-height: 26px;
+.svg-chip,
+.svg-pill,
+.svg-tools rect,
+.svg-toolbar rect,
+.svg-mini-token,
+.svg-input {
+  stroke: rgb(210 220 238 / 86%);
+  stroke-width: 1;
 }
 
-.token-card__shapes i:nth-child(1) {
-  width: 19px;
-  height: 19px;
-  background: var(--illustration-blue);
-  box-shadow: 4px 4px 0 #dce8ff;
+.svg-chip--soft,
+.svg-tools .is-active {
+  fill: var(--svg-blue-soft);
 }
 
-.token-card__shapes i:nth-child(2) {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #9eb7ff;
+.svg-logo {
+  fill: none;
+  stroke: var(--svg-blue);
+  stroke-linejoin: round;
+  stroke-width: 7;
 }
 
-.token-card__shapes i:nth-child(3) {
-  width: 0;
-  height: 0;
-  border-right: 10px solid transparent;
-  border-bottom: 19px solid #a8b9ff;
-  border-left: 10px solid transparent;
+.svg-button,
+.svg-check,
+.svg-theme-dot,
+.svg-swatch-square {
+  fill: var(--svg-blue);
 }
 
-.token-card small b {
-  display: grid;
-  width: 25px;
-  height: 21px;
-  place-items: center;
-  border: 1px solid #e0e8f4;
-  border-radius: 7px;
-  color: #52617c;
+.svg-button-text,
+.svg-pill-text {
+  font-family: 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 12px;
+  font-weight: 730;
+}
+
+.svg-button-text {
+  fill: #fff;
+}
+
+.svg-button-text--tiny {
   font-size: 9px;
 }
 
-.token-card__swatches {
-  gap: 10px;
-  padding-top: 6px;
+.svg-pill-text {
+  fill: #26334c;
 }
 
-.token-card__swatches i {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--illustration-blue);
-  box-shadow: 0 4px 9px rgb(22 93 255 / 25%);
+.svg-mark {
+  fill: var(--svg-blue);
 }
 
-.token-card__swatches i:nth-child(2) {
-  background: #457dff;
+.svg-rule,
+.svg-connector line {
+  fill: none;
+  stroke-linecap: round;
 }
 
-.token-card__swatches i:nth-child(3) {
-  background: #dbe5f7;
-  box-shadow: none;
+.svg-rule {
+  stroke: var(--svg-line);
+  stroke-width: 1.2;
 }
 
-.token-card__controls {
-  padding-top: 4px;
+.svg-status {
+  fill: #16a060;
 }
 
-.token-card__controls i {
-  display: grid;
-  width: 16px;
-  height: 16px;
-  place-items: center;
-  border-radius: 4px;
-  background: var(--illustration-blue);
-  color: #fff;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 800;
+.svg-tree path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--svg-blue) 68%, var(--svg-line));
+  stroke-width: 2;
 }
 
-.token-card__controls i + i {
-  border: 4px solid #e2eafb;
-  border-radius: 50%;
+.svg-tree rect {
+  fill: color-mix(in srgb, var(--svg-muted) 16%, transparent);
 }
 
-.token-card--form > span {
-  height: 14px;
-  border: 1px solid #dbe5f3;
-  background: linear-gradient(90deg, #d7e0ef 38%, transparent 38%);
+.svg-tree .is-selected {
+  fill: var(--svg-blue-soft);
+  stroke: rgb(23 76 255 / 18%);
 }
 
-:global(.dark) .home-exploded-illustration {
-  --illustration-ink: #edf3ff;
-  --illustration-muted: #8f9fbe;
-  --illustration-line: #33415a;
-  --illustration-panel: rgb(22 30 46 / 91%);
-  --illustration-card: rgb(27 37 57 / 91%);
-  --illustration-shadow: 0 30px 58px rgb(0 0 0 / 32%);
+.svg-preview {
+  fill: url('#homeExplodedPreviewFill');
 }
 
-:global(.dark) .home-exploded-illustration__layer,
-:global(.dark) .template-layout__nav,
-:global(.dark) .ui-card,
-:global(.dark) .token-card {
-  border-color: rgb(108 136 185 / 30%);
+.svg-preview-mountain {
+  fill: #dfe6f2;
 }
 
-:global(.dark) .template-layout__nav span,
-:global(.dark) .copy-line,
-:global(.dark) .ui-card > span:not(.table-row),
-:global(.dark) .token-card--form > span,
-:global(.dark) .table-row.is-header {
-  background-color: #34415b;
+.svg-preview-sun {
+  fill: #dce4f2;
 }
 
-:global(.dark) .template-layout__actions i + i {
-  border-color: #3a4862;
-  background: #202c41;
-  color: #b6c4dc;
+.svg-swatch-oval {
+  fill: #a8b7ff;
 }
 
-@keyframes float-top {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-  50% {
-    translate: 0 -9px;
-  }
+.svg-swatch-triangle {
+  fill: #b9c3ff;
 }
 
-@keyframes float-middle {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-  50% {
-    translate: 0 5px;
-  }
+.svg-theme-dot--dark {
+  fill: var(--svg-blue-strong);
 }
 
-@keyframes float-bottom {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-  50% {
-    translate: 0 -5px;
-  }
+.svg-theme-dot--muted {
+  fill: #dbe4f2;
+}
+
+.svg-radio {
+  fill: var(--svg-blue);
+  stroke: #e4ecff;
+  stroke-width: 7;
+}
+
+.svg-toggle {
+  fill: #dce6ff;
+  stroke: rgb(23 76 255 / 18%);
+  stroke-width: 1;
+}
+
+.svg-toggle + .svg-input {
+  fill: var(--svg-line);
+}
+
+.svg-connector {
+  color: var(--svg-blue);
+}
+
+.svg-connector line {
+  stroke: color-mix(in srgb, currentColor 36%, transparent);
+  stroke-dasharray: 10 10;
+  stroke-width: 2;
+}
+
+.svg-connector circle {
+  fill: var(--svg-panel);
+  stroke: currentColor;
+  stroke-width: 6;
+}
+
+:global(.dark .home-exploded-illustration) {
+  --svg-blue: #4d7cff;
+  --svg-blue-strong: #6b94ff;
+  --svg-blue-soft: rgb(61 88 154 / 42%);
+  --svg-text: #e7eefc;
+  --svg-muted: #9aa8c1;
+  --svg-line: #303c52;
+  --svg-panel: var(--svg-panel-dark);
+  --svg-card: var(--svg-card-dark);
+  --svg-sheen: rgb(91 128 220 / 11%);
+  --svg-preview-a: rgb(31 43 65 / 86%);
+  --svg-preview-b: rgb(25 34 53 / 84%);
+}
+
+:global(.dark .svg-plane__panel),
+:global(.dark .svg-card),
+:global(.dark .svg-chip),
+:global(.dark .svg-pill),
+:global(.dark .svg-tools rect),
+:global(.dark .svg-toolbar rect),
+:global(.dark .svg-mini-token),
+:global(.dark .svg-input) {
+  stroke-color: rgb(103 126 169 / 28%);
+}
+
+:global(.dark .svg-pill-text) {
+  fill: #bdc8dc;
+}
+
+:global(.dark .svg-preview-mountain),
+:global(.dark .svg-preview-sun),
+:global(.dark .svg-theme-dot--muted) {
+  fill: #445169;
+}
+
+:global(.dark .svg-radio) {
+  stroke: #2f4167;
+}
+
+:global(.dark .svg-toggle) {
+  fill: #34445f;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-exploded-illustration__layer {
+  .svg-plane {
     animation: none;
   }
 }
@@ -571,19 +848,11 @@ withDefaults(
 @media (max-width: 767px) {
   .home-exploded-illustration {
     width: min(100%, 440px);
-    min-height: 380px;
+    min-height: 392px;
   }
 
-  .home-exploded-illustration__stage {
-    inset: 34px 0 8px;
-    transform: perspective(1100px) rotateX(49deg) rotateZ(-28deg) scale(0.66);
-  }
-
-  .home-exploded-illustration__connectors {
-    inset: 46px 0 0;
-  }
-  .home-exploded-illustration__connector {
-    height: 247px;
+  .home-exploded-illustration__svg {
+    max-width: 440px;
   }
 }
 </style>
