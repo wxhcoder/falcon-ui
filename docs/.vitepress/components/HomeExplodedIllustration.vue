@@ -533,11 +533,12 @@ withDefaults(
   --svg-line: #e5ebf6;
   --svg-panel-light: rgb(255 255 255 / 88%);
   --svg-card-light: rgb(252 254 255 / 84%);
-  --svg-panel-dark: rgb(17 25 42 / 88%);
-  --svg-card-dark: rgb(23 33 54 / 84%);
+  --svg-panel-dark: #141414;
+  --svg-card-dark: #111;
   --svg-panel: var(--svg-panel-light);
   --svg-card: var(--svg-card-light);
   --svg-sheen: rgb(255 255 255 / 66%);
+  --svg-mini-token-bg: var(--svg-line);
   --svg-preview-a: rgb(239 244 252 / 86%);
   --svg-preview-b: rgb(248 251 255 / 80%);
   position: relative;
@@ -644,6 +645,10 @@ withDefaults(
 .svg-mini-token,
 .svg-input {
   fill: var(--svg-line);
+}
+
+.svg-mini-token {
+  fill: var(--svg-mini-token-bg);
 }
 
 .svg-line--short {
@@ -802,12 +807,13 @@ withDefaults(
   --svg-blue-soft: rgb(61 88 154 / 42%);
   --svg-text: #e7eefc;
   --svg-muted: #9aa8c1;
-  --svg-line: #303c52;
+  --svg-line: #111;
   --svg-panel: var(--svg-panel-dark);
   --svg-card: var(--svg-card-dark);
-  --svg-sheen: rgb(91 128 220 / 11%);
-  --svg-preview-a: rgb(31 43 65 / 86%);
-  --svg-preview-b: rgb(25 34 53 / 84%);
+  --svg-sheen: transparent;
+  --svg-mini-token-bg: #272727;
+  --svg-preview-a: #272727;
+  --svg-preview-b: #272727;
 }
 
 :global(.dark .svg-plane__panel),
@@ -817,26 +823,31 @@ withDefaults(
 :global(.dark .svg-tools rect),
 :global(.dark .svg-toolbar rect),
 :global(.dark .svg-mini-token),
-:global(.dark .svg-input) {
-  stroke-color: rgb(103 126 169 / 28%);
+:global(.dark .svg-input),
+:global(.dark .svg-toggle),
+:global(.dark .svg-tree .is-selected),
+:global(.dark .svg-radio) {
+  stroke: #2e2e2e;
 }
 
 :global(.dark .svg-pill-text) {
   fill: #bdc8dc;
 }
 
+:global(.dark .svg-line),
+:global(.dark .svg-toggle),
+:global(.dark .svg-input),
+:global(.dark .svg-toolbar rect),
+:global(.dark .svg-pill),
+:global(.dark .svg-tools rect) {
+  fill: #272727;
+}
+
+:global(.dark .svg-tree rect:not(.is-selected)),
 :global(.dark .svg-preview-mountain),
 :global(.dark .svg-preview-sun),
 :global(.dark .svg-theme-dot--muted) {
-  fill: #445169;
-}
-
-:global(.dark .svg-radio) {
-  stroke: #2f4167;
-}
-
-:global(.dark .svg-toggle) {
-  fill: #34445f;
+  fill: #111;
 }
 
 @media (prefers-reduced-motion: reduce) {

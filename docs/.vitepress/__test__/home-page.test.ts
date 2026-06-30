@@ -199,6 +199,46 @@ describe('docs homepage', () => {
     expect(illustrationSource).not.toContain('svg-float')
   })
 
+  it('locks the dark-mode illustration color contract', () => {
+    const illustrationSource = readText('docs/.vitepress/components/HomeExplodedIllustration.vue')
+    const normalizedIllustrationSource = illustrationSource.replace(/\r\n/g, '\n')
+    const darkThemeSource =
+      illustrationSource.match(
+        /:global\(\.dark \.home-exploded-illustration\) \{([\s\S]*?)\}/
+      )?.[1] ?? ''
+    const darkRaisedFillSource =
+      normalizedIllustrationSource.match(
+        /:global\(\.dark \.svg-line\),[\s\S]*?fill: #272727;\n\}/
+      )?.[0] ?? ''
+    const staleDarkColors = [
+      '--svg-line: #303c52;',
+      '#445169',
+      '#34445f',
+      '#2f4167',
+      'stroke-color: rgb(103 126 169 / 28%)'
+    ]
+
+    expect(illustrationSource).toContain('--svg-panel-dark: #141414;')
+    expect(illustrationSource).toContain('--svg-card-dark: #111;')
+    expect(darkThemeSource).toContain('--svg-line: #111;')
+    expect(darkThemeSource).toContain('--svg-mini-token-bg: #272727;')
+    expect(darkThemeSource).toContain('--svg-sheen: transparent;')
+    expect(darkThemeSource).toContain('--svg-preview-a: #272727;')
+    expect(darkThemeSource).toContain('--svg-preview-b: #272727;')
+    expect(illustrationSource).toContain('#2e2e2e')
+    expect(illustrationSource).toContain(':global(.dark .svg-mini-token)')
+    expect(darkRaisedFillSource).toContain(':global(.dark .svg-line)')
+    expect(darkRaisedFillSource).toContain(':global(.dark .svg-toggle)')
+    expect(darkRaisedFillSource).toContain(':global(.dark .svg-input)')
+    expect(darkRaisedFillSource).toContain(':global(.dark .svg-toolbar rect)')
+    expect(darkRaisedFillSource).toContain(':global(.dark .svg-pill)')
+    expect(darkRaisedFillSource).toContain(':global(.dark .svg-tools rect)')
+
+    for (const staleColor of staleDarkColors) {
+      expect(illustrationSource).not.toContain(staleColor)
+    }
+  })
+
   it('maps each SVG plane-local coordinate space onto its panel corners', () => {
     const wrapper = mount(HomeExplodedIllustration)
 
