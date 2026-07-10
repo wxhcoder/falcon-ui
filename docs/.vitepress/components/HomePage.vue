@@ -87,20 +87,24 @@ const content = computed<HomeContent>(() =>
   --home-line: #dfe7f5;
   --home-blue: #165dff;
   --home-blue-hover: #0c4ce5;
-  width: min(100%, 1180px);
+  display: grid;
+  width: min(100%, 1320px);
+  height: calc(100svh - var(--vp-nav-height, 64px));
   margin: 0 auto;
-  padding: clamp(18px, 3vw, 42px) 0 68px;
+  padding: 0;
+  overflow: hidden;
   color: var(--home-text);
   font-family: 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  align-items: center;
 }
 
 .falcon-homepage__hero {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(460px, 1.08fr);
+  grid-template-columns: minmax(360px, 0.36fr) minmax(0, 0.64fr);
   align-items: center;
-  min-height: 580px;
-  gap: clamp(28px, 4vw, 72px);
-  padding: clamp(18px, 4vw, 48px) clamp(4px, 2vw, 22px) 52px;
+  min-height: 0;
+  gap: clamp(20px, 3vw, 44px);
+  padding: clamp(16px, 2vw, 28px) clamp(8px, 2vw, 24px);
 }
 
 .falcon-homepage__copy {
@@ -217,11 +221,24 @@ const content = computed<HomeContent>(() =>
   box-shadow: 0 12px 26px rgb(0 0 0 / 24%);
 }
 
+:global(.page-content:has(.falcon-homepage)) {
+  padding-top: 0;
+  overflow: hidden;
+}
+
+:global(.doc-content-wrapper:has(.falcon-homepage)) {
+  padding: 0;
+}
+
+:global(.doc-content-container:has(.falcon-homepage)),
+:global(.doc-content:has(.falcon-homepage)) {
+  width: 100%;
+}
+
 @media (max-width: 960px) {
   .falcon-homepage__hero {
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding-top: 30px;
+    gap: 8px;
   }
 
   .falcon-homepage__copy {
@@ -240,21 +257,22 @@ const content = computed<HomeContent>(() =>
 }
 
 @media (max-width: 767px) {
-  .falcon-homepage {
-    padding-bottom: 42px;
-  }
-
   .falcon-homepage__hero {
-    min-height: 0;
-    padding: 16px 0 31px;
+    padding: 12px 0;
   }
 
   .falcon-homepage h1 {
-    font-size: clamp(40px, 12vw, 54px);
+    font-size: clamp(34px, 10vw, 46px);
   }
 
   .falcon-homepage__description {
-    font-size: 15px;
+    margin-top: 18px !important;
+    font-size: 14px;
+    line-height: 1.58;
+  }
+
+  .falcon-homepage__actions {
+    margin-top: 22px;
   }
 }
 </style>

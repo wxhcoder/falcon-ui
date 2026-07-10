@@ -190,3 +190,25 @@
   - `vue-tsc`: passed
   - `play build`: passed with the existing chunk-size warning
 - Stage 12 is now complete.
+
+---
+
+# Falcon UI Docs Publishing Progress
+
+## 2026-07-10
+
+- Loaded the Sites building and hosting workflows.
+- Inspected the existing VitePress structure, package scripts, localization, custom theme, and
+  current uncommitted homepage changes.
+- Confirmed no existing Sites project metadata is present.
+- Started validating the current documentation build before adding hosting compatibility.
+- The first combined validation command timed out without producing a test result; switched to
+  isolated, resource-constrained test and build commands so the failure can be diagnosed safely.
+- Ran the homepage suite with one worker: 16 tests passed.
+- Ran `pnpm docs:check`: API metadata generation and the full VitePress build succeeded.
+- Added a Sites build script, static asset worker, hosting metadata scaffold, and worker route tests.
+- The first worker test run confirmed routing worked but exposed two overly generic title
+  assertions; updated them to the actual generated VitePress titles.
+- Re-ran the Sites worker suite: 3 tests passed.
+- Opened the existing VitePress preview at `http://127.0.0.1:5173/` and confirmed the Falcon UI
+  document title loaded.

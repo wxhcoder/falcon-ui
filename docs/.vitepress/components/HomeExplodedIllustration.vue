@@ -2,7 +2,7 @@
   <div class="home-exploded-illustration" role="img" :aria-label="label">
     <svg
       class="home-exploded-illustration__svg"
-      viewBox="0 0 1672 941"
+      viewBox="0 0 1672 1096"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true">
       <defs>
@@ -18,6 +18,12 @@
 
       <g class="svg-scene">
         <g v-for="plane in planes" :key="plane.name" class="svg-plane" :class="plane.className">
+          <polygon
+            v-for="depthFace in plane.depthFaces"
+            :key="depthFace.key"
+            class="svg-plane__depth-face"
+            :class="depthFace.className"
+            :points="depthFace.pointsValue" />
           <polygon
             class="svg-plane__panel"
             :class="{ 'svg-plane__panel--strong': plane.strong }"
@@ -38,22 +44,22 @@
             <template v-if="plane.name === 'foundation'">
               <text class="svg-layer-kicker" x="30" y="34">Foundation</text>
               <text class="svg-label" x="30" y="62">Foundation</text>
-              <rect class="svg-swatch-square" x="30" y="86" width="40" height="40" rx="2" />
-              <rect class="svg-mini-token" x="30" y="154" width="52" height="30" rx="7" />
-              <rect class="svg-mini-token" x="100" y="154" width="52" height="30" rx="7" />
+              <rect class="svg-swatch-square" x="30" y="86" width="40" height="24" rx="2" />
+              <rect class="svg-mini-token" x="30" y="154" width="52" height="30" rx="2" />
+              <rect class="svg-mini-token" x="100" y="154" width="52" height="30" rx="2" />
 
               <text class="svg-layer-kicker" x="280" y="34">Tokens</text>
               <text class="svg-label" x="280" y="62">Theme</text>
-              <rect class="svg-mini-token" x="280" y="154" width="54" height="30" rx="7" />
-              <rect class="svg-mini-token" x="352" y="154" width="54" height="30" rx="7" />
+              <rect class="svg-mini-token" x="280" y="154" width="54" height="30" rx="2" />
+              <rect class="svg-mini-token" x="352" y="154" width="54" height="30" rx="2" />
               <text class="svg-token-text" x="307" y="174" text-anchor="middle">Aa</text>
               <text class="svg-token-text" x="379" y="174" text-anchor="middle">R2</text>
 
               <text class="svg-layer-kicker" x="535" y="34">Controls</text>
               <text class="svg-label" x="535" y="62">Form</text>
-              <rect class="svg-check" x="535" y="88" width="30" height="30" rx="5" />
-              <rect class="svg-toggle" x="655" y="89" width="58" height="29" rx="15" />
-              <rect class="svg-input" x="535" y="153" width="148" height="30" rx="5" />
+              <rect class="svg-check" x="535" y="88" width="40" height="24" rx="2" />
+              <rect class="svg-toggle" x="655" y="89" width="58" height="29" rx="2" />
+              <rect class="svg-input" x="535" y="153" width="148" height="30" rx="2" />
             </template>
 
             <template v-else-if="plane.name === 'content'">
@@ -61,40 +67,40 @@
               <text class="svg-label" x="30" y="62">Trees</text>
               <g class="svg-tree">
                 <path d="M34 84h18v14H34z" />
-                <rect x="70" y="87" width="96" height="9" rx="5" />
+                <rect x="70" y="87" width="96" height="9" rx="2" />
                 <path d="M34 114h18v14H34z" />
-                <rect x="70" y="117" width="128" height="9" rx="5" />
-                <rect class="is-selected" x="26" y="141" width="320" height="28" rx="8" />
+                <rect x="70" y="117" width="128" height="9" rx="2" />
+                <rect class="is-selected" x="26" y="141" width="320" height="28" rx="2" />
                 <path d="M34 148h18v14H34z" />
                 <text class="svg-blue-text" x="70" y="164">Atoms</text>
                 <path d="M34 180h18v14H34z" />
-                <rect x="70" y="183" width="112" height="9" rx="5" />
+                <rect x="70" y="183" width="112" height="9" rx="2" />
               </g>
 
               <text class="svg-layer-kicker" x="405" y="34">Preview</text>
-              <rect class="svg-preview" x="425" y="50" width="220" height="100" rx="4" ry="4" />
+              <rect class="svg-preview" x="425" y="50" width="220" height="100" rx="2" ry="2" />
               <path class="svg-preview-mountain" d="M454 131l67-60 44 42 29-25 66 43z" />
               <circle class="svg-preview-sun" cx="594" cy="79" r="18" />
-              <rect class="svg-line" x="425" y="164" width="210" height="10" rx="5" />
-              <rect class="svg-line" x="445" y="184" width="170" height="10" rx="5" />
+              <rect class="svg-line" x="425" y="164" width="210" height="10" rx="2" />
+              <rect class="svg-line" x="445" y="184" width="170" height="10" rx="2" />
             </template>
 
             <template v-else-if="plane.name === 'components'">
               <text class="svg-layer-kicker" x="30" y="34">Layout</text>
               <text class="svg-label" x="30" y="62">Buttons</text>
-              <rect class="svg-button" x="30" y="82" width="128" height="34" rx="8" />
+              <rect class="svg-button" x="30" y="82" width="128" height="34" rx="2" />
               <text class="svg-button-text" x="94" y="104" text-anchor="middle">Primary</text>
-              <rect class="svg-chip" x="30" y="132" width="96" height="22" rx="10" />
-              <rect class="svg-chip" x="30" y="164" width="76" height="22" rx="10" />
+              <rect class="svg-chip" x="30" y="132" width="96" height="22" rx="2" />
+              <rect class="svg-chip" x="30" y="164" width="76" height="22" rx="2" />
               <text class="svg-blue-text" x="166" y="184">+ Add</text>
 
               <text class="svg-layer-kicker" x="280" y="34">Overlay</text>
               <text class="svg-label" x="280" y="62">Dialog</text>
               <text class="svg-caption" x="280" y="92">Dialog title</text>
-              <rect class="svg-line" x="280" y="108" width="150" height="9" rx="5" />
-              <rect class="svg-line" x="280" y="130" width="118" height="9" rx="5" />
+              <rect class="svg-line" x="280" y="108" width="150" height="9" rx="2" />
+              <rect class="svg-line" x="280" y="130" width="118" height="9" rx="2" />
               <text class="svg-muted-text" x="292" y="176">Cancel</text>
-              <rect class="svg-button" x="405" y="153" width="78" height="30" rx="8" />
+              <rect class="svg-button" x="405" y="153" width="78" height="30" rx="2" />
               <text
                 class="svg-button-text svg-button-text--tiny"
                 x="444"
@@ -109,44 +115,38 @@
               <text class="svg-caption" x="605" y="92">Role</text>
               <text class="svg-caption" x="666" y="92">Status</text>
               <line class="svg-rule" x1="535" x2="730" y1="105" y2="105" />
-              <rect class="svg-line svg-line--cell" x="535" y="124" width="52" height="8" rx="4" />
-              <rect class="svg-line svg-line--cell" x="605" y="124" width="42" height="8" rx="4" />
+              <rect class="svg-line svg-line--cell" x="535" y="124" width="52" height="8" rx="2" />
+              <rect class="svg-line svg-line--cell" x="605" y="124" width="42" height="8" rx="2" />
               <circle class="svg-status" cx="690" cy="128" r="5" />
-              <rect class="svg-line svg-line--cell" x="535" y="152" width="60" height="8" rx="4" />
-              <rect class="svg-line svg-line--cell" x="605" y="152" width="40" height="8" rx="4" />
+              <rect class="svg-line svg-line--cell" x="535" y="152" width="60" height="8" rx="2" />
+              <rect class="svg-line svg-line--cell" x="605" y="152" width="40" height="8" rx="2" />
               <circle class="svg-status" cx="690" cy="156" r="5" />
             </template>
 
             <template v-else>
               <text class="svg-layer-kicker" x="30" y="34">Template</text>
               <path class="svg-logo" d="M95 58l22 12-22 12-22-12z" />
-              <rect class="svg-line svg-line--short" x="42" y="100" width="94" height="9" rx="5" />
-              <rect class="svg-line svg-line--short" x="34" y="128" width="112" height="9" rx="5" />
-              <rect
-                class="svg-chip svg-chip--soft"
-                x="32"
-                y="153"
-                width="116"
-                height="28"
-                rx="12" />
+              <rect class="svg-line svg-line--short" x="42" y="100" width="94" height="9" rx="2" />
+              <rect class="svg-line svg-line--short" x="34" y="128" width="112" height="9" rx="2" />
+              <rect class="svg-chip svg-chip--soft" x="32" y="153" width="116" height="28" rx="2" />
 
               <g class="svg-toolbar">
-                <rect x="640" y="28" width="26" height="24" rx="5" />
-                <rect x="676" y="28" width="26" height="24" rx="5" />
-                <rect x="712" y="28" width="26" height="24" rx="5" />
+                <rect x="640" y="28" width="26" height="24" rx="2" />
+                <rect x="676" y="28" width="26" height="24" rx="2" />
+                <rect x="712" y="28" width="26" height="24" rx="2" />
                 <circle class="svg-mark" cx="548" cy="40" r="8" />
               </g>
               <text class="svg-title" x="230" y="64">Getting Started</text>
-              <rect class="svg-line" x="230" y="92" width="310" height="13" rx="7" />
-              <rect class="svg-line" x="230" y="120" width="410" height="18" rx="9" />
-              <rect class="svg-button" x="230" y="156" width="124" height="34" rx="8" />
+              <rect class="svg-line" x="230" y="92" width="310" height="13" rx="2" />
+              <rect class="svg-line" x="230" y="120" width="410" height="18" rx="2" />
+              <rect class="svg-button" x="230" y="156" width="124" height="34" rx="2" />
               <text class="svg-button-text" x="292" y="178" text-anchor="middle">Preview</text>
-              <rect class="svg-pill" x="374" y="156" width="108" height="34" rx="16" />
+              <rect class="svg-pill" x="374" y="156" width="108" height="34" rx="2" />
               <text class="svg-pill-text" x="428" y="178" text-anchor="middle">Code</text>
               <g class="svg-tools">
-                <rect x="520" y="158" width="36" height="30" rx="8" />
-                <rect x="570" y="158" width="36" height="30" rx="8" />
-                <rect class="is-active" x="620" y="158" width="36" height="30" rx="8" />
+                <rect x="520" y="158" width="36" height="30" rx="2" />
+                <rect x="570" y="158" width="36" height="30" rx="2" />
+                <rect class="is-active" x="620" y="158" width="36" height="30" rx="2" />
               </g>
             </template>
           </g>
@@ -165,26 +165,22 @@
         </g>
 
         <g class="svg-connectors" aria-hidden="true">
-          <g class="svg-connector svg-connector--left">
-            <line x1="400" x2="400" y1="120" y2="790" />
-            <circle cx="400" cy="120" r="9" />
-            <circle cx="400" cy="340" r="9" />
-            <circle cx="400" cy="560" r="9" />
-            <circle cx="400" cy="790" r="9" />
-          </g>
-          <g class="svg-connector svg-connector--center">
-            <line x1="1135" x2="1135" y1="180" y2="920" />
-            <circle cx="1135" cy="180" r="9" />
-            <circle cx="1135" cy="420" r="9" />
-            <circle cx="1135" cy="660" r="9" />
-            <circle cx="1135" cy="920" r="9" />
-          </g>
-          <g class="svg-connector svg-connector--right">
-            <line x1="1435" x2="1435" y1="60" y2="660" />
-            <circle cx="1435" cy="60" r="9" />
-            <circle cx="1435" cy="260" r="9" />
-            <circle cx="1435" cy="460" r="9" />
-            <circle cx="1435" cy="660" r="9" />
+          <g
+            v-for="connector in connectors"
+            :key="connector.name"
+            class="svg-connector"
+            :class="connector.className">
+            <line
+              :x1="connector.anchors[0][0]"
+              :x2="connector.anchors[3][0]"
+              :y1="connector.anchors[0][1]"
+              :y2="connector.anchors[3][1]" />
+            <circle
+              v-for="anchor in connector.anchors"
+              :key="`${anchor[0]}-${anchor[1]}`"
+              :cx="anchor[0]"
+              :cy="anchor[1]"
+              r="9" />
           </g>
         </g>
       </g>
@@ -194,8 +190,11 @@
 
 <script setup lang="ts">
 type PlaneName = 'foundation' | 'content' | 'components' | 'template'
+type ConnectorName = 'left' | 'center' | 'right'
+type PlaneCorner = 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'
 type Point = readonly [number, number]
 type PlanePoints = readonly [Point, Point, Point, Point]
+type ConnectorAnchors = readonly [Point, Point, Point, Point]
 type Matrix = readonly [number, number, number, number, number, number]
 
 interface CardGeometry {
@@ -234,14 +233,28 @@ interface PathGlyphGeometry {
   d: string
 }
 
+interface PlaneDepthFace {
+  key: string
+  className: string
+  points: PlanePoints
+  pointsValue: string
+}
+
 interface PlaneGeometry {
   name: PlaneName
   className: string
   points: PlanePoints
   pointsValue: string
+  depthFaces: readonly PlaneDepthFace[]
   transform: string
   cards: readonly CardGeometry[]
   strong?: boolean
+}
+
+interface ConnectorGeometry {
+  name: ConnectorName
+  className: string
+  anchors: ConnectorAnchors
 }
 
 const planeSize = {
@@ -249,21 +262,22 @@ const planeSize = {
   height: 220
 } as const
 const planePadding = 10
-const cardRadius = 4
+const planeDepth = 18
+const cardRadius = 2
 const cardHeight = planeSize.height - planePadding * 2
 const glyphDepthScale = 0.62
 const ellipseKappa = 0.552284749831
 const foundationPoints: PlanePoints = [
-  [700, 530],
-  [1435, 660],
-  [1135, 920],
-  [400, 790]
+  [700, 684.49],
+  [1435, 814.49],
+  [1135, 1074.49],
+  [400, 944.49]
 ]
 const contentPoints: PlanePoints = [
-  [700, 360],
-  [1435, 460],
-  [1135, 660],
-  [400, 560]
+  [700, 408.163],
+  [1435, 508.163],
+  [1135, 708.163],
+  [400, 608.163]
 ]
 const componentsPoints: PlanePoints = [
   [700, 180],
@@ -285,6 +299,12 @@ const planeClassNames: Record<PlaneName, string> = {
   template: 'svg-plane--template'
 }
 
+const connectorClassNames: Record<ConnectorName, string> = {
+  left: 'svg-connector--left',
+  center: 'svg-connector--center',
+  right: 'svg-connector--right'
+}
+
 const card = (key: string, x: number, width: number): CardGeometry => ({
   key,
   x,
@@ -300,6 +320,50 @@ const formatGlyphNumber = (value: number) => Number(value.toFixed(3))
 
 const pointsToString = (points: PlanePoints) => points.map(([x, y]) => `${x} ${y}`).join(' ')
 const formatPathPoint = ([x, y]: Point) => `${formatGlyphNumber(x)} ${formatGlyphNumber(y)}`
+
+const offsetPoint = ([x, y]: Point, offsetY: number): Point => [x, y + offsetY]
+
+const createPlaneDepthFaces = (points: PlanePoints): readonly PlaneDepthFace[] => {
+  const [, topRight, bottomRight, bottomLeft] = points
+  const frontPoints: PlanePoints = [
+    bottomLeft,
+    bottomRight,
+    offsetPoint(bottomRight, planeDepth),
+    offsetPoint(bottomLeft, planeDepth)
+  ]
+  const rightPoints: PlanePoints = [
+    topRight,
+    bottomRight,
+    offsetPoint(bottomRight, planeDepth),
+    offsetPoint(topRight, planeDepth)
+  ]
+
+  return [
+    {
+      key: 'front',
+      className: 'svg-plane__depth-face--front',
+      points: frontPoints,
+      pointsValue: pointsToString(frontPoints)
+    },
+    {
+      key: 'right',
+      className: 'svg-plane__depth-face--right',
+      points: rightPoints,
+      pointsValue: pointsToString(rightPoints)
+    }
+  ]
+}
+
+const getPlaneCorner = (points: PlanePoints, corner: PlaneCorner): Point => {
+  const [topLeft, topRight, bottomRight, bottomLeft] = points
+
+  return {
+    topLeft,
+    topRight,
+    bottomRight,
+    bottomLeft
+  }[corner]
+}
 
 const normalizeVector = ([x, y]: Point): Point => {
   const length = Math.hypot(x, y)
@@ -453,9 +517,23 @@ const definePlane = (
   className: planeClassNames[name],
   points,
   pointsValue: pointsToString(points),
+  depthFaces: createPlaneDepthFaces(points),
   transform: createPlaneTransform(points),
   cards,
   strong
+})
+
+const connectorPlanePoints = [
+  templatePoints,
+  componentsPoints,
+  contentPoints,
+  foundationPoints
+] as const
+
+const defineConnector = (name: ConnectorName, corner: PlaneCorner): ConnectorGeometry => ({
+  name,
+  className: connectorClassNames[name],
+  anchors: connectorPlanePoints.map((points) => getPlaneCorner(points, corner)) as ConnectorAnchors
 })
 
 const foundationProjection = createPlaneProjection(foundationPoints)
@@ -512,6 +590,12 @@ const planes = [
   )
 ] as const
 
+const connectors = [
+  defineConnector('left', 'bottomLeft'),
+  defineConnector('center', 'bottomRight'),
+  defineConnector('right', 'topRight')
+] as const
+
 withDefaults(
   defineProps<{
     label?: string
@@ -525,6 +609,8 @@ withDefaults(
 
 <style scoped>
 .home-exploded-illustration {
+  --home-illustration-width: 960px;
+  --home-illustration-mobile-width: 420px;
   --svg-blue: #174cff;
   --svg-blue-strong: #123fff;
   --svg-blue-soft: rgb(231 237 255 / 82%);
@@ -537,14 +623,19 @@ withDefaults(
   --svg-card-dark: #111;
   --svg-panel: var(--svg-panel-light);
   --svg-card: var(--svg-card-light);
+  --svg-depth-front: rgb(229 237 252 / 76%);
+  --svg-depth-right: rgb(207 220 246 / 70%);
+  --svg-depth-stroke: rgb(183 199 229 / 58%);
   --svg-sheen: rgb(255 255 255 / 66%);
   --svg-mini-token-bg: var(--svg-line);
   --svg-preview-a: rgb(239 244 252 / 86%);
   --svg-preview-b: rgb(248 251 255 / 80%);
   position: relative;
   display: grid;
-  width: min(100%, 720px);
-  min-height: clamp(430px, 48vw, 610px);
+  width: min(100%, var(--home-illustration-width));
+  max-width: var(--home-illustration-width);
+  height: auto;
+  aspect-ratio: 1672 / 1096;
   margin-inline: auto;
   overflow: visible;
   place-items: center;
@@ -553,14 +644,29 @@ withDefaults(
 .home-exploded-illustration__svg {
   display: block;
   width: 100%;
-  max-width: 720px;
+  max-width: var(--home-illustration-width);
   height: auto;
+  aspect-ratio: inherit;
   overflow: visible;
 }
 
 .svg-plane {
   transform-box: fill-box;
   transform-origin: center;
+}
+
+.svg-plane__depth-face {
+  stroke: var(--svg-depth-stroke);
+  stroke-width: 1.1;
+  pointer-events: none;
+}
+
+.svg-plane__depth-face--front {
+  fill: var(--svg-depth-front);
+}
+
+.svg-plane__depth-face--right {
+  fill: var(--svg-depth-right);
 }
 
 .svg-plane__panel {
@@ -642,13 +748,16 @@ withDefaults(
 .svg-pill,
 .svg-tools rect,
 .svg-toolbar rect,
-.svg-mini-token,
-.svg-input {
+.svg-mini-token {
   fill: var(--svg-line);
 }
 
 .svg-mini-token {
   fill: var(--svg-mini-token-bg);
+}
+
+.svg-input {
+  fill: var(--svg-card);
 }
 
 .svg-line--short {
@@ -781,10 +890,6 @@ withDefaults(
   stroke-width: 1;
 }
 
-.svg-toggle + .svg-input {
-  fill: var(--svg-line);
-}
-
 .svg-connector {
   color: var(--svg-blue);
 }
@@ -810,6 +915,9 @@ withDefaults(
   --svg-line: #111;
   --svg-panel: var(--svg-panel-dark);
   --svg-card: var(--svg-card-dark);
+  --svg-depth-front: #101010;
+  --svg-depth-right: #0b0b0b;
+  --svg-depth-stroke: #2a2a2a;
   --svg-sheen: transparent;
   --svg-mini-token-bg: #272727;
   --svg-preview-a: #272727;
@@ -836,7 +944,6 @@ withDefaults(
 
 :global(.dark .svg-line),
 :global(.dark .svg-toggle),
-:global(.dark .svg-input),
 :global(.dark .svg-toolbar rect),
 :global(.dark .svg-pill),
 :global(.dark .svg-tools rect) {
@@ -858,12 +965,12 @@ withDefaults(
 
 @media (max-width: 767px) {
   .home-exploded-illustration {
-    width: min(100%, 440px);
-    min-height: 392px;
+    width: min(100%, var(--home-illustration-mobile-width));
+    max-width: var(--home-illustration-mobile-width);
   }
 
   .home-exploded-illustration__svg {
-    max-width: 440px;
+    max-width: var(--home-illustration-mobile-width);
   }
 }
 </style>

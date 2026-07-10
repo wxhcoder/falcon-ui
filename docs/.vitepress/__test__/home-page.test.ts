@@ -9,20 +9,12 @@ const rootDir = path.resolve(__dirname, '../../..')
 const readText = (relativePath: string) =>
   fs.readFileSync(path.resolve(rootDir, relativePath), 'utf8')
 
-const readConnectorGroup = (source: string, connector: 'left' | 'center' | 'right') => {
-  const match = source.match(
-    new RegExp(`<g class="svg-connector svg-connector--${connector}">([\\s\\S]*?)</g>`)
-  )
-
-  expect(match).not.toBeNull()
-
-  return match?.[1] ?? ''
-}
-
 const planeWidth = 760
 const planeHeight = 220
 const planePadding = 10
 const planeGap = 10
+const planeDepth = 18
+const referenceLayerGap = 35.5102
 
 const expectedPlanes = {
   template: {
@@ -52,10 +44,10 @@ const expectedPlanes = {
   },
   content: {
     points: [
-      [700, 360],
-      [1435, 460],
-      [1135, 660],
-      [400, 560]
+      [700, 408.163],
+      [1435, 508.163],
+      [1135, 708.163],
+      [400, 608.163]
     ],
     cards: [
       { x: 10, y: 10, width: 365, height: 200 },
@@ -64,10 +56,10 @@ const expectedPlanes = {
   },
   foundation: {
     points: [
-      [700, 530],
-      [1435, 660],
-      [1135, 920],
-      [400, 790]
+      [700, 684.49],
+      [1435, 814.49],
+      [1135, 1074.49],
+      [400, 944.49]
     ],
     cards: [
       { x: 10, y: 10, width: 240, height: 200 },
@@ -97,6 +89,43 @@ const expectPoint = (actual: number[], expected: readonly [number, number]) => {
   expect(actual[0]).toBeCloseTo(expected[0], 4)
   expect(actual[1]).toBeCloseTo(expected[1], 4)
 }
+
+const panelCorner = (
+  plane: (typeof expectedPlanes)[keyof typeof expectedPlanes],
+  corner: 'topLeft' | 'topRight' | 'bottomRight' | 'bottomLeft'
+) => {
+  const [topLeft, topRight, bottomRight, bottomLeft] = plane.points
+
+  return {
+    topLeft,
+    topRight,
+    bottomRight,
+    bottomLeft
+  }[corner]
+}
+
+const interpolateYAtX = (
+  [start, end]: readonly [readonly [number, number], readonly [number, number]],
+  x: number
+) => {
+  const progress = (x - start[0]) / (end[0] - start[0])
+
+  return start[1] + (end[1] - start[1]) * progress
+}
+
+const topYAtX = (plane: (typeof expectedPlanes)[keyof typeof expectedPlanes], x: number) =>
+  interpolateYAtX([panelCorner(plane, 'topLeft'), panelCorner(plane, 'topRight')], x)
+
+const bottomYAtX = (plane: (typeof expectedPlanes)[keyof typeof expectedPlanes], x: number) =>
+  interpolateYAtX([panelCorner(plane, 'bottomLeft'), panelCorner(plane, 'bottomRight')], x)
+
+const offsetPoint = ([x, y]: readonly [number, number], offsetY: number): [number, number] => [
+  x,
+  y + offsetY
+]
+
+const pointsValue = (points: readonly (readonly [number, number])[]) =>
+  points.map(([x, y]) => `${x} ${y}`).join(' ')
 
 const expectOutsideTransformedPlaneContent = (element: Element) => {
   expect(element.closest('.svg-plane__content')).toBeNull()
@@ -171,7 +200,7 @@ describe('docs homepage', () => {
 
     expect(illustrationSource).toContain('home-exploded-illustration')
     expect(illustrationSource).toContain('<svg')
-    expect(illustrationSource).toContain('viewBox="0 0 1672 941"')
+    expect(illustrationSource).toContain('viewBox="0 0 1672 1096"')
     expect(illustrationSource).toContain('preserveAspectRatio="xMidYMid meet"')
     expect(illustrationSource).toContain('Foundation')
     expect(illustrationSource).toContain('Layout')
@@ -197,6 +226,39 @@ describe('docs homepage', () => {
     expect(illustrationSource).not.toContain('rotate(')
     expect(illustrationSource).toContain('svg-foundation-glyphs')
     expect(illustrationSource).not.toContain('svg-float')
+  })
+
+  it('locks the homepage illustration to a reduced proportional display size', () => {
+    const illustrationSource = readText('docs/.vitepress/components/HomeExplodedIllustration.vue')
+
+    expect(illustrationSource).toContain('--home-illustration-width: 960px;')
+    expect(illustrationSource).toContain('--home-illustration-mobile-width: 420px;')
+    expect(illustrationSource).toContain('aspect-ratio: 1672 / 1096;')
+    expect(illustrationSource).toContain('width: min(100%, var(--home-illustration-width));')
+    expect(illustrationSource).toContain('max-width: var(--home-illustration-width);')
+    expect(illustrationSource).toContain('height: auto;')
+    expect(illustrationSource).toContain('width: min(100%, var(--home-illustration-mobile-width));')
+    expect(illustrationSource).toContain('max-width: var(--home-illustration-mobile-width);')
+    expect(illustrationSource).not.toContain('--home-illustration-width: 1440px;')
+    expect(illustrationSource).not.toContain('--home-illustration-mobile-width: 880px;')
+    expect(illustrationSource).not.toContain('scaleX(')
+    expect(illustrationSource).not.toContain('scaleY(')
+  })
+
+  it('keeps the homepage hero vertically centered without page overflow', () => {
+    const homeSource = readText('docs/.vitepress/components/HomePage.vue')
+
+    expect(homeSource).toContain('height: calc(100svh - var(--vp-nav-height, 64px));')
+    expect(homeSource).toContain('overflow: hidden;')
+    expect(homeSource).toContain('display: grid;')
+    expect(homeSource).toContain('align-items: center;')
+    expect(homeSource).toContain('min-height: 0;')
+    expect(homeSource).toContain(':global(.page-content:has(.falcon-homepage))')
+    expect(homeSource).toContain(':global(.doc-content-wrapper:has(.falcon-homepage))')
+    expect(homeSource).toContain(':global(.doc-content:has(.falcon-homepage))')
+    expect(homeSource).toContain('padding-top: 0;')
+    expect(homeSource).toContain('padding: 0;')
+    expect(homeSource).not.toContain('min-height: clamp(760px, 52vw, 980px);')
   })
 
   it('locks the dark-mode illustration color contract', () => {
@@ -227,9 +289,11 @@ describe('docs homepage', () => {
     expect(darkThemeSource).toContain('--svg-preview-b: #272727;')
     expect(illustrationSource).toContain('#2e2e2e')
     expect(illustrationSource).toContain(':global(.dark .svg-mini-token)')
+    expect(normalizedIllustrationSource).toContain('.svg-input {\n  fill: var(--svg-card);\n}')
+    expect(normalizedIllustrationSource).not.toContain('.svg-toggle + .svg-input')
     expect(darkRaisedFillSource).toContain(':global(.dark .svg-line)')
     expect(darkRaisedFillSource).toContain(':global(.dark .svg-toggle)')
-    expect(darkRaisedFillSource).toContain(':global(.dark .svg-input)')
+    expect(darkRaisedFillSource).not.toContain(':global(.dark .svg-input)')
     expect(darkRaisedFillSource).toContain(':global(.dark .svg-toolbar rect)')
     expect(darkRaisedFillSource).toContain(':global(.dark .svg-pill)')
     expect(darkRaisedFillSource).toContain(':global(.dark .svg-tools rect)')
@@ -257,7 +321,7 @@ describe('docs homepage', () => {
     }
   })
 
-  it('keeps plane content inside a 10-unit inset with 10-unit card gaps and 4-unit card radii', () => {
+  it('keeps plane content inside a 10-unit inset with 10-unit card gaps and 2-unit card radii', () => {
     const wrapper = mount(HomeExplodedIllustration)
 
     for (const [name, plane] of Object.entries(expectedPlanes)) {
@@ -272,8 +336,8 @@ describe('docs homepage', () => {
         expect(numberAttr(card, 'y')).toBe(planePadding)
         expect(numberAttr(card, 'width')).toBe(expectedCard.width)
         expect(numberAttr(card, 'height')).toBe(planeHeight - planePadding * 2)
-        expect(numberAttr(card, 'rx')).toBe(4)
-        expect(numberAttr(card, 'ry')).toBe(4)
+        expect(numberAttr(card, 'rx')).toBe(2)
+        expect(numberAttr(card, 'ry')).toBe(2)
 
         if (index > 0) {
           const previousCard = plane.cards[index - 1]
@@ -288,6 +352,31 @@ describe('docs homepage', () => {
 
       expect(firstCard.x).toBe(planePadding)
       expect(lastCard.x + lastCard.width).toBe(planeWidth - planePadding)
+    }
+  })
+
+  it('normalizes rounded inline SVG rects and foundation control sizes', () => {
+    const wrapper = mount(HomeExplodedIllustration)
+    const swatch = wrapper.find('.svg-swatch-square').element
+    const check = wrapper.find('.svg-check').element
+    const roundedRects = wrapper.findAll('rect[rx]').map((rect) => rect.element)
+
+    expect(numberAttr(swatch, 'width')).toBe(40)
+    expect(numberAttr(swatch, 'height')).toBe(24)
+    expect(numberAttr(swatch, 'rx')).toBe(2)
+
+    expect(numberAttr(check, 'width')).toBe(40)
+    expect(numberAttr(check, 'height')).toBe(24)
+    expect(numberAttr(check, 'rx')).toBe(2)
+
+    expect(roundedRects.length).toBeGreaterThan(0)
+
+    for (const rect of roundedRects) {
+      expect(numberAttr(rect, 'rx')).toBe(2)
+
+      if (rect.hasAttribute('ry')) {
+        expect(numberAttr(rect, 'ry')).toBe(2)
+      }
     }
   })
 
@@ -352,49 +441,98 @@ describe('docs homepage', () => {
     expect(triangle.element.parentElement).toBe(overlay.element)
   })
 
-  it('aligns SVG layer panels to four connector anchors on each vertical guide', () => {
-    const illustrationSource = readText('docs/.vitepress/components/HomeExplodedIllustration.vue')
+  it('keeps each layer separated by the red reference gap at the leading panel edge', () => {
+    const measurementX = 700
+    const layerPairs = [
+      [expectedPlanes.template, expectedPlanes.components],
+      [expectedPlanes.components, expectedPlanes.content],
+      [expectedPlanes.content, expectedPlanes.foundation]
+    ] as const
+
+    for (const [upperPlane, lowerPlane] of layerPairs) {
+      expect(topYAtX(lowerPlane, measurementX) - bottomYAtX(upperPlane, measurementX)).toBeCloseTo(
+        referenceLayerGap,
+        3
+      )
+    }
+  })
+
+  it('adds a consistent vertical thickness face to all four illustration planes', () => {
     const wrapper = mount(HomeExplodedIllustration)
-    const connectorAnchors = {
-      left: [
-        [400, 120],
-        [400, 340],
-        [400, 560],
-        [400, 790]
-      ],
-      center: [
-        [1135, 180],
-        [1135, 420],
-        [1135, 660],
-        [1135, 920]
-      ],
-      right: [
-        [1435, 60],
-        [1435, 260],
-        [1435, 460],
-        [1435, 660]
-      ]
+    const maxViewBoxY = 1096
+
+    for (const [name, plane] of Object.entries(expectedPlanes)) {
+      const planeGroup = wrapper.find(`.svg-plane--${name}`)
+      const depthFaces = planeGroup.findAll('.svg-plane__depth-face').map((face) => face.element)
+      const [topLeft, topRight, bottomRight, bottomLeft] = plane.points
+      const expectedFrontFace = pointsValue([
+        bottomLeft,
+        bottomRight,
+        offsetPoint(bottomRight, planeDepth),
+        offsetPoint(bottomLeft, planeDepth)
+      ])
+      const expectedRightFace = pointsValue([
+        topRight,
+        bottomRight,
+        offsetPoint(bottomRight, planeDepth),
+        offsetPoint(topRight, planeDepth)
+      ])
+      const directChildClasses = Array.from(planeGroup.element.children).map((child) =>
+        child.getAttribute('class')
+      )
+      const depthYValues = depthFaces.flatMap((face) => {
+        const values =
+          face
+            .getAttribute('points')
+            ?.match(/-?\d+(?:\.\d+)?/g)
+            ?.map(Number) ?? []
+
+        return values.filter((_, index) => index % 2 === 1)
+      })
+
+      expect(topLeft).toBeDefined()
+      expect(depthFaces).toHaveLength(2)
+      expect(depthFaces[0].getAttribute('class')).toBe(
+        'svg-plane__depth-face svg-plane__depth-face--front'
+      )
+      expect(depthFaces[0].getAttribute('points')).toBe(expectedFrontFace)
+      expect(depthFaces[1].getAttribute('class')).toBe(
+        'svg-plane__depth-face svg-plane__depth-face--right'
+      )
+      expect(depthFaces[1].getAttribute('points')).toBe(expectedRightFace)
+      expect(directChildClasses[0]).toBe('svg-plane__depth-face svg-plane__depth-face--front')
+      expect(directChildClasses[1]).toBe('svg-plane__depth-face svg-plane__depth-face--right')
+      expect(directChildClasses[2]).toContain('svg-plane__panel')
+      expect(Math.max(...depthYValues)).toBeLessThanOrEqual(maxViewBoxY)
+    }
+  })
+
+  it('aligns SVG layer panels to connector anchors derived from their three reference corners', () => {
+    const wrapper = mount(HomeExplodedIllustration)
+    const planeOrder = ['template', 'components', 'content', 'foundation'] as const
+    const connectorCorners = {
+      left: 'bottomLeft',
+      center: 'bottomRight',
+      right: 'topRight'
     } as const
-    const { left, center, right } = connectorAnchors
 
-    expect(right[3][1]).toBe(center[2][1])
-    expect(left[3][1]).toBe((center[2][1] + center[3][1]) / 2)
+    for (const [connector, corner] of Object.entries(connectorCorners)) {
+      const anchors = planeOrder.map((planeName) => panelCorner(expectedPlanes[planeName], corner))
+      const connectorGroup = wrapper.find(`.svg-connector--${connector}`)
+      const line = connectorGroup.find('line')
+      const circles = connectorGroup.findAll('circle').map((circle) => circle.element)
 
-    for (const [connector, anchors] of Object.entries(connectorAnchors)) {
-      const groupSource = readConnectorGroup(
-        illustrationSource,
-        connector as 'left' | 'center' | 'right'
-      )
+      expect(connectorGroup.exists()).toBe(true)
+      expect(line.exists()).toBe(true)
+      expect(circles).toHaveLength(anchors.length)
+      expectPoint([numberAttr(line.element, 'x1'), numberAttr(line.element, 'y1')], anchors[0])
+      expectPoint([numberAttr(line.element, 'x2'), numberAttr(line.element, 'y2')], anchors[3])
 
-      expect(groupSource.match(/<circle /g)).toHaveLength(4)
-      expect(groupSource).toContain(
-        `<line x1="${anchors[0][0]}" x2="${anchors[0][0]}" y1="${anchors[0][1]}" y2="${
-          anchors[3][1]
-        }" />`
-      )
+      for (const [index, anchor] of anchors.entries()) {
+        const circle = circles[index]
 
-      for (const [x, y] of anchors) {
-        expect(groupSource).toContain(`<circle cx="${x}" cy="${y}" r="9" />`)
+        expectPoint([numberAttr(circle, 'cx'), numberAttr(circle, 'cy')], anchor)
+        expect(numberAttr(circle, 'r')).toBe(9)
       }
     }
 

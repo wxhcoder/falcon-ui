@@ -140,3 +140,19 @@
 - `planning-with-files` applies because this task crossed the multi-step threshold and needs
   persistent phase tracking.
 - `component-development-playbook` does not apply because `FlTree` is not an Element Plus wrapper.
+
+---
+
+# Falcon UI Docs Publishing Findings
+
+- The documentation site is an existing VitePress 1.6 project rooted at `docs/`.
+- Root scripts already include `docs:dev`, `docs:build`, `docs:preview`, and `docs:check`.
+- The site provides Chinese and English locales, local search, component demos, and custom Vue
+  theme components.
+- No `.openai/hosting.json` exists, so publishing must create a new Sites project exactly once.
+- The worktree contains user-authored changes in the homepage illustration, homepage layout, and
+  related tests; publishing must include and preserve those changes.
+- Sites packaging requires `dist/server/index.js` plus `.openai/hosting.json`; the existing
+  VitePress build outputs to `docs/.vitepress/dist`, so a small hosting adapter is required.
+- A Cloudflare-compatible worker can delegate generated files to the Sites `ASSETS` binding while
+  mapping VitePress clean URLs such as `/components/button` to `/components/button.html`.

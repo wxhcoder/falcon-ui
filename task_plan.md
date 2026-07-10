@@ -73,3 +73,37 @@ The closed runtime milestones cover:
 | `rg.exe` access denied in this environment                    | 1       | Switched to PowerShell `Get-ChildItem` and targeted file reads                         |
 | `pnpm build:lib` warns about `dialog.vue` dynamic import      | 1       | Confirmed it is a pre-existing non-blocking warning unrelated to `FlTree`              |
 | `pnpm --dir play build` warns about large chunks              | 1       | Confirmed the build succeeds; chunk-size warning is non-blocking and pre-existing      |
+
+---
+
+# Falcon UI Docs Publishing Plan
+
+## Goal
+
+Publish the existing VitePress site under `docs/` with OpenAI Sites while preserving the current
+documentation content, bilingual routes, interactive examples, and uncommitted homepage work.
+
+## Phase Status
+
+| Phase    | Status      | Notes                                                                                      |
+| -------- | ----------- | ------------------------------------------------------------------------------------------ |
+| Inspect  | complete    | Confirmed an existing Vue/VitePress documentation site and no prior Sites project metadata |
+| Validate | complete    | Homepage tests passed (16/16) and the full bilingual VitePress build succeeded             |
+| Adapt    | complete    | Static worker routing tests passed (3/3) and the VitePress preview opened successfully     |
+| Publish  | in progress | Create the Sites project, save the validated version, and deploy privately                 |
+| Verify   | pending     | Poll deployment status and hand off the production URL                                     |
+
+## Publishing Constraints
+
+- Preserve the user's existing uncommitted homepage changes.
+- Keep VitePress as the documentation source and preserve clean routes and interactive examples.
+- Do not replace the current docs UI with a new starter.
+- Publish privately unless Sites reports that owner-only access cannot be verified.
+
+## Publishing Errors Encountered
+
+| Error                                                                            | Attempt | Resolution                                                                           |
+| -------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------ |
+| Initial combined inspection returned exit 1 because `.openai/` did not exist     | 1       | Confirmed this is a new Sites project and continued with targeted reads              |
+| Combined homepage test and docs check timed out without output after 124 seconds | 1       | Split validation into isolated commands and constrain Vitest workers before retrying |
+| Initial worker test expected generic Button and Page Not Found titles            | 1       | Matched the real generated titles after confirming the responses were correct        |
