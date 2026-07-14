@@ -22,6 +22,7 @@
     "dev": "pnpm play",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
+    "docs:build:sites": "pnpm docs:check && node scripts/docs/build-sites.mjs",
     "docs:preview": "vitepress preview docs",
     "docs:api": "node scripts/docs/generate-api-meta.mjs",
     "docs:check": "pnpm docs:api && pnpm docs:build",
