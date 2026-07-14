@@ -1,20 +1,20 @@
 {
   "component": "fl-tree-select",
-  "description": "树选择器组件，用于从层级数据中选择值，支持错误态和表格内样式。",
+  "description": "",
   "events": [],
   "exposes": [
     {
-      "description": "让内部输入框失去焦点。",
+      "description": "Blur the inner input.",
       "name": "blur",
       "type": "() => void"
     },
     {
-      "description": "让内部可聚焦元素获得焦点。",
+      "description": "Focus the inner focusable element.",
       "name": "focus",
       "type": "() => void"
     },
     {
-      "description": "读取当前选中项显示出来的文字。",
+      "description": "Read the label displayed for the selected option.",
       "name": "selectedLabel",
       "type": "string | string[] | undefined"
     },
@@ -32,14 +32,14 @@
   "props": [
     {
       "default": "false",
-      "description": "是否显示错误状态。",
+      "description": "Whether to show the error state.",
       "name": "isError",
       "required": false,
       "type": "boolean | undefined"
     },
     {
       "default": "false",
-      "description": "是否按表格单元格场景显示。",
+      "description": "Whether to render for a table-cell scenario.",
       "name": "isTable",
       "required": false,
       "type": "boolean | undefined"
