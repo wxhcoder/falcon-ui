@@ -200,6 +200,59 @@ describe('docs homepage', () => {
     expect(layoutSource).toContain('v-if="!isHomepage"')
   })
 
+  it('animates the supplied SVG noise geometry as a theme-aware decorative mask', () => {
+    const homeSource = readText('docs/.vitepress/components/HomePage.vue')
+    const customStylesSource = readText('docs/.vitepress/styles/custom.css')
+    const noiseSource = readText('docs/public/home-noise.svg')
+    const normalizedHomeSource = homeSource.replace(/\r\n/g, '\n')
+    const reducedMotionSource =
+      normalizedHomeSource.match(
+        /@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/
+      )?.[1] ?? ''
+    const circles = noiseSource.match(/<circle\b/g) ?? []
+    const radii = [...noiseSource.matchAll(/<circle\b[^>]*\br="([^"]+)"/g)].map(
+      ([, radius]) => radius
+    )
+    const fills = [...noiseSource.matchAll(/<circle\b[^>]*\bfill="([^"]+)"/g)].map(
+      ([, fill]) => fill
+    )
+
+    expect(noiseSource).toContain('viewBox="0 0 1080 608"')
+    expect(noiseSource).toContain('<mask id="noiseFadeMask"')
+    expect(noiseSource).toContain('fill="url(#noiseVerticalGradient)"')
+    expect(noiseSource).toContain(
+      '<linearGradient id="noiseVerticalGradient" x1="0%" y1="0%" x2="0%" y2="100%">'
+    )
+    expect(noiseSource).toContain('<stop offset="0" stop-color="white" stop-opacity="0.22" />')
+    expect(noiseSource).toContain('<stop offset="0.55" stop-color="white" stop-opacity="0.6" />')
+    expect(noiseSource).toContain('<stop offset="1" stop-color="white" stop-opacity="1" />')
+    expect(circles).toHaveLength(2258)
+    expect(new Set(radii)).toEqual(new Set(['0.864']))
+    expect(new Set(fills)).toEqual(new Set(['#121212']))
+
+    expect(homeSource).toContain('class="falcon-homepage__noise"')
+    expect(homeSource).toContain('aria-hidden="true"')
+    expect(homeSource).toContain("withBase('/home-noise.svg')")
+    expect(homeSource).toContain("'--home-noise-mask'")
+    expect(homeSource).toContain('-webkit-mask-image: var(--home-noise-mask);')
+    expect(homeSource).toContain('mask-image: var(--home-noise-mask);')
+    expect(homeSource).toContain('-webkit-mask-size: cover;')
+    expect(homeSource).toContain('mask-size: cover;')
+    expect(homeSource).toContain('color-mix(in srgb, var(--vp-c-text-1) 12%, var(--vp-c-bg))')
+    expect(homeSource).toContain('color-mix(in srgb, var(--vp-c-text-1) 22%, var(--vp-c-bg))')
+    expect(homeSource).toContain('linear-gradient(')
+    expect(homeSource).toContain('115deg,')
+    expect(homeSource).toContain('background-size: 220% 100%;')
+    expect(homeSource).toContain('animation: home-noise-wave 12s ease-in-out infinite alternate;')
+    expect(homeSource).toContain('@keyframes home-noise-wave')
+    expect(homeSource).toContain('pointer-events: none;')
+    expect(reducedMotionSource).toContain('.falcon-homepage__noise')
+    expect(reducedMotionSource).toContain('animation: none;')
+    expect(reducedMotionSource).toContain('background-position: 50% 50%;')
+    expect(homeSource).not.toContain('filter: invert(')
+    expect(customStylesSource).not.toContain('.dark .falcon-homepage__noise')
+  })
+
   it('keeps localized content separate from the illustration structure', () => {
     const homeSource = readText('docs/.vitepress/components/HomePage.vue')
 

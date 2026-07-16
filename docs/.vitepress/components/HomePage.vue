@@ -1,5 +1,10 @@
 <template>
   <main class="falcon-homepage">
+    <div
+      class="falcon-homepage__noise"
+      aria-hidden="true"
+      :style="{ '--home-noise-mask': `url('${withBase('/home-noise.svg')}')` }" />
+
     <section class="falcon-homepage__hero" aria-labelledby="falcon-homepage-title">
       <div class="falcon-homepage__copy">
         <p class="falcon-homepage__eyebrow">{{ content.eyebrow }}</p>
@@ -87,8 +92,10 @@ const content = computed<HomeContent>(() =>
   --home-line: #dfe7f5;
   --home-blue: #165dff;
   --home-blue-hover: #0c4ce5;
+  position: relative;
+  isolation: isolate;
   display: grid;
-  width: min(100%, 1320px);
+  width: 100%;
   height: calc(100svh - var(--vp-nav-height, 64px));
   margin: 0 auto;
   padding: 0;
@@ -98,11 +105,63 @@ const content = computed<HomeContent>(() =>
   align-items: center;
 }
 
+.falcon-homepage__noise {
+  --home-noise-rest: color-mix(in srgb, var(--vp-c-text-1) 12%, var(--vp-c-bg));
+  --home-noise-crest: color-mix(in srgb, var(--vp-c-text-1) 22%, var(--vp-c-bg));
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(
+    115deg,
+    var(--home-noise-rest) 0%,
+    var(--home-noise-rest) 34%,
+    var(--home-noise-crest) 48%,
+    var(--home-noise-rest) 62%,
+    var(--home-noise-rest) 100%
+  );
+  background-repeat: no-repeat;
+  background-position: 100% 50%;
+  background-size: 220% 100%;
+  -webkit-mask-image: var(--home-noise-mask);
+  mask-image: var(--home-noise-mask);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  animation: home-noise-wave 12s ease-in-out infinite alternate;
+  pointer-events: none;
+  will-change: background-position;
+}
+
+@keyframes home-noise-wave {
+  0%,
+  100% {
+    background-position: 100% 50%;
+  }
+
+  50% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .falcon-homepage__noise {
+    animation: none;
+    background-position: 50% 50%;
+  }
+}
+
 .falcon-homepage__hero {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(360px, 0.36fr) minmax(0, 0.64fr);
   align-items: center;
+  width: min(100%, 1320px);
   min-height: 0;
+  margin: 0 auto;
   gap: clamp(20px, 3vw, 44px);
   padding: clamp(16px, 2vw, 28px) clamp(8px, 2vw, 24px);
 }
