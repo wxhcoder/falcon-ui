@@ -250,3 +250,4 @@ production version.
 | Performance test expected the old `registerDemoRuntime(app)` call      | 1       | Match the full-context hook implementation with `registerDemoRuntime(context.app)`                      |
 | Combined tests plus `docs:check` exceeded the 120-second command limit | 1       | Tests had already advanced; rerun the production check separately with its own time budget              |
 | Sites source credential request returned an internal connector error   | 1       | Inspect the existing saved version/source binding and use the established repository path if it matches |
+| Git Bash tar treated the Windows `C:` archive path as a remote target  | 1       | Retry the packaging helper with MSYS `/c/...` and `/d/...` paths                                        |

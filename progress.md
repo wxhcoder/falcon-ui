@@ -366,3 +366,6 @@
 - Began packaging and source publication for a new Sites version.
 - Sites could not issue a fresh source credential because of an internal connector error; checking
   the existing version's source binding before choosing the established repository fallback.
+- Pushed the validated release commit to the established source repository.
+- The first packaging-helper call rejected the Windows drive-letter archive path; switching to the
+  helper's native MSYS path form for the retry.
