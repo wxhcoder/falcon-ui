@@ -212,3 +212,166 @@
 - Re-ran the Sites worker suite: 3 tests passed.
 - Opened the existing VitePress preview at `http://127.0.0.1:5173/` and confirmed the Falcon UI
   document title loaded.
+- Created the private Falcon UI Documentation Sites project and persisted its project metadata.
+- Pushed the exact validated source state to the Sites source branch; an HTTP/2 interruption was
+  resolved by using Git HTTP/1.1.
+- The bundled Bash packager could not start because WSL is unavailable in this Windows session;
+  switched to an equivalent native PowerShell archive flow.
+- Saved Sites version 1 from the validated archive and deployed it privately.
+- Sites reported deployment success at `https://falcon-ui-docs.wangzixu53982.chatgpt.site`.
+- The in-app browser could not complete a TLS handshake with the newly provisioned hostname, but
+  the production deployment itself completed successfully according to Sites.
+- Final plan review confirmed all publishing phases are complete; the auxiliary completion helper
+  did not recognize the appended Markdown phase table format.
+
+---
+
+# Docs Homepage Exploded Animation Progress
+
+## 2026-07-14
+
+- Loaded Vue, frontend motion, and file-planning guidance.
+- Recovered and preserved the existing dirty worktree and prior planning records.
+- Confirmed the current illustration has four independently grouped planes and separate connectors.
+- Confirmed the homepage regression baseline passes all 20 tests.
+- Started the implementation phase for the one-shot staggered entrance animation.
+- Added per-plane initial offsets, overshoot values, and 70ms stagger delays.
+- Added the 880ms one-shot layer keyframes and delayed connector reveal.
+- Added mobile-specific reduced travel and complete reduced-motion final-state resets.
+- Extended the homepage regression suite with an animation contract test.
+- The first parallel test/format check stopped on Prettier warnings for both edited files; the
+  test result was not retained, so verification continues with isolated commands.
+- Formatted the two edited source/test files with the repository Prettier configuration.
+- Re-ran the homepage regression suite successfully: 21 tests passed.
+- Target ESLint and Prettier checks passed.
+- The VitePress production build succeeded with only existing Sass, chunking, and bundle-size
+  warnings.
+- Desktop final-state inspection showed all planes at full opacity with identity transforms.
+- One timed browser screenshot returned a capture-only black frame; surrounding screenshots and
+  computed element bounds remained healthy.
+- The browser page scope did not expose `Element.getAnimations()`, so visual verification continues
+  with computed styles and responsive bounds.
+- Verified the production preview at 390x844: no horizontal overflow, no clipping, and all mobile
+  offset overrides applied.
+- Verified desktop light and dark final states: four planes and connectors are fully visible with
+  identity transforms after the entrance finishes.
+- Browser visual verification is complete; reduced motion remains covered by the source contract
+  test because the local browser cannot emulate the system preference.
+- Restored the preview theme, finalized browser tabs, and stopped the local preview server; the
+  combined cleanup command left only its two temporary log files for separate removal.
+- Final source diff and whitespace checks passed.
+- The three planning Markdown files required repository-standard formatting before handoff.
+
+---
+
+# Docs Homepage White-Screen Performance Progress
+
+## 2026-07-18
+
+- Loaded the Computer Use safety/runtime guidance and the file-based planning workflow.
+- Confirmed the repository already has modified planning records; appended a new investigation
+  section without overwriting prior content.
+- Started the baseline phase; no product source files have been modified.
+- Inspected package scripts, VitePress configuration, docs inventory, scoped dirty state, and local
+  listeners.
+- Preserved the user's unrelated open Chrome window and selected an isolated profiling path.
+- Confirmed the listener on port 5173 belongs to `vitepress dev docs`.
+- Mapped the homepage entry chain and identified the eager theme-level imports to validate against
+  the performance trace.
+- Completed the baseline phase and moved to cold-load profiling in an isolated DevTools browser.
+- The first navigation to IPv4 loopback failed because VitePress is listening on IPv6 loopback;
+  switched the target URL to `localhost` instead of repeating the same endpoint.
+- The requested workspace trace path was rejected by the isolated DevTools filesystem policy;
+  continued with DevTools-managed trace storage so profiling itself remains unaffected.
+- Recorded the first unthrottled cold-load performance trace and analyzed its LCP breakdown and
+  network dependency tree.
+- Confirmed that render delay/module fan-out, not TTFB, accounts for virtually the entire blank
+  interval.
+- Read the exact demo registration implementation and proved it eagerly imports every localized
+  demo module.
+- Collected Resource Timing counts, decoded sizes, First Paint/FCP timings, and slowest initial
+  resources from the loaded page.
+- Repeated the trace with Fast 3G networking and 4x CPU slowdown; captured the 48.1-second LCP and
+  47.0-second critical path.
+- Detected that the existing production output predated the latest docs commit, rebuilt the current
+  site successfully, and retained Vite's chunk-size/static-import warnings as supporting evidence.
+- Measured the rebuilt asset totals and started an isolated current production preview on port 5174.
+- Recorded the production preview under the same Fast 3G/4x CPU conditions and measured 2.10-second
+  LCP, establishing the dev-versus-production boundary of the issue.
+- Analyzed production render-blocking resources and the critical dependency chain.
+- Corrected for warm-cache bias by tracing a new isolated browser context from `about:blank`; the
+  true cold production LCP is 3.36 seconds under the constrained profile.
+- Analyzed cold production render-blocking CSS, dependency latency, DOM/layout cost, and forced
+  reflow to rank secondary causes.
+- Ran an isolated cold dev navigation; navigation itself completed after about 50 seconds, but the
+  generated trace was too large for DevTools to serialize, so switched to browser timing entries.
+- Collected the final cold-dev Navigation/Resource Timing data: 67.2-second First Paint and
+  70.2-second FCP with 250 resources.
+- Compared HTTP shells and proved dev serves an empty mount point while production includes the
+  server-rendered homepage.
+- Completed profiling and began final source/build correlation.
+- Measured the true cold production startup payload and confirmed the 1.30 MB decoded theme chunk
+  continues loading after first paint.
+- Ranked the root causes and proposed measurable remediation priorities without changing product
+  source.
+- Reset browser CPU/network emulation, closed isolated profiling pages, stopped the temporary 5174
+  preview, and verified the pre-existing 5173 dev server remains running.
+- Finalized the white-screen problem report; all investigation phases are complete.
+
+---
+
+# Docs Homepage White-Screen Optimization Progress
+
+## 2026-07-18
+
+- Reloaded the Vue, Vite, and file-planning workflows for the implementation turn.
+- Preserved the pre-existing dirty planning files and started a new scoped optimization plan.
+- Began mapping the docs-only runtime dependencies before changing registration or styles.
+- Cataloged all demo component tags/imports and confirmed no Element Plus directives require global
+  plugin installation.
+- Confirmed SSR injection keys and Falcon component entries can be imported without the two root
+  plugins; logged and corrected a Windows-only `rg` glob failure.
+- Verified `VpDemo`, Element Plus subpath exports, `useDialog`, and Vite CSS-splitting behavior support
+  the planned async runtime design.
+- Added a source-contract regression suite for lazy demo loading, on-demand component registration,
+  and demo-only style loading; the red baseline is ready to run.
+- Confirmed the red baseline failed all 3 tests for the expected missing contracts.
+- The first combined implementation/planning patch could not identify the intended error table;
+  split the edits and confirmed no partial source change occurred.
+- Added a docs-only async runtime that lazy-loads demo SFCs, registers only the required Falcon and
+  Element Plus components through dynamic imports, and loads the full demo visual theme on demand.
+- Removed the two full plugin installations and all demo CSS imports from the shared theme entry.
+- Re-ran the new performance suite successfully: 3 tests passed.
+- Target lint/type verification exposed a pre-existing docs TypeScript configuration resolution
+  problem for `falcon-ui/global` and `node`; separated lint from the config diagnosis.
+
+---
+
+# Falcon UI Compressed Production Release Progress
+
+## 2026-07-18
+
+- Loaded the Sites building, Sites hosting, Vite, and file-planning workflows.
+- Resolved the existing Falcon UI project, production URL, public access mode, and current source
+  state without changing the site's access policy.
+- Verified production gzip delivery for both HTML and CSS; selected platform compression instead
+  of redundant Worker-level compression.
+- Started validation of the latest white-screen optimization source before publishing.
+- The first validation run found a stale source-contract assertion after the VitePress hook context
+  fix; updated the assertion to the correct `context.app` call before retrying.
+- The combined retry exceeded the command window because tests and the full docs build shared one
+  timeout; split the production check into a separate run instead of repeating the same command.
+- Completed the split validation successfully: all 36 documentation tests passed and the full API
+  generation plus VitePress production build completed.
+- Began packaging and source publication for a new Sites version.
+- Sites could not issue a fresh source credential because of an internal connector error; checking
+  the existing version's source binding before choosing the established repository fallback.
+- Pushed the validated release commit to the established source repository.
+- The first packaging-helper call rejected the Windows drive-letter archive path; switching to the
+  helper's native MSYS path form for the retry.
+- Packaged the validated Sites artifact successfully and confirmed its required server and hosting
+  metadata entries.
+- The first save attempt proved the Sites project uses a separate bound source repository; obtained
+  a fresh credential after the earlier connector error cleared.
+- The bound repository rejected a direct push because its previous release history diverges from
+  GitHub main; preparing a merge commit with the current validated tree and both histories intact.

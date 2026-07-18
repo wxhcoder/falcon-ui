@@ -78,9 +78,8 @@
               </g>
 
               <text class="svg-layer-kicker" x="405" y="34">Preview</text>
-              <rect class="svg-preview" x="425" y="50" width="220" height="100" rx="2" ry="2" />
+              <rect class="svg-preview" x="420" y="50" width="300" height="100" rx="2" ry="2" />
               <path class="svg-preview-mountain" d="M454 131l67-60 44 42 29-25 66 43z" />
-              <circle class="svg-preview-sun" cx="594" cy="79" r="18" />
               <rect class="svg-line" x="425" y="164" width="210" height="10" rx="2" />
               <rect class="svg-line" x="445" y="184" width="170" height="10" rx="2" />
             </template>
@@ -117,10 +116,8 @@
               <line class="svg-rule" x1="535" x2="730" y1="105" y2="105" />
               <rect class="svg-line svg-line--cell" x="535" y="124" width="52" height="8" rx="2" />
               <rect class="svg-line svg-line--cell" x="605" y="124" width="42" height="8" rx="2" />
-              <circle class="svg-status" cx="690" cy="128" r="5" />
               <rect class="svg-line svg-line--cell" x="535" y="152" width="60" height="8" rx="2" />
               <rect class="svg-line svg-line--cell" x="605" y="152" width="40" height="8" rx="2" />
-              <circle class="svg-status" cx="690" cy="156" r="5" />
             </template>
 
             <template v-else>
@@ -134,7 +131,6 @@
                 <rect x="640" y="28" width="26" height="24" rx="2" />
                 <rect x="676" y="28" width="26" height="24" rx="2" />
                 <rect x="712" y="28" width="26" height="24" rx="2" />
-                <circle class="svg-mark" cx="548" cy="40" r="8" />
               </g>
               <text class="svg-title" x="230" y="64">Getting Started</text>
               <rect class="svg-line" x="230" y="92" width="310" height="13" rx="2" />
@@ -149,6 +145,13 @@
                 <rect class="is-active" x="620" y="158" width="36" height="30" rx="2" />
               </g>
             </template>
+          </g>
+          <g v-if="planeRoundGlyphs[plane.name].length" class="svg-plane-round-glyphs">
+            <path
+              v-for="glyph in planeRoundGlyphs[plane.name]"
+              :key="glyph.key"
+              :class="glyph.className"
+              :d="glyph.d" />
           </g>
           <g v-if="plane.name === 'foundation'" class="svg-foundation-glyphs" aria-hidden="true">
             <path
@@ -440,30 +443,32 @@ const createRoundGlyph = (
   className: string,
   x: number,
   y: number,
-  radius: number
+  radius: number,
+  horizontalScale = 1
 ): RoundGlyphGeometry => {
+  const radiusX = radius * horizontalScale
   const center = projectPoint(basis.projection, x, y)
-  const start = projectGlyphPoint(basis, center, radius, 0)
+  const start = projectGlyphPoint(basis, center, radiusX, 0)
   const segments: readonly (readonly [Point, Point, Point])[] = [
     [
-      [radius, radius * ellipseKappa],
-      [radius * ellipseKappa, radius],
+      [radiusX, radius * ellipseKappa],
+      [radiusX * ellipseKappa, radius],
       [0, radius]
     ],
     [
-      [-radius * ellipseKappa, radius],
-      [-radius, radius * ellipseKappa],
-      [-radius, 0]
+      [-radiusX * ellipseKappa, radius],
+      [-radiusX, radius * ellipseKappa],
+      [-radiusX, 0]
     ],
     [
-      [-radius, -radius * ellipseKappa],
-      [-radius * ellipseKappa, -radius],
+      [-radiusX, -radius * ellipseKappa],
+      [-radiusX * ellipseKappa, -radius],
       [0, -radius]
     ],
     [
-      [radius * ellipseKappa, -radius],
-      [radius, -radius * ellipseKappa],
-      [radius, 0]
+      [radiusX * ellipseKappa, -radius],
+      [radiusX, -radius * ellipseKappa],
+      [radiusX, 0]
     ]
   ]
   const commands = segments.map(([controlA, controlB, end]) => {
@@ -538,14 +543,26 @@ const defineConnector = (name: ConnectorName, corner: PlaneCorner): ConnectorGeo
 
 const foundationProjection = createPlaneProjection(foundationPoints)
 const foundationGlyphBasis = createPlaneGlyphBasis(foundationProjection)
+const contentGlyphBasis = createPlaneGlyphBasis(createPlaneProjection(contentPoints))
+const componentsGlyphBasis = createPlaneGlyphBasis(createPlaneProjection(componentsPoints))
+const templateGlyphBasis = createPlaneGlyphBasis(createPlaneProjection(templatePoints))
+const planeRoundGlyphs: Record<PlaneName, readonly RoundGlyphGeometry[]> = {
+  foundation: [],
+  content: [createRoundGlyph(contentGlyphBasis, 'preview-sun', 'svg-preview-sun', 594, 79, 18)],
+  components: [
+    createRoundGlyph(componentsGlyphBasis, 'status-first', 'svg-status', 690, 128, 5),
+    createRoundGlyph(componentsGlyphBasis, 'status-second', 'svg-status', 690, 156, 5)
+  ],
+  template: [createRoundGlyph(templateGlyphBasis, 'template-mark', 'svg-mark', 548, 40, 8)]
+}
 const foundationRoundGlyphs = [
-  createRoundGlyph(foundationGlyphBasis, 'swatch-oval', 'svg-swatch-oval', 112, 106, 20),
-  createRoundGlyph(foundationGlyphBasis, 'theme-light', 'svg-theme-dot', 306, 108, 22),
+  createRoundGlyph(foundationGlyphBasis, 'swatch-oval', 'svg-swatch-oval', 117, 106, 20),
+  createRoundGlyph(foundationGlyphBasis, 'theme-light', 'svg-theme-dot', 321, 108, 22),
   createRoundGlyph(
     foundationGlyphBasis,
     'theme-dark',
     'svg-theme-dot svg-theme-dot--dark',
-    366,
+    385,
     108,
     22
   ),
@@ -553,7 +570,7 @@ const foundationRoundGlyphs = [
     foundationGlyphBasis,
     'theme-muted',
     'svg-theme-dot svg-theme-dot--muted',
-    426,
+    449,
     108,
     22
   ),
@@ -569,23 +586,23 @@ const foundationPathGlyphs = [
 
 const planes = [
   definePlane('foundation', foundationPoints, [
-    card('foundation-foundation', 10, 240),
-    card('foundation-theme', 260, 245),
-    card('foundation-form', 515, 235)
+    card('foundation-foundation', 10, 235),
+    card('foundation-theme', 265, 240),
+    card('foundation-form', 525, 225)
   ]),
   definePlane('content', contentPoints, [
-    card('content-tree', 10, 365),
-    card('content-preview', 385, 365)
+    card('content-tree', 10, 360),
+    card('content-preview', 390, 360)
   ]),
   definePlane('components', componentsPoints, [
-    card('components-button', 10, 240),
-    card('components-dialog', 260, 245),
-    card('components-table', 515, 235)
+    card('components-button', 10, 235),
+    card('components-dialog', 265, 240),
+    card('components-table', 525, 225)
   ]),
   definePlane(
     'template',
     templatePoints,
-    [card('template-nav', 10, 170), card('template-main', 190, 560)],
+    [card('template-nav', 10, 165), card('template-main', 195, 555)],
     true
   )
 ] as const
@@ -626,7 +643,7 @@ withDefaults(
   --svg-depth-front: rgb(229 237 252 / 76%);
   --svg-depth-right: rgb(207 220 246 / 70%);
   --svg-depth-stroke: rgb(183 199 229 / 58%);
-  --svg-sheen: rgb(255 255 255 / 66%);
+  --svg-sheen: transparent;
   --svg-mini-token-bg: var(--svg-line);
   --svg-preview-a: rgb(239 244 252 / 86%);
   --svg-preview-b: rgb(248 251 255 / 80%);
@@ -651,8 +668,58 @@ withDefaults(
 }
 
 .svg-plane {
+  --explode-start-y: 0%;
+  --explode-overshoot-y: 0%;
+  --explode-delay: 0ms;
+  animation: home-layer-explode 880ms cubic-bezier(0.22, 1, 0.36, 1) var(--explode-delay) both;
   transform-box: fill-box;
   transform-origin: center;
+}
+
+.svg-plane--foundation {
+  --explode-start-y: -96%;
+  --explode-overshoot-y: 2%;
+  --explode-delay: 0ms;
+}
+
+.svg-plane--content {
+  --explode-start-y: -24%;
+  --explode-overshoot-y: 1%;
+  --explode-delay: 70ms;
+}
+
+.svg-plane--components {
+  --explode-start-y: 68%;
+  --explode-overshoot-y: -1.5%;
+  --explode-delay: 140ms;
+}
+
+.svg-plane--template {
+  --explode-start-y: 190%;
+  --explode-overshoot-y: -3%;
+  --explode-delay: 210ms;
+}
+
+@keyframes home-layer-explode {
+  0%,
+  14% {
+    opacity: 0.12;
+    transform: translateY(var(--explode-start-y)) scale(0.965);
+  }
+
+  24% {
+    opacity: 1;
+  }
+
+  76% {
+    opacity: 1;
+    transform: translateY(var(--explode-overshoot-y)) scale(1.006);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .svg-plane__depth-face {
@@ -894,6 +961,20 @@ withDefaults(
   color: var(--svg-blue);
 }
 
+.svg-connectors {
+  animation: home-connectors-reveal 440ms ease-out 720ms both;
+}
+
+@keyframes home-connectors-reveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .svg-connector line {
   stroke: color-mix(in srgb, currentColor 36%, transparent);
   stroke-dasharray: 10 10;
@@ -958,8 +1039,11 @@ withDefaults(
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .svg-plane {
+  .svg-plane,
+  .svg-connectors {
     animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -971,6 +1055,26 @@ withDefaults(
 
   .home-exploded-illustration__svg {
     max-width: var(--home-illustration-mobile-width);
+  }
+
+  .svg-plane--foundation {
+    --explode-start-y: -72%;
+    --explode-overshoot-y: 1.5%;
+  }
+
+  .svg-plane--content {
+    --explode-start-y: -18%;
+    --explode-overshoot-y: 0.75%;
+  }
+
+  .svg-plane--components {
+    --explode-start-y: 52%;
+    --explode-overshoot-y: -1%;
+  }
+
+  .svg-plane--template {
+    --explode-start-y: 142%;
+    --explode-overshoot-y: -2%;
   }
 }
 </style>

@@ -28,5 +28,3 @@ await Promise.all([
   copyFile(workerSource, path.resolve(serverOutput, 'index.js')),
   copyFile(hostingSource, path.resolve(metadataOutput, 'hosting.json'))
 ])
-
-console.log('Sites build created from the current VitePress output.')

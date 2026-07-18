@@ -12,7 +12,7 @@ const readText = (relativePath: string) =>
 const planeWidth = 760
 const planeHeight = 220
 const planePadding = 10
-const planeGap = 10
+const planeGap = 20
 const planeDepth = 18
 const referenceLayerGap = 35.5102
 
@@ -25,8 +25,8 @@ const expectedPlanes = {
       [400, 120]
     ],
     cards: [
-      { x: 10, y: 10, width: 170, height: 200 },
-      { x: 190, y: 10, width: 560, height: 200 }
+      { x: 10, y: 10, width: 165, height: 200 },
+      { x: 195, y: 10, width: 555, height: 200 }
     ]
   },
   components: {
@@ -37,9 +37,9 @@ const expectedPlanes = {
       [400, 340]
     ],
     cards: [
-      { x: 10, y: 10, width: 240, height: 200 },
-      { x: 260, y: 10, width: 245, height: 200 },
-      { x: 515, y: 10, width: 235, height: 200 }
+      { x: 10, y: 10, width: 235, height: 200 },
+      { x: 265, y: 10, width: 240, height: 200 },
+      { x: 525, y: 10, width: 225, height: 200 }
     ]
   },
   content: {
@@ -50,8 +50,8 @@ const expectedPlanes = {
       [400, 608.163]
     ],
     cards: [
-      { x: 10, y: 10, width: 365, height: 200 },
-      { x: 385, y: 10, width: 365, height: 200 }
+      { x: 10, y: 10, width: 360, height: 200 },
+      { x: 390, y: 10, width: 360, height: 200 }
     ]
   },
   foundation: {
@@ -62,9 +62,9 @@ const expectedPlanes = {
       [400, 944.49]
     ],
     cards: [
-      { x: 10, y: 10, width: 240, height: 200 },
-      { x: 260, y: 10, width: 245, height: 200 },
-      { x: 515, y: 10, width: 235, height: 200 }
+      { x: 10, y: 10, width: 235, height: 200 },
+      { x: 265, y: 10, width: 240, height: 200 },
+      { x: 525, y: 10, width: 225, height: 200 }
     ]
   }
 } as const
@@ -150,6 +150,31 @@ const pathBounds = (d: string) => {
   }
 }
 
+const relativePolygonBounds = (d: string) => {
+  const values = d.match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? []
+
+  expect(values.length).toBeGreaterThanOrEqual(2)
+  expect(values.length % 2).toBe(0)
+
+  const points = [{ x: values[0], y: values[1] }]
+
+  for (let index = 2; index < values.length; index += 2) {
+    const previous = points.at(-1) ?? points[0]
+
+    points.push({ x: previous.x + values[index], y: previous.y + values[index + 1] })
+  }
+
+  const xs = points.map((point) => point.x)
+  const ys = points.map((point) => point.y)
+
+  return {
+    left: Math.min(...xs),
+    right: Math.max(...xs),
+    top: Math.min(...ys),
+    bottom: Math.max(...ys)
+  }
+}
+
 describe('docs homepage', () => {
   it('registers the shared homepage component in the VitePress theme', () => {
     const themeSource = readText('docs/.vitepress/theme/index.ts')
@@ -173,6 +198,59 @@ describe('docs homepage', () => {
 
     expect(layoutSource).toContain('isHomepage')
     expect(layoutSource).toContain('v-if="!isHomepage"')
+  })
+
+  it('animates the supplied SVG noise geometry as a theme-aware decorative mask', () => {
+    const homeSource = readText('docs/.vitepress/components/HomePage.vue')
+    const customStylesSource = readText('docs/.vitepress/styles/custom.css')
+    const noiseSource = readText('docs/public/home-noise.svg')
+    const normalizedHomeSource = homeSource.replace(/\r\n/g, '\n')
+    const reducedMotionSource =
+      normalizedHomeSource.match(
+        /@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/
+      )?.[1] ?? ''
+    const circles = noiseSource.match(/<circle\b/g) ?? []
+    const radii = [...noiseSource.matchAll(/<circle\b[^>]*\br="([^"]+)"/g)].map(
+      ([, radius]) => radius
+    )
+    const fills = [...noiseSource.matchAll(/<circle\b[^>]*\bfill="([^"]+)"/g)].map(
+      ([, fill]) => fill
+    )
+
+    expect(noiseSource).toContain('viewBox="0 0 1080 608"')
+    expect(noiseSource).toContain('<mask id="noiseFadeMask"')
+    expect(noiseSource).toContain('fill="url(#noiseVerticalGradient)"')
+    expect(noiseSource).toContain(
+      '<linearGradient id="noiseVerticalGradient" x1="0%" y1="0%" x2="0%" y2="100%">'
+    )
+    expect(noiseSource).toContain('<stop offset="0" stop-color="white" stop-opacity="0.22" />')
+    expect(noiseSource).toContain('<stop offset="0.55" stop-color="white" stop-opacity="0.6" />')
+    expect(noiseSource).toContain('<stop offset="1" stop-color="white" stop-opacity="1" />')
+    expect(circles).toHaveLength(2258)
+    expect(new Set(radii)).toEqual(new Set(['0.864']))
+    expect(new Set(fills)).toEqual(new Set(['#121212']))
+
+    expect(homeSource).toContain('class="falcon-homepage__noise"')
+    expect(homeSource).toContain('aria-hidden="true"')
+    expect(homeSource).toContain("withBase('/home-noise.svg')")
+    expect(homeSource).toContain("'--home-noise-mask'")
+    expect(homeSource).toContain('-webkit-mask-image: var(--home-noise-mask);')
+    expect(homeSource).toContain('mask-image: var(--home-noise-mask);')
+    expect(homeSource).toContain('-webkit-mask-size: cover;')
+    expect(homeSource).toContain('mask-size: cover;')
+    expect(homeSource).toContain('color-mix(in srgb, var(--vp-c-text-1) 12%, var(--vp-c-bg))')
+    expect(homeSource).toContain('color-mix(in srgb, var(--vp-c-text-1) 22%, var(--vp-c-bg))')
+    expect(homeSource).toContain('linear-gradient(')
+    expect(homeSource).toContain('115deg,')
+    expect(homeSource).toContain('background-size: 220% 100%;')
+    expect(homeSource).toContain('animation: home-noise-wave 12s ease-in-out infinite alternate;')
+    expect(homeSource).toContain('@keyframes home-noise-wave')
+    expect(homeSource).toContain('pointer-events: none;')
+    expect(reducedMotionSource).toContain('.falcon-homepage__noise')
+    expect(reducedMotionSource).toContain('animation: none;')
+    expect(reducedMotionSource).toContain('background-position: 50% 50%;')
+    expect(homeSource).not.toContain('filter: invert(')
+    expect(customStylesSource).not.toContain('.dark .falcon-homepage__noise')
   })
 
   it('keeps localized content separate from the illustration structure', () => {
@@ -321,7 +399,7 @@ describe('docs homepage', () => {
     }
   })
 
-  it('keeps plane content inside a 10-unit inset with 10-unit card gaps and 2-unit card radii', () => {
+  it('keeps plane content inside a 10-unit inset with 20-unit card gaps and 2-unit card radii', () => {
     const wrapper = mount(HomeExplodedIllustration)
 
     for (const [name, plane] of Object.entries(expectedPlanes)) {
@@ -378,6 +456,37 @@ describe('docs homepage', () => {
         expect(numberAttr(rect, 'ry')).toBe(2)
       }
     }
+  })
+
+  it('keeps light-mode illustration panels free of sheen gradients', () => {
+    const illustrationSource = readText('docs/.vitepress/components/HomeExplodedIllustration.vue')
+    const lightThemeSource =
+      illustrationSource.match(/\.home-exploded-illustration \{([\s\S]*?)\}/)?.[1] ?? ''
+
+    expect(lightThemeSource).toContain('--svg-sheen: transparent;')
+    expect(lightThemeSource).not.toContain('--svg-sheen: rgb(')
+  })
+
+  it('keeps the content preview at a clear 30-unit card inset and contains its mountain', () => {
+    const wrapper = mount(HomeExplodedIllustration)
+    const contentCards = wrapper.findAll('.svg-plane--content .svg-card')
+    const previewCard = contentCards[1].element
+    const preview = wrapper.find('.svg-plane--content .svg-preview').element
+    const mountain = wrapper.find('.svg-plane--content .svg-preview-mountain').element
+    const cardLeft = numberAttr(previewCard, 'x')
+    const cardRight = cardLeft + numberAttr(previewCard, 'width')
+    const previewLeft = numberAttr(preview, 'x')
+    const previewRight = previewLeft + numberAttr(preview, 'width')
+    const previewTop = numberAttr(preview, 'y')
+    const previewBottom = previewTop + numberAttr(preview, 'height')
+    const mountainBounds = relativePolygonBounds(mountain.getAttribute('d') ?? '')
+
+    expect(previewLeft - cardLeft).toBe(30)
+    expect(cardRight - previewRight).toBe(30)
+    expect(mountainBounds.left).toBeGreaterThanOrEqual(previewLeft)
+    expect(mountainBounds.right).toBeLessThanOrEqual(previewRight)
+    expect(mountainBounds.top).toBeGreaterThanOrEqual(previewTop)
+    expect(mountainBounds.bottom).toBeLessThanOrEqual(previewBottom)
   })
 
   it('keeps foundation shape glyphs outside the non-uniform plane content transform', () => {
@@ -439,6 +548,35 @@ describe('docs homepage', () => {
     expect(triangle.exists()).toBe(true)
     expectOutsideTransformedPlaneContent(triangle.element)
     expect(triangle.element.parentElement).toBe(overlay.element)
+  })
+
+  it('locks foundation glyph positions and centers the theme dot group', () => {
+    const illustrationSource = readText('docs/.vitepress/components/HomeExplodedIllustration.vue')
+
+    expect(illustrationSource).toContain(
+      "createRoundGlyph(foundationGlyphBasis, 'swatch-oval', 'svg-swatch-oval', 117, 106, 20)"
+    )
+    expect(illustrationSource).toContain('horizontalScale = 1')
+    expect(illustrationSource).toMatch(
+      /'theme-light', 'svg-theme-dot', 321, 108, 22\)[\s\S]*?'theme-dark',[\s\S]*?385,[\s\S]*?'theme-muted',[\s\S]*?449,/
+    )
+    expect(
+      expectedPlanes.foundation.cards[1].x + expectedPlanes.foundation.cards[1].width / 2
+    ).toBe(385)
+  })
+
+  it('projects in-plane round marks with the same path geometry as foundation glyphs', () => {
+    const wrapper = mount(HomeExplodedIllustration)
+    const roundMarks = wrapper.findAll('.svg-mark, .svg-status, .svg-preview-sun')
+
+    expect(roundMarks).toHaveLength(4)
+
+    for (const mark of roundMarks) {
+      expect(mark.element.tagName.toLowerCase()).toBe('path')
+      expectOutsideTransformedPlaneContent(mark.element)
+      expect(mark.element.parentElement?.getAttribute('class')).toBe('svg-plane-round-glyphs')
+      expect(mark.attributes('d')).toMatch(/^M.+C.+z$/)
+    }
   })
 
   it('keeps each layer separated by the red reference gap at the leading panel edge', () => {
@@ -520,19 +658,19 @@ describe('docs homepage', () => {
       const anchors = planeOrder.map((planeName) => panelCorner(expectedPlanes[planeName], corner))
       const connectorGroup = wrapper.find(`.svg-connector--${connector}`)
       const line = connectorGroup.find('line')
-      const circles = connectorGroup.findAll('circle').map((circle) => circle.element)
+      const anchorsElements = connectorGroup.findAll('circle').map((circle) => circle.element)
 
       expect(connectorGroup.exists()).toBe(true)
       expect(line.exists()).toBe(true)
-      expect(circles).toHaveLength(anchors.length)
+      expect(anchorsElements).toHaveLength(anchors.length)
       expectPoint([numberAttr(line.element, 'x1'), numberAttr(line.element, 'y1')], anchors[0])
       expectPoint([numberAttr(line.element, 'x2'), numberAttr(line.element, 'y2')], anchors[3])
 
       for (const [index, anchor] of anchors.entries()) {
-        const circle = circles[index]
+        const anchorElement = anchorsElements[index]
 
-        expectPoint([numberAttr(circle, 'cx'), numberAttr(circle, 'cy')], anchor)
-        expect(numberAttr(circle, 'r')).toBe(9)
+        expectPoint([numberAttr(anchorElement, 'cx'), numberAttr(anchorElement, 'cy')], anchor)
+        expect(numberAttr(anchorElement, 'r')).toBe(9)
       }
     }
 
@@ -559,5 +697,32 @@ describe('docs homepage', () => {
       'svg-plane svg-plane--template',
       'svg-connectors'
     ])
+  })
+
+  it('stages a one-shot exploded entrance and preserves a reduced-motion final state', () => {
+    const illustrationSource = readText('docs/.vitepress/components/HomeExplodedIllustration.vue')
+    const normalizedIllustrationSource = illustrationSource.replace(/\r\n/g, '\n')
+    const reducedMotionSource =
+      normalizedIllustrationSource.match(
+        /@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/
+      )?.[1] ?? ''
+
+    expect(illustrationSource).toContain('@keyframes home-layer-explode')
+    expect(illustrationSource).toContain(
+      'animation: home-layer-explode 880ms cubic-bezier(0.22, 1, 0.36, 1) var(--explode-delay) both;'
+    )
+    expect(illustrationSource).toMatch(
+      /\.svg-plane--foundation \{[\s\S]*?--explode-delay: 0ms;[\s\S]*?\.svg-plane--content \{[\s\S]*?--explode-delay: 70ms;[\s\S]*?\.svg-plane--components \{[\s\S]*?--explode-delay: 140ms;[\s\S]*?\.svg-plane--template \{[\s\S]*?--explode-delay: 210ms;/
+    )
+    expect(illustrationSource).toContain('@keyframes home-connectors-reveal')
+    expect(illustrationSource).toContain(
+      'animation: home-connectors-reveal 440ms ease-out 720ms both;'
+    )
+    expect(reducedMotionSource).toContain('.svg-plane,')
+    expect(reducedMotionSource).toContain('.svg-connectors')
+    expect(reducedMotionSource).toContain('animation: none;')
+    expect(reducedMotionSource).toContain('opacity: 1;')
+    expect(reducedMotionSource).toContain('transform: none;')
+    expect(illustrationSource).not.toContain('animation-iteration-count: infinite')
   })
 })

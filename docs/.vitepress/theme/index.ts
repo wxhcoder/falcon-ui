@@ -1,64 +1,24 @@
 import DefaultTheme from 'vitepress/theme'
 import type { Theme } from 'vitepress'
-import ElementPlus from 'element-plus'
-import { ID_INJECTION_KEY, ZINDEX_INJECTION_KEY } from 'element-plus'
-import FalconUI from '@falcon-ui/falcon-ui'
-import type { Component } from 'vue'
 import Layout from './layout.vue'
+import { registerDemoRuntime } from './demo-runtime'
 import VpDemo from '../components/vp-demo.vue'
 import VpApiTable from '../components/vp-api-table.vue'
 import OverviewGrid from '../components/overview-grid.vue'
 import HomePage from '../components/HomePage.vue'
 import '../styles/vars.css'
 import '../styles/custom.css'
-import 'element-plus/dist/index.css'
-import 'element-plus/theme-chalk/dark/css-vars.css'
-import '@falcon-ui/theme/index.scss'
-
-const toDemoComponentName = (demoPath: string, locale: 'en' | 'root') => {
-  const safeName = demoPath
-    .replaceAll('.vue', '')
-    .split(/[\\/.-]/g)
-    .filter(Boolean)
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join('')
-
-  return `${locale === 'en' ? 'DocsEnDemo' : 'DocsDemo'}${safeName}`
-}
 
 const theme: Theme = {
   ...DefaultTheme,
   Layout,
-  enhanceApp({ app }) {
-    DefaultTheme.enhanceApp?.({ app })
-    app.provide(ID_INJECTION_KEY, {
-      prefix: 1024,
-      current: 0
-    })
-    app.provide(ZINDEX_INJECTION_KEY, {
-      current: 0
-    })
-    app.use(ElementPlus)
-    app.use(FalconUI)
-    app.component('VpDemo', VpDemo)
-    app.component('VpApiTable', VpApiTable)
-    app.component('OverviewGrid', OverviewGrid)
-    app.component('HomePage', HomePage)
-
-    const demoModules = import.meta.glob(
-      ['../../examples/**/*.vue', '../../en/examples/**/*.vue'],
-      {
-        eager: true
-      }
-    ) as Record<string, { default: Component }>
-
-    for (const [modulePath, mod] of Object.entries(demoModules)) {
-      const normalizedModulePath = modulePath.replaceAll('\\', '/')
-      const locale = normalizedModulePath.includes('/en/examples/') ? 'en' : 'root'
-      const relativePath = normalizedModulePath.replace(/^.*\/examples\//, '')
-      const componentName = toDemoComponentName(relativePath, locale)
-      app.component(componentName, mod.default)
-    }
+  enhanceApp(context) {
+    DefaultTheme.enhanceApp?.(context)
+    registerDemoRuntime(context.app)
+    context.app.component('VpDemo', VpDemo)
+    context.app.component('VpApiTable', VpApiTable)
+    context.app.component('OverviewGrid', OverviewGrid)
+    context.app.component('HomePage', HomePage)
   }
 }
 

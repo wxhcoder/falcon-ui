@@ -85,13 +85,13 @@ documentation content, bilingual routes, interactive examples, and uncommitted h
 
 ## Phase Status
 
-| Phase    | Status      | Notes                                                                                      |
-| -------- | ----------- | ------------------------------------------------------------------------------------------ |
-| Inspect  | complete    | Confirmed an existing Vue/VitePress documentation site and no prior Sites project metadata |
-| Validate | complete    | Homepage tests passed (16/16) and the full bilingual VitePress build succeeded             |
-| Adapt    | complete    | Static worker routing tests passed (3/3) and the VitePress preview opened successfully     |
-| Publish  | in progress | Create the Sites project, save the validated version, and deploy privately                 |
-| Verify   | pending     | Poll deployment status and hand off the production URL                                     |
+| Phase    | Status   | Notes                                                                                      |
+| -------- | -------- | ------------------------------------------------------------------------------------------ |
+| Inspect  | complete | Confirmed an existing Vue/VitePress documentation site and no prior Sites project metadata |
+| Validate | complete | Homepage tests passed (16/16) and the full bilingual VitePress build succeeded             |
+| Adapt    | complete | Static worker routing tests passed (3/3) and the VitePress preview opened successfully     |
+| Publish  | complete | Saved version 1 and deployed it with owner-only access                                     |
+| Verify   | complete | Sites reported a successful production deployment and returned the live URL                |
 
 ## Publishing Constraints
 
@@ -102,8 +102,154 @@ documentation content, bilingual routes, interactive examples, and uncommitted h
 
 ## Publishing Errors Encountered
 
-| Error                                                                            | Attempt | Resolution                                                                           |
-| -------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------ |
-| Initial combined inspection returned exit 1 because `.openai/` did not exist     | 1       | Confirmed this is a new Sites project and continued with targeted reads              |
-| Combined homepage test and docs check timed out without output after 124 seconds | 1       | Split validation into isolated commands and constrain Vitest workers before retrying |
-| Initial worker test expected generic Button and Page Not Found titles            | 1       | Matched the real generated titles after confirming the responses were correct        |
+| Error                                                                            | Attempt | Resolution                                                                             |
+| -------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------- |
+| Initial combined inspection returned exit 1 because `.openai/` did not exist     | 1       | Confirmed this is a new Sites project and continued with targeted reads                |
+| Combined homepage test and docs check timed out without output after 124 seconds | 1       | Split validation into isolated commands and constrain Vitest workers before retrying   |
+| Initial worker test expected generic Button and Page Not Found titles            | 1       | Matched the real generated titles after confirming the responses were correct          |
+| First Git push was interrupted by an HTTP/2 protocol error                       | 1       | Retried with Git HTTP/1.1 and pushed the prepared commit successfully                  |
+| WSL could not start the bundled Bash packaging helper                            | 1       | Switched to an equivalent PowerShell staging and tar flow on Windows                   |
+| In-app browser could not negotiate TLS with the new production hostname          | 1       | Sites deployment status is authoritative and reported the production release succeeded |
+| Planning completion helper reported 0/0 phases for the appended Markdown table   | 1       | Verified all five publishing phases are marked complete in the table manually          |
+
+---
+
+# Docs Homepage Exploded Animation Plan
+
+## Goal
+
+Add a one-shot exploded-layer entrance animation to the existing four-plane homepage SVG while
+preserving all current uncommitted geometry, layout, theme, and publishing work.
+
+## Phase Status
+
+| Phase     | Status   | Notes                                                                |
+| --------- | -------- | -------------------------------------------------------------------- |
+| Inspect   | complete | Current SVG groups, connector structure, tests, and dirty state read |
+| Implement | complete | Added staggered transform/opacity animation and reduced-motion reset |
+| Test      | complete | 21 tests, target lint/format, and VitePress production build passed  |
+| Verify    | complete | Desktop/mobile and light/dark final states inspected successfully    |
+
+## Constraints
+
+- Animate only `transform` and `opacity`; do not change layout or SVG geometry.
+- Play once on component mount and remain static afterward.
+- Preserve the current public props contract and all user-authored uncommitted changes.
+- Reduced-motion users must receive the final static illustration immediately.
+
+## Errors Encountered
+
+| Error                                                                           | Attempt | Resolution                                                                |
+| ------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------- |
+| Target Prettier check reported both edited files need formatting                | 1       | Run targeted Prettier write, then rerun checks separately                 |
+| In-app page scope did not expose `Element.getAnimations()`                      | 1       | Use computed CSS contracts, timed screenshots, and element bounds instead |
+| Combined preview stop/log cleanup command returned exit 1 after stopping server | 1       | Confirm server stopped, then remove each temporary log separately         |
+| Planning Markdown files failed the final Prettier check                         | 1       | Run Prettier only on the three planning files, preserving their content   |
+
+---
+
+# Docs Homepage White-Screen Performance Investigation Plan
+
+## Goal
+
+Reproduce the long initial white screen on the `docs/` homepage, record a browser performance
+profile, correlate network/main-thread/render timing with source code, and deliver a diagnosis
+report before making any implementation changes.
+
+## Phase Status
+
+| Phase     | Status   | Notes                                                      |
+| --------- | -------- | ---------------------------------------------------------- |
+| Baseline  | complete | Docs dev server confirmed on 5173; eager theme entry found |
+| Profile   | complete | Dev warm/cold and production cold profiles captured        |
+| Correlate | complete | Trace evidence mapped to theme entry, plugins, and CSS     |
+| Report    | complete | Causes, severity, evidence, and fix priorities finalized   |
+
+## Constraints
+
+- Diagnose only; do not change homepage implementation in this pass.
+- Preserve all existing uncommitted work.
+- Use browser performance profiling evidence, not source inspection alone.
+- Separate observed facts from hypotheses and note test conditions.
+
+## Errors Encountered
+
+| Error                                                   | Attempt | Resolution                                                               |
+| ------------------------------------------------------- | ------- | ------------------------------------------------------------------------ |
+| `rg packages/theme/src/*.scss` failed on a Windows glob | 1       | Use `-g '*.scss' packages/theme/src` on the next inspection              |
+| `127.0.0.1:5173` returned `ERR_CONNECTION_REFUSED`      | 1       | Listener is IPv6-only; retry with `localhost` / `::1`                    |
+| DevTools rejected the requested raw-trace path          | 1       | Record in DevTools temporary storage and retain summarized evidence      |
+| Cold dev trace exceeded DevTools' maximum string size   | 1       | Do not repeat; use the completed navigation plus Resource Timing metrics |
+
+---
+
+# Docs Homepage White-Screen Optimization Plan
+
+## Goal
+
+Implement the first three remediation priorities from the performance report: lazy demo loading,
+on-demand docs component registration, and route/component-scoped styles, while preserving all
+interactive bilingual examples and existing homepage behavior.
+
+## Phase Status
+
+| Phase     | Status      | Notes                                                    |
+| --------- | ----------- | -------------------------------------------------------- |
+| Inspect   | complete    | Mapped demo tags, global dependencies, styles, and tests |
+| Tests     | complete    | Red baseline failed 3/3; async contracts now pass 3/3    |
+| Implement | in_progress | Refactor theme registration and style entry points       |
+| Verify    | pending     | Run tests/build and repeat request/bundle profiling      |
+
+## Constraints
+
+- Preserve all existing user-authored changes and planning records.
+- Keep Chinese and English demos functional in both dev and production builds.
+- The homepage must make no `/examples/` requests before navigation to a component page.
+- Do not globally import/install complete Element Plus or Falcon UI bundles.
+- Keep the homepage/docs shell visually unchanged while splitting demo styles.
+
+## Errors Encountered
+
+| Error                                                                          | Attempt | Resolution                                                            |
+| ------------------------------------------------------------------------------ | ------- | --------------------------------------------------------------------- |
+| Combined source/planning patch matched the wrong prior error table             | 1       | Split source and planning patches; no partial source edit occurred    |
+| New performance suite failed 3/3 on the red baseline                           | 1       | Expected; implemented the missing async runtime contracts             |
+| `vue-tsc -p tsconfig.docs.json` could not resolve existing global type entries | 1       | Diagnose config separately; use build plus targeted TypeScript checks |
+
+---
+
+# Falcon UI Compressed Production Release Plan
+
+## Goal
+
+Validate compression behavior for the existing Falcon UI Sites project, add production-safe
+compression support when required, build the latest documentation changes, and publish a new
+production version.
+
+## Phase Status
+
+| Phase     | Status      | Notes                                                                         |
+| --------- | ----------- | ----------------------------------------------------------------------------- |
+| Inspect   | complete    | Live HTML and CSS already return `Content-Encoding: gzip` from the Sites edge |
+| Implement | complete    | Retain platform compression; avoid redundant Worker or precompression code    |
+| Validate  | complete    | 36 docs tests and the full API generation/VitePress production build passed   |
+| Publish   | in_progress | Push exact source, save a Sites version, deploy, and poll to success          |
+| Verify    | pending     | Confirm the new production URL and compressed response headers                |
+
+## Constraints
+
+- Preserve the existing VitePress architecture and all current documentation optimizations.
+- Prefer Brotli with gzip fallback and send `Vary: Accept-Encoding` correctly.
+- Do not rely on precompressed files unless the Sites asset binding can serve them correctly.
+- Publish to the existing project `appgprj_6a50fb4353f88191bddd43224e785984`.
+
+## Errors Encountered
+
+| Error                                                                  | Attempt | Resolution                                                                                              |
+| ---------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------- |
+| Performance test expected the old `registerDemoRuntime(app)` call      | 1       | Match the full-context hook implementation with `registerDemoRuntime(context.app)`                      |
+| Combined tests plus `docs:check` exceeded the 120-second command limit | 1       | Tests had already advanced; rerun the production check separately with its own time budget              |
+| Sites source credential request returned an internal connector error   | 1       | Inspect the existing saved version/source binding and use the established repository path if it matches |
+| Git Bash tar treated the Windows `C:` archive path as a remote target  | 1       | Retry the packaging helper with MSYS `/c/...` and `/d/...` paths                                        |
+| Saving the GitHub SHA failed because it was not the Sites source HEAD  | 1       | Push the exact release tree to the bound Sites source repository                                        |
+| Direct Sites source push was rejected as non-fast-forward              | 1       | Merge the previous Sites history with the validated current source tree                                 |
