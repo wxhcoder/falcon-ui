@@ -369,3 +369,9 @@
 - Pushed the validated release commit to the established source repository.
 - The first packaging-helper call rejected the Windows drive-letter archive path; switching to the
   helper's native MSYS path form for the retry.
+- Packaged the validated Sites artifact successfully and confirmed its required server and hosting
+  metadata entries.
+- The first save attempt proved the Sites project uses a separate bound source repository; obtained
+  a fresh credential after the earlier connector error cleared.
+- The bound repository rejected a direct push because its previous release history diverges from
+  GitHub main; preparing a merge commit with the current validated tree and both histories intact.

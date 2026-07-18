@@ -251,3 +251,5 @@ production version.
 | Combined tests plus `docs:check` exceeded the 120-second command limit | 1       | Tests had already advanced; rerun the production check separately with its own time budget              |
 | Sites source credential request returned an internal connector error   | 1       | Inspect the existing saved version/source binding and use the established repository path if it matches |
 | Git Bash tar treated the Windows `C:` archive path as a remote target  | 1       | Retry the packaging helper with MSYS `/c/...` and `/d/...` paths                                        |
+| Saving the GitHub SHA failed because it was not the Sites source HEAD  | 1       | Push the exact release tree to the bound Sites source repository                                        |
+| Direct Sites source push was rejected as non-fast-forward              | 1       | Merge the previous Sites history with the validated current source tree                                 |
