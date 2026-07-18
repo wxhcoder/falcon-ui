@@ -214,6 +214,9 @@ export default defineConfig({
   },
   themeConfig: rootThemeConfig,
   vite: {
+    build: {
+      cssCodeSplit: true
+    },
     css: {
       postcss: {
         plugins: [
