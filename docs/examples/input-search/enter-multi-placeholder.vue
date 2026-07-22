@@ -22,9 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import { ElTable, ElTableColumn } from 'element-plus'
+import { FlTable } from '@falcon-ui/components'
 import type { DialogRejectPayload } from '@falcon-ui/hooks'
 import { useDialog } from '@falcon-ui/hooks'
+import { ElTableColumn } from 'element-plus'
 import { h, ref } from 'vue'
 
 type SearchItem = {
@@ -68,11 +69,12 @@ const mapResult = (item: unknown) => {
 
 const renderSelectionTable = (rows: SearchItem[]) =>
   h(
-    ElTable,
+    FlTable,
     {
       data: rows,
       border: true,
-      height: 240
+      height: 240,
+      selectionSingle: true
     },
     () => [
       h(ElTableColumn, { type: 'selection', width: 52 }),

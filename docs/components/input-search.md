@@ -6,7 +6,23 @@
 
 ## 基础用法
 
+输入唯一关键词后按回车可直接回填；点击搜索图标会打开客户单选弹窗。
+
 ::: demo input-search/basic
+:::
+
+## 表格业务选择场景
+
+在表格单元格中使用时，设置 `is-table`。每一行分别维护业务 ID 与显示名称；点击搜索图标选择客户时，只更新当前业务行。
+
+::: demo input-search/is-table
+:::
+
+## 模糊匹配多条结果
+
+输入 `acme` 后按回车会返回多条模糊匹配结果，并自动打开单选表格完成回填。
+
+::: demo input-search/fuzzy-multi-select
 :::
 
 ## 回车检索与 useDialog 占位

@@ -1,16 +1,18 @@
-﻿<template>
+<template>
   <div class="demo-col">
     <FlInputSearch
       v-model="value"
       v-model:label="label"
       clearable
-      placeholder="Enter globex and press Enter to auto backfill"
+      placeholder="Enter acme and press Enter to select from multiple matches"
       :fetch-api="fetchApi"
       :map-result="mapResult"
       @open-dialog="handleOpenDialog" />
 
-    <div class="demo-result">Bound value:{{ value ?? '(null)' }}</div>
-    <div class="demo-result">Display label:{{ label || '(empty)' }}</div>
+    <div class="demo-result">Latest reason: {{ latestReason || '(none)' }}</div>
+    <div class="demo-result">
+      Current backfill: {{ value ?? '(null)' }} / {{ label || '(empty)' }}
+    </div>
   </div>
 </template>
 
@@ -33,11 +35,14 @@ type OpenDialogEvent = {
 
 const data: SearchItem[] = [
   { id: 'c-1001', name: 'Acme Corporation' },
+  { id: 'c-1002', name: 'Acme Retail' },
+  { id: 'c-1003', name: 'Acme Logistics' },
   { id: 'c-2001', name: 'Globex Inc.' }
 ]
 
 const value = ref<string | number | null>(null)
 const label = ref('')
+const latestReason = ref('')
 const dialog = useDialog()
 
 const fetchApi = async (keyword: string) => {
@@ -51,6 +56,7 @@ const fetchApi = async (keyword: string) => {
 
 const mapResult = (item: unknown) => {
   const record = item as SearchItem
+
   return {
     value: record?.id ?? null,
     label: record?.name ?? ''
@@ -94,11 +100,12 @@ const renderSelectionTable = (rows: SearchItem[]) =>
   )
 
 const handleOpenDialog = (event: OpenDialogEvent) => {
+  latestReason.value = event.reason
   const dialogRows = resolveDialogRows(event)
 
   dialog
     .open<SearchItem[]>({
-      title: 'Select Customer',
+      title: 'Select a Fuzzy Match',
       message: () => renderSelectionTable(dialogRows),
       payloadMethod: 'getSelectionRows',
       dialogProps: {

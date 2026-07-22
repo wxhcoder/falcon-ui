@@ -1,16 +1,16 @@
-﻿<template>
+<template>
   <div class="demo-col">
     <FlInputSearch
       v-model="value"
       v-model:label="label"
       clearable
-      placeholder="Enter globex and press Enter to auto backfill"
+      placeholder="输入 acme 后回车，匹配多条时弹窗选择"
       :fetch-api="fetchApi"
       :map-result="mapResult"
       @open-dialog="handleOpenDialog" />
 
-    <div class="demo-result">Bound value:{{ value ?? '(null)' }}</div>
-    <div class="demo-result">Display label:{{ label || '(empty)' }}</div>
+    <div class="demo-result">最近触发原因：{{ latestReason || '（暂无）' }}</div>
+    <div class="demo-result">当前回填：{{ value ?? '(null)' }} / {{ label || '(empty)' }}</div>
   </div>
 </template>
 
@@ -33,11 +33,14 @@ type OpenDialogEvent = {
 
 const data: SearchItem[] = [
   { id: 'c-1001', name: 'Acme Corporation' },
+  { id: 'c-1002', name: 'Acme Retail' },
+  { id: 'c-1003', name: 'Acme Logistics' },
   { id: 'c-2001', name: 'Globex Inc.' }
 ]
 
 const value = ref<string | number | null>(null)
 const label = ref('')
+const latestReason = ref('')
 const dialog = useDialog()
 
 const fetchApi = async (keyword: string) => {
@@ -51,6 +54,7 @@ const fetchApi = async (keyword: string) => {
 
 const mapResult = (item: unknown) => {
   const record = item as SearchItem
+
   return {
     value: record?.id ?? null,
     label: record?.name ?? ''
@@ -89,16 +93,17 @@ const renderSelectionTable = (rows: SearchItem[]) =>
     () => [
       h(ElTableColumn, { type: 'selection', width: 52 }),
       h(ElTableColumn, { label: 'ID', prop: 'id', width: 120 }),
-      h(ElTableColumn, { label: 'Customer Name', prop: 'name' })
+      h(ElTableColumn, { label: '客户名称', prop: 'name' })
     ]
   )
 
 const handleOpenDialog = (event: OpenDialogEvent) => {
+  latestReason.value = event.reason
   const dialogRows = resolveDialogRows(event)
 
   dialog
     .open<SearchItem[]>({
-      title: 'Select Customer',
+      title: '选择模糊匹配客户',
       message: () => renderSelectionTable(dialogRows),
       payloadMethod: 'getSelectionRows',
       dialogProps: {

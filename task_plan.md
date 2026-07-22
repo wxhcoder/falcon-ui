@@ -1,5 +1,41 @@
 # FlTree Task Plan
 
+# Falcon UI Latest Main Release Plan
+
+## Release Goal
+
+Commit every pending repository change to `main`, push the exact commit to GitHub and the bound
+Sites source repository, then publish that same validated source to the existing Falcon UI site.
+
+## Release Phase Status
+
+| Phase    | Status      | Notes                                                         |
+| -------- | ----------- | ------------------------------------------------------------- |
+| Inspect  | complete    | Inventory source, tests, docs, diagnostics, and release state |
+| Validate | complete    | Lint, typecheck, 347 tests, and Sites production build passed |
+| Commit   | in_progress | Commit all pending changes with a complete change summary     |
+| Push     | pending     | Push the exact commit to GitHub `main` and Sites source       |
+| Publish  | pending     | Save, deploy, and verify the latest production site version   |
+
+## Release Constraints
+
+- Preserve every pending user-authored change and include it in the release commit.
+- Keep GitHub `main`, the Sites source branch, and the packaged artifact on one exact source tree.
+- Reuse the existing Sites project `appgprj_6a50fb4353f88191bddd43224e785984`.
+- Do not change the existing site access policy while republishing.
+
+## Release Errors Encountered
+
+| Error                                                    | Attempt | Resolution                                             |
+| -------------------------------------------------------- | ------- | ------------------------------------------------------ |
+| Initial multi-file planning append missed an anchor      | 1       | Re-anchor each addition at file headers                |
+| Parallel full test run exhausted Vitest worker startup   | 1       | Rerun with constrained workers after dependency repair |
+| Playground typecheck found stale TypeScript 7 link       | 1       | Restore the lockfile-defined pnpm dependency graph     |
+| Vitest 4 rejected obsolete `--minWorkers` option         | 1       | Use `--maxWorkers=1 --no-file-parallelism` instead     |
+| VitePress rejected repository source paths as dead links | 1       | Render source locations as code paths in the report    |
+
+---
+
 ## Goal
 
 Implement `FlTree` strictly by PRD phases. The current completed milestone is `阶段 12` in the PRD.
@@ -233,7 +269,7 @@ production version.
 | Inspect   | complete    | Live HTML and CSS already return `Content-Encoding: gzip` from the Sites edge |
 | Implement | complete    | Retain platform compression; avoid redundant Worker or precompression code    |
 | Validate  | complete    | 36 docs tests and the full API generation/VitePress production build passed   |
-| Publish   | in_progress | Push exact source, save a Sites version, deploy, and poll to success          |
+| Publish   | in_progress | Version 2 saved; awaiting required confirmation for the existing public site  |
 | Verify    | pending     | Confirm the new production URL and compressed response headers                |
 
 ## Constraints
@@ -253,3 +289,89 @@ production version.
 | Git Bash tar treated the Windows `C:` archive path as a remote target  | 1       | Retry the packaging helper with MSYS `/c/...` and `/d/...` paths                                        |
 | Saving the GitHub SHA failed because it was not the Sites source HEAD  | 1       | Push the exact release tree to the bound Sites source repository                                        |
 | Direct Sites source push was rejected as non-fast-forward              | 1       | Merge the previous Sites history with the validated current source tree                                 |
+| First version archive upload failed with a transient request error     | 1       | Retry the same validated archive once after the source synchronization completed                        |
+| Temporary archive cleanup command was blocked by command policy        | 1       | Leave the harmless temporary archive in the system temp directory                                       |
+
+---
+
+# FlTable 50×50 Keyboard Focus Performance Diagnosis Plan
+
+## Goal
+
+Add an isolated Playground benchmark for 50 rows × 50 visible columns, collect reproducible browser
+performance traces for plain and fully editable cells, and publish an evidence-backed optimization
+proposal without changing the FlTable implementation or public API.
+
+## Phase Status
+
+| Phase     | Status   | Notes                                                                           |
+| --------- | -------- | ------------------------------------------------------------------------------- |
+| Inspect   | complete | Focus, class recomputation, registry scan, routing, and play tooling mapped     |
+| Benchmark | complete | Route, scenarios, probes, selectors, lint, and play typecheck pass              |
+| Profile   | complete | Four raw traces, metrics, screenshots, and independent analysis saved           |
+| Report    | complete | Facts, source inference, and ranked non-implemented remedies documented         |
+| Verify    | complete | Typecheck/lint/test/build pass; pre-existing workspace YAML format issue logged |
+
+## Constraints
+
+- Do not modify `packages/components/table/**`, component contracts, or public exports.
+- Preserve all pre-existing dirty files and planning history; append only to shared planning logs.
+- Keep benchmark instrumentation out of the reactive render loop except for batched display updates.
+- Retain raw compressed traces and screenshots under `docs/performance/` for later comparison.
+
+## Errors Encountered
+
+| Error                                               | Attempt | Resolution                                                                                               |
+| --------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
+| Combined planning append used the wrong anchor      | 1       | Retry with each file's verified EOF; no partial edit occurred                                            |
+| Play typecheck could not resolve `falcon-ui/global` | 1       | Rebuild and relink the currently empty local `dist/falcon-ui` package                                    |
+| `npm link` installed incompatible TS 7/vue-tsc 3.3  | 1       | Restore locked workspace dependencies with pnpm, then create a pnpm-only local link                      |
+| In-app browser rejected `networkidle`               | 1       | Use benchmark DOM counters and stable selectors as the readiness signal                                  |
+| Locator press lost focus after cell click           | 1       | Send a browser-level physical key event to the document focus model                                      |
+| DevTools rejected all requested trace file paths    | 3       | Stop retrying its file export; retain in-tool analysis and use a separate CDP export path for raw traces |
+| CDP capture script triggered `no-console`           | 1       | Emit machine-readable progress through `process.stdout.write`                                            |
+| Probe listener missed the full table update window  | 1       | Move the diagnostic listener to the window capture phase and regenerate all four traces                  |
+| Full format check found existing workspace YAML     | 1       | Preserve the unrelated file; verify every other supported file separately                                |
+
+---
+
+# FlTable P0 Keyboard Focus Optimization Plan
+
+## Goal
+
+Implement only the two confirmed P0 remedies, preserve all existing FlTable behavior, rerun the four
+browser scenarios, and keep the complete P0–P3 roadmap in the component directory.
+
+## Phase Status
+
+| Phase       | Status      | Notes                                                                    |
+| ----------- | ----------- | ------------------------------------------------------------------------ |
+| Scope       | in_progress | Freeze P0-only implementation and write full component-local roadmap     |
+| Focus class | pending     | Replace activeCell-driven full-table class recomputation with delta sync |
+| Registry    | pending     | Replace reactive endpoint array scans with a cell-indexed registry       |
+| Regression  | pending     | Add focused tests and preserve wrapper/editor/fixed-column semantics     |
+| Profile     | pending     | Rerun four fixed browser scenarios and compare against baseline          |
+| Verify      | pending     | Run gates, update evidence, and prove P1–P3 were not implemented         |
+
+## Constraints
+
+- Implement P0-A and P0-B only; record but do not implement P1–P3.
+- Do not change public props, emits, slots, expose behavior, or package exports.
+- Preserve all unrelated dirty files and the existing diagnostic artifacts.
+- Keep Element Plus passthrough, fixed clones, editor panel, drag, selection, and keyboard semantics.
+
+## Errors Encountered
+
+| Error | Attempt | Resolution |
+| ----- | ------- | ---------- |
+
+## FlTable P0 Completion
+
+| Phase       | Status   | Result                                                               |
+| ----------- | -------- | -------------------------------------------------------------------- |
+| Scope       | complete | Full P0–P3 plan saved under the component; only P0 changed code      |
+| Focus class | complete | Full-table reactive callbacks replaced by old/new DOM class delta    |
+| Registry    | complete | Reactive endpoint array replaced by a cell-indexed non-reactive map  |
+| Regression  | complete | Component 33/33 and full suite 345/345                               |
+| Profile     | complete | Four final traces plus independent DevTools INP evidence captured    |
+| Verify      | complete | Lint/type/build pass; only existing workspace YAML format issue left |

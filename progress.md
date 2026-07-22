@@ -1,5 +1,32 @@
 # FlTree Progress
 
+# Falcon UI Latest Main Release Progress
+
+## 2026-07-22
+
+- Loaded the Sites building/hosting, Vue, and file-planning workflows.
+- Confirmed the workspace is on `main`, the GitHub remote targets `wxhcoder/falcon-ui`, and the
+  existing hosting metadata points to the requested Falcon UI Sites project.
+- Inventoried all pending tracked and untracked paths; detailed diff review and validation are in
+  progress before the release commit is created.
+- Reviewed the FlTable focus-class delta sync, cell-indexed editor registry, regression coverage,
+  benchmark route/scripts/artifacts, InputSearch bilingual examples, homepage styling, and favicon.
+- Confirmed `git diff --check` passes; only Git line-ending conversion notices were reported.
+- Full lint passed. The first full test run exhausted fork-worker startup while three heavy gates
+  ran concurrently, and typecheck exposed a stale TypeScript 7 link under `play/node_modules`.
+- Validation recovery is restoring the pnpm lockfile dependency graph and will rerun tests with a
+  constrained worker count instead of repeating the resource-heavy parallel invocation.
+- Restored the lockfile-defined TypeScript 6.0.2 / vue-tsc 3.2.x dependency graph without changing
+  tracked files; workspace typecheck now passes.
+- Re-ran the full suite with one worker: 28 test files and 347 tests passed.
+- The first Sites build found ten repository-source links in the new performance report that are
+  not valid VitePress routes; converted them to explicit code paths before rebuilding.
+- Formatted the corrected report and shared planning records with the repository Prettier config.
+- Re-ran `pnpm docs:build:sites` successfully; VitePress rendered all pages and the Sites worker
+  output completed with only existing Sass deprecation and chunk-size warnings.
+
+---
+
 ## 2026-04-16
 
 - Read `packages/components/tree/Tree_PRD.md`.
@@ -375,3 +402,76 @@
   a fresh credential after the earlier connector error cleared.
 - The bound repository rejected a direct push because its previous release history diverges from
   GitHub main; preparing a merge commit with the current validated tree and both histories intact.
+- Pushed a merge commit to the bound Sites source repository with the validated current tree and
+  the previous production commit retained as history.
+- The first archive upload failed at the file transport layer; retrying the already validated
+  archive once without rebuilding or changing its contents.
+- Saved Sites version 2 successfully after the archive retry.
+- Paused immediately before production deployment because the existing site is public and the
+  hosting workflow requires explicit public-release confirmation.
+- A cleanup command for the uploaded temporary archive was blocked by command policy; left the
+  harmless file in the system temporary directory instead of bypassing the policy.
+
+---
+
+# FlTable 50×50 Keyboard Focus Performance Progress
+
+## 2026-07-20
+
+- Reloaded the Vue, Element Plus wrapper, browser, and file-planning workflows for implementation.
+- Recovered existing planning history and preserved unrelated dirty docs and planning changes.
+- Mapped the FlTable keyboard path, active-cell class callbacks, editor registry, play router, and
+  available quality commands.
+- Logged and corrected a rejected combined planning append; it produced no partial file changes.
+- Started the isolated benchmark page implementation; component source remains untouched.
+- Added `/table-performance`, navigation, query-controlled 1–100 row/column dimensions, plain and
+  2,500-editor modes, non-reactive class probes, double-frame key timing, and a browser snapshot API.
+- The new play files pass targeted ESLint.
+- The first play typecheck could not resolve `falcon-ui/global` because the linked `dist/falcon-ui`
+  directory was empty; rebuilding and relinking before retrying.
+- Rebuilt the complete local library successfully with unminified source maps and generated global
+  types. The subsequent npm link installed incompatible TypeScript/vue-tsc versions in `play`, so
+  dependency recovery is switching to pnpm rather than repeating npm link.
+- Restored the locked pnpm workspace dependency graph, retained the local Falcon UI distribution
+  junction, and passed `pnpm --dir play typecheck` with TypeScript 6.0.2.
+- Benchmark implementation phase is complete; browser profiling is now in progress.
+- Started the play server at `127.0.0.1:5174` and verified the plain baseline DOM is exactly 50×50.
+- Confirmed a real ArrowRight moves the active cell one column without entering edit mode; the first
+  measurement recorded 213.8 ms and 2,500 cell-class callbacks.
+- Captured and analyzed the first DevTools trace in memory: worst keydown 608 ms, including 397 ms
+  processing and 210 ms presentation delay; 7,670 elements were affected by a 167 ms style pass.
+- DevTools rejected three distinct raw-trace destinations, so file export is switching to a separate
+  Chrome DevTools Protocol capture rather than repeating the blocked API path.
+- Added a dependency-free CDP capture script for reproducible physical-key traces, metrics, and PNGs;
+  corrected its first lint pass by replacing the progress console call.
+- Captured all four raw Chrome traces through the deterministic CDP runner. The artifacts are valid gzip
+  JSON trace streams; a corrected probe-order run and report generation remain.
+- Regenerated all four traces after moving the probe to the window capture phase; each key now records the
+  expected 2,500 body class callbacks, plus 50 header callbacks when cross highlight is enabled.
+- Added an independent raw-trace analyzer and a fact-versus-inference baseline report with ranked P0–P3
+  proposals. No file under `packages/components/table/**` changed.
+- Passed play typecheck, full lint, 342 tests, full library/Playground production build, and diff checks.
+- Kept the unrelated `pnpm-workspace.yaml` untouched: it is the only file failing the repository-wide
+  Prettier check, while the supplemental check for every other supported file passes.
+- Stopped the temporary Vite server and restored pnpm's locked dependency graph after the required legacy
+  npm-link build step.
+
+## 2026-07-21 FlTable P0 implementation
+
+- Reloaded the Vue performance, Element Plus wrapper, browser-control, and file-planning workflows.
+- Recovered the dirty workspace without changing unrelated docs/site work.
+- Froze the P0-only implementation boundary and started the complete component-local P0–P3 roadmap.
+- Added `packages/components/table/PERFORMANCE_OPTIMIZATION_PLAN.md` with the full P0–P3 roadmap and an
+  explicit restriction that only P0-A/P0-B may change code in this iteration.
+- Inspected editor registration, DOM cell resolution, focus lifecycle, structural watchers, and the existing
+  regression matrix; implementation design now preserves fixed clones and current editor priority rules.
+- Implemented P0-A with a non-reactive focus snapshot and old/new DOM class-set delta updates.
+- Implemented P0-B with a non-reactive `Map`/`WeakMap` registry indexed by owning table cell.
+- Added callback-count and registry fast-path tests; the component tests pass 33/33 and the full suite
+  passes 345/345.
+- Built and profiled the final distribution in all four fixed scenarios. Body/header callback probes are
+  zero for all 96 measured keys.
+- Saved final compressed traces, screenshots, page metrics, and raw-trace analysis under
+  `docs/performance/artifacts/p0-after/`.
+- Added the complete P0–P3 component plan and P0 result report under `packages/components/table/`;
+  P1–P3 remain documentation only.

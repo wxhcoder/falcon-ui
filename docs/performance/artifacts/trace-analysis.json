@@ -1,0 +1,1099 @@
+{
+  "generatedAt": "2026-07-20T15:33:04.186Z",
+  "methodology": {
+    "phaseTotals": "Exclusive main-thread time; nested painting/rendering/GC overrides enclosing scripting.",
+    "eventTotals": "Named event totals can overlap; unionMs removes same-name nesting.",
+    "cpuHotspots": "Sampling percentages, not wall-clock percentages."
+  },
+  "scenarios": [
+    {
+      "scenario": "plain-cross-off",
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "plain",
+        "isCrossHighlight": false,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 0,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "pageMetrics": {
+        "count": 24,
+        "p50Ms": 448.6,
+        "p95Ms": 515.2,
+        "maxMs": 539.1,
+        "overFrameBudget": 24,
+        "longTasks": 24
+      },
+      "callbackProbe": { "bodyPerKey": [2500], "headerPerKey": [0] },
+      "trace": {
+        "rendererPid": 38228,
+        "rendererTid": 39120,
+        "mainThreadBusyMs": 10267.2,
+        "longTasks": { "count": 25, "totalMs": 9490.6, "maxMs": 492.8 },
+        "keydownDispatch": { "count": 24, "totalMs": 9420.1, "maxMs": 492.6 },
+        "phases": {
+          "painting": { "durationMs": 118.6, "percentOfBusy": 1.2 },
+          "rendering": { "durationMs": 580.5, "percentOfBusy": 5.7 },
+          "gc": { "durationMs": 122.8, "percentOfBusy": 1.2 },
+          "scripting": { "durationMs": 9371.8, "percentOfBusy": 91.3 },
+          "other": { "durationMs": 73.5, "percentOfBusy": 0.7 }
+        },
+        "eventBreakdown": {
+          "EventDispatch": { "count": 89, "totalMs": 9429.8, "maxMs": 492.6, "unionMs": 9429.8 },
+          "RunMicrotasks": { "count": 88, "totalMs": 9276.4, "maxMs": 488.6, "unionMs": 9276.4 },
+          "UpdateLayoutTree": { "count": 64, "totalMs": 64.5, "maxMs": 49.1, "unionMs": 64.5 },
+          "Layout": { "count": 24, "totalMs": 36.9, "maxMs": 2.4, "unionMs": 36.9 },
+          "PrePaint": { "count": 56, "totalMs": 18.7, "maxMs": 0.7, "unionMs": 18.7 },
+          "Layerize": { "count": 56, "totalMs": 341.1, "maxMs": 11.2, "unionMs": 341.1 },
+          "Paint": { "count": 1794, "totalMs": 187.8, "maxMs": 26.8, "unionMs": 118.6 },
+          "MinorGC": { "count": 26, "totalMs": 111.8, "maxMs": 5.6, "unionMs": 111.8 },
+          "MajorGC": { "count": 1, "totalMs": 11, "maxMs": 11, "unionMs": 11 }
+        },
+        "droppedFrames": 960,
+        "cpuHotspots": {
+          "totalSamples": 15077,
+          "self": [
+            {
+              "functionName": "resolveCrossClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8059,
+              "samples": 55,
+              "percent": 0.4
+            },
+            {
+              "functionName": "mergeClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7798,
+              "samples": 50,
+              "percent": 0.3
+            },
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 30,
+              "percent": 0.2
+            },
+            {
+              "functionName": "isControlColumn",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7862,
+              "samples": 27,
+              "percent": 0.2
+            },
+            {
+              "functionName": "readRowKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7858,
+              "samples": 19,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 18,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7863,
+              "samples": 15,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveVisibleColumns",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7891,
+              "samples": 5,
+              "percent": 0
+            },
+            {
+              "functionName": "normalizeClass$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7791,
+              "samples": 4,
+              "percent": 0
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8075,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveVisibleColumns",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7891,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7863,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7800,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveCrossClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8059,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8075,
+              "samples": 1,
+              "percent": 0
+            }
+          ],
+          "inclusive": [
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8075,
+              "samples": 452,
+              "percent": 3
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 448,
+              "percent": 3
+            },
+            {
+              "functionName": "resolveCrossClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8059,
+              "samples": 330,
+              "percent": 2.2
+            },
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8221,
+              "samples": 183,
+              "percent": 1.2
+            },
+            {
+              "functionName": "readRowKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7858,
+              "samples": 95,
+              "percent": 0.6
+            },
+            {
+              "functionName": "scrollActiveCellIntoView",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7974,
+              "samples": 78,
+              "percent": 0.5
+            },
+            {
+              "functionName": "mergeClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7798,
+              "samples": 56,
+              "percent": 0.4
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7863,
+              "samples": 55,
+              "percent": 0.4
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7944,
+              "samples": 52,
+              "percent": 0.3
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7989,
+              "samples": 52,
+              "percent": 0.3
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7928,
+              "samples": 47,
+              "percent": 0.3
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7944,
+              "samples": 45,
+              "percent": 0.3
+            },
+            {
+              "functionName": "blurActiveEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7982,
+              "samples": 45,
+              "percent": 0.3
+            },
+            {
+              "functionName": "isControlColumn",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7862,
+              "samples": 41,
+              "percent": 0.3
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7928,
+              "samples": 39,
+              "percent": 0.3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plain-cross-on",
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "plain",
+        "isCrossHighlight": true,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 0,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "pageMetrics": {
+        "count": 24,
+        "p50Ms": 680.3,
+        "p95Ms": 750.1,
+        "maxMs": 764.1,
+        "overFrameBudget": 24,
+        "longTasks": 24
+      },
+      "callbackProbe": { "bodyPerKey": [2500], "headerPerKey": [50] },
+      "trace": {
+        "rendererPid": 38228,
+        "rendererTid": 39120,
+        "mainThreadBusyMs": 16790.9,
+        "longTasks": { "count": 26, "totalMs": 15231.4, "maxMs": 1096.9 },
+        "keydownDispatch": { "count": 24, "totalMs": 15049.6, "maxMs": 1096.7 },
+        "phases": {
+          "painting": { "durationMs": 229.3, "percentOfBusy": 1.4 },
+          "rendering": { "durationMs": 1396.7, "percentOfBusy": 8.3 },
+          "gc": { "durationMs": 174.7, "percentOfBusy": 1 },
+          "scripting": { "durationMs": 14780, "percentOfBusy": 88 },
+          "other": { "durationMs": 210.3, "percentOfBusy": 1.3 }
+        },
+        "eventBreakdown": {
+          "EventDispatch": { "count": 89, "totalMs": 15062.1, "maxMs": 1096.7, "unionMs": 15062.1 },
+          "RunMicrotasks": { "count": 112, "totalMs": 14590.8, "maxMs": 716.3, "unionMs": 14590.8 },
+          "UpdateLayoutTree": { "count": 100, "totalMs": 281.9, "maxMs": 62, "unionMs": 281.9 },
+          "Layout": { "count": 25, "totalMs": 52.5, "maxMs": 3.5, "unionMs": 52.5 },
+          "PrePaint": { "count": 71, "totalMs": 39.1, "maxMs": 1.3, "unionMs": 39.1 },
+          "Layerize": { "count": 71, "totalMs": 639.2, "maxMs": 14, "unionMs": 639.2 },
+          "Paint": { "count": 3994, "totalMs": 373.9, "maxMs": 33.8, "unionMs": 229.3 },
+          "MinorGC": { "count": 26, "totalMs": 118.9, "maxMs": 5.8, "unionMs": 118.9 },
+          "MajorGC": { "count": 1, "totalMs": 55.7, "maxMs": 55.7, "unionMs": 55.7 }
+        },
+        "droppedFrames": 2518,
+        "cpuHotspots": {
+          "totalSamples": 24670,
+          "self": [
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 356,
+              "percent": 1.4
+            },
+            {
+              "functionName": "mergeClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7798,
+              "samples": 102,
+              "percent": 0.4
+            },
+            {
+              "functionName": "resolveCrossClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8059,
+              "samples": 61,
+              "percent": 0.2
+            },
+            {
+              "functionName": "readRowKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7858,
+              "samples": 39,
+              "percent": 0.2
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 34,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7863,
+              "samples": 32,
+              "percent": 0.1
+            },
+            {
+              "functionName": "isControlColumn",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7862,
+              "samples": 20,
+              "percent": 0.1
+            },
+            {
+              "functionName": "mergeClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7798,
+              "samples": 12,
+              "percent": 0
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7800,
+              "samples": 7,
+              "percent": 0
+            },
+            {
+              "functionName": "normalizeClass$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7791,
+              "samples": 7,
+              "percent": 0
+            },
+            {
+              "functionName": "readRowKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7858,
+              "samples": 6,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8079,
+              "samples": 6,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveVisibleColumns",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7891,
+              "samples": 5,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveVisibleColumns",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7891,
+              "samples": 4,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7863,
+              "samples": 4,
+              "percent": 0
+            }
+          ],
+          "inclusive": [
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 701,
+              "percent": 2.8
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8075,
+              "samples": 701,
+              "percent": 2.8
+            },
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8221,
+              "samples": 550,
+              "percent": 2.2
+            },
+            {
+              "functionName": "resolveCrossClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8059,
+              "samples": 478,
+              "percent": 1.9
+            },
+            {
+              "functionName": "scrollActiveCellIntoView",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7974,
+              "samples": 419,
+              "percent": 1.7
+            },
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 356,
+              "percent": 1.4
+            },
+            {
+              "functionName": "readRowKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7858,
+              "samples": 133,
+              "percent": 0.5
+            },
+            {
+              "functionName": "mergeClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7798,
+              "samples": 118,
+              "percent": 0.5
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7863,
+              "samples": 102,
+              "percent": 0.4
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7944,
+              "samples": 67,
+              "percent": 0.3
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7989,
+              "samples": 67,
+              "percent": 0.3
+            },
+            {
+              "functionName": "isControlColumn",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7862,
+              "samples": 61,
+              "percent": 0.2
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7928,
+              "samples": 57,
+              "percent": 0.2
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8075,
+              "samples": 57,
+              "percent": 0.2
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 56,
+              "percent": 0.2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "editor-cross-off",
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "editor",
+        "isCrossHighlight": false,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 2500,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "pageMetrics": {
+        "count": 24,
+        "p50Ms": 1744.4,
+        "p95Ms": 2104.6,
+        "maxMs": 2131.6,
+        "overFrameBudget": 24,
+        "longTasks": 24
+      },
+      "callbackProbe": { "bodyPerKey": [2500], "headerPerKey": [0] },
+      "trace": {
+        "rendererPid": 38228,
+        "rendererTid": 39120,
+        "mainThreadBusyMs": 55252.9,
+        "longTasks": { "count": 66, "totalMs": 54749.4, "maxMs": 2791.2 },
+        "keydownDispatch": { "count": 24, "totalMs": 37835.2, "maxMs": 2791.1 },
+        "phases": {
+          "painting": { "durationMs": 212.7, "percentOfBusy": 0.4 },
+          "rendering": { "durationMs": 16781.6, "percentOfBusy": 30.4 },
+          "gc": { "durationMs": 590.8, "percentOfBusy": 1.1 },
+          "scripting": { "durationMs": 37464.2, "percentOfBusy": 67.8 },
+          "other": { "durationMs": 203.6, "percentOfBusy": 0.4 }
+        },
+        "eventBreakdown": {
+          "EventDispatch": {
+            "count": 118,
+            "totalMs": 38173.8,
+            "maxMs": 2791.1,
+            "unionMs": 37843.6
+          },
+          "RunMicrotasks": {
+            "count": 102,
+            "totalMs": 35822.8,
+            "maxMs": 1656.9,
+            "unionMs": 35822.8
+          },
+          "UpdateLayoutTree": { "count": 56, "totalMs": 125.1, "maxMs": 107, "unionMs": 125.1 },
+          "Layout": { "count": 25, "totalMs": 57.6, "maxMs": 3.1, "unionMs": 57.6 },
+          "PrePaint": { "count": 53, "totalMs": 22.3, "maxMs": 0.7, "unionMs": 22.3 },
+          "Layerize": { "count": 53, "totalMs": 15859.6, "maxMs": 554.3, "unionMs": 15859.6 },
+          "Paint": { "count": 689, "totalMs": 325.4, "maxMs": 14, "unionMs": 212.7 },
+          "MinorGC": { "count": 70, "totalMs": 558.8, "maxMs": 13.6, "unionMs": 558.8 },
+          "MajorGC": { "count": 1, "totalMs": 32, "maxMs": 32, "unionMs": 32 }
+        },
+        "droppedFrames": 2642,
+        "cpuHotspots": {
+          "totalSamples": 78020,
+          "self": [
+            {
+              "functionName": "mergeComponentExpose",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 46,
+              "samples": 1470,
+              "percent": 1.9
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 68,
+              "samples": 519,
+              "percent": 0.7
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 77,
+              "samples": 374,
+              "percent": 0.5
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8810,
+              "samples": 169,
+              "percent": 0.2
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 63,
+              "samples": 135,
+              "percent": 0.2
+            },
+            {
+              "functionName": "readRowKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7858,
+              "samples": 69,
+              "percent": 0.1
+            },
+            {
+              "functionName": "mergeClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7798,
+              "samples": 67,
+              "percent": 0.1
+            },
+            {
+              "functionName": "get",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7622,
+              "samples": 42,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveCrossClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8059,
+              "samples": 37,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveTargetValue",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8593,
+              "samples": 36,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 35,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveTargetValue",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8593,
+              "samples": 34,
+              "percent": 0
+            },
+            { "functionName": "scrollIntoView", "url": "", "line": 0, "samples": 34, "percent": 0 },
+            {
+              "functionName": "resolveTargetValue",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8593,
+              "samples": 28,
+              "percent": 0
+            },
+            {
+              "functionName": "getRootEl",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8778,
+              "samples": 27,
+              "percent": 0
+            }
+          ],
+          "inclusive": [
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 77,
+              "samples": 2185,
+              "percent": 2.8
+            },
+            {
+              "functionName": "mergeComponentExpose",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 46,
+              "samples": 2151,
+              "percent": 2.8
+            },
+            {
+              "functionName": "changeRef",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 81,
+              "samples": 2151,
+              "percent": 2.8
+            },
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8221,
+              "samples": 1536,
+              "percent": 2
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8810,
+              "samples": 1367,
+              "percent": 1.8
+            },
+            {
+              "functionName": "blurActiveEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7982,
+              "samples": 902,
+              "percent": 1.2
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8075,
+              "samples": 632,
+              "percent": 0.8
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 611,
+              "percent": 0.8
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 68,
+              "samples": 562,
+              "percent": 0.7
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7944,
+              "samples": 458,
+              "percent": 0.6
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7989,
+              "samples": 458,
+              "percent": 0.6
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7944,
+              "samples": 452,
+              "percent": 0.6
+            },
+            {
+              "functionName": "closeEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8718,
+              "samples": 449,
+              "percent": 0.6
+            },
+            {
+              "functionName": "close",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8784,
+              "samples": 449,
+              "percent": 0.6
+            },
+            {
+              "functionName": "resolveCrossClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8059,
+              "samples": 449,
+              "percent": 0.6
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "editor-cross-on",
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "editor",
+        "isCrossHighlight": true,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 2500,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "pageMetrics": {
+        "count": 24,
+        "p50Ms": 564,
+        "p95Ms": 963.3,
+        "maxMs": 1020.3,
+        "overFrameBudget": 24,
+        "longTasks": 24
+      },
+      "callbackProbe": { "bodyPerKey": [2500], "headerPerKey": [50] },
+      "trace": {
+        "rendererPid": 38228,
+        "rendererTid": 39120,
+        "mainThreadBusyMs": 21904.2,
+        "longTasks": { "count": 85, "totalMs": 21820.3, "maxMs": 1602 },
+        "keydownDispatch": { "count": 24, "totalMs": 12361, "maxMs": 1601.4 },
+        "phases": {
+          "painting": { "durationMs": 186.4, "percentOfBusy": 0.9 },
+          "rendering": { "durationMs": 9384.5, "percentOfBusy": 42.8 },
+          "gc": { "durationMs": 379, "percentOfBusy": 1.7 },
+          "scripting": { "durationMs": 11981.6, "percentOfBusy": 54.7 },
+          "other": { "durationMs": 0, "percentOfBusy": 0 }
+        },
+        "eventBreakdown": {
+          "EventDispatch": {
+            "count": 113,
+            "totalMs": 12515.2,
+            "maxMs": 1601.4,
+            "unionMs": 12366.6
+          },
+          "RunMicrotasks": { "count": 107, "totalMs": 11189.5, "maxMs": 791.4, "unionMs": 11189.5 },
+          "UpdateLayoutTree": { "count": 98, "totalMs": 143.4, "maxMs": 43.2, "unionMs": 143.4 },
+          "Layout": { "count": 24, "totalMs": 28.8, "maxMs": 1.6, "unionMs": 28.8 },
+          "PrePaint": { "count": 73, "totalMs": 24.3, "maxMs": 1.3, "unionMs": 24.3 },
+          "Layerize": { "count": 73, "totalMs": 8656.7, "maxMs": 186.6, "unionMs": 8656.7 },
+          "Paint": { "count": 3349, "totalMs": 268.2, "maxMs": 7.1, "unionMs": 186.4 },
+          "MinorGC": { "count": 70, "totalMs": 379, "maxMs": 8.1, "unionMs": 379 },
+          "MajorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 }
+        },
+        "droppedFrames": 4569,
+        "cpuHotspots": {
+          "totalSamples": 35204,
+          "self": [
+            {
+              "functionName": "mergeComponentExpose",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 46,
+              "samples": 483,
+              "percent": 1.4
+            },
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 157,
+              "percent": 0.4
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 68,
+              "samples": 119,
+              "percent": 0.3
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 63,
+              "samples": 44,
+              "percent": 0.1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8810,
+              "samples": 41,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveCrossClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8059,
+              "samples": 23,
+              "percent": 0.1
+            },
+            {
+              "functionName": "readRowKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7858,
+              "samples": 22,
+              "percent": 0.1
+            },
+            {
+              "functionName": "mergeClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7798,
+              "samples": 18,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7863,
+              "samples": 11,
+              "percent": 0
+            },
+            {
+              "functionName": "get",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7622,
+              "samples": 11,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 10,
+              "percent": 0
+            },
+            {
+              "functionName": "isControlColumn",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7862,
+              "samples": 7,
+              "percent": 0
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 77,
+              "samples": 6,
+              "percent": 0
+            },
+            {
+              "functionName": "get",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7622,
+              "samples": 5,
+              "percent": 0
+            },
+            {
+              "functionName": "normalizeClass$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7791,
+              "samples": 3,
+              "percent": 0
+            }
+          ],
+          "inclusive": [
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8221,
+              "samples": 975,
+              "percent": 2.8
+            },
+            {
+              "functionName": "mergeComponentExpose",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 46,
+              "samples": 650,
+              "percent": 1.8
+            },
+            {
+              "functionName": "changeRef",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/dialog-Cm3Px-Bu.js",
+              "line": 81,
+              "samples": 650,
+              "percent": 1.8
+            },
+            {
+              "functionName": "blurActiveEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7982,
+              "samples": 488,
+              "percent": 1.4
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8810,
+              "samples": 387,
+              "percent": 1.1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 77,
+              "samples": 259,
+              "percent": 0.7
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8075,
+              "samples": 258,
+              "percent": 0.7
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7944,
+              "samples": 257,
+              "percent": 0.7
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7989,
+              "samples": 257,
+              "percent": 0.7
+            },
+            {
+              "functionName": "closeEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8718,
+              "samples": 253,
+              "percent": 0.7
+            },
+            {
+              "functionName": "close",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8784,
+              "samples": 253,
+              "percent": 0.7
+            },
+            {
+              "functionName": "resolveByScope",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8074,
+              "samples": 250,
+              "percent": 0.7
+            },
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 8221,
+              "samples": 248,
+              "percent": 0.7
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7944,
+              "samples": 246,
+              "percent": 0.7
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs",
+              "line": 7989,
+              "samples": 246,
+              "percent": 0.7
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

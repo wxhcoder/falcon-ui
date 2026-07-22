@@ -188,6 +188,7 @@ export default defineConfig({
   title: 'Falcon UI',
   description: '基于 Element Plus 的二次封装组件库',
   lang: 'zh-CN',
+  head: [['link', { rel: 'icon', href: '/favicon.ico', type: 'image/x-icon' }]],
   srcDir: docsRoot,
   lastUpdated: true,
   cleanUrls: true,

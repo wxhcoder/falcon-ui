@@ -1,0 +1,994 @@
+[
+  {
+    "scenario": "plain-cross-off",
+    "traceBytes": 235074,
+    "screenshotBytes": 43088,
+    "metrics": {
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "plain",
+        "isCrossHighlight": false,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 0,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "samples": [
+        {
+          "sequence": 1,
+          "key": "ArrowRight",
+          "durationMs": 16.4,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 2
+        },
+        {
+          "sequence": 2,
+          "key": "ArrowRight",
+          "durationMs": 19.4,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 3
+        },
+        {
+          "sequence": 3,
+          "key": "ArrowRight",
+          "durationMs": 19.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 4
+        },
+        {
+          "sequence": 4,
+          "key": "ArrowRight",
+          "durationMs": 21.5,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 5
+        },
+        {
+          "sequence": 5,
+          "key": "ArrowRight",
+          "durationMs": 18.9,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 6
+        },
+        {
+          "sequence": 6,
+          "key": "ArrowRight",
+          "durationMs": 18.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 7
+        },
+        {
+          "sequence": 7,
+          "key": "ArrowRight",
+          "durationMs": 59.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 8
+        },
+        {
+          "sequence": 8,
+          "key": "ArrowRight",
+          "durationMs": 18.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 9
+        },
+        {
+          "sequence": 9,
+          "key": "ArrowRight",
+          "durationMs": 29.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 10
+        },
+        {
+          "sequence": 10,
+          "key": "ArrowRight",
+          "durationMs": 16.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 11
+        },
+        {
+          "sequence": 11,
+          "key": "ArrowRight",
+          "durationMs": 35,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 12
+        },
+        {
+          "sequence": 12,
+          "key": "ArrowRight",
+          "durationMs": 17.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 13,
+          "key": "ArrowDown",
+          "durationMs": 14,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 2,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 14,
+          "key": "ArrowDown",
+          "durationMs": 24.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 3,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 15,
+          "key": "ArrowDown",
+          "durationMs": 30.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 4,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 16,
+          "key": "ArrowDown",
+          "durationMs": 26.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 5,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 17,
+          "key": "ArrowDown",
+          "durationMs": 23.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 6,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 18,
+          "key": "ArrowDown",
+          "durationMs": 22.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 7,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 19,
+          "key": "ArrowDown",
+          "durationMs": 26.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 8,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 20,
+          "key": "ArrowDown",
+          "durationMs": 26.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 9,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 21,
+          "key": "ArrowDown",
+          "durationMs": 26.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 10,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 22,
+          "key": "ArrowDown",
+          "durationMs": 29.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 11,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 23,
+          "key": "ArrowDown",
+          "durationMs": 26.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 12,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 24,
+          "key": "ArrowDown",
+          "durationMs": 24.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 13,
+          "activeColumn": 13
+        }
+      ],
+      "summary": {
+        "count": 24,
+        "p50Ms": 23.1,
+        "p95Ms": 35,
+        "maxMs": 59.2,
+        "overFrameBudget": 21,
+        "longTasks": 1
+      }
+    }
+  },
+  {
+    "scenario": "plain-cross-on",
+    "traceBytes": 435809,
+    "screenshotBytes": 48512,
+    "metrics": {
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "plain",
+        "isCrossHighlight": true,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 0,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "samples": [
+        {
+          "sequence": 1,
+          "key": "ArrowRight",
+          "durationMs": 48.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 2
+        },
+        {
+          "sequence": 2,
+          "key": "ArrowRight",
+          "durationMs": 48.5,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 3
+        },
+        {
+          "sequence": 3,
+          "key": "ArrowRight",
+          "durationMs": 38.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 4
+        },
+        {
+          "sequence": 4,
+          "key": "ArrowRight",
+          "durationMs": 33.4,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 5
+        },
+        {
+          "sequence": 5,
+          "key": "ArrowRight",
+          "durationMs": 35.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 6
+        },
+        {
+          "sequence": 6,
+          "key": "ArrowRight",
+          "durationMs": 36.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 7
+        },
+        {
+          "sequence": 7,
+          "key": "ArrowRight",
+          "durationMs": 75.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 8
+        },
+        {
+          "sequence": 8,
+          "key": "ArrowRight",
+          "durationMs": 38.9,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 9
+        },
+        {
+          "sequence": 9,
+          "key": "ArrowRight",
+          "durationMs": 38.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 10
+        },
+        {
+          "sequence": 10,
+          "key": "ArrowRight",
+          "durationMs": 37.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 11
+        },
+        {
+          "sequence": 11,
+          "key": "ArrowRight",
+          "durationMs": 58.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 12
+        },
+        {
+          "sequence": 12,
+          "key": "ArrowRight",
+          "durationMs": 41.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 13,
+          "key": "ArrowDown",
+          "durationMs": 39,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 2,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 14,
+          "key": "ArrowDown",
+          "durationMs": 42.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 3,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 15,
+          "key": "ArrowDown",
+          "durationMs": 37.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 4,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 16,
+          "key": "ArrowDown",
+          "durationMs": 42.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 5,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 17,
+          "key": "ArrowDown",
+          "durationMs": 37.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 6,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 18,
+          "key": "ArrowDown",
+          "durationMs": 38.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 7,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 19,
+          "key": "ArrowDown",
+          "durationMs": 38,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 8,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 20,
+          "key": "ArrowDown",
+          "durationMs": 32,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 9,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 21,
+          "key": "ArrowDown",
+          "durationMs": 39.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 10,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 22,
+          "key": "ArrowDown",
+          "durationMs": 39.5,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 11,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 23,
+          "key": "ArrowDown",
+          "durationMs": 39.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 12,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 24,
+          "key": "ArrowDown",
+          "durationMs": 46.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 13,
+          "activeColumn": 13
+        }
+      ],
+      "summary": {
+        "count": 24,
+        "p50Ms": 38.9,
+        "p95Ms": 58.3,
+        "maxMs": 75.1,
+        "overFrameBudget": 24,
+        "longTasks": 2
+      }
+    }
+  },
+  {
+    "scenario": "editor-cross-off",
+    "traceBytes": 1270792,
+    "screenshotBytes": 43399,
+    "metrics": {
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "editor",
+        "isCrossHighlight": false,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 2500,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "samples": [
+        {
+          "sequence": 1,
+          "key": "ArrowRight",
+          "durationMs": 49.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 2
+        },
+        {
+          "sequence": 2,
+          "key": "ArrowRight",
+          "durationMs": 348,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 3
+        },
+        {
+          "sequence": 3,
+          "key": "ArrowRight",
+          "durationMs": 324.4,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 4
+        },
+        {
+          "sequence": 4,
+          "key": "ArrowRight",
+          "durationMs": 344.9,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 5
+        },
+        {
+          "sequence": 5,
+          "key": "ArrowRight",
+          "durationMs": 341.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 6
+        },
+        {
+          "sequence": 6,
+          "key": "ArrowRight",
+          "durationMs": 322.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 7
+        },
+        {
+          "sequence": 7,
+          "key": "ArrowRight",
+          "durationMs": 489.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 8
+        },
+        {
+          "sequence": 8,
+          "key": "ArrowRight",
+          "durationMs": 332.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 9
+        },
+        {
+          "sequence": 9,
+          "key": "ArrowRight",
+          "durationMs": 145.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 10
+        },
+        {
+          "sequence": 10,
+          "key": "ArrowRight",
+          "durationMs": 179.9,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 11
+        },
+        {
+          "sequence": 11,
+          "key": "ArrowRight",
+          "durationMs": 229.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 12
+        },
+        {
+          "sequence": 12,
+          "key": "ArrowRight",
+          "durationMs": 228.9,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 13,
+          "key": "ArrowDown",
+          "durationMs": 22.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 2,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 14,
+          "key": "ArrowDown",
+          "durationMs": 160.5,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 3,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 15,
+          "key": "ArrowDown",
+          "durationMs": 201.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 4,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 16,
+          "key": "ArrowDown",
+          "durationMs": 173.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 5,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 17,
+          "key": "ArrowDown",
+          "durationMs": 208.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 6,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 18,
+          "key": "ArrowDown",
+          "durationMs": 176.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 7,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 19,
+          "key": "ArrowDown",
+          "durationMs": 216.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 8,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 20,
+          "key": "ArrowDown",
+          "durationMs": 166.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 9,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 21,
+          "key": "ArrowDown",
+          "durationMs": 169.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 10,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 22,
+          "key": "ArrowDown",
+          "durationMs": 174.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 11,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 23,
+          "key": "ArrowDown",
+          "durationMs": 187.6,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 12,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 24,
+          "key": "ArrowDown",
+          "durationMs": 225.8,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 13,
+          "activeColumn": 13
+        }
+      ],
+      "summary": {
+        "count": 24,
+        "p50Ms": 201.2,
+        "p95Ms": 348,
+        "maxMs": 489.6,
+        "overFrameBudget": 24,
+        "longTasks": 22
+      }
+    }
+  },
+  {
+    "scenario": "editor-cross-on",
+    "traceBytes": 1723727,
+    "screenshotBytes": 49428,
+    "metrics": {
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "editor",
+        "isCrossHighlight": true,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 2500,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "samples": [
+        {
+          "sequence": 1,
+          "key": "ArrowRight",
+          "durationMs": 76.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 2
+        },
+        {
+          "sequence": 2,
+          "key": "ArrowRight",
+          "durationMs": 342.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 3
+        },
+        {
+          "sequence": 3,
+          "key": "ArrowRight",
+          "durationMs": 352,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 4
+        },
+        {
+          "sequence": 4,
+          "key": "ArrowRight",
+          "durationMs": 341.5,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 5
+        },
+        {
+          "sequence": 5,
+          "key": "ArrowRight",
+          "durationMs": 356.4,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 6
+        },
+        {
+          "sequence": 6,
+          "key": "ArrowRight",
+          "durationMs": 316.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 7
+        },
+        {
+          "sequence": 7,
+          "key": "ArrowRight",
+          "durationMs": 297.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 8
+        },
+        {
+          "sequence": 8,
+          "key": "ArrowRight",
+          "durationMs": 142.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 9
+        },
+        {
+          "sequence": 9,
+          "key": "ArrowRight",
+          "durationMs": 186.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 10
+        },
+        {
+          "sequence": 10,
+          "key": "ArrowRight",
+          "durationMs": 149.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 11
+        },
+        {
+          "sequence": 11,
+          "key": "ArrowRight",
+          "durationMs": 216.5,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 12
+        },
+        {
+          "sequence": 12,
+          "key": "ArrowRight",
+          "durationMs": 196.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 1,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 13,
+          "key": "ArrowDown",
+          "durationMs": 250.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 2,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 14,
+          "key": "ArrowDown",
+          "durationMs": 196.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 3,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 15,
+          "key": "ArrowDown",
+          "durationMs": 176.4,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 4,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 16,
+          "key": "ArrowDown",
+          "durationMs": 218.1,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 5,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 17,
+          "key": "ArrowDown",
+          "durationMs": 218.9,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 6,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 18,
+          "key": "ArrowDown",
+          "durationMs": 219.4,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 7,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 19,
+          "key": "ArrowDown",
+          "durationMs": 223.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 8,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 20,
+          "key": "ArrowDown",
+          "durationMs": 182.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 9,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 21,
+          "key": "ArrowDown",
+          "durationMs": 256.5,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 10,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 22,
+          "key": "ArrowDown",
+          "durationMs": 189.3,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 11,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 23,
+          "key": "ArrowDown",
+          "durationMs": 183.7,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 12,
+          "activeColumn": 13
+        },
+        {
+          "sequence": 24,
+          "key": "ArrowDown",
+          "durationMs": 173.2,
+          "cellClassCalls": 0,
+          "headerClassCalls": 0,
+          "activeRow": 13,
+          "activeColumn": 13
+        }
+      ],
+      "summary": {
+        "count": 24,
+        "p50Ms": 216.5,
+        "p95Ms": 352,
+        "maxMs": 356.4,
+        "overFrameBudget": 24,
+        "longTasks": 24
+      }
+    }
+  }
+]

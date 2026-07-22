@@ -8,6 +8,21 @@ const readText = (relativePath: string) =>
   fs.readFileSync(path.resolve(rootDir, relativePath), 'utf8')
 
 describe('docs Element Plus-style layout', () => {
+  it('configures a valid multi-size favicon for the docs site', () => {
+    const configSource = readText('docs/.vitepress/config.ts')
+    const faviconPath = path.resolve(rootDir, 'docs/public/favicon.ico')
+
+    expect(configSource).toContain("rel: 'icon'")
+    expect(configSource).toContain("href: '/favicon.ico'")
+    expect(configSource).toContain("type: 'image/x-icon'")
+    expect(fs.existsSync(faviconPath)).toBe(true)
+
+    const favicon = fs.readFileSync(faviconPath)
+
+    expect(Array.from(favicon.subarray(0, 4))).toEqual([0, 0, 1, 0])
+    expect(favicon.readUInt16LE(4)).toBe(6)
+  })
+
   it('configures root and locale fallback sidebars without removing section sidebars', () => {
     const configSource = readText('docs/.vitepress/config.ts')
 

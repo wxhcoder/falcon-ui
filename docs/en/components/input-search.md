@@ -8,7 +8,26 @@ every `ElInput` capability.
 
 ## Basic Usage
 
+Enter a unique keyword and press Enter to backfill directly, or click the search icon to open a
+single-selection customer dialog.
+
 ::: demo input-search/basic
+:::
+
+## Table Business Selection Scenario
+
+Set `is-table` when the component is used in a table cell. Each row maintains its own business ID
+and display label; selecting a customer from the search dialog updates only the active row.
+
+::: demo input-search/is-table
+:::
+
+## Multiple Fuzzy Matches
+
+Enter `acme` and press Enter to return multiple fuzzy matches. The component then opens a
+single-selection table and backfills the confirmed row.
+
+::: demo input-search/fuzzy-multi-select
 :::
 
 ## Enter Search and useDialog Placeholder

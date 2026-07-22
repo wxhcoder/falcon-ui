@@ -39,7 +39,10 @@ describe('docs i18n structure', () => {
       'en/guide/getting-started.md',
       'en/components/button.md',
       'en/components/dialog.md',
+      'en/components/input-search.md',
       'en/examples/button/basic.vue',
+      'en/examples/input-search/fuzzy-multi-select.vue',
+      'en/examples/input-search/is-table.vue',
       'en/examples/table/basic.vue'
     ]
 
@@ -48,6 +51,45 @@ describe('docs i18n structure', () => {
       expect(fs.existsSync(filePath), relativePath).toBe(true)
       expect(hasChineseText(fs.readFileSync(filePath, 'utf8')), relativePath).toBe(false)
     }
+  })
+
+  it('links interactive bilingual input-search examples with strict single selection', () => {
+    const rootPage = readText('docs/components/input-search.md')
+    const englishPage = readText('docs/en/components/input-search.md')
+    const examplePaths = [
+      'docs/examples/input-search/basic.vue',
+      'docs/examples/input-search/is-table.vue',
+      'docs/examples/input-search/fuzzy-multi-select.vue',
+      'docs/examples/input-search/enter-multi-placeholder.vue',
+      'docs/en/examples/input-search/basic.vue',
+      'docs/en/examples/input-search/is-table.vue',
+      'docs/en/examples/input-search/fuzzy-multi-select.vue',
+      'docs/en/examples/input-search/enter-multi-placeholder.vue'
+    ]
+
+    expect(rootPage).toContain('::: demo input-search/is-table')
+    expect(rootPage).toContain('::: demo input-search/fuzzy-multi-select')
+    expect(englishPage).toContain('::: demo input-search/is-table')
+    expect(englishPage).toContain('::: demo input-search/fuzzy-multi-select')
+
+    for (const relativePath of examplePaths) {
+      const source = readText(relativePath)
+
+      expect(source, relativePath).toContain('selectionSingle: true')
+    }
+
+    expect(readText('docs/examples/input-search/basic.vue')).toContain(
+      '@open-dialog="handleOpenDialog"'
+    )
+    expect(readText('docs/examples/input-search/is-table.vue')).toContain(
+      '@open-dialog="handleOpenDialog(row, $event)"'
+    )
+    expect(readText('docs/en/examples/input-search/basic.vue')).toContain(
+      '@open-dialog="handleOpenDialog"'
+    )
+    expect(readText('docs/en/examples/input-search/is-table.vue')).toContain(
+      '@open-dialog="handleOpenDialog(row, $event)"'
+    )
   })
 
   it('generates English API metadata without Chinese descriptions', () => {

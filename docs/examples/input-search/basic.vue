@@ -6,7 +6,8 @@
       clearable
       placeholder="输入 globex 回车可自动回填"
       :fetch-api="fetchApi"
-      :map-result="mapResult" />
+      :map-result="mapResult"
+      @open-dialog="handleOpenDialog" />
 
     <div class="demo-result">绑定值（value）：{{ value ?? '(null)' }}</div>
     <div class="demo-result">显示值（label）：{{ label || '(empty)' }}</div>
@@ -14,11 +15,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { FlTable } from '@falcon-ui/components'
+import { useDialog } from '@falcon-ui/hooks'
+import { ElTableColumn } from 'element-plus'
+import { h, ref } from 'vue'
 
 type SearchItem = {
   id: string
   name: string
+}
+
+type OpenDialogEvent = {
+  keyword: string
+  reason: 'manual' | 'multi-match'
+  results?: unknown[]
 }
 
 const data: SearchItem[] = [
@@ -28,6 +38,7 @@ const data: SearchItem[] = [
 
 const value = ref<string | number | null>(null)
 const label = ref('')
+const dialog = useDialog()
 
 const fetchApi = async (keyword: string) => {
   const normalized = keyword.trim().toLowerCase()
@@ -44,6 +55,66 @@ const mapResult = (item: unknown) => {
     value: record?.id ?? null,
     label: record?.name ?? ''
   }
+}
+
+const resolveDialogRows = (event: OpenDialogEvent) => {
+  if (event.results) {
+    return event.results.map((item) => {
+      const record = item as SearchItem
+
+      return {
+        id: record?.id ?? '',
+        name: record?.name ?? ''
+      }
+    })
+  }
+
+  const normalized = event.keyword.trim().toLowerCase()
+  if (!normalized) {
+    return data
+  }
+
+  return data.filter((item) => item.name.toLowerCase().includes(normalized))
+}
+
+const renderSelectionTable = (rows: SearchItem[]) =>
+  h(
+    FlTable,
+    {
+      data: rows,
+      border: true,
+      height: 240,
+      selectionSingle: true
+    },
+    () => [
+      h(ElTableColumn, { type: 'selection', width: 52 }),
+      h(ElTableColumn, { label: 'ID', prop: 'id', width: 120 }),
+      h(ElTableColumn, { label: '客户名称', prop: 'name' })
+    ]
+  )
+
+const handleOpenDialog = (event: OpenDialogEvent) => {
+  const dialogRows = resolveDialogRows(event)
+
+  dialog
+    .open<SearchItem[]>({
+      title: '选择客户',
+      message: () => renderSelectionTable(dialogRows),
+      payloadMethod: 'getSelectionRows',
+      dialogProps: {
+        bodyHeight: 280
+      }
+    })
+    .then(({ data: selectedRows }) => {
+      const selectedRow = selectedRows[0]
+      if (!selectedRow) {
+        return
+      }
+
+      value.value = selectedRow.id
+      label.value = selectedRow.name
+    })
+    .catch(() => undefined)
 }
 </script>
 

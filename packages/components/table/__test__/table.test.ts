@@ -916,6 +916,45 @@ describe('FlTable', () => {
     expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-active')
   })
 
+  it('moves focus without rerunning full-table class callbacks', async () => {
+    const rows = createRows()
+    const cellClassName = vi.fn(() => 'business-cell')
+    const headerCellClassName = vi.fn(() => 'business-header-cell')
+    const wrapper = mount(FlTable, {
+      props: {
+        data: rows,
+        crossHighlight: true
+      },
+      attrs: {
+        cellClassName,
+        headerCellClassName
+      },
+      slots: {
+        default: () => createPlainColumns()
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+    await emitCellClick(wrapper, rows[0], 0)
+    cellClassName.mockClear()
+    headerCellClassName.mockClear()
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    await waitForKeyboardEffect()
+
+    const headerCells = wrapper.findAll('.el-table__header-wrapper th.el-table__cell')
+    const firstRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:first-child td')
+    const secondRowCells = wrapper.findAll('.el-table__body-wrapper tbody tr:nth-child(2) td')
+
+    expect(cellClassName).not.toHaveBeenCalled()
+    expect(headerCellClassName).not.toHaveBeenCalled()
+    expect(headerCells[1]?.classes()).toContain('fl-table__cross-column')
+    expect(firstRowCells[0]?.classes()).not.toContain('fl-table__cross-active')
+    expect(firstRowCells[1]?.classes()).toContain('fl-table__cross-active')
+    expect(secondRowCells[1]?.classes()).toContain('fl-table__cross-column')
+  })
+
   it('hands off the first key to a text editor without targetRef', async () => {
     const rows = createRows()
     rows[0].name = ''

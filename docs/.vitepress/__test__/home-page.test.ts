@@ -209,13 +209,9 @@ describe('docs homepage', () => {
       normalizedHomeSource.match(
         /@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/
       )?.[1] ?? ''
-    const circles = noiseSource.match(/<circle\b/g) ?? []
-    const radii = [...noiseSource.matchAll(/<circle\b[^>]*\br="([^"]+)"/g)].map(
-      ([, radius]) => radius
-    )
-    const fills = [...noiseSource.matchAll(/<circle\b[^>]*\bfill="([^"]+)"/g)].map(
-      ([, fill]) => fill
-    )
+    const squares =
+      noiseSource.match(/<rect\b[^>]*\bwidth="1\.728"[^>]*\bheight="1\.728"[^>]*>/g) ?? []
+    const squareFills = squares.map((square) => square.match(/\bfill="([^"]+)"/)?.[1] ?? '')
 
     expect(noiseSource).toContain('viewBox="0 0 1080 608"')
     expect(noiseSource).toContain('<mask id="noiseFadeMask"')
@@ -226,9 +222,10 @@ describe('docs homepage', () => {
     expect(noiseSource).toContain('<stop offset="0" stop-color="white" stop-opacity="0.22" />')
     expect(noiseSource).toContain('<stop offset="0.55" stop-color="white" stop-opacity="0.6" />')
     expect(noiseSource).toContain('<stop offset="1" stop-color="white" stop-opacity="1" />')
-    expect(circles).toHaveLength(2258)
-    expect(new Set(radii)).toEqual(new Set(['0.864']))
-    expect(new Set(fills)).toEqual(new Set(['#121212']))
+    expect(noiseSource).not.toContain('<circle')
+    expect(squares).toHaveLength(2258)
+    expect(new Set(squareFills)).toEqual(new Set(['#121212']))
+    expect(noiseSource).toContain('<rect x="37.636" y="4.636" width="1.728" height="1.728"')
 
     expect(homeSource).toContain('class="falcon-homepage__noise"')
     expect(homeSource).toContain('aria-hidden="true"')
@@ -238,8 +235,11 @@ describe('docs homepage', () => {
     expect(homeSource).toContain('mask-image: var(--home-noise-mask);')
     expect(homeSource).toContain('-webkit-mask-size: cover;')
     expect(homeSource).toContain('mask-size: cover;')
-    expect(homeSource).toContain('color-mix(in srgb, var(--vp-c-text-1) 12%, var(--vp-c-bg))')
-    expect(homeSource).toContain('color-mix(in srgb, var(--vp-c-text-1) 22%, var(--vp-c-bg))')
+    expect(homeSource).toContain('color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-bg))')
+    expect(homeSource).toContain('color-mix(in srgb, var(--vp-c-brand-1) 40%, var(--vp-c-bg))')
+    expect(homeSource).not.toContain('color-mix(in srgb, var(--vp-c-brand-1) 16%, var(--vp-c-bg))')
+    expect(homeSource).not.toContain('color-mix(in srgb, var(--vp-c-brand-1) 32%, var(--vp-c-bg))')
+    expect(homeSource).not.toContain('color-mix(in srgb, var(--vp-c-text-1)')
     expect(homeSource).toContain('linear-gradient(')
     expect(homeSource).toContain('115deg,')
     expect(homeSource).toContain('background-size: 220% 100%;')

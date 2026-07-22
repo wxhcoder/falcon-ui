@@ -39,7 +39,7 @@ import type {
 import { tableEmits, tableProps } from './table'
 import { createTableProxyDataBuilder } from './proxy-data'
 import type { TableEditorEndpoint, TableEditorRegistry } from './editor-registry'
-import { tableEditorRegistryDomKey } from './editor-registry'
+import { createTableEditorRegistry, tableEditorRegistryDomKey } from './editor-registry'
 
 defineOptions({
   name: 'FlTable',
@@ -130,21 +130,16 @@ const isEditing = ref(false)
 const outsidePointerDownListener = ref<((event: Event) => void) | null>(null)
 const keyboardListener = ref<((event: KeyboardEvent) => void) | null>(null)
 const editorFocusInListener = ref<((event: FocusEvent) => void) | null>(null)
-const editorEndpoints = ref<TableEditorEndpoint[]>([])
 const buildProxyData = createTableProxyDataBuilder()
+const editorRegistry = createTableEditorRegistry()
+
+let activeCellClassSnapshot: ActiveCell | null = null
+let renderedActiveCell: ActiveCell | null = null
+let renderedCrossHighlight = props.crossHighlight
+let activeCellClassSyncVersion = 0
+let shouldResetActiveCellClasses = false
 
 const { changeRef } = useMergedExpose({})
-
-const editorRegistry: TableEditorRegistry = {
-  register(endpoint) {
-    editorEndpoints.value = [...editorEndpoints.value, endpoint]
-
-    return () => {
-      editorEndpoints.value = editorEndpoints.value.filter((item) => item.id !== endpoint.id)
-    }
-  },
-  getEditors: () => editorEndpoints.value
-}
 
 const setTableRef = (instance: unknown) => {
   tableRef.value = instance as FlTableExpose | null
@@ -486,6 +481,12 @@ const isRowDragHandleHotzone = (
   return point.x - rect.left <= Math.min(ROW_DRAG_HANDLE_HOTZONE_PX, rect.width)
 }
 
+const commitActiveCell = (nextActiveCell: ActiveCell | null) => {
+  activeCellClassSnapshot = nextActiveCell ? { ...nextActiveCell } : null
+  activeCell.value = nextActiveCell ? { ...nextActiveCell } : null
+  scheduleActiveCellClassSync()
+}
+
 const setActiveCell = (
   row: RowData,
   column: ColumnState | null | undefined,
@@ -502,10 +503,10 @@ const setActiveCell = (
     return
   }
 
-  activeCell.value = {
+  commitActiveCell({
     rowKey,
     columnKey
-  }
+  })
 }
 
 const resolveVisibleColumns = (): VisibleColumnEntry[] => {
@@ -535,23 +536,26 @@ const resolveVisibleColumns = (): VisibleColumnEntry[] => {
   })
 }
 
-const resolveActiveCellPosition = (): ActiveCellPosition | null => {
-  if (!activeCell.value) {
+const resolveCellPosition = (
+  cell: ActiveCell | null,
+  rows: RowData[] = sourceData.value
+): ActiveCellPosition | null => {
+  if (!cell) {
     return null
   }
 
-  const rowIndex = sourceData.value.findIndex((row) => readRowKey(row) === activeCell.value?.rowKey)
+  const rowIndex = rows.findIndex((row) => readRowKey(row) === cell.rowKey)
   if (rowIndex < 0) {
     return null
   }
 
   const columns = resolveVisibleColumns()
-  const column = columns.find((item) => item.columnKey === activeCell.value?.columnKey)
+  const column = columns.find((item) => item.columnKey === cell.columnKey)
   if (!column) {
     return null
   }
 
-  const row = sourceData.value[rowIndex]
+  const row = rows[rowIndex]
   if (!row) {
     return null
   }
@@ -563,6 +567,9 @@ const resolveActiveCellPosition = (): ActiveCellPosition | null => {
     columns
   }
 }
+
+const resolveActiveCellPosition = (): ActiveCellPosition | null =>
+  resolveCellPosition(activeCell.value)
 
 const getBodyWrappers = (): HTMLElement[] => {
   const tableElement = getTableElement()
@@ -595,6 +602,221 @@ const resolveBodyCellsByPosition = (rowIndex: number, displayIndex: number): HTM
 const pickPrimaryCell = (cells: HTMLElement[]): HTMLElement | null =>
   cells.find((cell) => !isFixedCloneElement(cell)) ?? cells[0] ?? null
 
+const activeCellClassNames = {
+  active: ns.e('cross-active'),
+  row: ns.e('cross-row'),
+  column: ns.e('cross-column'),
+  control: ns.e('cross-control-cell')
+} as const
+
+type ActiveCellClassState = Map<HTMLElement, Set<string>>
+
+const getHeaderWrappers = (): HTMLElement[] => {
+  const tableElement = getTableElement()
+  if (!tableElement) {
+    return []
+  }
+
+  return Array.from(
+    tableElement.querySelectorAll<HTMLElement>(
+      '.el-table__header-wrapper, .el-table__fixed-header-wrapper'
+    )
+  )
+}
+
+const resolveHeaderCellsByPosition = (displayIndex: number): HTMLElement[] =>
+  getHeaderWrappers().flatMap((wrapper) => {
+    const rows = wrapper.querySelectorAll<HTMLTableRowElement>('thead tr')
+    const row = rows[rows.length - 1]
+    const cell = row?.querySelectorAll<HTMLElement>('th.el-table__cell')[displayIndex]
+    return cell ? [cell] : []
+  })
+
+const createActiveCellDomLookup = () => {
+  const bodyWrappers = getBodyWrappers().map((wrapper) => ({
+    rows: wrapper.querySelectorAll<HTMLTableRowElement>('tbody tr'),
+    rowCells: new Map<number, HTMLElement[]>()
+  }))
+
+  const readRowCells = (
+    wrapper: (typeof bodyWrappers)[number],
+    rowIndex: number
+  ): HTMLElement[] | null => {
+    const cached = wrapper.rowCells.get(rowIndex)
+    if (cached) {
+      return cached
+    }
+
+    const row = wrapper.rows[rowIndex]
+    if (!row) {
+      return null
+    }
+
+    const cells = Array.from(row.querySelectorAll<HTMLElement>('td.el-table__cell'))
+    wrapper.rowCells.set(rowIndex, cells)
+    return cells
+  }
+
+  return {
+    resolveBodyCells(rowIndex: number, displayIndex: number) {
+      return bodyWrappers.flatMap((wrapper) => {
+        const cell = readRowCells(wrapper, rowIndex)?.[displayIndex]
+        return cell ? [cell] : []
+      })
+    },
+    resolveBodyRowCells(rowIndex: number) {
+      return bodyWrappers.flatMap((wrapper) =>
+        Array.from(readRowCells(wrapper, rowIndex) ?? []).map((cell, displayIndex) => ({
+          cell,
+          displayIndex
+        }))
+      )
+    },
+    resolveBodyColumnCells(displayIndex: number) {
+      const selector = `tr > td.el-table__cell:nth-child(${displayIndex + 1})`
+      return bodyWrappers.flatMap((wrapper) =>
+        Array.from(wrapper.rows[0]?.parentElement?.querySelectorAll<HTMLElement>(selector) ?? [])
+      )
+    },
+    resolveHeaderCells: resolveHeaderCellsByPosition
+  }
+}
+
+const addActiveCellClass = (
+  state: ActiveCellClassState,
+  elements: Iterable<HTMLElement>,
+  className: string
+) => {
+  for (const element of elements) {
+    const classes = state.get(element) ?? new Set<string>()
+    classes.add(className)
+    state.set(element, classes)
+  }
+}
+
+const collectActiveCellClasses = (
+  cell: ActiveCell | null,
+  crossHighlight: boolean,
+  lookup: ReturnType<typeof createActiveCellDomLookup>
+): ActiveCellClassState => {
+  const state: ActiveCellClassState = new Map()
+  const storeData = readStoreData()
+  const position = resolveCellPosition(
+    cell,
+    Array.isArray(storeData) ? (storeData as RowData[]) : sourceData.value
+  )
+  if (!position) {
+    return state
+  }
+
+  const activeCells = lookup.resolveBodyCells(position.rowIndex, position.column.displayIndex)
+  addActiveCellClass(state, activeCells, activeCellClassNames.active)
+
+  if (!crossHighlight) {
+    return state
+  }
+
+  const columns = readStoreColumns()
+  if (Array.isArray(columns)) {
+    for (const { cell: rowCell, displayIndex } of lookup.resolveBodyRowCells(position.rowIndex)) {
+      if (displayIndex === position.column.displayIndex) {
+        continue
+      }
+
+      addActiveCellClass(
+        state,
+        [rowCell],
+        isControlColumn(columns[displayIndex] as ColumnState)
+          ? activeCellClassNames.control
+          : activeCellClassNames.row
+      )
+    }
+  }
+
+  const activeCellSet = new Set(activeCells)
+  addActiveCellClass(
+    state,
+    lookup
+      .resolveBodyColumnCells(position.column.displayIndex)
+      .filter((columnCell) => !activeCellSet.has(columnCell)),
+    activeCellClassNames.column
+  )
+  addActiveCellClass(
+    state,
+    lookup.resolveHeaderCells(position.column.displayIndex),
+    activeCellClassNames.column
+  )
+
+  return state
+}
+
+const applyActiveCellClassDelta = (previous: ActiveCellClassState, next: ActiveCellClassState) => {
+  for (const [element, classes] of previous) {
+    const nextClasses = next.get(element)
+    for (const className of classes) {
+      if (!nextClasses?.has(className)) {
+        element.classList.remove(className)
+      }
+    }
+  }
+
+  for (const [element, classes] of next) {
+    const previousClasses = previous.get(element)
+    for (const className of classes) {
+      if (!previousClasses?.has(className)) {
+        element.classList.add(className)
+      }
+    }
+  }
+}
+
+const clearActiveCellClasses = () => {
+  const tableElement = getTableElement()
+  if (!tableElement) {
+    return
+  }
+
+  const selector = Object.values(activeCellClassNames)
+    .map((className) => `.${className}`)
+    .join(',')
+  for (const element of tableElement.querySelectorAll<HTMLElement>(selector)) {
+    element.classList.remove(...Object.values(activeCellClassNames))
+  }
+}
+
+const syncActiveCellClasses = () => {
+  const nextActiveCell = activeCellClassSnapshot ? { ...activeCellClassSnapshot } : null
+  const nextCrossHighlight = props.crossHighlight
+  const lookup = createActiveCellDomLookup()
+  const nextClasses = collectActiveCellClasses(nextActiveCell, nextCrossHighlight, lookup)
+
+  if (shouldResetActiveCellClasses) {
+    clearActiveCellClasses()
+    applyActiveCellClassDelta(new Map(), nextClasses)
+  } else {
+    const previousClasses = collectActiveCellClasses(
+      renderedActiveCell,
+      renderedCrossHighlight,
+      lookup
+    )
+    applyActiveCellClassDelta(previousClasses, nextClasses)
+  }
+
+  renderedActiveCell = nextActiveCell
+  renderedCrossHighlight = nextCrossHighlight
+  shouldResetActiveCellClasses = false
+}
+
+function scheduleActiveCellClassSync(shouldReset = false) {
+  shouldResetActiveCellClasses ||= shouldReset
+  const version = ++activeCellClassSyncVersion
+  void nextTick(() => {
+    if (version === activeCellClassSyncVersion) {
+      syncActiveCellClasses()
+    }
+  })
+}
+
 const sortEditorCandidates = (items: TableEditorEndpoint[]): TableEditorEndpoint[] =>
   [...items].sort((left, right) => {
     const fixedDelta = Number(Boolean(left.isFixedClone)) - Number(Boolean(right.isFixedClone))
@@ -606,12 +828,7 @@ const sortEditorCandidates = (items: TableEditorEndpoint[]): TableEditorEndpoint
   })
 
 const findEditorsInCells = (cells: HTMLElement[]): TableEditorEndpoint[] =>
-  sortEditorCandidates(
-    editorEndpoints.value.filter((endpoint) => {
-      const root = endpoint.getRootEl()
-      return root !== null && cells.some((cell) => cell.contains(root))
-    })
-  )
+  sortEditorCandidates(editorRegistry.getEditorsInCells(cells))
 
 const findEditorForActiveCell = (): TableEditorEndpoint | null => {
   const position = resolveActiveCellPosition()
@@ -805,7 +1022,8 @@ const resolveCellClassName = () => {
   const userCellClassName = readAttr('cellClassName', 'cell-class-name')
 
   const resolveCrossClass = (scope: CellClassNameScope): string | null => {
-    if (!activeCell.value) {
+    const focusCell = activeCellClassSnapshot
+    if (!focusCell) {
       return null
     }
 
@@ -815,9 +1033,7 @@ const resolveCellClassName = () => {
     }
 
     if (isControlColumn(scope.column)) {
-      return props.crossHighlight && rowKey === activeCell.value.rowKey
-        ? ns.e('cross-control-cell')
-        : null
+      return props.crossHighlight && rowKey === focusCell.rowKey ? ns.e('cross-control-cell') : null
     }
 
     const columnKey = resolveColumnKey(scope.column, scope.columnIndex)
@@ -825,8 +1041,8 @@ const resolveCellClassName = () => {
       return null
     }
 
-    const isActiveRow = rowKey === activeCell.value.rowKey
-    const isActiveColumn = columnKey === activeCell.value.columnKey
+    const isActiveRow = rowKey === focusCell.rowKey
+    const isActiveColumn = columnKey === focusCell.columnKey
 
     if (isActiveRow && isActiveColumn) {
       return ns.e('cross-active')
@@ -863,11 +1079,12 @@ const resolveHeaderCellClassName = () => {
   const userHeaderCellClassName = readAttr('headerCellClassName', 'header-cell-class-name')
 
   const resolveByScope = (scope: HeaderCellClassNameScope) => {
+    const focusCell = activeCellClassSnapshot
     const columnClass =
       props.crossHighlight &&
-      activeCell.value &&
+      focusCell &&
       !isControlColumn(scope.column) &&
-      resolveColumnKey(scope.column, scope.columnIndex) === activeCell.value.columnKey
+      resolveColumnKey(scope.column, scope.columnIndex) === focusCell.columnKey
         ? ns.e('cross-column')
         : null
 
@@ -899,6 +1116,19 @@ const readStoreColumns = () =>
       }
     }
   )?.store?.states?.columns?.value
+
+const readStoreData = () =>
+  (
+    tableRef.value as unknown as {
+      store?: {
+        states?: {
+          data?: {
+            value?: unknown[]
+          }
+        }
+      }
+    }
+  )?.store?.states?.data?.value
 
 const columnStoreSignature = computed(() => {
   const columns = readStoreColumns()
@@ -1045,7 +1275,7 @@ const bindOutsidePointerDown = () => {
 
     void blurActiveEditor()
     isEditing.value = false
-    activeCell.value = null
+    commitActiveCell(null)
   }
 
   outsidePointerDownListener.value = listener
@@ -1142,7 +1372,7 @@ const bindKeyboardListener = () => {
       }
 
       await blurActiveEditor()
-      activeCell.value = nextActive
+      commitActiveCell(nextActive)
       await nextTick()
       scrollActiveCellIntoView()
       return
@@ -1589,16 +1819,20 @@ const mergedTableAttrs = computed(() => ({
 
 watch(columnStoreSignature, (next, prev) => {
   if (prev !== undefined && next !== prev) {
+    editorRegistry.invalidate()
     void blurActiveEditor()
     isEditing.value = false
-    activeCell.value = null
+    commitActiveCell(null)
+    scheduleActiveCellClassSync(true)
   }
 })
 
 watch(
   () => [sourceData.value.length, props.rowKeyField],
   () => {
+    editorRegistry.invalidate()
     if (!activeCell.value) {
+      scheduleActiveCellClassSync(true)
       return
     }
 
@@ -1608,9 +1842,28 @@ watch(
     if (!hasActiveRow) {
       void blurActiveEditor()
       isEditing.value = false
-      activeCell.value = null
+      commitActiveCell(null)
     }
+
+    scheduleActiveCellClassSync(true)
   }
+)
+
+watch(
+  sourceData,
+  () => {
+    editorRegistry.invalidate()
+    scheduleActiveCellClassSync(true)
+  },
+  { flush: 'post' }
+)
+
+watch(
+  () => props.crossHighlight,
+  () => {
+    scheduleActiveCellClassSync()
+  },
+  { flush: 'post' }
 )
 
 watch(activeCell, (nextActiveCell) => {
@@ -1624,6 +1877,7 @@ onMounted(() => {
   bindOutsidePointerDown()
   bindKeyboardListener()
   bindEditorFocusTracking()
+  scheduleActiveCellClassSync(true)
   void refreshSortables()
 })
 
@@ -1641,6 +1895,7 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  clearActiveCellClasses()
   unbindEditorRegistryHost()
   unbindOutsidePointerDown()
   unbindKeyboardListener()

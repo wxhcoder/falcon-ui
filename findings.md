@@ -1,5 +1,16 @@
 # FlTree Findings
 
+# Falcon UI Latest Main Release Findings
+
+- The workspace is already on `main` and matches `origin/main` at `0c4c208` before this release.
+- The pending tree spans FlTable P0 source/tests, benchmark and trace artifacts, input-search
+  examples, homepage/docs updates, favicon assets, diagnostics, and accumulated planning records.
+- `.openai/hosting.json` already binds the repository to the requested Falcon UI Sites project.
+- The release must use `pnpm docs:build:sites` so the packaged worker output is regenerated from
+  the exact source state that will be committed and pushed.
+
+---
+
 ## Product / PRD
 
 - `FlTree` targets Ant Design Tree semantics.
@@ -353,3 +364,121 @@
   compression or build-time `.gz` files would duplicate that behavior and add operational risk.
 - The release should therefore publish the latest white-screen optimizations unchanged and verify
   that gzip remains present after deployment.
+
+---
+
+# FlTable 50×50 Keyboard Focus Performance Findings
+
+- The keyboard handler resolves the next cell, awaits editor blur, replaces `activeCell`, waits for
+  Vue's next tick, and calls `scrollIntoView({ block: 'nearest', inline: 'nearest' })`.
+- `cellClassName` and `headerCellClassName` callbacks read `activeCell` while ElTable renders. This
+  can subscribe the table body render effect to focus changes and re-run class resolution across all
+  2,500 body cells even though only the old/new focus visuals need to change.
+- Editor lookup filters and sorts the entire reactive `editorEndpoints` array. A fully editable
+  50×50 table therefore creates both a 2,500-endpoint scan per lookup and repeated array copying
+  during registration.
+- The existing play app already uses Vue Router and globally installs the built Falcon UI package;
+  an isolated view can exercise the production wrapper without changing component source.
+- Library JavaScript is built unminified with source maps, so the play dev server is the preferred
+  profiling surface for readable call-stack attribution.
+- `play/node_modules/falcon-ui` is a junction to `dist/falcon-ui`, which was empty before this task's
+  build. The first play typecheck failure is therefore a local package-link state issue rather than
+  a diagnostic-page TypeScript failure.
+- The repository lock uses TypeScript 6.0.2 and vue-tsc 3.2.4, while `npm link` installed TypeScript
+  7.0.2 and vue-tsc 3.3.7 directly under `play`. The link script can therefore destabilize play's
+  typecheck environment; profiling setup should restore pnpm's locked workspace graph afterward.
+- The plain 50×50 page renders exactly 50 rows, 50 visible columns, and 2,500 body cells with zero
+  editor bridges. One real `ArrowRight` moved focus from R1C1 to R1C2 correctly.
+- That first warm plain/cross-off move took 213.8 ms to the second animation frame and invoked the
+  merged body `cellClassName` callback exactly 2,500 times. This directly confirms the reactive
+  focus update is amplified to a full body-cell class pass even with cross highlight disabled.
+- The fixed DevTools plain/cross-off run completed all 24 moves at active cell R13C13. Page samples
+  reported p50 14.3 ms, p95 36.5 ms, max 184.7 ms, 9/24 frame-budget misses, and one >50 ms sample.
+- Chrome's trace classified the worst physical keydown as 608 ms INP: 0.4 ms input delay, 397 ms
+  event processing, and 210 ms presentation delay. The large-DOM insight counted 7,875 elements and
+  a 167 ms style recalculation affecting 7,670 elements.
+- The DevTools MCP refuses absolute, relative, and secondary-workspace raw-trace paths on Windows,
+  even though in-memory tracing and insights work. Raw files require a separate CDP capture path;
+  the DevTools insight output remains the authoritative summary for its own trace.
+
+## 2026-07-20 FlTable 50×50 raw trace capture
+
+- The isolated Playground benchmark is available at `/table-performance` and renders exactly 50 rows,
+  50 visible data columns, and 2,500 body cells for the default query.
+- A reproducible raw-CDP capture script now produces four gzip-compressed Chrome Performance traces,
+  per-run metrics JSON, and screenshots under `docs/performance/artifacts/`.
+- First reproducible capture results (24 arrow-key moves per scenario):
+  - plain/cross-off: p50 13.5 ms, p95 40.9 ms, max 52.1 ms, 5 over 16.7 ms, 1 over 50 ms.
+  - plain/cross-on: p50 25.3 ms, p95 44.2 ms, max 85.9 ms, 24 over 16.7 ms, 1 over 50 ms.
+  - editor/cross-off: p50 263.3 ms, p95 391.8 ms, max 394.4 ms, 24 over 16.7 ms, 15 over 50 ms.
+  - editor/cross-on: p50 203.6 ms, p95 329.0 ms, max 361.7 ms, 24 over 16.7 ms, 23 over 50 ms.
+- The first CDP run exposed a probe-listener ordering issue: callback totals were read after the table's
+  document-level listener had already begun its async path. The benchmark listener is being moved to the
+  window capture phase, then all four runs will be regenerated.
+- A separate Chrome DevTools Performance recording corroborated visible main-thread pressure: its worst
+  keydown interaction reported 608 ms INP (397 ms processing plus 210 ms presentation), and the DOM-size
+  insight reported a 167 ms style recalculation affecting 7,670 elements in a 7,875-element document.
+
+## 2026-07-20 FlTable final corrected baseline
+
+- Moving the page probe to the window capture phase confirmed exactly 2,500 body class callbacks on every
+  valid key. Cross highlight adds exactly 50 header class callbacks per key.
+- Corrected trace-on page medians are 448.6 ms (plain/off), 680.3 ms (plain/on), 1,744.4 ms
+  (editor/off), and 564.0 ms (editor/on). All 24 samples in all four runs exceeded 50 ms.
+- Exclusive main-thread classification attributes 88.0%–91.3% of plain busy time to scripting. Editor
+  rendering grows to 30.4%–42.8%, with 8.7–15.9 seconds of Layerize work per capture.
+- CPU samples correlate the behavior with `resolveCrossClass`/`resolveByScope`, editor lookup and blur,
+  component ref/prop updates, and `scrollIntoView`.
+- The editor on/off absolute ordering is not causal evidence because each case was captured once and trace
+  overhead is substantial. The invariant callback counts and source-linked stacks are the stronger evidence.
+- All traces passed gzip/JSON/main-thread/key-range parsing. Lint, tests, play typecheck, play build, and
+  `git diff --check` pass. The exact full format check still reports only the pre-existing, unmodified
+  `pnpm-workspace.yaml`; every other supported file passes.
+
+## 2026-07-21 FlTable P0 implementation scope
+
+- The user explicitly authorized implementation of both P0 remedies only.
+- The complete P0–P3 roadmap must live under `packages/components/table/`, while code changes are limited
+  to differential focus classes and a cell-indexed, non-reactive editor registry.
+- Existing public contracts and all wrapper-specific behavior must survive; performance improvement alone
+  is not acceptance.
+- The same four browser scenarios must be rerun after implementation to identify residual latency before
+  deciding whether P1 is warranted.
+- The focus class callback can safely use a plain active-cell snapshot: focus-only changes will be applied
+  directly to affected DOM cells, while any later ElTable render will still regenerate the correct classes
+  from the latest snapshot without subscribing its render effect to `activeCell`.
+- Existing tests already cover cross on/off, outside clearing, runtime cross toggling, control columns,
+  drag-handle exclusion, arrow boundaries, editor blur, panel blocking, and column changes. P0 tests should
+  add callback-count assertions and indexed-registry candidate isolation rather than duplicate those cases.
+- `FlTableEditor` registers after mount and resolves its root from either `targetRef` or its display-contents
+  host, so the registry can index the nearest `td.el-table__cell` at registration time.
+- A registry fast path can use actual cell identity. A rare miss may rebuild endpoint-to-cell links once to
+  preserve correctness after unusual DOM relocation; the normal per-key path must never scan all endpoints.
+- Only five direct `activeCell` assignments exist, so a single commit function can synchronously update the
+  non-reactive class snapshot and schedule DOM delta synchronization without changing the public contract.
+- ElTable's normal future renders can continue returning focus classes from the plain snapshot. This avoids
+  a broad MutationObserver while ensuring data-driven renders do not erase manually applied focus classes.
+- The current body-cell resolver already models normal and fixed body wrappers. P0 class synchronization
+  should reuse that resolver and existing control-column classification rather than invent new DOM semantics.
+
+## 2026-07-21 P0 implementation checkpoints
+
+- `FlTable` 的焦点 class 解析现在可以读取普通快照；只有方向键焦点变化时，不再把
+  `activeCell` 作为 `ElTable` 全表 class 计算的响应式依赖。
+- DOM 差量同步仍复用现有的普通/固定列单元格定位逻辑；关闭交叉高亮时只改旧、
+  新焦点格，开启时只改旧、新焦点涉及的行、列和表头。
+- 编辑器 registry 使用普通 `Map`/`WeakMap`，查询目标格时只校验该格候选；列、
+  数据结构变化会使索引失效，并在下次查询前重建。
+
+## 2026-07-21 P0 final evidence
+
+- Final four-scenario callback probes are body/header `0/0` for every key; baseline was `2500/0`
+  or `2500/50`.
+- Final page p50 values are 23.1 ms (plain/off), 38.9 ms (plain/on), 201.2 ms
+  (editor/off), and 216.5 ms (editor/on).
+- The editor traces remain rendering-bound: rendering is 90.7% and 88.1% of main-thread busy time,
+  while Layerize totals 11.98 s and 13.16 s across the 24-key captures.
+- An independent DevTools trace reports a worst editor/off keydown INP of 693 ms: 0.9 ms input
+  delay, 414 ms processing, and 278 ms presentation delay.
+- The residual trace and slow samples support testing P1 conditional scrolling next; P1–P3 remain
+  unimplemented in this iteration.

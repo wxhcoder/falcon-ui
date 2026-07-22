@@ -1,0 +1,1090 @@
+{
+  "generatedAt": "2026-07-21T14:05:44.834Z",
+  "methodology": {
+    "phaseTotals": "Exclusive main-thread time; nested painting/rendering/GC overrides enclosing scripting.",
+    "eventTotals": "Named event totals can overlap; unionMs removes same-name nesting.",
+    "cpuHotspots": "Sampling percentages, not wall-clock percentages."
+  },
+  "scenarios": [
+    {
+      "scenario": "plain-cross-off",
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "plain",
+        "isCrossHighlight": false,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 0,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "pageMetrics": {
+        "count": 24,
+        "p50Ms": 23.1,
+        "p95Ms": 35,
+        "maxMs": 59.2,
+        "overFrameBudget": 21,
+        "longTasks": 1
+      },
+      "callbackProbe": { "bodyPerKey": [0], "headerPerKey": [0] },
+      "trace": {
+        "rendererPid": 36284,
+        "rendererTid": 6188,
+        "mainThreadBusyMs": 1082.1,
+        "longTasks": { "count": 1, "totalMs": 190.5, "maxMs": 190.5 },
+        "keydownDispatch": { "count": 24, "totalMs": 336.5, "maxMs": 190.3 },
+        "phases": {
+          "painting": { "durationMs": 90.5, "percentOfBusy": 8.4 },
+          "rendering": { "durationMs": 528.1, "percentOfBusy": 48.8 },
+          "gc": { "durationMs": 0, "percentOfBusy": 0 },
+          "scripting": { "durationMs": 396.1, "percentOfBusy": 36.6 },
+          "other": { "durationMs": 67.5, "percentOfBusy": 6.2 }
+        },
+        "eventBreakdown": {
+          "EventDispatch": { "count": 89, "totalMs": 344.4, "maxMs": 190.3, "unionMs": 344.4 },
+          "RunMicrotasks": { "count": 90, "totalMs": 133.6, "maxMs": 6.9, "unionMs": 133.6 },
+          "UpdateLayoutTree": { "count": 72, "totalMs": 41.1, "maxMs": 29.7, "unionMs": 41.1 },
+          "Layout": { "count": 24, "totalMs": 39.9, "maxMs": 3.2, "unionMs": 39.9 },
+          "PrePaint": { "count": 56, "totalMs": 20, "maxMs": 0.7, "unionMs": 20 },
+          "Layerize": { "count": 56, "totalMs": 338.6, "maxMs": 11.1, "unionMs": 338.6 },
+          "Paint": { "count": 1810, "totalMs": 142.8, "maxMs": 15.2, "unionMs": 90.5 },
+          "MinorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 },
+          "MajorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 }
+        },
+        "droppedFrames": 141,
+        "cpuHotspots": {
+          "totalSamples": 1647,
+          "self": [
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 39,
+              "percent": 2.4
+            },
+            {
+              "functionName": "resolveVisibleColumns",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7984,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "applyActiveCellClassDelta",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8103,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveCellPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7999,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7987,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7951,
+              "samples": 1,
+              "percent": 0.1
+            },
+            {
+              "functionName": "readRowKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7946,
+              "samples": 1,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7951,
+              "samples": 1,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7951,
+              "samples": 1,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 1,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7951,
+              "samples": 1,
+              "percent": 0.1
+            },
+            {
+              "functionName": "getBodyWrappers",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8016,
+              "samples": 1,
+              "percent": 0.1
+            },
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8424,
+              "samples": 1,
+              "percent": 0.1
+            },
+            {
+              "functionName": "syncActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8119,
+              "samples": 1,
+              "percent": 0.1
+            }
+          ],
+          "inclusive": [
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8424,
+              "samples": 184,
+              "percent": 11.2
+            },
+            {
+              "functionName": "scrollActiveCellIntoView",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8175,
+              "samples": 80,
+              "percent": 4.9
+            },
+            {
+              "functionName": "syncActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8119,
+              "samples": 58,
+              "percent": 3.5
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8135,
+              "samples": 58,
+              "percent": 3.5
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 55,
+              "percent": 3.3
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8190,
+              "samples": 55,
+              "percent": 3.3
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 49,
+              "percent": 3
+            },
+            {
+              "functionName": "createActiveCellDomLookup",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8045,
+              "samples": 45,
+              "percent": 2.7
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 40,
+              "percent": 2.4
+            },
+            {
+              "functionName": "blurActiveEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8183,
+              "samples": 40,
+              "percent": 2.4
+            },
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 39,
+              "percent": 2.4
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 36,
+              "percent": 2.2
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 34,
+              "percent": 2.1
+            },
+            {
+              "functionName": "getBodyWrappers",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8016,
+              "samples": 29,
+              "percent": 1.8
+            },
+            {
+              "functionName": "getBodyWrappers",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8016,
+              "samples": 28,
+              "percent": 1.7
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "plain-cross-on",
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "plain",
+        "isCrossHighlight": true,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 0,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "pageMetrics": {
+        "count": 24,
+        "p50Ms": 38.9,
+        "p95Ms": 58.3,
+        "maxMs": 75.1,
+        "overFrameBudget": 24,
+        "longTasks": 2
+      },
+      "callbackProbe": { "bodyPerKey": [0], "headerPerKey": [0] },
+      "trace": {
+        "rendererPid": 36284,
+        "rendererTid": 6188,
+        "mainThreadBusyMs": 1734.7,
+        "longTasks": { "count": 2, "totalMs": 376.7, "maxMs": 316.5 },
+        "keydownDispatch": { "count": 24, "totalMs": 656.3, "maxMs": 316.3 },
+        "phases": {
+          "painting": { "durationMs": 156.9, "percentOfBusy": 9 },
+          "rendering": { "durationMs": 824.2, "percentOfBusy": 47.5 },
+          "gc": { "durationMs": 0, "percentOfBusy": 0 },
+          "scripting": { "durationMs": 620.2, "percentOfBusy": 35.8 },
+          "other": { "durationMs": 133.5, "percentOfBusy": 7.7 }
+        },
+        "eventBreakdown": {
+          "EventDispatch": { "count": 89, "totalMs": 662.4, "maxMs": 316.3, "unionMs": 662.4 },
+          "RunMicrotasks": { "count": 90, "totalMs": 343.3, "maxMs": 17.4, "unionMs": 343.3 },
+          "UpdateLayoutTree": { "count": 82, "totalMs": 156.8, "maxMs": 40.2, "unionMs": 156.8 },
+          "Layout": { "count": 25, "totalMs": 46.4, "maxMs": 2.9, "unionMs": 46.4 },
+          "PrePaint": { "count": 61, "totalMs": 30.4, "maxMs": 1.1, "unionMs": 30.4 },
+          "Layerize": { "count": 61, "totalMs": 383.9, "maxMs": 11.5, "unionMs": 383.9 },
+          "Paint": { "count": 3672, "totalMs": 256.6, "maxMs": 24.1, "unionMs": 156.9 },
+          "MinorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 },
+          "MajorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 }
+        },
+        "droppedFrames": 285,
+        "cpuHotspots": {
+          "totalSamples": 2511,
+          "self": [
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 212,
+              "percent": 8.4
+            },
+            {
+              "functionName": "applyActiveCellClassDelta",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8103,
+              "samples": 4,
+              "percent": 0.2
+            },
+            {
+              "functionName": "collectActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8086,
+              "samples": 4,
+              "percent": 0.2
+            },
+            {
+              "functionName": "getBodyWrappers",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8016,
+              "samples": 3,
+              "percent": 0.1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8074,
+              "samples": 3,
+              "percent": 0.1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8099,
+              "samples": 3,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveVisibleColumns",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7984,
+              "samples": 3,
+              "percent": 0.1
+            },
+            {
+              "functionName": "getHeaderWrappers",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8035,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7951,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveVisibleColumns",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7984,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "addActiveCellClass",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8079,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7987,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveBodyColumnCells",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8072,
+              "samples": 2,
+              "percent": 0.1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7987,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 1,
+              "percent": 0
+            }
+          ],
+          "inclusive": [
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8424,
+              "samples": 376,
+              "percent": 15
+            },
+            {
+              "functionName": "scrollActiveCellIntoView",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8175,
+              "samples": 264,
+              "percent": 10.5
+            },
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 212,
+              "percent": 8.4
+            },
+            {
+              "functionName": "syncActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8119,
+              "samples": 198,
+              "percent": 7.9
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8135,
+              "samples": 198,
+              "percent": 7.9
+            },
+            {
+              "functionName": "collectActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8086,
+              "samples": 141,
+              "percent": 5.6
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 63,
+              "percent": 2.5
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8190,
+              "samples": 63,
+              "percent": 2.5
+            },
+            {
+              "functionName": "resolveBodyColumnCells",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8072,
+              "samples": 59,
+              "percent": 2.3
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8074,
+              "samples": 57,
+              "percent": 2.3
+            },
+            {
+              "functionName": "getHeaderWrappers",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8035,
+              "samples": 53,
+              "percent": 2.1
+            },
+            {
+              "functionName": "resolveHeaderCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8040,
+              "samples": 53,
+              "percent": 2.1
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 51,
+              "percent": 2
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 44,
+              "percent": 1.8
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 38,
+              "percent": 1.5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "editor-cross-off",
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "editor",
+        "isCrossHighlight": false,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 2500,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "pageMetrics": {
+        "count": 24,
+        "p50Ms": 201.2,
+        "p95Ms": 348,
+        "maxMs": 489.6,
+        "overFrameBudget": 24,
+        "longTasks": 22
+      },
+      "callbackProbe": { "bodyPerKey": [0], "headerPerKey": [0] },
+      "trace": {
+        "rendererPid": 36284,
+        "rendererTid": 6188,
+        "mainThreadBusyMs": 13888.9,
+        "longTasks": { "count": 57, "totalMs": 13463.9, "maxMs": 543.1 },
+        "keydownDispatch": { "count": 24, "totalMs": 892.9, "maxMs": 542.8 },
+        "phases": {
+          "painting": { "durationMs": 184.6, "percentOfBusy": 1.3 },
+          "rendering": { "durationMs": 12600.6, "percentOfBusy": 90.7 },
+          "gc": { "durationMs": 0, "percentOfBusy": 0 },
+          "scripting": { "durationMs": 975.2, "percentOfBusy": 7 },
+          "other": { "durationMs": 128.5, "percentOfBusy": 0.9 }
+        },
+        "eventBreakdown": {
+          "EventDispatch": { "count": 113, "totalMs": 965.8, "maxMs": 542.8, "unionMs": 899.4 },
+          "RunMicrotasks": { "count": 97, "totalMs": 228.1, "maxMs": 12.4, "unionMs": 228.1 },
+          "UpdateLayoutTree": { "count": 80, "totalMs": 110.9, "maxMs": 101.3, "unionMs": 110.9 },
+          "Layout": { "count": 25, "totalMs": 43.5, "maxMs": 3.2, "unionMs": 43.5 },
+          "PrePaint": { "count": 65, "totalMs": 16.9, "maxMs": 0.7, "unionMs": 16.9 },
+          "Layerize": { "count": 65, "totalMs": 11977.5, "maxMs": 321.2, "unionMs": 11977.5 },
+          "Paint": { "count": 711, "totalMs": 263.4, "maxMs": 6.8, "unionMs": 184.6 },
+          "MinorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 },
+          "MajorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 }
+        },
+        "droppedFrames": 1857,
+        "cpuHotspots": {
+          "totalSamples": 21086,
+          "self": [
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 20,
+              "percent": 0.1
+            },
+            {
+              "functionName": "resolveVisibleColumns",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7984,
+              "samples": 3,
+              "percent": 0
+            },
+            {
+              "functionName": "getBodyWrappers",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8016,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveCellPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7999,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "getRootEl",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8997,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "scrollActiveCellIntoView",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8175,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveActiveCellPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8015,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "applyActiveCellClassDelta",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8103,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "isControlColumn",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7950,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "blurEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8916,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "isInputActivationKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8393,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7951,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "getTableElement",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7907,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7951,
+              "samples": 1,
+              "percent": 0
+            }
+          ],
+          "inclusive": [
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8424,
+              "samples": 483,
+              "percent": 2.3
+            },
+            {
+              "functionName": "blurActiveEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8183,
+              "samples": 220,
+              "percent": 1
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 137,
+              "percent": 0.6
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8190,
+              "samples": 137,
+              "percent": 0.6
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 124,
+              "percent": 0.6
+            },
+            {
+              "functionName": "scrollActiveCellIntoView",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8175,
+              "samples": 119,
+              "percent": 0.6
+            },
+            {
+              "functionName": "syncActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8119,
+              "samples": 118,
+              "percent": 0.6
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8135,
+              "samples": 118,
+              "percent": 0.6
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 112,
+              "percent": 0.5
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 108,
+              "percent": 0.5
+            },
+            {
+              "functionName": "closeEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8937,
+              "samples": 108,
+              "percent": 0.5
+            },
+            {
+              "functionName": "close",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 9003,
+              "samples": 108,
+              "percent": 0.5
+            },
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8424,
+              "samples": 106,
+              "percent": 0.5
+            },
+            {
+              "functionName": "createActiveCellDomLookup",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8045,
+              "samples": 106,
+              "percent": 0.5
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 104,
+              "percent": 0.5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "editor-cross-on",
+      "settings": {
+        "rows": 50,
+        "columns": 50,
+        "mode": "editor",
+        "isCrossHighlight": true,
+        "isDragEnabled": false
+      },
+      "dom": {
+        "rows": 50,
+        "columns": 50,
+        "bodyCells": 2500,
+        "editors": 2500,
+        "activeRow": 13,
+        "activeColumn": 13
+      },
+      "pageMetrics": {
+        "count": 24,
+        "p50Ms": 216.5,
+        "p95Ms": 352,
+        "maxMs": 356.4,
+        "overFrameBudget": 24,
+        "longTasks": 24
+      },
+      "callbackProbe": { "bodyPerKey": [0], "headerPerKey": [0] },
+      "trace": {
+        "rendererPid": 36284,
+        "rendererTid": 6188,
+        "mainThreadBusyMs": 15969.1,
+        "longTasks": { "count": 69, "totalMs": 15403.6, "maxMs": 1274.5 },
+        "keydownDispatch": { "count": 24, "totalMs": 1803.4, "maxMs": 1274.3 },
+        "phases": {
+          "painting": { "durationMs": 273.6, "percentOfBusy": 1.7 },
+          "rendering": { "durationMs": 14060.9, "percentOfBusy": 88.1 },
+          "gc": { "durationMs": 0, "percentOfBusy": 0 },
+          "scripting": { "durationMs": 1772.7, "percentOfBusy": 11.1 },
+          "other": { "durationMs": 0, "percentOfBusy": 0 }
+        },
+        "eventBreakdown": {
+          "EventDispatch": { "count": 114, "totalMs": 1867.8, "maxMs": 1274.3, "unionMs": 1810.1 },
+          "RunMicrotasks": { "count": 109, "totalMs": 428.2, "maxMs": 33.4, "unionMs": 428.2 },
+          "UpdateLayoutTree": { "count": 91, "totalMs": 220.2, "maxMs": 80.8, "unionMs": 220.2 },
+          "Layout": { "count": 24, "totalMs": 34.8, "maxMs": 2.6, "unionMs": 34.8 },
+          "PrePaint": { "count": 72, "totalMs": 33.6, "maxMs": 1.9, "unionMs": 33.6 },
+          "Layerize": { "count": 73, "totalMs": 13156.7, "maxMs": 305.8, "unionMs": 13156.7 },
+          "Paint": { "count": 4528, "totalMs": 397.6, "maxMs": 14, "unionMs": 273.6 },
+          "MinorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 },
+          "MajorGC": { "count": 0, "totalMs": 0, "maxMs": 0, "unionMs": 0 }
+        },
+        "droppedFrames": 2702,
+        "cpuHotspots": {
+          "totalSamples": 23035,
+          "self": [
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 211,
+              "percent": 0.9
+            },
+            {
+              "functionName": "applyActiveCellClassDelta",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8103,
+              "samples": 5,
+              "percent": 0
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8074,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveCellPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7999,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8424,
+              "samples": 2,
+              "percent": 0
+            },
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8424,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "isFixedCloneElement",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8021,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveCellPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7999,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveCellPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7999,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "isInputActivationKey",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8393,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "syncActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8119,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "getBodyWrappers",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8016,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "closeEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8937,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8040,
+              "samples": 1,
+              "percent": 0
+            },
+            {
+              "functionName": "resolveColumnKey$1",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 7951,
+              "samples": 1,
+              "percent": 0
+            }
+          ],
+          "inclusive": [
+            {
+              "functionName": "listener",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8424,
+              "samples": 627,
+              "percent": 2.7
+            },
+            {
+              "functionName": "scrollActiveCellIntoView",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8175,
+              "samples": 310,
+              "percent": 1.3
+            },
+            {
+              "functionName": "syncActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8119,
+              "samples": 236,
+              "percent": 1
+            },
+            {
+              "functionName": "(anonymous)",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8135,
+              "samples": 236,
+              "percent": 1
+            },
+            {
+              "functionName": "scrollIntoView",
+              "url": "",
+              "line": 0,
+              "samples": 211,
+              "percent": 0.9
+            },
+            {
+              "functionName": "blurActiveEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8183,
+              "samples": 184,
+              "percent": 0.8
+            },
+            {
+              "functionName": "collectActiveCellClasses",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8086,
+              "samples": 136,
+              "percent": 0.6
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 124,
+              "percent": 0.5
+            },
+            {
+              "functionName": "isActiveEditorPanelOpen",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8190,
+              "samples": 124,
+              "percent": 0.5
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 121,
+              "percent": 0.5
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 96,
+              "percent": 0.4
+            },
+            {
+              "functionName": "findEditorForActiveCell",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8145,
+              "samples": 95,
+              "percent": 0.4
+            },
+            {
+              "functionName": "resolveBodyCellsByPosition",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8022,
+              "samples": 93,
+              "percent": 0.4
+            },
+            {
+              "functionName": "closeEditor",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 8937,
+              "samples": 89,
+              "percent": 0.4
+            },
+            {
+              "functionName": "close",
+              "url": "http://127.0.0.1:5174/@fs/D:/IdeaProject/falcon-ui/dist/falcon-ui/esm/index.mjs?t=1784642140914",
+              "line": 9003,
+              "samples": 89,
+              "percent": 0.4
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

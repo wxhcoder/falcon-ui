@@ -106,8 +106,8 @@ const content = computed<HomeContent>(() =>
 }
 
 .falcon-homepage__noise {
-  --home-noise-rest: color-mix(in srgb, var(--vp-c-text-1) 12%, var(--vp-c-bg));
-  --home-noise-crest: color-mix(in srgb, var(--vp-c-text-1) 22%, var(--vp-c-bg));
+  --home-noise-rest: color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-bg));
+  --home-noise-crest: color-mix(in srgb, var(--vp-c-brand-1) 40%, var(--vp-c-bg));
   position: absolute;
   inset: 0;
   z-index: 0;

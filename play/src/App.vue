@@ -6,6 +6,7 @@
         <RouterLink class="play-link" to="/">Home</RouterLink>
         <RouterLink class="play-link" to="/components">Components</RouterLink>
         <RouterLink class="play-link" to="/playground">Playground</RouterLink>
+        <RouterLink class="play-link" to="/table-performance">Table Performance</RouterLink>
       </nav>
     </header>
     <main class="play-main">
