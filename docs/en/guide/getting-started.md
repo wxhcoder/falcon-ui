@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-pnpm add falcon-ui
+pnpm add @falcon-ui/falcon-ui
 ```
 
 ## Full Registration
@@ -11,8 +11,8 @@ pnpm add falcon-ui
 ```ts
 import { createApp } from 'vue'
 import App from './App.vue'
-import FalconUI from 'falcon-ui'
-import 'falcon-ui/theme/index.css'
+import FalconUI from '@falcon-ui/falcon-ui'
+import '@falcon-ui/falcon-ui/theme/index.css'
 
 createApp(App).use(FalconUI).mount('#app')
 ```
@@ -20,7 +20,7 @@ createApp(App).use(FalconUI).mount('#app')
 ## On-Demand Imports
 
 ```ts
-import { FlButton, FlInput, FlInputNumber } from 'falcon-ui'
+import { FlButton, FlInput, FlInputNumber } from '@falcon-ui/falcon-ui'
 ```
 
 ## Type Hints
@@ -30,7 +30,7 @@ If you register all components globally with `app.use(FalconUI)`, add:
 ```json
 {
   "compilerOptions": {
-    "types": ["vite/client", "falcon-ui/global"]
+    "types": ["vite/client", "@falcon-ui/falcon-ui/global"]
   }
 }
 ```

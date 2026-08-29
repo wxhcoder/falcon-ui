@@ -101,7 +101,7 @@ dist/falcon-ui/
 Install and import in your app:
 
 ```bash
-pnpm add falcon-ui
+pnpm add @falcon-ui/falcon-ui
 ```
 
 Use one of these patterns:
@@ -109,7 +109,7 @@ Use one of these patterns:
 1. Local import (usually no extra global typing config needed)
 
 ```ts
-import { FlInput } from 'falcon-ui'
+import { FlInput } from '@falcon-ui/falcon-ui'
 ```
 
 2. Global install (register all components)
@@ -117,8 +117,8 @@ import { FlInput } from 'falcon-ui'
 ```ts
 import { createApp } from 'vue'
 import App from './App.vue'
-import FalconUI from 'falcon-ui'
-import 'falcon-ui/theme/index.css'
+import FalconUI from '@falcon-ui/falcon-ui'
+import '@falcon-ui/falcon-ui/theme/index.css'
 
 createApp(App).use(FalconUI).mount('#app')
 ```
@@ -128,7 +128,7 @@ createApp(App).use(FalconUI).mount('#app')
 If you use global install (`app.use(FalconUI)`), you must add the global
 component type entry:
 
-- `falcon-ui/global`
+- `@falcon-ui/falcon-ui/global`
 
 Choose one setup method.
 
@@ -137,7 +137,7 @@ Choose one setup method.
 ```json
 {
   "compilerOptions": {
-    "types": ["vite/client", "falcon-ui/global"]
+    "types": ["vite/client", "@falcon-ui/falcon-ui/global"]
   }
 }
 ```
@@ -146,7 +146,7 @@ Choose one setup method.
 
 ```ts
 /// <reference types="vite/client" />
-/// <reference types="falcon-ui/global" />
+/// <reference types="@falcon-ui/falcon-ui/global" />
 ```
 
 ## Type Hints Checklist

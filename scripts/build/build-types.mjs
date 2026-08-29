@@ -27,11 +27,17 @@ const run = (command, args) =>
   })
 
 const typeImportRewrites = new Map([
-  ['@falcon-ui/falcon-ui', 'falcon-ui'],
-  ['@falcon-ui/components', 'falcon-ui/components'],
-  ['@falcon-ui/hooks', 'falcon-ui/hooks'],
-  ['@falcon-ui/icons', 'falcon-ui/icons'],
-  ['@falcon-ui/utils', 'falcon-ui/utils']
+  ['packages/falcon-ui/index.js', '@falcon-ui/falcon-ui'],
+  ['packages/falcon-ui', '@falcon-ui/falcon-ui'],
+  ['falcon-ui/components', '@falcon-ui/falcon-ui/components'],
+  ['falcon-ui/hooks', '@falcon-ui/falcon-ui/hooks'],
+  ['falcon-ui/icons', '@falcon-ui/falcon-ui/icons'],
+  ['falcon-ui/utils', '@falcon-ui/falcon-ui/utils'],
+  ['falcon-ui', '@falcon-ui/falcon-ui'],
+  ['@falcon-ui/components', '@falcon-ui/falcon-ui/components'],
+  ['@falcon-ui/hooks', '@falcon-ui/falcon-ui/hooks'],
+  ['@falcon-ui/icons', '@falcon-ui/falcon-ui/icons'],
+  ['@falcon-ui/utils', '@falcon-ui/falcon-ui/utils']
 ])
 
 const rewriteTypeImportSpecifiers = (content) => {

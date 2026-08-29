@@ -45,13 +45,17 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "link:play:falcon": "npm link ./dist/falcon-ui --prefix play",
-    "unlink:play:falcon": "npm unlink falcon-ui --prefix play",
+    "unlink:play:falcon": "npm unlink @falcon-ui/falcon-ui --prefix play",
     "play": "pnpm play:dist",
     "play:dist": "pnpm build:lib && pnpm link:play:falcon && pnpm --dir play dev",
     "play:build": "pnpm build:lib && pnpm link:play:falcon && pnpm --dir play build",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "release:build": "pnpm build:lib",
+    "release:check": "pnpm release:build && node scripts/release/verify-package.mjs",
+    "release:pack": "npm pack --dry-run --json ./dist/falcon-ui",
+    "release:publish": "pnpm release:check && npm publish ./dist/falcon-ui --access public"
   },
   "devDependencies": {
     "@changesets/cli": "latest",

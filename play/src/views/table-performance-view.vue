@@ -129,7 +129,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElTableColumn } from 'element-plus'
-import { FlInput, FlTable, FlTableEditor } from 'falcon-ui'
+import { FlInput, FlTable, FlTableEditor } from '@falcon-ui/falcon-ui'
 
 type BenchmarkMode = 'plain' | 'editor'
 type DirectionKey = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'

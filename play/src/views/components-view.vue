@@ -56,8 +56,8 @@
       </div>
       <p class="demo-result">size / color: {{ iconPreviewSize }} / {{ iconPreviewColor }}</p>
       <p class="demo-result">
-        These icons are imported from `falcon-ui`, so internal components can reuse the same assets
-        without global registration.
+        These icons are imported from `@falcon-ui/falcon-ui`, so internal components can reuse the
+        same assets without global registration.
       </p>
     </article>
     <article class="card demo-card">
@@ -634,7 +634,7 @@
 import { computed, reactive, ref } from 'vue'
 import { Eleme, Search } from '@element-plus/icons-vue'
 import { ElIcon, ElOption, ElTableColumn } from 'element-plus'
-import { HolderOutlined, MinusSquareOutlined, PlusSquareOutlined } from 'falcon-ui'
+import { HolderOutlined, MinusSquareOutlined, PlusSquareOutlined } from '@falcon-ui/falcon-ui'
 import type {
   RowOrderChangeEvent,
   TreeAllowDrag,
@@ -656,7 +656,7 @@ import type {
   TreeSelectEvent,
   TreeStyles,
   TreeSwitcherIconMode
-} from 'falcon-ui'
+} from '@falcon-ui/falcon-ui'
 
 const iconPreviewSize = ref(22)
 const iconPreviewColor = ref('#409eff')

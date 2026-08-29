@@ -1,10 +1,10 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import FalconUI from 'falcon-ui'
+import FalconUI from '@falcon-ui/falcon-ui'
 import 'element-plus/dist/index.css'
 import './styles/base.scss'
-import 'falcon-ui/theme/index.css'
+import '@falcon-ui/falcon-ui/theme/index.css'
 
 const app = createApp(App)
 

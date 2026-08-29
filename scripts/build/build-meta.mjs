@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { distPackageDir, rootDir } from './constants.mjs'
 import { logInfo } from './logger.mjs'
@@ -8,13 +8,26 @@ const buildMeta = async () => {
   const sourcePackageJson = JSON.parse(await readFile(sourcePackageFile, 'utf8'))
 
   const publishPackageJson = {
-    name: 'falcon-ui',
+    name: sourcePackageJson.name,
     version: sourcePackageJson.version,
+    description: sourcePackageJson.description,
+    license: sourcePackageJson.license,
+    repository: sourcePackageJson.repository,
     type: 'module',
     main: './cjs/index.cjs',
     module: './esm/index.mjs',
     types: './types/falcon-ui/index.d.ts',
-    files: ['esm', 'cjs', 'umd', 'types', 'theme', 'global.d.ts', 'package.json'],
+    files: [
+      'esm',
+      'cjs',
+      'umd',
+      'types',
+      'theme',
+      'global.d.ts',
+      'README.md',
+      'LICENSE',
+      'package.json'
+    ],
     exports: {
       '.': {
         types: './types/falcon-ui/index.d.ts',
@@ -32,15 +45,30 @@ const buildMeta = async () => {
         import: './esm/components/button/index.mjs',
         require: './cjs/components/button/index.cjs'
       },
+      './components/dialog': {
+        types: './types/components/dialog/index.d.ts',
+        import: './esm/components/dialog/index.mjs',
+        require: './cjs/components/dialog/index.cjs'
+      },
       './components/input': {
         types: './types/components/input/index.d.ts',
         import: './esm/components/input/index.mjs',
         require: './cjs/components/input/index.cjs'
       },
+      './components/input-search': {
+        types: './types/components/input-search/index.d.ts',
+        import: './esm/components/input-search/index.mjs',
+        require: './cjs/components/input-search/index.cjs'
+      },
       './components/input-number': {
         types: './types/components/input-number/index.d.ts',
         import: './esm/components/input-number/index.mjs',
         require: './cjs/components/input-number/index.cjs'
+      },
+      './components/date-picker': {
+        types: './types/components/date-picker/index.d.ts',
+        import: './esm/components/date-picker/index.mjs',
+        require: './cjs/components/date-picker/index.cjs'
       },
       './components/qr-code': {
         types: './types/components/qr-code/index.d.ts',
@@ -51,6 +79,21 @@ const buildMeta = async () => {
         types: './types/components/barcode/index.d.ts',
         import: './esm/components/barcode/index.mjs',
         require: './cjs/components/barcode/index.cjs'
+      },
+      './components/select': {
+        types: './types/components/select/index.d.ts',
+        import: './esm/components/select/index.mjs',
+        require: './cjs/components/select/index.cjs'
+      },
+      './components/tree-select': {
+        types: './types/components/tree-select/index.d.ts',
+        import: './esm/components/tree-select/index.mjs',
+        require: './cjs/components/tree-select/index.cjs'
+      },
+      './components/tree': {
+        types: './types/components/tree/index.d.ts',
+        import: './esm/components/tree/index.mjs',
+        require: './cjs/components/tree/index.cjs'
       },
       './components/table': {
         types: './types/components/table/index.d.ts',
@@ -81,9 +124,13 @@ const buildMeta = async () => {
       './theme/index.scss': './theme/index.scss'
     },
     sideEffects: ['**/*.css'],
+    publishConfig: {
+      access: 'public'
+    },
     peerDependencies: {
       vue: '^3.5.0',
-      'element-plus': '^2.0.0'
+      'element-plus': '^2.0.0',
+      '@element-plus/icons-vue': '^2.0.0'
     }
   }
 
@@ -98,6 +145,8 @@ const buildMeta = async () => {
   await logInfo(`write package metadata -> ${targetPackageFile}`, { stage: 'meta' })
 
   await writeFile(targetPackageFile, `${JSON.stringify(publishPackageJson, null, 2)}\n`)
+  await cp(resolve(rootDir, 'README.md'), resolve(distPackageDir, 'README.md'))
+  await cp(resolve(rootDir, 'LICENSE'), resolve(distPackageDir, 'LICENSE'))
 }
 
 export { buildMeta }
