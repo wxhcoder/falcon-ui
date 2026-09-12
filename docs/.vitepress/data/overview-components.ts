@@ -26,6 +26,16 @@ export const overviewComponentGroups: readonly OverviewGroup[] = [
 
 export const overviewComponents: readonly OverviewItem[] = [
   {
+    name: 'FlLoading',
+    title: 'Loading',
+    titleEn: 'Loading',
+    group: 'feedback',
+    link: '/components/loading',
+    description: '七种点阵动画，支持地球纹理与原生加载遮罩。',
+    descriptionEn: 'Seven dot animations with Earth texture and native loading masks.',
+    icon: '/overview/fl-loading.svg'
+  },
+  {
     name: 'FlButton',
     title: 'Button',
     titleEn: 'Button',

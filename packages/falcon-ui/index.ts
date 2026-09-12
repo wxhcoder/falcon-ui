@@ -1,6 +1,7 @@
 import type { App, Plugin } from 'vue'
 import {
   FlBarcode,
+  FlLoading,
   FlButton,
   FlDatePicker,
   FlDialog,
@@ -23,6 +24,7 @@ export * from '@falcon-ui/icons'
 export * from '@falcon-ui/utils'
 
 const components = [
+  FlLoading,
   FlBarcode,
   FlButton,
   FlDialog,

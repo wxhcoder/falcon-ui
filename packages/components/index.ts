@@ -1,4 +1,14 @@
 export { FlButton } from './button'
+export { FlLoading, useFlLoading } from './loading'
+export type {
+  FlLoadingProps,
+  FlLoadingAnimation,
+  FlLoadingSize,
+  FlLoadingTheme,
+  FlLoadingLayout,
+  FlLoadingOptions,
+  FlLoadingDirectiveOptions
+} from './loading'
 export type { ButtonEmits, ButtonProps, FlButtonEmits, FlButtonProps } from './button'
 export { FlDialog } from './dialog'
 export type { DialogEmits, DialogProps, FlDialogEmits, FlDialogProps } from './dialog'

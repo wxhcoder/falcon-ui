@@ -165,6 +165,7 @@ When publishing, ensure these type artifacts and exports exist:
   - `types`
   - `exports["."]`
   - `exports["./global"]`
+  - `exports["./components/loading"]`
   - `exports["./theme/index.css"]`
 
 Style override source files are published under `dist/falcon-ui/theme/src`.

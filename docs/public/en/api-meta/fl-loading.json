@@ -1,0 +1,85 @@
+{
+  "component": "fl-loading",
+  "description": "Dot animations for standalone use and native v-loading masks.",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "true",
+      "description": "Show the indicator; inactive indicators retain space and stop drawing.",
+      "name": "active",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'searching'",
+      "description": "Choose one of six dot animations or a land-textured Earth.",
+      "name": "animation",
+      "required": false,
+      "type": "\"working\" | \"searching\" | \"solving\" | \"listening\" | \"composing\" | \"shaping\" | \"earth\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Accessible name for assistive technologies.",
+      "name": "ariaLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Dot color; supports CSS variables and overrides automatic theme colors.",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'inline'",
+      "description": "Inline places text beside the canvas; vertical places it below.",
+      "name": "layout",
+      "required": false,
+      "type": "FlLoadingLayout | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Freeze animation time and resume continuously.",
+      "name": "paused",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "64",
+      "description": "Canvas CSS size in pixels, with density tuned for each size.",
+      "name": "size",
+      "required": false,
+      "type": "20 | 32 | 48 | 64 | 96 | undefined"
+    },
+    {
+      "default": "1",
+      "description": "Speed multiplier clamped to 0.25–3. Use paused to freeze the animation.",
+      "name": "speed",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Visible status text beside or below the animation.",
+      "name": "text",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'auto'",
+      "description": "Background theme; auto detects ancestor markers or the system theme.",
+      "name": "theme",
+      "required": false,
+      "type": "FlLoadingTheme | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "Custom status text using phrasing content, such as spans.",
+      "name": "text",
+      "type": "any"
+    }
+  ]
+}

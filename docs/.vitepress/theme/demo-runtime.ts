@@ -6,6 +6,8 @@ import type { App, Component } from 'vue'
 type ComponentLoader = () => Promise<Component>
 
 const falconComponentLoaders: Record<string, ComponentLoader> = {
+  FlLoading: () =>
+    import('../../../packages/components/loading').then((module) => module.FlLoading),
   FlBarcode: () =>
     import('../../../packages/components/barcode').then((module) => module.FlBarcode),
   FlButton: () => import('../../../packages/components/button').then((module) => module.FlButton),

@@ -1,0 +1,4 @@
+@use 'element-plus/theme-chalk/src/mixins/config.scss' with (
+  $namespace: 'qa'
+);
+@use 'element-plus/theme-chalk/src/loading.scss';

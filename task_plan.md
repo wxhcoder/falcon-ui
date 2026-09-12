@@ -1,3 +1,37 @@
+# FlLoading Research Plan (2026-09-10)
+
+## Release (2026-09-12)
+
+- Add and publish the third-party notices required by the Loading build metadata: complete.
+- Bump `@falcon-ui/falcon-ui` to `1.1.0`: complete.
+- Validate Loading exports, generated types, ESM/CJS files and npm contents: complete.
+- Run focused/full tests, lint, typecheck, formatting and docs checks: complete.
+- Commit, push `codex/feat-loading`, fast-forward merge to `1.0.0`, push target and publish npm:
+  pending final git and npm operations.
+
+## Implementation (2026-09-11)
+
+- Geometry, seven animation modules and offline Earth data: complete.
+- Vue component, lifecycle, themes and native loading adapter: complete.
+- Exports, bilingual demos/docs and tests: complete; 19 focused tests passed.
+- Browser acceptance and performance: known follow-up boundary; repository checks: complete.
+- Dependency recovery: package manager re-resolved latest tags while adding types; restored original
+  lock graph, then added only pinned Node 22.18.0 types and undici-types 6.21.0. Frozen install passed.
+- Production declaration build passed. Wider docs type check exposes pre-existing errors outside
+  loading; corrected the new native directive binding type to use plain values instead of MaybeRef.
+- Commit all current worktree content except `packages/components/text-shimmer/TestShimmer_PRD.md`.
+
+- Goal: research Thinking Orbs, Earth dots, standalone Vue use and native Element Plus v-loading.
+- Deliverable: packages/components/loading/loading_prd.md; implementation is a later milestone.
+- Branch: codex/feat-loading, based on the current checkout; preserve existing uncommitted work.
+- Inspect repository and reference metadata: complete.
+- Inspect animation source and validate Element Plus integration: complete.
+- Write requirements, API proposal and acceptance criteria: complete.
+- Check Markdown and final diff: complete; Prettier (LF override) and git diff --check passed.
+- Root planning files retain prior task records below.
+- Research errors: unauthenticated GitHub API hit its rate limit; switched to git/raw public source.
+- 21st.dev source tab requires unlocking; public upstream is available without that step.
+
 # FlTree Task Plan
 
 # Falcon UI Latest Main Release Plan

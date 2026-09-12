@@ -58,6 +58,7 @@
     "release:publish": "pnpm release:check && npm publish ./dist/falcon-ui --access public"
   },
   "devDependencies": {
+    "@types/node": "22.18.0",
     "@changesets/cli": "latest",
     "@element-plus/icons-vue": "latest",
     "@eslint/js": "latest",

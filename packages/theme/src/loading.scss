@@ -1,0 +1,52 @@
+@use './mixins/bem.scss' as bem;
+
+@include bem.b(loading) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  vertical-align: middle;
+  color: var(--el-text-color-regular, #606266);
+  font-size: 14px;
+  line-height: 1.5;
+
+  @include bem.m(vertical) {
+    flex-direction: column;
+  }
+  @include bem.when(inactive) {
+    visibility: hidden;
+  }
+  @include bem.e(visual) {
+    display: inline-flex;
+    width: var(--fl-loading-size, 64px);
+    height: var(--fl-loading-size, 64px);
+    flex: none;
+    align-items: center;
+    justify-content: center;
+  }
+  @include bem.e(canvas) {
+    display: block;
+  }
+  @include bem.e(fallback) {
+    font-size: calc(var(--fl-loading-size, 64px) * 0.4);
+  }
+  @include bem.e(text) {
+    overflow-wrap: anywhere;
+  }
+}
+
+// Direct children make the adapter independent of Element Plus's configurable namespace.
+@include bem.b(loading-adapter) {
+  > div {
+    top: 50%;
+    margin-top: 0 !important;
+    transform: translateY(-50%);
+    > svg {
+      display: none !important;
+    }
+    > p {
+      margin: 0;
+      padding: 0 12px;
+    }
+  }
+}

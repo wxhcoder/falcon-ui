@@ -8,11 +8,15 @@ const packageDir = resolve(rootDir, 'dist', 'falcon-ui')
 const requiredFiles = [
   'README.md',
   'LICENSE',
+  'THIRD_PARTY_NOTICES.md',
   'global.d.ts',
   'esm/index.mjs',
   'cjs/index.cjs',
   'umd/falcon-ui.umd.js',
   'types/falcon-ui/index.d.ts',
+  'types/components/loading/index.d.ts',
+  'esm/components/loading/index.mjs',
+  'cjs/components/loading/index.cjs',
   'theme/index.css',
   'theme/index.scss'
 ]
@@ -21,6 +25,7 @@ const requiredExports = [
   '.',
   './global',
   './components',
+  './components/loading',
   './components/button',
   './components/dialog',
   './components/input',
@@ -66,10 +71,14 @@ const assert = (condition, message) => {
   }
 }
 
+const sourcePackageJson = await readJson(resolve(rootDir, 'packages/falcon-ui/package.json'))
 const packageJson = await readJson(resolve(packageDir, 'package.json'))
 
 assert(packageJson.name === '@falcon-ui/falcon-ui', `unexpected package name: ${packageJson.name}`)
-assert(packageJson.version === '1.0.0', `unexpected package version: ${packageJson.version}`)
+assert(
+  packageJson.version === sourcePackageJson.version,
+  `package version does not match source package: ${packageJson.version} !== ${sourcePackageJson.version}`
+)
 assert(packageJson.publishConfig?.access === 'public', 'package must be public')
 assert(packageJson.peerDependencies?.vue, 'vue peer dependency is missing')
 assert(packageJson.peerDependencies?.['element-plus'], 'element-plus peer dependency is missing')
@@ -81,6 +90,20 @@ assert(
 for (const exportPath of requiredExports) {
   assert(packageJson.exports?.[exportPath], `missing export: ${exportPath}`)
 }
+
+const loadingExport = packageJson.exports?.['./components/loading']
+assert(
+  loadingExport?.types === './types/components/loading/index.d.ts',
+  'loading types export is incorrect'
+)
+assert(
+  loadingExport?.import === './esm/components/loading/index.mjs',
+  'loading import export is incorrect'
+)
+assert(
+  loadingExport?.require === './cjs/components/loading/index.cjs',
+  'loading require export is incorrect'
+)
 
 for (const file of requiredFiles) {
   const filePath = resolve(packageDir, file)

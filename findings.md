@@ -1,3 +1,33 @@
+# FlLoading Research Findings (2026-09-10)
+
+# FlLoading Release Findings (2026-09-12)
+
+- `pnpm release:check` now passes for `@falcon-ui/falcon-ui@1.1.0`.
+- The generated package contains 318 files, including the Loading ESM/CJS entries,
+  declarations and `THIRD_PARTY_NOTICES.md`.
+- `docs:check` passed; unrelated API metadata reorder output was restored before commit.
+- npm registry already contains `1.0.0`; the next publish must use `1.1.0`.
+- npm publish requires a successful local `npm login` before the publish command.
+
+- Inspected upstream commit de85557ca220332586d070d8788c0e1d6e877a0d: searching is
+  frameGlobe with latitude/longitude sampling, depth projection and a moving scan meridian.
+- Local Vue/jsdom experiment passed Canvas VNode mount, prop updates without remount,
+  false close, reopen and host-unmount cleanup through native Element Plus v-loading.
+- PRD proposes seven animations (six reference states plus earth), standalone FlLoading,
+  useFlLoading with native directive, local map points and browser acceptance criteria.
+- Browser layout, actual Earth visuals, performance and namespace compatibility remain untested.
+- Browser preview confirms a monochrome dotted sphere inside a status pill.
+- 21st.dev Component.tsx is locked; use its explicitly linked public MIT upstream source.
+- Upstream 0.3.1 exports a framework-independent engine but declares React as a peer dependency.
+- Natural Earth permits modifying and distributing its public-domain map data.
+- New branch starts at 2d6ad1a (current checkout, one commit ahead of local main).
+- 21st.dev describes six Canvas states; upstream now lists nine. Version scope needs explicit limits.
+- Local Element Plus is 2.13.6. Loading text accepts VNode; spinner/svg accept markup strings.
+- Native v-loading accepts an options object and closes on false. This suggests a VNode helper
+  can embed a Canvas component using text, with adapter-scoped CSS hiding the original spinner.
+- Existing .npmrc and untracked text-shimmer requirements belong to earlier work.
+- Read existing root plans and ran session-catchup; no recovery output was returned.
+
 # FlTree Findings
 
 # Falcon UI Latest Main Release Findings

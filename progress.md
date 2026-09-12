@@ -1,3 +1,23 @@
+# FlLoading Research Progress (2026-09-10)
+
+## FlLoading Release Progress (2026-09-12)
+
+- Fixed the release build blocker by adding the published third-party notices file.
+- Prepared `@falcon-ui/falcon-ui@1.1.0` and made release verification follow the source version.
+- Added required checks for the Loading export, ESM/CJS entries and generated declarations.
+- Passed focused tests, full tests, lint, typecheck, formatting, docs build and release checks.
+- npm authentication is the only remaining external prerequisite; `text-shimmer` remains excluded.
+
+- Finished upstream algorithm inspection and native directive feasibility experiment.
+- Added packages/components/loading/loading_prd.md with requirements, API examples,
+  Earth sampling design, scope, implementation phases and measurable acceptance criteria.
+- Prettier check and git diff --check passed.
+- Final scope review complete; the FlLoading implementation and release artifacts are ready to commit.
+- Read repository instructions, existing requirements, Vue guidance and planning skill.
+- Checked 21st.dev, upstream README and Element Plus documentation and installed source.
+- Created codex/feat-loading without altering earlier .npmrc or text-shimmer changes.
+- Started technical feasibility research for the requested loading_prd.md.
+
 # FlTree Progress
 
 # Falcon UI Latest Main Release Progress

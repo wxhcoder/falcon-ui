@@ -26,9 +26,15 @@ const buildMeta = async () => {
       'global.d.ts',
       'README.md',
       'LICENSE',
+      'THIRD_PARTY_NOTICES.md',
       'package.json'
     ],
     exports: {
+      './components/loading': {
+        types: './types/components/loading/index.d.ts',
+        import: './esm/components/loading/index.mjs',
+        require: './cjs/components/loading/index.cjs'
+      },
       '.': {
         types: './types/falcon-ui/index.d.ts',
         import: './esm/index.mjs',
@@ -147,6 +153,10 @@ const buildMeta = async () => {
   await writeFile(targetPackageFile, `${JSON.stringify(publishPackageJson, null, 2)}\n`)
   await cp(resolve(rootDir, 'README.md'), resolve(distPackageDir, 'README.md'))
   await cp(resolve(rootDir, 'LICENSE'), resolve(distPackageDir, 'LICENSE'))
+  await cp(
+    resolve(rootDir, 'packages/components/loading/THIRD_PARTY_NOTICES.md'),
+    resolve(distPackageDir, 'THIRD_PARTY_NOTICES.md')
+  )
 }
 
 export { buildMeta }

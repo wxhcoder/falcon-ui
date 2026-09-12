@@ -9,6 +9,8 @@ const distPackageDir = resolve(distDir, 'falcon-ui')
 const logsDir = resolve(rootDir, 'logs')
 
 const entryPoints = {
+  'components/loading/index': resolve(packagesDir, 'components/loading/index.ts'),
+  'components/loading/src/loading': resolve(packagesDir, 'components/loading/src/loading.ts'),
   index: resolve(packagesDir, 'falcon-ui/index.ts'),
   'components/index': resolve(packagesDir, 'components/index.ts'),
   'components/button/index': resolve(packagesDir, 'components/button/index.ts'),

@@ -361,6 +361,11 @@
   gap: 10px;
 }
 
+.loading-docs-page .vp-demo.vp-demo,
+.loading-docs-page .vp-demo .vp-demo__preview {
+  background: transparent;
+}
+
 .radial-menu-demo-stage {
   display: grid;
   place-items: center;

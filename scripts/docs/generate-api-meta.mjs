@@ -13,6 +13,10 @@ const toProjectLineEndings = (content) => content.replace(/\n/g, '\r\n')
 
 const targets = [
   {
+    id: 'fl-loading',
+    filePath: path.resolve(rootDir, 'packages/components/loading/src/FlLoading.vue')
+  },
+  {
     id: 'fl-button',
     filePath: path.resolve(rootDir, 'packages/components/button/src/button.vue')
   },
@@ -269,6 +273,21 @@ const sharedDescriptionOverrides = {
 }
 
 const customDescriptionOverrides = {
+  'fl-loading': {
+    component: { '': '点阵加载动画，可独立使用或通过 useFlLoading 接入原生 v-loading。' },
+    props: {
+      active: '是否显示；隐藏时保留占位并停止动画。',
+      animation: '选择六种点阵动画或带大陆轮廓的 earth 地球。',
+      size: '画布边长（px），每档尺寸有独立的点数与点径。',
+      color: '点颜色，支持 CSS 颜色和变量；优先于自动主题颜色。',
+      theme: '背景主题，auto 跟随最近主题标记或系统设置。',
+      speed: '速度倍率，限制在 0.25–3；暂停请使用 paused。',
+      paused: '冻结当前动画时间，恢复后连续播放。',
+      text: '显示在动画旁边或下方的状态文字。',
+      layout: 'inline 为同行，vertical 为上下排列。'
+    },
+    slots: { text: '自定义状态文字；使用 span 等行内容。' }
+  },
   'fl-barcode': {
     component: {
       '': '一维码组件，用来把业务编号、商品码等内容生成条码。'
@@ -792,6 +811,21 @@ const englishSharedDescriptionOverrides = {
 }
 
 const englishCustomDescriptionOverrides = {
+  'fl-loading': {
+    component: { '': 'Dot animations for standalone use and native v-loading masks.' },
+    props: {
+      active: 'Show the indicator; inactive indicators retain space and stop drawing.',
+      animation: 'Choose one of six dot animations or a land-textured Earth.',
+      size: 'Canvas CSS size in pixels, with density tuned for each size.',
+      color: 'Dot color; supports CSS variables and overrides automatic theme colors.',
+      theme: 'Background theme; auto detects ancestor markers or the system theme.',
+      speed: 'Speed multiplier clamped to 0.25–3. Use paused to freeze the animation.',
+      paused: 'Freeze animation time and resume continuously.',
+      text: 'Visible status text beside or below the animation.',
+      layout: 'Inline places text beside the canvas; vertical places it below.'
+    },
+    slots: { text: 'Custom status text using phrasing content, such as spans.' }
+  },
   'fl-barcode': {
     component: {
       '': 'Barcode component that renders business identifiers and product codes.'

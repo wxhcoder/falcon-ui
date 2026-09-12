@@ -1,0 +1,85 @@
+{
+  "component": "fl-loading",
+  "description": "点阵加载动画，可独立使用或通过 useFlLoading 接入原生 v-loading。",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "true",
+      "description": "是否显示；隐藏时保留占位并停止动画。",
+      "name": "active",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "'searching'",
+      "description": "选择六种点阵动画或带大陆轮廓的 earth 地球。",
+      "name": "animation",
+      "required": false,
+      "type": "\"working\" | \"searching\" | \"solving\" | \"listening\" | \"composing\" | \"shaping\" | \"earth\" | undefined"
+    },
+    {
+      "default": "'加载中'",
+      "description": "设置无障碍名称，方便读屏软件识别。",
+      "name": "ariaLabel",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "''",
+      "description": "点颜色，支持 CSS 颜色和变量；优先于自动主题颜色。",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'inline'",
+      "description": "inline 为同行，vertical 为上下排列。",
+      "name": "layout",
+      "required": false,
+      "type": "FlLoadingLayout | undefined"
+    },
+    {
+      "default": "false",
+      "description": "冻结当前动画时间，恢复后连续播放。",
+      "name": "paused",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "64",
+      "description": "画布边长（px），每档尺寸有独立的点数与点径。",
+      "name": "size",
+      "required": false,
+      "type": "20 | 32 | 48 | 64 | 96 | undefined"
+    },
+    {
+      "default": "1",
+      "description": "速度倍率，限制在 0.25–3；暂停请使用 paused。",
+      "name": "speed",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "显示在动画旁边或下方的状态文字。",
+      "name": "text",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "'auto'",
+      "description": "背景主题，auto 跟随最近主题标记或系统设置。",
+      "name": "theme",
+      "required": false,
+      "type": "FlLoadingTheme | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "自定义状态文字；使用 span 等行内容。",
+      "name": "text",
+      "type": "any"
+    }
+  ]
+}
