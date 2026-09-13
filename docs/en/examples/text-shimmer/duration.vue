@@ -1,8 +1,9 @@
 <template>
   <div class="text-shimmer-demo-column">
-    <FlTextShimmer :duration="1">One-second pass</FlTextShimmer>
-    <FlTextShimmer :duration="2">Two-second pass</FlTextShimmer>
-    <FlTextShimmer :duration="4">Four-second pass</FlTextShimmer>
+    <FlTextShimmer :duration="4"
+      >Synchronizing 1,248 order records. Keep this page open until the task
+      completes.</FlTextShimmer
+    >
   </div>
 </template>
 

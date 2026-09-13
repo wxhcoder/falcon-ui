@@ -9,14 +9,14 @@
 
 ## 颜色
 
-默认继承父级文字颜色。可分别设置普通文字和扫光高亮颜色，也可用于深色背景。
+默认继承父级文字颜色。可分别设置普通文字和扫光高亮颜色。
 
 ::: demo text-shimmer/color
 :::
 
 ## 时长与宽度
 
-`duration` 控制一轮扫过的秒数；`spread` 按文字 JavaScript 字符串长度计算高亮渐变范围。
+`duration` 控制一轮扫过的秒数；`spread` 按文字 JavaScript 字符串长度计算高亮渐变范围。以下示例使用长文本，便于观察效果。
 
 ::: demo text-shimmer/duration
 :::

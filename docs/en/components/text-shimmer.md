@@ -10,8 +10,7 @@ work is still in progress; it does not represent completion percentage.
 
 ## Colors
 
-The default inherits the parent text color. Base and highlight colors can be customized separately,
-including on a dark surface.
+The default inherits the parent text color. Base and highlight colors can be customized separately.
 
 ::: demo text-shimmer/color
 :::
@@ -19,7 +18,7 @@ including on a dark surface.
 ## Duration and Spread
 
 `duration` controls seconds per pass. `spread` calculates the gradient range from the JavaScript
-string length.
+string length. The examples use long text so the effect is easy to inspect.
 
 ::: demo text-shimmer/duration
 :::

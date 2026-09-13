@@ -1,8 +1,8 @@
 <template>
   <div class="text-shimmer-demo-column">
-    <FlTextShimmer :duration="1">1 秒扫过</FlTextShimmer>
-    <FlTextShimmer :duration="2">2 秒扫过</FlTextShimmer>
-    <FlTextShimmer :duration="4">4 秒扫过</FlTextShimmer>
+    <FlTextShimmer :duration="4"
+      >系统正在同步 1,248 条订单记录，请保持页面打开直到处理完成。</FlTextShimmer
+    >
   </div>
 </template>
 
