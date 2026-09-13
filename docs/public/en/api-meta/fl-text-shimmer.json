@@ -1,0 +1,64 @@
+{
+  "component": "fl-text-shimmer",
+  "description": "Animated text highlight that sweeps left to right inside the glyphs.",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "'span'",
+      "description": "Root HTML tag: span, p, or div.",
+      "name": "as",
+      "required": false,
+      "type": "\"span\" | \"p\" | \"div\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Base text color. When omitted, inherits the parent text color.",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "false",
+      "description": "Whether to show readable static text without shimmer animation.",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "TEXT_SHIMMER_DEFAULT_DURATION",
+      "description": "Seconds for one complete pass; must be a finite positive number.",
+      "name": "duration",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "Highlight color. When omitted, follows the current text color.",
+      "name": "shimmerColor",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "TEXT_SHIMMER_DEFAULT_SPREAD",
+      "description": "Fade-distance multiplier from the highlight center; must be finite and positive.",
+      "name": "spread",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "Plain text displayed when no default slot is provided.",
+      "name": "text",
+      "required": false,
+      "type": "string | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "Plain text content; takes precedence over the text prop.",
+      "name": "default",
+      "type": "any"
+    }
+  ]
+}

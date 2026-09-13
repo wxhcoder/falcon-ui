@@ -17,6 +17,10 @@ const targets = [
     filePath: path.resolve(rootDir, 'packages/components/loading/src/FlLoading.vue')
   },
   {
+    id: 'fl-text-shimmer',
+    filePath: path.resolve(rootDir, 'packages/components/text-shimmer/src/text-shimmer.vue')
+  },
+  {
     id: 'fl-button',
     filePath: path.resolve(rootDir, 'packages/components/button/src/button.vue')
   },
@@ -287,6 +291,19 @@ const customDescriptionOverrides = {
       layout: 'inline 为同行，vertical 为上下排列。'
     },
     slots: { text: '自定义状态文字；使用 span 等行内容。' }
+  },
+  'fl-text-shimmer': {
+    component: { '': '文字扫光组件，在字形内部循环显示从左到右的高亮。' },
+    props: {
+      as: '根元素标签，可选 span、p 或 div。',
+      color: '普通文字颜色；不设置时继承父级文字颜色。',
+      disabled: '是否关闭扫光并显示静态文字。',
+      duration: '一次完整扫过所用秒数，必须是有限正数。',
+      shimmerColor: '扫光高亮颜色；不设置时跟随当前文字颜色。',
+      spread: '高亮从中心向两侧淡化的距离系数，必须是有限正数。',
+      text: '没有默认插槽时显示的纯文本。'
+    },
+    slots: { default: '纯文本内容；存在时优先于 text 属性。' }
   },
   'fl-barcode': {
     component: {
@@ -825,6 +842,19 @@ const englishCustomDescriptionOverrides = {
       layout: 'Inline places text beside the canvas; vertical places it below.'
     },
     slots: { text: 'Custom status text using phrasing content, such as spans.' }
+  },
+  'fl-text-shimmer': {
+    component: { '': 'Animated text highlight that sweeps left to right inside the glyphs.' },
+    props: {
+      as: 'Root HTML tag: span, p, or div.',
+      color: 'Base text color. When omitted, inherits the parent text color.',
+      disabled: 'Whether to show readable static text without shimmer animation.',
+      duration: 'Seconds for one complete pass; must be a finite positive number.',
+      shimmerColor: 'Highlight color. When omitted, follows the current text color.',
+      spread: 'Fade-distance multiplier from the highlight center; must be finite and positive.',
+      text: 'Plain text displayed when no default slot is provided.'
+    },
+    slots: { default: 'Plain text content; takes precedence over the text prop.' }
   },
   'fl-barcode': {
     component: {

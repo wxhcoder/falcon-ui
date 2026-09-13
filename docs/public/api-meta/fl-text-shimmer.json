@@ -1,0 +1,64 @@
+{
+  "component": "fl-text-shimmer",
+  "description": "文字扫光组件，在字形内部循环显示从左到右的高亮。",
+  "events": [],
+  "exposes": [],
+  "props": [
+    {
+      "default": "'span'",
+      "description": "根元素标签，可选 span、p 或 div。",
+      "name": "as",
+      "required": false,
+      "type": "\"span\" | \"p\" | \"div\" | undefined"
+    },
+    {
+      "default": "-",
+      "description": "普通文字颜色；不设置时继承父级文字颜色。",
+      "name": "color",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "false",
+      "description": "是否关闭扫光并显示静态文字。",
+      "name": "disabled",
+      "required": false,
+      "type": "boolean | undefined"
+    },
+    {
+      "default": "TEXT_SHIMMER_DEFAULT_DURATION",
+      "description": "一次完整扫过所用秒数，必须是有限正数。",
+      "name": "duration",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "-",
+      "description": "扫光高亮颜色；不设置时跟随当前文字颜色。",
+      "name": "shimmerColor",
+      "required": false,
+      "type": "string | undefined"
+    },
+    {
+      "default": "TEXT_SHIMMER_DEFAULT_SPREAD",
+      "description": "高亮从中心向两侧淡化的距离系数，必须是有限正数。",
+      "name": "spread",
+      "required": false,
+      "type": "number | undefined"
+    },
+    {
+      "default": "''",
+      "description": "没有默认插槽时显示的纯文本。",
+      "name": "text",
+      "required": false,
+      "type": "string | undefined"
+    }
+  ],
+  "slots": [
+    {
+      "description": "纯文本内容；存在时优先于 text 属性。",
+      "name": "default",
+      "type": "any"
+    }
+  ]
+}

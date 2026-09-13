@@ -50,6 +50,7 @@ describe('docs performance boundaries', () => {
       'FlInputNumber',
       'FlInputSearch',
       'FlQrCode',
+      'FlTextShimmer',
       'FlRadialMenu',
       'FlRadialMenuItem',
       'FlSelect',

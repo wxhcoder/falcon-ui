@@ -17,6 +17,9 @@ const requiredFiles = [
   'types/components/loading/index.d.ts',
   'esm/components/loading/index.mjs',
   'cjs/components/loading/index.cjs',
+  'types/components/text-shimmer/index.d.ts',
+  'esm/components/text-shimmer/index.mjs',
+  'cjs/components/text-shimmer/index.cjs',
   'theme/index.css',
   'theme/index.scss'
 ]
@@ -26,6 +29,7 @@ const requiredExports = [
   './global',
   './components',
   './components/loading',
+  './components/text-shimmer',
   './components/button',
   './components/dialog',
   './components/input',
@@ -103,6 +107,20 @@ assert(
 assert(
   loadingExport?.require === './cjs/components/loading/index.cjs',
   'loading require export is incorrect'
+)
+
+const textShimmerExport = packageJson.exports?.['./components/text-shimmer']
+assert(
+  textShimmerExport?.types === './types/components/text-shimmer/index.d.ts',
+  'text-shimmer types export is incorrect'
+)
+assert(
+  textShimmerExport?.import === './esm/components/text-shimmer/index.mjs',
+  'text-shimmer import export is incorrect'
+)
+assert(
+  textShimmerExport?.require === './cjs/components/text-shimmer/index.cjs',
+  'text-shimmer require export is incorrect'
 )
 
 for (const file of requiredFiles) {

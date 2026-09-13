@@ -11,6 +11,15 @@ const logsDir = resolve(rootDir, 'logs')
 const entryPoints = {
   'components/loading/index': resolve(packagesDir, 'components/loading/index.ts'),
   'components/loading/src/loading': resolve(packagesDir, 'components/loading/src/loading.ts'),
+  'components/text-shimmer/index': resolve(packagesDir, 'components/text-shimmer/index.ts'),
+  'components/text-shimmer/src/text-shimmer': resolve(
+    packagesDir,
+    'components/text-shimmer/src/text-shimmer.ts'
+  ),
+  'components/text-shimmer/src/text-shimmer.vue': resolve(
+    packagesDir,
+    'components/text-shimmer/src/text-shimmer.vue'
+  ),
   index: resolve(packagesDir, 'falcon-ui/index.ts'),
   'components/index': resolve(packagesDir, 'components/index.ts'),
   'components/button/index': resolve(packagesDir, 'components/button/index.ts'),

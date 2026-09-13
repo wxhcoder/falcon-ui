@@ -1,0 +1,78 @@
+@use './mixins/bem.scss' as bem;
+
+@keyframes fl-text-shimmer-sweep {
+  from {
+    background-position:
+      0 center,
+      100% center;
+  }
+
+  to {
+    background-position:
+      0 center,
+      0 center;
+  }
+}
+
+@include bem.b(text-shimmer) {
+  --fl-text-shimmer-duration: 2s;
+  --fl-text-shimmer-spread: 0px;
+  --fl-text-shimmer-base-color: color-mix(
+    in srgb,
+    var(--fl-text-shimmer-text-color, currentcolor) 55%,
+    transparent
+  );
+  --fl-text-shimmer-highlight: var(--fl-text-shimmer-highlight-color, currentcolor);
+
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  color: var(--fl-text-shimmer-text-color, currentcolor);
+  white-space: nowrap;
+
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) and
+    (color: color-mix(in srgb, red 55%, transparent)) {
+    background-image:
+      linear-gradient(
+        90deg,
+        var(--fl-text-shimmer-base-color) 0%,
+        var(--fl-text-shimmer-base-color) 100%
+      ),
+      linear-gradient(
+        90deg,
+        transparent calc(50% - var(--fl-text-shimmer-spread)),
+        var(--fl-text-shimmer-highlight) 50%,
+        transparent calc(50% + var(--fl-text-shimmer-spread))
+      );
+    background-repeat: no-repeat;
+    background-size:
+      100% 100%,
+      250% 100%;
+    background-position:
+      0 center,
+      100% center;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fl-text-shimmer-sweep var(--fl-text-shimmer-duration) linear infinite;
+  }
+
+  @include bem.when(disabled) {
+    background-image: none;
+    -webkit-text-fill-color: currentcolor;
+    animation: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    background-image: none;
+    -webkit-text-fill-color: currentcolor;
+    animation: none;
+  }
+
+  @media (forced-colors: active) {
+    background-image: none;
+    -webkit-text-fill-color: currentcolor;
+    color: CanvasText;
+    animation: none;
+  }
+}

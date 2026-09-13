@@ -40,7 +40,9 @@ describe('docs i18n structure', () => {
       'en/components/button.md',
       'en/components/dialog.md',
       'en/components/input-search.md',
+      'en/components/text-shimmer.md',
       'en/examples/button/basic.vue',
+      'en/examples/text-shimmer/basic.vue',
       'en/examples/input-search/fuzzy-multi-select.vue',
       'en/examples/input-search/is-table.vue',
       'en/examples/table/basic.vue'

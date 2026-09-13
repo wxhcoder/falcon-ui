@@ -9,6 +9,8 @@ export type {
   FlLoadingOptions,
   FlLoadingDirectiveOptions
 } from './loading'
+export { FlTextShimmer } from './text-shimmer'
+export type { FlTextShimmerProps, FlTextShimmerTag, TextShimmerProps } from './text-shimmer'
 export type { ButtonEmits, ButtonProps, FlButtonEmits, FlButtonProps } from './button'
 export { FlDialog } from './dialog'
 export type { DialogEmits, DialogProps, FlDialogEmits, FlDialogProps } from './dialog'

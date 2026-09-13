@@ -9,6 +9,7 @@
   "exports": {
     ".": "./index.ts",
     "./loading": "./loading/index.ts",
+    "./text-shimmer": "./text-shimmer/index.ts",
     "./button": "./button/index.ts",
     "./dialog": "./dialog/index.ts",
     "./input": "./input/index.ts",

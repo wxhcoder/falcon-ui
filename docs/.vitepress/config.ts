@@ -11,6 +11,7 @@ const socialLinks = [{ icon: 'github' as const, link: 'https://github.com/wxhcod
 
 const rootComponentSidebar = [
   { text: 'Loading 加载动画', link: '/components/loading' },
+  { text: 'Text Shimmer 文字扫光', link: '/components/text-shimmer' },
   { text: '总览', link: '/components/index' },
   { text: 'Button 按钮', link: '/components/button' },
   { text: 'Dialog 对话框', link: '/components/dialog' },
@@ -29,6 +30,7 @@ const rootComponentSidebar = [
 
 const englishComponentSidebar = [
   { text: 'Loading', link: '/en/components/loading' },
+  { text: 'Text Shimmer', link: '/en/components/text-shimmer' },
   { text: 'Overview', link: '/en/components/index' },
   { text: 'Button', link: '/en/components/button' },
   { text: 'Dialog', link: '/en/components/dialog' },

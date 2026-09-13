@@ -3,8 +3,8 @@
     <h2 class="page-title">Components</h2>
     <p class="page-desc">
       Element Plus passthrough wrappers plus code display components: FlButton, FlInput,
-      FlDatePicker, FlQrCode, FlBarcode, FlSelect, FlTreeSelect, FlInputSearch, FlInputNumber,
-      FlTable, FlDialog and shared icon exports.
+      FlDatePicker, FlTextShimmer, FlQrCode, FlBarcode, FlSelect, FlTreeSelect, FlInputSearch,
+      FlInputNumber, FlTable, FlDialog and shared icon exports.
     </p>
     <article class="card demo-card">
       <h3>Icons</h3>
@@ -75,6 +75,45 @@
         <FlButton type="primary" @click="buttonClicks += 1">Click +1</FlButton>
       </div>
       <p class="demo-result">Click count: {{ buttonClicks }}</p>
+    </article>
+
+    <article class="card demo-card">
+      <h3>FlTextShimmer</h3>
+      <div class="demo-row">
+        <FlTextShimmer
+          :text="textShimmerText"
+          :duration="textShimmerDuration"
+          :spread="textShimmerSpread"
+          :color="textShimmerColor || undefined"
+          :shimmer-color="textShimmerHighlightColor || undefined"
+          :disabled="textShimmerDisabled"
+          class="text-shimmer-preview" />
+      </div>
+      <div class="text-shimmer-controls">
+        <label>
+          Text
+          <input v-model="textShimmerText" type="text" />
+        </label>
+        <label>
+          Duration
+          <input v-model.number="textShimmerDuration" min="0.1" step="0.1" type="number" />
+        </label>
+        <label>
+          Spread
+          <input v-model.number="textShimmerSpread" min="0.1" step="0.1" type="number" />
+        </label>
+        <label>
+          Base color
+          <input v-model="textShimmerColor" type="color" />
+        </label>
+        <label>
+          Highlight color
+          <input v-model="textShimmerHighlightColor" type="color" />
+        </label>
+        <FlButton @click="textShimmerDisabled = !textShimmerDisabled">
+          {{ textShimmerDisabled ? 'Start shimmer' : 'Show static text' }}
+        </FlButton>
+      </div>
     </article>
 
     <article class="card demo-card">
@@ -661,6 +700,12 @@ import type {
 const iconPreviewSize = ref(22)
 const iconPreviewColor = ref('#409eff')
 const buttonClicks = ref(0)
+const textShimmerText = ref('Generating report')
+const textShimmerDuration = ref(2)
+const textShimmerSpread = ref(2)
+const textShimmerColor = ref('#64748b')
+const textShimmerHighlightColor = ref('#0ea5e9')
+const textShimmerDisabled = ref(false)
 const qrCodeValue = ref('https://falcon-ui.dev')
 const qrCodeType = ref<'canvas' | 'svg'>('canvas')
 const qrCodeSize = ref(140)
@@ -2142,6 +2187,40 @@ applyTreeDefaultExpandMode()
 
 .demo-result {
   margin: 6px 0 0;
+}
+
+.text-shimmer-preview {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.text-shimmer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+
+.text-shimmer-controls label {
+  display: grid;
+  gap: 4px;
+  color: #606266;
+  font-size: 12px;
+}
+
+.text-shimmer-controls input {
+  box-sizing: border-box;
+  min-width: 96px;
+  height: 32px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.text-shimmer-controls input[type='color'] {
+  width: 52px;
+  min-width: 52px;
+  padding: 2px;
 }
 
 .tree-demo-row {

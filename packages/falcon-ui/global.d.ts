@@ -1,6 +1,7 @@
 import type {
   FlBarcode,
   FlLoading,
+  FlTextShimmer,
   FlButton,
   FlDatePicker,
   FlDialog,
@@ -20,6 +21,7 @@ import type {
 declare module 'vue' {
   interface GlobalComponents {
     FlLoading: typeof FlLoading
+    FlTextShimmer: typeof FlTextShimmer
     FlBarcode: typeof FlBarcode
     FlButton: typeof FlButton
     FlDatePicker: typeof FlDatePicker

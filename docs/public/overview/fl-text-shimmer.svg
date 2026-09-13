@@ -1,0 +1,9 @@
+<svg width="248" height="144" viewBox="0 0 248 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>FlTextShimmer SVG preview</title>
+  <path d="M35 50H213" stroke="#D8DEE8" stroke-width="18" stroke-linecap="round"/>
+  <path d="M35 50H213" stroke="#6F7781" stroke-width="8" stroke-linecap="round"/>
+  <path d="M91 50H157" stroke="#0083FF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M61 91H187" stroke="#D8DEE8" stroke-width="14" stroke-linecap="round"/>
+  <path d="M61 91H187" stroke="#6F7781" stroke-width="6" stroke-linecap="round"/>
+  <path d="M109 91H139" stroke="#0083FF" stroke-width="6" stroke-linecap="round"/>
+</svg>

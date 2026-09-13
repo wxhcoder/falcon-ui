@@ -35,6 +35,11 @@ const buildMeta = async () => {
         import: './esm/components/loading/index.mjs',
         require: './cjs/components/loading/index.cjs'
       },
+      './components/text-shimmer': {
+        types: './types/components/text-shimmer/index.d.ts',
+        import: './esm/components/text-shimmer/index.mjs',
+        require: './cjs/components/text-shimmer/index.cjs'
+      },
       '.': {
         types: './types/falcon-ui/index.d.ts',
         import: './esm/index.mjs',

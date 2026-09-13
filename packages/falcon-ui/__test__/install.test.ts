@@ -7,6 +7,7 @@ import FalconUI, {
   FlInput,
   FlInputNumber,
   FlInputSearch,
+  FlTextShimmer,
   FlRadialMenu,
   FlRadialMenuItem,
   FlSelect,
@@ -48,6 +49,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
+    expect(app.component).toHaveBeenCalledWith('FlTextShimmer', FlTextShimmer)
     expect(app.component).toHaveBeenCalledWith('FlRadialMenu', FlRadialMenu)
     expect(app.component).toHaveBeenCalledWith('FlRadialMenuItem', FlRadialMenuItem)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)
@@ -70,6 +72,7 @@ describe('@falcon-ui/falcon-ui install', () => {
     expect(app.component).toHaveBeenCalledWith('FlInput', FlInput)
     expect(app.component).toHaveBeenCalledWith('FlInputSearch', FlInputSearch)
     expect(app.component).toHaveBeenCalledWith('FlInputNumber', FlInputNumber)
+    expect(app.component).toHaveBeenCalledWith('FlTextShimmer', FlTextShimmer)
     expect(app.component).toHaveBeenCalledWith('FlRadialMenu', FlRadialMenu)
     expect(app.component).toHaveBeenCalledWith('FlRadialMenuItem', FlRadialMenuItem)
     expect(app.component).toHaveBeenCalledWith('FlSelect', FlSelect)

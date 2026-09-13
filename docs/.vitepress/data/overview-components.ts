@@ -36,6 +36,16 @@ export const overviewComponents: readonly OverviewItem[] = [
     icon: '/overview/fl-loading.svg'
   },
   {
+    name: 'FlTextShimmer',
+    title: 'Text Shimmer',
+    titleEn: 'Text Shimmer',
+    group: 'feedback',
+    link: '/components/text-shimmer',
+    description: '文字内部循环扫过高亮，用于正在处理中的状态提示。',
+    descriptionEn: 'A looping in-glyph highlight for work-in-progress status text.',
+    icon: '/overview/fl-text-shimmer.svg'
+  },
+  {
     name: 'FlButton',
     title: 'Button',
     titleEn: 'Button',
