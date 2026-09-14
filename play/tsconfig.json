@@ -3,6 +3,10 @@
   "compilerOptions": {
     "types": ["vite/client", "falcon-ui/global"],
     "baseUrl": ".",
+    "paths": {
+      "falcon-ui": ["../packages/falcon-ui/index.ts"],
+      "falcon-ui/global": ["../packages/falcon-ui/global.d.ts"]
+    },
     "ignoreDeprecations": "6.0",
     "preserveSymlinks": true
   },
