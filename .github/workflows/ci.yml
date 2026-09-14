@@ -58,7 +58,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
+      - run: pnpm build && ln -s "$GITHUB_WORKSPACE/dist/falcon-ui" play/node_modules/falcon-ui && pnpm typecheck
 
   test:
     name: Test
