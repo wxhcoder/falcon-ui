@@ -1,11 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["vite/client", "falcon-ui/global"],
+    "types": ["vite/client"],
     "baseUrl": ".",
     "paths": {
-      "falcon-ui": ["../packages/falcon-ui/index.ts"],
-      "falcon-ui/global": ["../packages/falcon-ui/global.d.ts"]
+      "falcon-ui": ["../packages/falcon-ui/index.ts"]
     },
     "ignoreDeprecations": "6.0",
     "preserveSymlinks": true
