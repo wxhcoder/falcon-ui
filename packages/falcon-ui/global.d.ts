@@ -1,3 +1,4 @@
+import 'vue'
 import type {
   FlBarcode,
   FlLoading,
